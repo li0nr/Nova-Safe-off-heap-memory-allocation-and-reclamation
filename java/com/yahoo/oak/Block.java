@@ -52,9 +52,9 @@ class Block {
     
     
     boolean allocate(NovaSlice s, int size) {
-        int now = allocated.getAndAdd(size + headersize);
-        if (now + size + headersize > this.capacity) {
-            allocated.getAndAdd(-(size + headersize) );
+        int now = allocated.getAndAdd(size );
+        if (now + size  > this.capacity) {
+            allocated.getAndAdd(-size );
             throw new OakOutOfMemoryException();
         }
         s.update(id, now, size);

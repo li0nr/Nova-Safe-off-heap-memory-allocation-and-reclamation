@@ -23,7 +23,7 @@ final class BlocksPool implements BlocksProvider, Closeable {
     // TODO change the following constants to be configurable
 
     // Size of a single memory block - currently 256MB
-    static final int BLOCK_SIZE = 256 * 1024; //TODO Ramy 1024
+    static final int BLOCK_SIZE =  1024* 1024; //*256
 
     // Number of memory blocks to be pre-allocated
     private static final int PRE_ALLOC_BLOCKS = 0;

@@ -104,6 +104,8 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     	int newVer= (version<<1 | 0) & 0xFFF;
     	long header=header_slice | newVer ;
     	buffer.putLong(offset,header);
+    	
+    	long bu=buffer.getLong(offset);
     }
 
 //    /* ------------------------------------------------------------------------------------
