@@ -20,7 +20,7 @@ public class FacadeTest {
     private  ArrayList<Thread> threads;
     private static CountDownLatch latch = new CountDownLatch(1);
 
-    private  final int NUM_THREADS = 3;
+    private  final int NUM_THREADS = 1;
     
     FacadeWriteTransformer<Void> f=(ByteBuffer) -> {	
     for(int i=0;i <20; i++) {

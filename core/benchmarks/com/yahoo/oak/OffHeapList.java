@@ -36,12 +36,7 @@ public class OffHeapList {
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		try {
 			return ArrayOff[i].getInt(0);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		return 0;
 	}
 	
 	public void set(int index, int e) {

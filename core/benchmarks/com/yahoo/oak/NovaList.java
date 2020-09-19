@@ -16,12 +16,14 @@ public class NovaList {
 	FacadeReadTransformer<Integer> fread=(ByteBuffer) -> {	return ByteBuffer.getInt(0);  };
 	
 	
-	private FacadeWriteTransformer<Void> serialiaze(int e) {
-	    FacadeWriteTransformer<Void> f=(ByteBuffer) -> {	ByteBuffer.putInt(0,e); 
+	private FacadeWriteTransformer<Void> serialiaze(long e) {
+	    FacadeWriteTransformer<Void> f=(ByteBuffer) -> {	ByteBuffer.putLong(0,e); 
 											return null; };
 		return f;
 		
 	}
+	
+	private FacadeWriteTransformer<Void> f= serialiaze(0);
 
 
 
@@ -35,7 +37,7 @@ public class NovaList {
 
 	}
 
-	public void add(int e) {
+	public void add(long e) {
 		if(size == ArrayOfFacades.length) {
 			EnsureCap();
 		}
@@ -43,15 +45,14 @@ public class NovaList {
 		if(ArrayOfFacades[size]== null)
 			ArrayOfFacades[size]=new Facade(novaManager);
 			ArrayOfFacades[size].AllocateSlice(4);
-	    ArrayOfFacades[size].Write(serialiaze(e));
+	    ArrayOfFacades[size].Write(f);
 	    size++;
 	}
 	
-	public int get(int i) {
+	public long get(int i) {
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 		}
-
 		return ArrayOfFacades[i].Read(fread);
 	}
 	
@@ -60,7 +61,7 @@ public class NovaList {
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOfFacades[index].Write(serialiaze(e));
+		 ArrayOfFacades[index].Write(f);
 	}
 	
 	public int getSize(){
@@ -91,7 +92,7 @@ public class NovaList {
 	    	this.add(i);
 	    }
 	    for (int i = 0; i < 12; i++) {
-	    	int x=this.get(i);
+	    	int x=(int)this.get(i);
 	    	System.out.println(x);
 	    }	  
 	    for (int i = 0; i < 12; i++) {

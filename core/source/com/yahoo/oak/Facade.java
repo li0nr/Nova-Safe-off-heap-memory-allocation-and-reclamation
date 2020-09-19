@@ -86,18 +86,17 @@ public class Facade {
 		 return true; 
 	}
 	
-	public <T> T Read(FacadeReadTransformer<T> f) {
+	public <T> long Read(FacadeReadTransformer<T> f) {
 		Triple sliceLocated=LocateSlice();
 
 		if (sliceLocated.s == null) throw new IllegalArgumentException("cant locate slice");
-		T ResultToReturn= caluclate(sliceLocated.s,f);
+		//T R = f.apply(novaManager.getReadBuffer(sliceLocated.s));
+		long R = sliceLocated.s.buffer.getLong(0);
 		Unsafe UNSAFE = UnsafeUtils.unsafe;
 		UNSAFE.loadFence();
-
-		long header= Long.reverseBytes(UNSAFE.getLong(sliceLocated.HeaderAddress));
-		if(! (sliceLocated.facadeVer== (int)(header&0xFFFFFF))) 
+		if(! (sliceLocated.facadeVer== (int)(sliceLocated.Header&0xFFFFFF))) 
 			throw new IllegalArgumentException("slice changed");
-		return ResultToReturn;
+		return R;
 
 	}
 	
@@ -117,7 +116,7 @@ public class Facade {
 			 novaManager.UnsetTap(facadeRef);
 			throw new IllegalArgumentException("cant locate slice");
 		}
-		long header= Long.reverseBytes(UNSAFE.getLong(sliceLocated.HeaderAddress));
+		long header= LocateSlice().Header;
 		 if(! (sliceLocated.facadeVer == (int)(header&0xFFFFFF))) {
 			 novaManager.UnsetTap(facadeRef);
 			 throw new IllegalArgumentException("slice changed");
@@ -143,7 +142,7 @@ public class Facade {
 		NovaSlice locatedSlice = new NovaSlice(block,offset);
 		novaManager.readByteBuffer(locatedSlice);
 
-		return  new Triple(version,locatedSlice,locatedSlice.getAddress()+offset);
+		return  new Triple(version,locatedSlice,locatedSlice.buffer.getLong(offset));
 	}
 	
 	
@@ -212,122 +211,16 @@ public class Facade {
 	
 	
 	
-	
-	
-	
-	class XNovaReadBuffer extends NovaSlice implements OakScopedReadBuffer, OakUnsafeDirectBuffer {
-
-
-		XNovaReadBuffer(NovaSlice other) {
-	        super(other);
-	    }
-
-	    protected int getDataOffset(int index) {
-	        if (index < 0 || index >= getLength()) {
-	            throw new IndexOutOfBoundsException();
-	        }
-	        return getOffset() + index;
-	    }
-
-	    @Override
-	    public int capacity() {
-	        return getLength();
-	    }
-
-	    @Override
-	    public ByteOrder order() {
-	        return buffer.order();
-	    }
-
-	    @Override
-	    public byte get(int index) {
-	        return buffer.get(getDataOffset(index));
-	    }
-
-	    @Override
-	    public char getChar(int index) {
-	        return buffer.getChar(getDataOffset(index));
-	    }
-
-	    @Override
-	    public short getShort(int index) {
-	        return buffer.getShort(getDataOffset(index));
-	    }
-
-	    @Override
-	    public int getInt(int index) {
-	        return buffer.getInt(getDataOffset(index));
-	    }
-
-	    @Override
-	    public long getLong(int index) {
-	        return buffer.getLong(getDataOffset(index));
-	    }
-
-	    @Override
-	    public float getFloat(int index) {
-	        return buffer.getFloat(getDataOffset(index));
-	    }
-
-	    @Override
-	    public double getDouble(int index) {
-	        return buffer.getDouble(getDataOffset(index));
-	    }
-	}
-
-	
-	
-    /**TODO RAMY taken from https://github.com/patrickfav/bytes-java/blob/master/src/main/java/at/favre/lib/bytes/Util.java
-     * Unsigned/logical right shift of whole byte array by shiftBitCount bits.
-     * This method will alter the input byte array.
-     *
-     * <p>
-     * <strong>Analysis</strong>
-     * <ul>
-     * <li>Time Complexity: <code>O(n)</code></li>
-     * <li>Space Complexity: <code>O(1)</code></li>
-     * <li>Alters Parameters: <code>true</code></li>
-     * </ul>
-     * </p>
-     *
-     * @param byteArray     to shift
-     * @param shiftBitCount how many bits to shift
-     * @return shifted byte array
-     */
-    static byte[] shiftRight(byte[] byteArray, int shiftBitCount) {
-        final int shiftMod = shiftBitCount % 8;
-        final byte carryMask = (byte) (0xFF << (8 - shiftMod));
-        final int offsetBytes = (shiftBitCount / 8);
-
-        int sourceIndex;
-        for (int i = byteArray.length - 1; i >= 0; i--) {
-            sourceIndex = i - offsetBytes;
-            if (sourceIndex < 0) {
-                byteArray[i] = 0;
-            } else {
-                byte src = byteArray[sourceIndex];
-                byte dst = (byte) ((0xff & src) >>> shiftMod);
-                if (sourceIndex - 1 >= 0) {
-                    dst |= byteArray[sourceIndex - 1] << (8 - shiftMod) & carryMask;
-                }
-                byteArray[i] = dst;
-            }
-        }
-        return byteArray;
-    }
-	
-	
-	
 	 class Triple{
 		public int facadeVer;
 		public NovaSlice s;
-		public long HeaderAddress;
+		public long Header;
 
 		
 		Triple(int ver, NovaSlice s, long header){
 			facadeVer=ver;
 			this.s=s;
-			this.HeaderAddress=header;
+			this.Header=header;
 		}
 
 	}

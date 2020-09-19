@@ -34,7 +34,6 @@ public class NovaListBenchmark {
     
     public NovaListBenchmark(){
     	Nova_list= new NovaList();
-    	//On_list = new  ArrayList<Integer>();
     	Off_list = new OffHeapList();
         threads = new ArrayList<>(NUM_THREADS);
     }
@@ -66,7 +65,8 @@ public class NovaListBenchmark {
             
         	for(int i=idx ; i<Nova_list.getSize(); i=i+NUM_THREADS ) {
         		try {
-        			Nova_list.set(i, Nova_list.get(i)*2);
+        			//Nova_list.set(i, Nova_list.get(i)*2);
+        			Nova_list.get(i);
         		}catch(Exception e) {
         			
         		}
@@ -105,7 +105,8 @@ public class NovaListBenchmark {
             
         	for(int i=idx ; i<Off_list.getSize(); i=i+NUM_THREADS ) {
         		
-        		Off_list.set(i, Off_list.get(i)*2);
+        		//Off_list.set(i, Off_list.get(i)*2);
+        		Off_list.get(i);
             	
         	}
         }
@@ -155,55 +156,16 @@ public class NovaListBenchmark {
         }
         final long endTime = System.nanoTime();
 
-        System.out.println("Total execution time Off Heap : " + (endTime - startTime));
+        System.out.println("Nova	  Heap : " + (endTime - startTime));
         try {
         	String S="Total execution time Off Heap : " + (endTime - startTime);
             myWriter.write(S);
-            System.out.println("Successfully wrote to the file.");
           } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
           }
         for (int i = 0; i <LIST_SIZE; i++) {
  //       	assertEquals(Off_list.get(i), i*2, "ojk");
-        }
-		
-	}
-	
-//	@Test
-	
-	public void RunThreadsOff() throws InterruptedException{
-        CyclicBarrier barrier = new CyclicBarrier(NUM_THREADS);
-
-		initOnlist();
-		
-		
-	    for (int i = 0; i < NUM_THREADS; i++) {
-	        threads.add(new Thread(new RunThreadsOff(latchON,barrier)));
-	        threads.get(i).start();
-	    }
-	    latchON.countDown();
-
-        final long startTime = System.nanoTime();
-
-        for (int i = 0; i < NUM_THREADS; i++) {
-            threads.get(i).join();
-        }
-        final long endTime = System.nanoTime();
-
-        
-        try {
-        	String S="Total execution time On Heap : " + (endTime - startTime);
-        	System.out.println(S);
-            myWriter.write(S);
-            myWriter.close();
-            System.out.println("Successfully wrote to the file.");
-          } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-          }
-        for (int i = 0; i <LIST_SIZE; i++) {
-  //      	assertEquals(On_list.get(i), i*2, "ok");
         }
 		
 	}
@@ -229,11 +191,10 @@ public class NovaListBenchmark {
 
         
         try {
-        	String S="Total execution time On Heap : " + (endTime - startTime);
+        	String S="Unmanaged Heap : " + (endTime - startTime);
         	System.out.println(S);
             myWriter.write(S);
             myWriter.close();
-            System.out.println("Successfully wrote to the file.");
           } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
