@@ -164,11 +164,6 @@ public class Facade {
 	
 
 	
-	public byte OnesToMask(int lenght, boolean bool){ //when @ true shift left
-//		assert lenght < 8;
-		byte mask= (byte)0xFF;
-		return (bool? (byte) (mask<<lenght) : (byte) ((mask & 0xff)>>lenght));
-	}
 	
 	private long buildRef(int block, int offset) {
 		long Ref=(block &0xFFFFF);
@@ -176,25 +171,12 @@ public class Facade {
 		Ref=Ref|(offset&0xFFFFF);
 		return Ref;
 	}
-	
-	private long ExtractRef(long toExtract) {
-		return (long) (toExtract >>24 );
 
-	}
-	private int ExtractVersion(long toExtract) {
-		int version=(int) (toExtract >>1 )&0x7FFFF;
-		return version;
-	}
 	private int ExtractDel(long toExtract) {
 		int del=(int) (toExtract)&0x1;
 		return del;
 	}
-	private int ExtractBlock(long toExtract) {
-		return (int) (toExtract >>44 );
-	}
-	private int ExtractOffset(long toExtract) {
-		return  (int) (toExtract >>24)&0xFFFFF;	
-	}
+
 	
 	private long combine(int block, int offset, int version_del ) {
 		long toReturn=  (block & 0xFFFFFFFF);

@@ -7,12 +7,14 @@
 package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.Map;
 import java.util.Set;
+
 
 
 class NativeMemoryAllocator implements BlockMemoryAllocator {
@@ -350,6 +352,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         Block b = blocksProvider.getBlock();
         int blockID = idGenerator.getAndIncrement();
         this.blocksArray[blockID] = b;
+        //attaching the block with a TAP
+        this.TAP[blockID] = new ConcurrentHashMap<>();
         b.setID(blockID);
         this.currentBlock = b;
     }
