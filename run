@@ -1,4 +1,4 @@
 #!/bin/bash
 #mvn compile
-cd /mnt/c/Users/rfakhour/Desktop/Nova_dev/Nova_19.9/Nova/target/classes
+cd target/classes
 java com.yahoo.oak.Main 

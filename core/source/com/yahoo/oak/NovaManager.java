@@ -9,6 +9,9 @@ package com.yahoo.oak;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +21,7 @@ class NovaManager implements MemoryManager {
     private final ThreadIndexCalculator threadIndexCalculator;
     private final List<List<Slice>> releaseLists;
     private final List<List<NovaSlice>> NreleaseLists;
+    private final Map<Long,List<NovaSlice>> NovaReleaseLists;
 
     private final AtomicInteger globalNovaNumber;
     private final BlockMemoryAllocator allocator;
@@ -56,6 +60,7 @@ class NovaManager implements MemoryManager {
         for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
             this.Slices.add(new NovaSlice(0,-1));
         }
+        this.NovaReleaseLists = new ConcurrentHashMap<>();
 
         
         globalNovaNumber = new AtomicInteger(1);
@@ -110,34 +115,29 @@ class NovaManager implements MemoryManager {
         }
     }
     
-    public void release(NovaSlice s) {
-        int idx = threadIndexCalculator.getIndex();
-        List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
+    public void release(NovaSlice s, int BlockID) {//map each thread to a his list, all lists start in the conccurnt list and remove when thread gets his?
+        long id = Thread.currentThread().getId();
+        if(this.NovaReleaseLists.get(id)== null) {
+        	this.NovaReleaseLists.put(id, new ArrayList<>());
+        }
+        List<NovaSlice> myReleaseList = this.NovaReleaseLists.get(id);
         myReleaseList.add(new NovaSlice(s));
         if (myReleaseList.size() >= 1) {
             globalNovaNumber.incrementAndGet();
             for (NovaSlice allocToRelease : myReleaseList) {
-            	if(!TAP.contains(allocToRelease.getRef()))
+            	if(!allocator.TapValues(BlockID).contains(allocToRelease.getRef()))
             			allocator.free(allocToRelease);
             }
             myReleaseList.clear();
         }
     }
 
-    public  boolean setTap(long ref) {
-        int idx = threadIndexCalculator.getIndex();
-        Long O=this.TAP.set(idx, ref);
-        if(O.equals((long)0)) return true;
-        else return false; 
+    public  boolean setTap(long Ref, int blockID) {
+    	return allocator.SetTap(Ref, blockID);
     }
 
-    public  boolean UnsetTap(long ref) {
-    	if (!this.TAP.contains(ref)) 
-    		return true;
-        int idx = threadIndexCalculator.getIndex();
-        Long O=this.TAP.set(idx, (long)0);
-        if(O.equals(ref)) return true;
-        else return false; 
+    public  boolean UnsetTap(long Ref, int blockID) {
+    	return allocator.UnsetTap(Ref, blockID);
     }
 
     @Override

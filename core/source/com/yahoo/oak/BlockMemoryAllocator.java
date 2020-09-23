@@ -7,6 +7,8 @@
 package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
+import java.util.Set;
+
 /**
  * This is an interface to be implemented as an alternative to OakNativeMemoryAllocator.
  * Its purpose is to allocate new buffers (DirectByteBuffer) which will be delivered as a Slice object.
@@ -38,6 +40,12 @@ interface BlockMemoryAllocator {
     void readByteBuffer(Slice s);
     
     void readByteBuffer(NovaSlice s);
+    
+    boolean SetTap(long Ref, int BlockId);
+    
+    boolean UnsetTap(long Ref, int BlockId);
+    
+    Set<Long> TapValues(int BlockId);
 
     ByteBuffer readByteBuffer(int block);
 

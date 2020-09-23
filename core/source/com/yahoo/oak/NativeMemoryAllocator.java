@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Map;
+import java.util.Set;
+
 
 class NativeMemoryAllocator implements BlockMemoryAllocator {
 
@@ -23,6 +26,9 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     private static final int headerSize=8;
     // mapping IDs to blocks allocated solely to this Allocator
     private Block[] blocksArray;
+    
+    private Map<Long,Long>[] TAP ;
+
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     /**
@@ -65,6 +71,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         int blockArraySize = ((int) (capacity / blocksProvider.blockSize())) + 1;
         // first entry of blocksArray is always empty
         this.blocksArray = new Block[blockArraySize + 1];
+        //for each block a TAP is provided
+        this.TAP = new Map[blockArraySize + 1];
         // initially allocate one single block from pool
         // this may lazy initialize the pool and take time if this is the first call for the pool
         allocateNewCurrentBlock();
@@ -295,6 +303,27 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.readByteBuffer(s);
     }
 
+    @Override
+    public boolean SetTap(long Ref, int BlockId) {
+    	long tid = Thread.currentThread().getId();
+        TAP[BlockId].put(tid, Ref);
+        return true;
+    }
+    
+    @Override
+    public boolean UnsetTap(long Ref, int BlockId) {
+    	long tid = Thread.currentThread().getId();
+    	if (this.TAP[BlockId].get(tid) == null)//was removed? 
+    		return true;
+        TAP[BlockId].remove(tid);
+        return true;
+    }
+    
+    
+    public Set<Long> TapValues(int BlockId) {
+    	return TAP[BlockId].keySet();
+    }
+    
     
     @Override
     public void readByteBuffer(NovaSlice s) {

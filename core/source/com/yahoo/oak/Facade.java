@@ -81,7 +81,7 @@ public class Facade {
 		 NewV     =combine(block,offset, (int) NewV & 0xFFFFFF);
 		 block_offset_ver_del.compareAndSet(FacadeVer, NewV);
 		 
-		 novaManager.release(sliceLocated.s);
+		 novaManager.release(sliceLocated.s,block);
 		 
 		 return true; 
 	}
@@ -104,7 +104,7 @@ public class Facade {
 	public <T> T Write(FacadeWriteTransformer<T> f) {
 
 		long facadeRef=buildRef(block,offset);
-		if(!novaManager.setTap(facadeRef))
+		if(!novaManager.setTap(facadeRef,block))
 			throw new RuntimeException("Problem in TAP");
 
 		Unsafe UNSAFE = UnsafeUtils.unsafe;
@@ -113,17 +113,17 @@ public class Facade {
 		Triple sliceLocated=LocateSlice();
 		
 		if (sliceLocated.s == null) {
-			 novaManager.UnsetTap(facadeRef);
+			 novaManager.UnsetTap(facadeRef,block);
 			throw new IllegalArgumentException("cant locate slice");
 		}
 		long header= LocateSlice().Header;
 		 if(! (sliceLocated.facadeVer == (int)(header&0xFFFFFF))) {
-			 novaManager.UnsetTap(facadeRef);
+			 novaManager.UnsetTap(facadeRef,block);
 			 throw new IllegalArgumentException("slice changed");
 		 }
 
 		T ResultToReturn= caluclate(sliceLocated.s,f);
-		 if(!novaManager.UnsetTap(facadeRef))
+		 if(!novaManager.UnsetTap(facadeRef,block))
 				throw new RuntimeException("Problem in TAP");
 
 		 return ResultToReturn;
