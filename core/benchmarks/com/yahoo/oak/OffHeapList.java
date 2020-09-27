@@ -27,7 +27,7 @@ public class OffHeapList {
 		}
 
 		if(ArrayOff[size]== null)
-			ArrayOff[size]= ByteBuffer.allocateDirect(Integer.BYTES);
+			ArrayOff[size]= ByteBuffer.allocateDirect(Long.BYTES);
 		ArrayOff[size].putInt(e);
 		size++;
 	}
@@ -39,12 +39,12 @@ public class OffHeapList {
 			return ArrayOff[i].getInt(0);
 	}
 	
-	public void set(int index, int e) {
+	public void set(int index, long e) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOff[index].putInt(0, e);
+		 ArrayOff[index].putLong(0, e);
 	}
 	
 	public int getSize(){

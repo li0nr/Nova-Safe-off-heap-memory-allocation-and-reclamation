@@ -3,54 +3,46 @@ package com.yahoo.oak;
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
-
-//import org.junit.Test;
-import java.io.FileWriter;   // Import the FileWriter class
-import java.io.IOException;  // Import the IOException class to handle errors
 
 
 
 public class NovaListBenchmark {
-	
-	FileWriter myWriter ;
-	
+		
 	static final int NUM_THREADS=1;
 	static final int LIST_SIZE=1000000;
 
     private  ArrayList<Thread> threads;
-    
-    private static CountDownLatch latchOFF = new CountDownLatch(1);
-    private static CountDownLatch latchON = new CountDownLatch(1);
-
     private static AtomicInteger index= new AtomicInteger(0);
-    
+
     NovaList Nova_list;
     OffHeapList Off_list;
     
     public NovaListBenchmark(){
-    	Nova_list= new NovaList();
-    	Off_list = new OffHeapList();
         threads = new ArrayList<>(NUM_THREADS);
     }
 
-    
+	
+
 
 	
-	public void ReadWrite() throws InterruptedException{
-        CyclicBarrier barrier = new CyclicBarrier(NUM_THREADS);
+    
+/*------------------------------------------NOVA----------------------------------------------------------*/	
 
-		initlist();
+	public void ReadWriteNova() throws InterruptedException{
+		CountDownLatch latchNova = new CountDownLatch(NUM_THREADS);
 		
+    	Nova_list= new NovaList();
+		for (int i=0; i<LIST_SIZE; i++)
+			Nova_list.add(i);
 		
 	    for (int i = 0; i < NUM_THREADS; i++) {
-	        threads.add(new Thread(new RunThreads(latchOFF,barrier)));
+	        threads.add(new Thread(new NovaThread(latchNova)));
 	        threads.get(i).start();
 	    }
-	    latchOFF.countDown();
+	    for (int i=0; i<=NUM_THREADS; i++)
+	    	latchNova.countDown();
 
         final long startTime = System.nanoTime();
 
@@ -60,77 +52,60 @@ public class NovaListBenchmark {
         final long endTime = System.nanoTime();
 
         System.out.println("Nova	  Heap : " + (endTime - startTime));
-        try {
-        	String S="Total execution time Off Heap : " + (endTime - startTime);
-            myWriter.write(S);
-          } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-          }
-        for (int i = 0; i <LIST_SIZE; i++) {
- //       	assertEquals(Off_list.get(i), i*2, "ojk");
-        }
+        
+        //---shared with the other List-----//
+        threads.clear();
+        index.set(0);
+		
 	}
 	
-	void initlist() {
-		for (int i=0; i<LIST_SIZE; i++)
-			Nova_list.add(i);	
-	}
 	
-    public class RunThreads implements Runnable{
+    public class NovaThread implements Runnable{
         CountDownLatch latch;
-        CyclicBarrier barrier;
-
         public int idx;
         
-        public int getidx() {
-        	return idx;
-        }
-        RunThreads(CountDownLatch latch, CyclicBarrier barrier) {
+        NovaThread(CountDownLatch latch) {
             this.latch = latch;
-            this.barrier = barrier;
-
         }
+        
         @Override
         public void run() {
-        	initThreads();
-        	
-            try {
-                barrier.await();
-            } catch (InterruptedException | BrokenBarrierException e) {
-                e.printStackTrace();
-            }
-            
-        	for(int i=idx ; i<Nova_list.getSize(); i=i+NUM_THREADS ) {
-        		try {
-        			//Nova_list.set(i, Nova_list.get(i)*2);
-        			Nova_list.get(i);
-        		}catch(Exception e) {
-        			
+        	initThreads();	
+        	try {
+            	latch.await();
+        	} catch (Exception e) {
+        		e.printStackTrace();
         		}
-            	
+        	
+        	for(int i=idx ; i<Nova_list.getSize(); i=i+NUM_THREADS ) {
+        		Nova_list.set(i, Nova_list.get(i)*2);
+        			//Nova_list.get(i);
+        			//Nova_list.set(i, 2);
         	}
         }
     	public void initThreads() {
     		idx=index.getAndAdd(1);
     	}
     }
-
-
+/*------------------------------------------NOVADone----------------------------------------------------------*/	
     
-    //Unmanaged Mem start measure
-	public void ReadWriteOff() throws InterruptedException{
-        CyclicBarrier barrier = new CyclicBarrier(NUM_THREADS);
+    
+/*------------------------------------------Unmanaged-----------------------------------------------------------*/	
+	public void ReadWriteUnmanaged() throws InterruptedException{
+		CountDownLatch latchUnmanaged = new CountDownLatch(NUM_THREADS);
 
-		initOFFlist();
+		Off_list = new OffHeapList();
+		for (int i=0; i<LIST_SIZE; i++)
+			Off_list.add(i);
 		
-		
-	    for (int i = 0; i < NUM_THREADS; i++) {
-	        threads.add(new Thread(new RunThreadsOff(latchON,barrier)));
+		for (int i = 0; i < NUM_THREADS; i++) {
+	        threads.add(new Thread(new UnmanagedThread(latchUnmanaged)));
 	        threads.get(i).start();
-	    }
-	    latchON.countDown();
+	    }	   
+	    for (int i=0; i<=NUM_THREADS; i++)
+	    	latchUnmanaged.countDown();
 
+	    
         final long startTime = System.nanoTime();
 
         for (int i = 0; i < NUM_THREADS; i++) {
@@ -138,78 +113,52 @@ public class NovaListBenchmark {
         }
         final long endTime = System.nanoTime();
 
-        
-        try {
-        	String S="Unmanaged Heap : " + (endTime - startTime);
-        	System.out.println(S);
-            myWriter.write(S);
-            myWriter.close();
-          } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-          }
-        for (int i = 0; i <LIST_SIZE; i++) {
-  //      	assertEquals(On_list.get(i), i*2, "ok");
-        }
+        System.out.println("Unmanaged Heap : " + (endTime - startTime));
+      
+        //---shared with the other List-----//
+        threads.clear();
+        index.set(0);	
 	}
 	
-	void initOFFlist() {
-		for (int i=0; i<LIST_SIZE; i++)
-			Off_list.add(i);
-	}
-	
-    public class RunThreadsOff implements Runnable{
+    public class UnmanagedThread implements Runnable{
         CountDownLatch latch;
-        CyclicBarrier barrier;
 
         public int idx;
         
-        public int getidx() {
-        	return idx;
-        }
-        RunThreadsOff(CountDownLatch latch, CyclicBarrier barrier) {
+        UnmanagedThread(CountDownLatch latch) {
             this.latch = latch;
-            this.barrier = barrier;
-
         }
+        
         @Override
         public void run() {
         	initThreads();
         	
             try {
-                barrier.await();
-            } catch (InterruptedException | BrokenBarrierException e) {
+                latch.await();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             
         	for(int i=idx ; i<Off_list.getSize(); i=i+NUM_THREADS ) {
-        		
-        		//Off_list.set(i, Off_list.get(i)*2);
-        		Off_list.get(i);
-            	
+        		Off_list.set(i, Off_list.get(i)*2);
+        		//Off_list.get(i);
+        		//Off_list.set(i, 2);
         	}
         }
     	public void initThreads() {
     		idx=index.getAndAdd(1);
     	}
     }
-	
+    
+/*------------------------------------------UnmanagedDone-----------------------------------------------------------*/	
 
 	
 	
     public  void main() {
-        try {
-        	myWriter = new FileWriter("filename.txt");
-         } catch (IOException e) {
-           System.out.println("An error occurred.");
-           e.printStackTrace();
-         }
     	try {
-        	ReadWrite();
-        	threads.clear();
-        	index.set(0);
-        	ReadWriteOff();
-
+        	ReadWriteNova();
+        	ReadWriteUnmanaged();
+        	
     	}catch(Exception e) {
     		e.printStackTrace();
     	}

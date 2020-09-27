@@ -1,11 +1,8 @@
 package com.yahoo.oak;
 
 
-
-import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
-
-
 import  sun.misc.Unsafe;
 
 
@@ -81,7 +78,7 @@ public class Facade {
 		 NewV     =combine(block,offset, (int) NewV & 0xFFFFFF);
 		 block_offset_ver_del.compareAndSet(FacadeVer, NewV);
 		 
-		 novaManager.release(sliceLocated.s,block);
+		 novaManager.release(sliceLocated.s);
 		 
 		 return true; 
 	}
@@ -101,31 +98,30 @@ public class Facade {
 	}
 	
 	
-	public <T> T Write(FacadeWriteTransformer<T> f) {
+	public <T> ByteBuffer Write(FacadeWriteTransformer<T> f) {
 
 		long facadeRef=buildRef(block,offset);
-		if(!novaManager.setTap(facadeRef,block))
-			throw new RuntimeException("Problem in TAP");
+		novaManager.setTap(facadeRef);
 
 		Unsafe UNSAFE = UnsafeUtils.unsafe;
 		UNSAFE.fullFence();
 		
 		Triple sliceLocated=LocateSlice();
-		
+//		
 		if (sliceLocated.s == null) {
-			 novaManager.UnsetTap(facadeRef,block);
+			 novaManager.UnsetTap(facadeRef);
 			throw new IllegalArgumentException("cant locate slice");
 		}
 		long header= LocateSlice().Header;
 		 if(! (sliceLocated.facadeVer == (int)(header&0xFFFFFF))) {
-			 novaManager.UnsetTap(facadeRef,block);
+			 novaManager.UnsetTap(facadeRef);
 			 throw new IllegalArgumentException("slice changed");
 		 }
-
-		T ResultToReturn= caluclate(sliceLocated.s,f);
-		 if(!novaManager.UnsetTap(facadeRef,block))
-				throw new RuntimeException("Problem in TAP");
-
+//
+//		T ResultToReturn= caluclate(sliceLocated.s,f);
+		ByteBuffer ResultToReturn =sliceLocated.s.buffer.putLong(0, 2);
+		novaManager.UnsetTap(facadeRef);
+		
 		 return ResultToReturn;
 		
 	}
@@ -171,12 +167,11 @@ public class Facade {
 		Ref=Ref|(offset&0xFFFFF);
 		return Ref;
 	}
-
+	
 	private int ExtractDel(long toExtract) {
 		int del=(int) (toExtract)&0x1;
 		return del;
 	}
-
 	
 	private long combine(int block, int offset, int version_del ) {
 		long toReturn=  (block & 0xFFFFFFFF);

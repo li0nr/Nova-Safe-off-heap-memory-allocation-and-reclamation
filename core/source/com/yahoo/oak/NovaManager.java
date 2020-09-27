@@ -10,7 +10,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,12 +20,11 @@ class NovaManager implements MemoryManager {
     private final ThreadIndexCalculator threadIndexCalculator;
     private final List<List<Slice>> releaseLists;
     private final List<List<NovaSlice>> NreleaseLists;
-    private final Map<Long,List<NovaSlice>> NovaReleaseLists;
 
     private final AtomicInteger globalNovaNumber;
     private final BlockMemoryAllocator allocator;
     
-    private final List<Long> TAP;
+    private final Map<Long,Long> TAP;
     
     private final List<NovaReadBuffer> ReadBuffers;
     private final List<NovaWriteBuffer> WriteBuffers;
@@ -42,10 +40,6 @@ class NovaManager implements MemoryManager {
         for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
             this.NreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
         }
-        this.TAP = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
-            this.TAP.add(new Long(0));
-        }
         //initialized once to be always used!
         NovaSlice s=new NovaSlice(0,-1);
         this.ReadBuffers = new CopyOnWriteArrayList<>();
@@ -60,7 +54,7 @@ class NovaManager implements MemoryManager {
         for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
             this.Slices.add(new NovaSlice(0,-1));
         }
-        this.NovaReleaseLists = new ConcurrentHashMap<>();
+        TAP = new ConcurrentHashMap<>();
 
         
         globalNovaNumber = new AtomicInteger(1);
@@ -115,29 +109,26 @@ class NovaManager implements MemoryManager {
         }
     }
     
-    public void release(NovaSlice s, int BlockID) {//map each thread to a his list, all lists start in the conccurnt list and remove when thread gets his?
-        long id = Thread.currentThread().getId();
-        if(this.NovaReleaseLists.get(id)== null) {
-        	this.NovaReleaseLists.put(id, new ArrayList<>());
-        }
-        List<NovaSlice> myReleaseList = this.NovaReleaseLists.get(id);
+    public void release(NovaSlice s) {
+        int idx = threadIndexCalculator.getIndex();
+        List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
         myReleaseList.add(new NovaSlice(s));
         if (myReleaseList.size() >= 1) {
             globalNovaNumber.incrementAndGet();
             for (NovaSlice allocToRelease : myReleaseList) {
-            	if(!allocator.TapValues(BlockID).contains(allocToRelease.getRef()))
+            	if(!TAP.containsValue(allocToRelease.getRef()))
             			allocator.free(allocToRelease);
             }
             myReleaseList.clear();
         }
     }
 
-    public  boolean setTap(long Ref, int blockID) {
-    	return allocator.SetTap(Ref, blockID);
+    public  void setTap(long ref) {
+    	TAP.put(Thread.currentThread().getId(), ref);
     }
 
-    public  boolean UnsetTap(long Ref, int blockID) {
-    	return allocator.UnsetTap(Ref, blockID);
+    public  void UnsetTap(long ref) {
+    	TAP.remove(Thread.currentThread().getId());
     }
 
     @Override

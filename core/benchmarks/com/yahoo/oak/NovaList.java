@@ -56,7 +56,7 @@ public class NovaList {
 		return ArrayOfFacades[i].Read(fread);
 	}
 	
-	public void set(int index, int e) {
+	public void set(int index, long e) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
