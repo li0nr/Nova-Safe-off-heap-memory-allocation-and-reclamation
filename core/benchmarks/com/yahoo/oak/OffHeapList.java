@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.lang.reflect.Method;
 
 
-public class OffHeapList {
+public class OffHeapList implements ListInterface{
 	
 	
 	private static final int DEFAULT_CAPACITY=10;
@@ -21,22 +21,22 @@ public class OffHeapList {
 		ArrayOff=new ByteBuffer[DEFAULT_CAPACITY];
 	}
 	
-	public void add(int e) {
+	public void add(Long e) {
 		if(size == ArrayOff.length) {
 			EnsureCap();
 		}
 
 		if(ArrayOff[size]== null)
 			ArrayOff[size]= ByteBuffer.allocateDirect(Long.BYTES);
-		ArrayOff[size].putInt(e);
+		ArrayOff[size].putLong(e);
 		size++;
 	}
 	
-	public int get(int i) {
+	public long get(int i) {
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 		}
-			return ArrayOff[i].getInt(0);
+			return ArrayOff[i].getLong(0);
 	}
 	
 	public void set(int index, long e) {
@@ -44,7 +44,7 @@ public class OffHeapList {
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOff[index].putLong(0, e);
+		 ArrayOff[index].putLong(0, 3);
 	}
 	
 	public int getSize(){

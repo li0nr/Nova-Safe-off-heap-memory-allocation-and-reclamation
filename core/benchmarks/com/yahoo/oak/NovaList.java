@@ -5,7 +5,7 @@ import com.yahoo.oak.*;
 //import org.junit.Test;
 
 
-public class NovaList {
+public class NovaList implements ListInterface{
 
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
@@ -37,14 +37,14 @@ public class NovaList {
 
 	}
 
-	public void add(long e) {
+	public void add(Long e) {
 		if(size == ArrayOfFacades.length) {
 			EnsureCap();
 		}
 
 		if(ArrayOfFacades[size]== null)
 			ArrayOfFacades[size]=new Facade(novaManager);
-			ArrayOfFacades[size].AllocateSlice(4);
+		ArrayOfFacades[size].AllocateSlice(Long.BYTES);
 	    ArrayOfFacades[size].Write(f);
 	    size++;
 	}
@@ -89,7 +89,7 @@ public class NovaList {
 //	@Test
 	public void NovaListTest() throws InterruptedException{
 	    for (int i = 0; i < 12; i++) {
-	    	this.add(i);
+	    	this.add((long)i);
 	    }
 	    for (int i = 0; i < 12; i++) {
 	    	int x=(int)this.get(i);

@@ -99,6 +99,10 @@ class Block {
         s.setBuffer(buffer);
     }
     
+    void readByteBuffer(Facade f) {
+        f.Block=buffer;
+    }
+    
     ByteBuffer readByteBuffer() {
         return (buffer);
     }

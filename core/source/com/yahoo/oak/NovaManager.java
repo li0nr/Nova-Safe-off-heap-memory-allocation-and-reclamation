@@ -14,6 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import sun.misc.Contended;
+
+
 
 class NovaManager implements MemoryManager {
     static final int RELEASE_LIST_LIMIT = 1024;
@@ -22,10 +25,11 @@ class NovaManager implements MemoryManager {
     private final List<List<NovaSlice>> NreleaseLists;
 
     private final AtomicInteger globalNovaNumber;
-    private final BlockMemoryAllocator allocator;
+    public final BlockMemoryAllocator allocator;
     
-    private final Map<Long,Long> TAP;
-    
+    //private final CopyOnWriteArrayList<Long> TAP;
+
+    private final TAP_entry TAP[];
     private final List<NovaReadBuffer> ReadBuffers;
     private final List<NovaWriteBuffer> WriteBuffers;
     private final List<NovaSlice> Slices;
@@ -41,7 +45,7 @@ class NovaManager implements MemoryManager {
             this.NreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
         }
         //initialized once to be always used!
-        NovaSlice s=new NovaSlice(0,-1);
+        NovaSlice s=new NovaSlice(0,-1,0);
         this.ReadBuffers = new CopyOnWriteArrayList<>();
         for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
             this.ReadBuffers.add(new NovaReadBuffer(s));
@@ -52,9 +56,13 @@ class NovaManager implements MemoryManager {
         }
         this.Slices = new CopyOnWriteArrayList<>();
         for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
-            this.Slices.add(new NovaSlice(0,-1));
+            this.Slices.add(new NovaSlice(0,-1,0));
         }
-        TAP = new ConcurrentHashMap<>();
+        TAP = new TAP_entry[ThreadIndexCalculator.MAX_THREADS];
+        for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
+        	this.TAP[i] = new TAP_entry();
+        }
+
 
         
         globalNovaNumber = new AtomicInteger(1);
@@ -116,7 +124,7 @@ class NovaManager implements MemoryManager {
         if (myReleaseList.size() >= 1) {
             globalNovaNumber.incrementAndGet();
             for (NovaSlice allocToRelease : myReleaseList) {
-            	if(!TAP.containsValue(allocToRelease.getRef()))
+            	if(!containsRef(allocToRelease.getRef()))
             			allocator.free(allocToRelease);
             }
             myReleaseList.clear();
@@ -124,12 +132,25 @@ class NovaManager implements MemoryManager {
     }
 
     public  void setTap(long ref) {
-    	TAP.put(Thread.currentThread().getId(), ref);
+    	long index = Thread.currentThread().getId();
+    	for(int i=(int)index%threadIndexCalculator.MAX_THREADS ; i<ThreadIndexCalculator.MAX_THREADS; i++) {
+    		if(TAP[i].id == -1){
+    			TAP[i].ref = ref;
+    			TAP[i].id = index;
+    			return;
+    		}
+    	}throw new IllegalAccessError("FAILED SETTING TAP");
     }
 
     public  void UnsetTap(long ref) {
-    	TAP.remove(Thread.currentThread().getId());
-    }
+    	long index = Thread.currentThread().getId();
+    	for(int i=(int)index%threadIndexCalculator.MAX_THREADS ; i<ThreadIndexCalculator.MAX_THREADS; i++) {
+    		if(TAP[i].id == index){
+    			TAP[i].id = -1;
+    			return;
+    		}
+    	}throw new IllegalAccessError("FAILED SETTING TAP");
+	}
 
     @Override
     public void readByteBuffer(Slice s) {
@@ -140,6 +161,11 @@ class NovaManager implements MemoryManager {
     public void readByteBuffer(NovaSlice s) {
         allocator.readByteBuffer(s);
     }
+    
+    public void readByteBuffer(Facade f) {
+        allocator.readByteBuffer(f);
+    }
+
 
     public ByteBuffer readByteBuffer(int block) {
         return allocator.readByteBuffer(block);
@@ -171,4 +197,22 @@ class NovaManager implements MemoryManager {
     public int  getNovaEra() {
         return globalNovaNumber.get();
     }
+    
+    @Contended
+    private class TAP_entry {
+        volatile public long ref;
+        volatile public long id;
+        
+    TAP_entry(){
+    	id = -1;
+    }
+
+    }
+    boolean containsRef(long ref) {
+    	for( TAP_entry entry: TAP) {
+    		if(entry.ref == ref) return true;
+    	}
+    	return false;
+    }
+    
 }

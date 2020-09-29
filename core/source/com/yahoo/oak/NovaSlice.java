@@ -34,9 +34,10 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     protected ByteBuffer buffer;
 
     
-    NovaSlice(int block, int offset) {
+    NovaSlice(int block, int offset, int len) {
         blockID=block;
         this.offset=offset;
+        this.length= len;
     }
 
     // Used to duplicate the allocation state. Does not duplicate the buffer itself.
@@ -83,6 +84,7 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
         this.blockID = other.blockID;
         this.offset = other.offset;
         this.buffer = other.buffer;
+        this.length = other.length;
     }
 
     // Set the internal buffer.
@@ -91,9 +93,8 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
         this.buffer = buffer;
     }
 
-    // Set the version. Should be used by the memory allocator.
-    void setVersion(int version) {
-     //   this.version = version;
+    void setLen(int len) {
+    	length=len;
     }
     void setHeader(int version, int size) {
     	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;

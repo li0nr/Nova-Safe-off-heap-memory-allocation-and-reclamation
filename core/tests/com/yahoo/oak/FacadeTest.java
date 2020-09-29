@@ -20,7 +20,7 @@ public class FacadeTest {
     private  ArrayList<Thread> threads;
     private static CountDownLatch latch = new CountDownLatch(1);
 
-    private  final int NUM_THREADS = 1;
+    private  final int NUM_THREADS = 3;
     
     FacadeWriteTransformer<Void> f=(ByteBuffer) -> {	
     for(int i=0;i <20; i++) {
@@ -154,7 +154,7 @@ public class FacadeTest {
 
         latch2.countDown();
         latch2.countDown();
-        
+
         for (i = 0; i < NUM_THREADS; i++) {
             threads.get(i).join();
         }
@@ -172,12 +172,11 @@ public class FacadeTest {
 	        threads.get(i).start();
 	    }
 	    CountDownLatch latch2 = new CountDownLatch(2);
-	    threads.add(new Thread(new delteThead(latch)));
-	    threads.get(i).setPriority(9);
-	    threads.get(i).start();
+	   // threads.add(new Thread(new delteThead(latch)));
+//	    threads.get(i).setPriority(9);
+//	    threads.get(i).start();
         
         latch.countDown();
-
         for (i = 0; i < NUM_THREADS; i++) {
             threads.get(i).join();
         }

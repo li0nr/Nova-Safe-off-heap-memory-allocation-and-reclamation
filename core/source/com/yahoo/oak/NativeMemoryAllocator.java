@@ -146,7 +146,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     
     
     
-    
     public boolean allocate(NovaSlice s, int size) {
         // While the free list is not empty there can be a suitable free slice to reuse.
         // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
@@ -242,7 +241,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     
     @Override
     public void free(NovaSlice s) {
-        int size = (int)s.getByteBuffer().getLong(s.getAllocatedOffset())>>24;
+    	int size = s.length;
         allocated.addAndGet(-size);
         if (stats != null) {
             stats.release(size);
@@ -293,6 +292,11 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     public void readByteBuffer(Slice s) {
         Block b = blocksArray[s.getAllocatedBlockID()];
         b.readByteBuffer(s);
+    }
+    
+    public void readByteBuffer(Facade f) {
+        Block b = blocksArray[f.block];
+        b.readByteBuffer(f);
     }
 
     
