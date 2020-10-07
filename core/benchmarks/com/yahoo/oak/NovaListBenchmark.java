@@ -2,21 +2,25 @@ package com.yahoo.oak;
 
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.Test;
+import java.io.FileWriter;   // Import the FileWriter class
 
 
 
 public class NovaListBenchmark {
 		
-	static final int NUM_THREADS=1;
-	static final int LIST_SIZE=1000000;
-	static final int RUNS= 10;
+	static  int NUM_THREADS=1;
+	static  int LIST_SIZE=1000000;
+	static  int RUNS= 10;
 
     public NovaListBenchmark(){    }
 
     
-	public long ReadWriteGeneric(ListInterface list) throws InterruptedException{
+	public long ReadWriteGeneric(ListInterface list,String s) throws InterruptedException{
 		CountDownLatch latch = new CountDownLatch(NUM_THREADS);
 	    ArrayList<Thread> threads = new ArrayList<>();
 	    AtomicInteger index= new AtomicInteger(0);
@@ -25,7 +29,10 @@ public class NovaListBenchmark {
 			list.add((long)i);
 		
 		for (int i = 0; i < NUM_THREADS; i++) {
-	        threads.add(new Thread(new GenrticThread(latch,list,index)));
+	        if(s.equals("W"))threads.add(new Thread(new GenrticThreadW(latch,list,index)));
+	        if(s.equals("R"))threads.add(new Thread(new GenrticThreadR(latch,list,index)));
+	        if(s.equals("RW"))threads.add(new Thread(new GenrticThreadRW(latch,list,index)));
+
 	        threads.get(i).start();
 	    }	   
 	    for (int i=0; i<=NUM_THREADS; i++)
@@ -43,13 +50,13 @@ public class NovaListBenchmark {
       
 	}
     
-    public class GenrticThread implements Runnable{
+    public class GenrticThreadW implements Runnable{
         ListInterface list;
     	CountDownLatch latch;
     	AtomicInteger index;
         public int idx;
         
-        GenrticThread(CountDownLatch latch,ListInterface list,AtomicInteger index) {
+        GenrticThreadW(CountDownLatch latch,ListInterface list,AtomicInteger index) {
             this.latch = latch;
             this.list = list;
             this.index = index;
@@ -66,9 +73,68 @@ public class NovaListBenchmark {
             }
             
         	for(int i=idx ; i<list.getSize(); i=i+NUM_THREADS ) {
-        		//list.set(i, list.get(i)*2);
-        		//list.get(i);
+
         		list.set(i, 2);
+        	}
+        }
+    	public void initThreads() {
+    		idx=index.getAndAdd(1);
+    	}
+    }
+    public class GenrticThreadR implements Runnable{
+        ListInterface list;
+    	CountDownLatch latch;
+    	AtomicInteger index;
+        public int idx;
+        
+        GenrticThreadR(CountDownLatch latch,ListInterface list,AtomicInteger index) {
+            this.latch = latch;
+            this.list = list;
+            this.index = index;
+        }
+        
+        @Override
+        public void run() {
+        	initThreads();
+        	
+            try {
+                latch.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+        	for(int i=idx ; i<list.getSize(); i=i+NUM_THREADS ) {
+        		list.get(i);
+        	}
+        }
+    	public void initThreads() {
+    		idx=index.getAndAdd(1);
+    	}
+    }
+    public class GenrticThreadRW implements Runnable{
+        ListInterface list;
+    	CountDownLatch latch;
+    	AtomicInteger index;
+        public int idx;
+        
+        GenrticThreadRW(CountDownLatch latch,ListInterface list,AtomicInteger index) {
+            this.latch = latch;
+            this.list = list;
+            this.index = index;
+        }
+        
+        @Override
+        public void run() {
+        	initThreads();
+        	
+            try {
+                latch.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+        	for(int i=idx ; i<list.getSize(); i=i+NUM_THREADS ) {
+        		list.set(i, list.get(i)*2);
         	}
         }
     	public void initThreads() {
@@ -79,22 +145,69 @@ public class NovaListBenchmark {
 
 	
 	
-    public  void main() {
+    public  void RunBenchmark(int Threads, int items, FileWriter f,String s) {
+        ArrayList<Long>	 NovaMean = new ArrayList<>();
+        ArrayList<Long>  UnmanagedMean = new ArrayList<>();
+        LIST_SIZE= items;
+        NUM_THREADS=Threads;
     	try {
     	long NovaTime=0;
     	long Unmanaged = 0;
-		for (int i=0; i<RUNS ; i++) {
-            System.out.println("Nova:");
-            NovaTime+=ReadWriteGeneric(new NovaList());
-            System.out.println("Unmanaged:");
-            Unmanaged+=ReadWriteGeneric(new OffHeapList());
-		}
-        System.out.println("Nova     :"+ NovaTime/RUNS);
-        System.out.println("Unmanaged:"+Unmanaged/RUNS);
-        	
+    	for (int j=0; j<1 ; j++) {
+    		for (int i=0; i<1 ; i++) {
+                System.out.println("Nova:");
+                NovaTime+=ReadWriteGeneric(new NovaList(),s);
+                System.out.println("Unmanaged:");
+                Unmanaged+=ReadWriteGeneric(new OffHeapList(),s);
+    		}
+    		Thread.sleep(10000);
+            NovaMean.add(NovaTime/10);
+            UnmanagedMean.add(Unmanaged/10);
+    	}
+        f.write("Nova  Mean:"+Mean(NovaMean)+" SE:"+StandardDeviation(NovaMean)+" mode:"+s+" thread num:"+Threads+ "\n");
+        f.write("Unman Mean:"+Mean(UnmanagedMean)+" SE:"+ StandardDeviation(UnmanagedMean) + " mode:"+s+" thread num:"+Threads+ "\n");
+
     	}catch(Exception e) {
     		e.printStackTrace();
     	}
+    }
+    
+    @Test
+    public void test() {
+    	ArrayList<Long> a= new ArrayList<Long>();
+    	for (int i=0; i<5 ; i++) {
+    		long n = (i+1);
+    		a.add(n);
+    	}
+    	double dt=StandardDeviation(a);
+    	System.out.println("sd :"+dt);
+    }
+    
+    private double Mean(List<Long> means) {
+    	int n=0;
+    	double sum=0, mean=0;
+    	for (double s : means) {
+    		sum=sum+s;
+			n++;
+			}
+		return sum/n;
+    }
+    
+    private double StandardDeviation(List<Long> means) {
+    	int n=0;
+    	double sum=0, mean=0;
+    	for (double s : means) {
+    		sum=sum+s;
+			n++;
+			}
+		mean=sum/n;
+		sum=0;  
+    	for (double s : means) {
+			sum+=Math.pow((s-mean),2);
+    	}
+		mean=sum/(n);
+		return Math.sqrt(mean);
+		
     }
 
 }
