@@ -45,7 +45,7 @@ public class NovaListBenchmark {
         }
         final long endTime = System.nanoTime();
 
-        System.out.println((endTime - startTime));
+    //    System.out.println((endTime - startTime));
         return (endTime - startTime);
       
 	}
@@ -151,22 +151,29 @@ public class NovaListBenchmark {
         LIST_SIZE= items;
         NUM_THREADS=Threads;
     	try {
-    	long NovaTime=0;
-    	long Unmanaged = 0;
-    	for (int j=0; j<1 ; j++) {
-    		for (int i=0; i<1 ; i++) {
-                System.out.println("Nova:");
-                NovaTime+=ReadWriteGeneric(new NovaList(),s);
-                System.out.println("Unmanaged:");
-                Unmanaged+=ReadWriteGeneric(new OffHeapList(),s);
-    		}
-    		Thread.sleep(10000);
-            NovaMean.add(NovaTime/10);
-            UnmanagedMean.add(Unmanaged/10);
-    	}
-        f.write("Nova  Mean:"+Mean(NovaMean)+" SE:"+StandardDeviation(NovaMean)+" mode:"+s+" thread num:"+Threads+ "\n");
-        f.write("Unman Mean:"+Mean(UnmanagedMean)+" SE:"+ StandardDeviation(UnmanagedMean) + " mode:"+s+" thread num:"+Threads+ "\n");
+    	System.out.println("----------------Threads:  "+Threads+"  Mode:"+s+"----------------");
+		long NovaTime=0;
+		long Unmanaged = 0;
+    	for (int j=0; j<3 ; j++) {
+            //System.out.println("Nova:");
+    		Thread.sleep(1000);
+    		NovaList nova=new NovaList();
+            NovaTime=ReadWriteGeneric( nova,s);
+            nova.close();
 
+            //System.out.println("Unmanaged:");
+    		Thread.sleep(1000);
+    		OffHeapList off = new OffHeapList();
+            Unmanaged=ReadWriteGeneric(off,s);
+            off.close();
+
+            NovaMean.add(NovaTime);
+            UnmanagedMean.add(Unmanaged);
+    	}
+        System.out.println("Nova  Mean:"+Mean(NovaMean)+" SE:"+StandardError(NovaMean)+" mode:"+s+" thread num:"+Threads+ "\n");
+        System.out.println("Unman Mean:"+Mean(UnmanagedMean)+" SE:"+ StandardError(UnmanagedMean) + " mode:"+s+" thread num:"+Threads+ "\n");
+        NovaMean.clear();
+        UnmanagedMean.clear();
     	}catch(Exception e) {
     		e.printStackTrace();
     	}
@@ -175,16 +182,21 @@ public class NovaListBenchmark {
     @Test
     public void test() {
     	ArrayList<Long> a= new ArrayList<Long>();
-    	for (int i=0; i<5 ; i++) {
-    		long n = (i+1);
+    	for (int i=0; i<10 ; i++) {
+    		long n = (i);
     		a.add(n);
     	}
     	double dt=StandardDeviation(a);
+    	double se=StandardError(a);
     	System.out.println("sd :"+dt);
+    	System.out.println("se :"+se);
     }
     
     private double Mean(List<Long> means) {
     	int n=0;
+    	for (Long s : means) {
+    		System.out.println("**"+s+"**");
+    	}
     	double sum=0, mean=0;
     	for (double s : means) {
     		sum=sum+s;
@@ -207,6 +219,24 @@ public class NovaListBenchmark {
     	}
 		mean=sum/(n);
 		return Math.sqrt(mean);
+		
+    }
+    
+    private double StandardError(List<Long> means) {
+    	int n=0;
+    	double sum=0, mean=0;
+    	for (double s : means) {
+    		sum=sum+s;
+			n++;
+			}
+		mean=sum/n;
+		sum=0;  
+    	for (double s : means) {
+			sum+=Math.pow((s-mean),2);
+    	}
+		mean=sum/(n-1);
+		mean=Math.sqrt(mean);
+		return mean/Math.sqrt(n);
 		
     }
 

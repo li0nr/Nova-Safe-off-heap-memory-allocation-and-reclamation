@@ -6,8 +6,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import  sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
-
-
 public class Facade {
 
 	static final int INVALID_BLOCKID=0;

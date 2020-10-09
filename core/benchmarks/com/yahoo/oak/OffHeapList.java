@@ -5,6 +5,11 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import sun.misc.Cleaner;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 
@@ -77,6 +82,27 @@ public class OffHeapList implements ListInterface{
 		ArrayOff = Arrays.copyOf(ArrayOff, newSize);
 	}
 	
+	 @Override
+	public void close() throws IOException {
+		 for (ByteBuffer buffer : ArrayOff) {
+		        Field cleanerField = null;
+		        try {
+		            cleanerField = buffer.getClass().getDeclaredField("cleaner");
+		        } catch (NoSuchFieldException e) {
+		            e.printStackTrace();
+		        }
+		        assert cleanerField != null;
+		        cleanerField.setAccessible(true);
+		        Cleaner cleaner = null;
+		        try {
+		            cleaner = (Cleaner) cleanerField.get(buffer);
+		        } catch (IllegalAccessException e) {
+		            e.printStackTrace();
+		        }
+		        assert cleaner != null;
+		        cleaner.clean();
+		 }
+	}
 //	@Test
 //	public void NovaListTest() throws InterruptedException{
 //	    for (int i = 0; i < 12; i++) {

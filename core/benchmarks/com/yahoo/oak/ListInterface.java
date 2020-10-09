@@ -1,7 +1,8 @@
 package com.yahoo.oak;
 
+import java.io.Closeable;
 
-public interface ListInterface {
+public interface ListInterface extends Closeable{
 
 	public void add(Long e);
 	

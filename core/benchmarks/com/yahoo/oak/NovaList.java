@@ -1,5 +1,6 @@
 package com.yahoo.oak;
 
+import java.io.IOException;
 import java.util.Arrays;
 import com.yahoo.oak.*;
 //import org.junit.Test;
@@ -83,7 +84,11 @@ public class NovaList implements ListInterface{
 	}
 	
 	
-
+ 
+@Override
+public void close() throws IOException {
+	novaManager.close();
+}
 	
 
 //	@Test
