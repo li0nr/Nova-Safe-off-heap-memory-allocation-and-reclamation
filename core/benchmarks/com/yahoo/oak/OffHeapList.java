@@ -84,7 +84,8 @@ public class OffHeapList implements ListInterface{
 	
 	 @Override
 	public void close() throws IOException {
-		 for (ByteBuffer buffer : ArrayOff) {
+		 for (int i=0;i<size;i++){
+			 ByteBuffer buffer = ArrayOff[i];
 		        Field cleanerField = null;
 		        try {
 		            cleanerField = buffer.getClass().getDeclaredField("cleaner");

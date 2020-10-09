@@ -154,7 +154,7 @@ public class NovaListBenchmark {
     	System.out.println("----------------Threads:  "+Threads+"  Mode:"+s+"----------------");
 		long NovaTime=0;
 		long Unmanaged = 0;
-    	for (int j=0; j<3 ; j++) {
+    	for (int j=0; j<100 ; j++) {
             //System.out.println("Nova:");
     		Thread.sleep(1000);
     		NovaList nova=new NovaList();
@@ -188,15 +188,17 @@ public class NovaListBenchmark {
     	}
     	double dt=StandardDeviation(a);
     	double se=StandardError(a);
+    	double mean= Mean(a);
+    	System.out.println("Mean:"+mean);
     	System.out.println("sd :"+dt);
     	System.out.println("se :"+se);
     }
     
     private double Mean(List<Long> means) {
     	int n=0;
-    	for (Long s : means) {
-    		System.out.println("**"+s+"**");
-    	}
+//    	for (Long s : means) {
+//    		System.out.println("**"+s+"**");
+//    	}
     	double sum=0, mean=0;
     	for (double s : means) {
     		sum=sum+s;
