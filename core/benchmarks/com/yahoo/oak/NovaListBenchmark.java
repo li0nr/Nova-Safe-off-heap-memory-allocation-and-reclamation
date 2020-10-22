@@ -3,11 +3,13 @@ package com.yahoo.oak;
 
 import java.util.ArrayList;
 import java.util.List;
+import 	java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
 import java.io.FileWriter;   // Import the FileWriter class
+import org.junit.Test;
+
 
 
 
@@ -16,6 +18,8 @@ public class NovaListBenchmark {
 	static  int NUM_THREADS=1;
 	static  int LIST_SIZE=1000000;
 	static  int RUNS= 10;
+	static  int Section = 8;//128 cache line /16 nova number  
+	static int Limit = 0;
 
     public NovaListBenchmark(){    }
 
@@ -29,9 +33,9 @@ public class NovaListBenchmark {
 			list.add((long)i);
 		
 		for (int i = 0; i < NUM_THREADS; i++) {
-	        if(s.equals("W"))threads.add(new Thread(new GenrticThreadW(latch,list,index)));
-	        if(s.equals("R"))threads.add(new Thread(new GenrticThreadR(latch,list,index)));
-	        if(s.equals("RW"))threads.add(new Thread(new GenrticThreadRW(latch,list,index)));
+	        if(s.equals("W"))threads.add(new Thread(new GenericThreadW(latch,list,index)));
+	        if(s.equals("R"))threads.add(new Thread(new GenericThreadR(latch,list,index)));
+	        if(s.equals("RW"))threads.add(new Thread(new GenericThreadRW(latch,list,index)));
 
 	        threads.get(i).start();
 	    }	   
@@ -50,107 +54,74 @@ public class NovaListBenchmark {
       
 	}
     
-    public class GenrticThreadW implements Runnable{
-        ListInterface list;
-    	CountDownLatch latch;
-    	AtomicInteger index;
-        public int idx;
-        
-        GenrticThreadW(CountDownLatch latch,ListInterface list,AtomicInteger index) {
-            this.latch = latch;
-            this.list = list;
-            this.index = index;
-        }
-        
+    public class GenericThreadW extends GenericBenchmark{
+    	GenericThreadW(CountDownLatch latch,ListInterface list,AtomicInteger index) {
+    		super(latch, list, index);
+    	}  
         @Override
         public void run() {
-        	initThreads();
-        	
             try {
                 latch.await();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
-        	for(int i=idx ; i<list.getSize(); i=i+NUM_THREADS ) {
-
+        	for(int i=idx*Limit ; i<idx*Limit  +Limit && i<LIST_SIZE; i=i+1 ) {
         		list.set(i, 2);
         	}
         }
-    	public void initThreads() {
-    		idx=index.getAndAdd(1);
-    	}
+
     }
-    public class GenrticThreadR implements Runnable{
-        ListInterface list;
-    	CountDownLatch latch;
-    	AtomicInteger index;
-        public int idx;
-        
-        GenrticThreadR(CountDownLatch latch,ListInterface list,AtomicInteger index) {
-            this.latch = latch;
-            this.list = list;
-            this.index = index;
-        }
-        
+    public class GenericThreadR extends GenericBenchmark{
+    	GenericThreadR(CountDownLatch latch,ListInterface list,AtomicInteger index) {
+    		super(latch, list, index);
+    	}  
         @Override
         public void run() {
-        	initThreads();
-        	
             try {
                 latch.await();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
-        	for(int i=idx ; i<list.getSize(); i=i+NUM_THREADS ) {
+        	for(int i=idx*Limit ; i<idx*Limit  +Limit && i<LIST_SIZE; i=i+1 ) {
         		list.get(i);
         	}
         }
-    	public void initThreads() {
-    		idx=index.getAndAdd(1);
-    	}
+
     }
-    public class GenrticThreadRW implements Runnable{
-        ListInterface list;
-    	CountDownLatch latch;
-    	AtomicInteger index;
-        public int idx;
-        
-        GenrticThreadRW(CountDownLatch latch,ListInterface list,AtomicInteger index) {
-            this.latch = latch;
-            this.list = list;
-            this.index = index;
-        }
-        
+    public class GenericThreadRW extends GenericBenchmark{
+    	GenericThreadRW(CountDownLatch latch,ListInterface list,AtomicInteger index) {
+    		super(latch, list, index);
+    	}  
         @Override
         public void run() {
-        	initThreads();
-        	
             try {
                 latch.await();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
-        	for(int i=idx ; i<list.getSize(); i=i+NUM_THREADS ) {
-        		list.set(i, list.get(i)*2);
+        	//for(int i=idx*Section ; i<Limit; i=i+1 ) {
+            for(int i=idx*Limit ; i<idx*Limit  +Limit && i<LIST_SIZE; i=i+1 ) {
+            	list.set(i, list.get(i)*2);
         	}
         }
-    	public void initThreads() {
-    		idx=index.getAndAdd(1);
-    	}
+
     }
-    
+  
 
 	
 	
-    public  void RunBenchmark(int Threads, int items, FileWriter f,String s) {
+    public  void RunBenchmark(int Threads, int items, FileWriter f,String s)throws java.io.IOException {
         ArrayList<Long>	 NovaMean = new ArrayList<>();
         ArrayList<Long>  UnmanagedMean = new ArrayList<>();
         LIST_SIZE= items;
         NUM_THREADS=Threads;
-    	try {
+        Limit = LIST_SIZE/NUM_THREADS+1;
+        FileWriter myWriter = new FileWriter("results.txt");
+        
+        try {
     	System.out.println("----------------Threads:  "+Threads+"  Mode:"+s+"----------------");
 		long NovaTime=0;
 		long Unmanaged = 0;
@@ -160,7 +131,6 @@ public class NovaListBenchmark {
     		NovaList nova=new NovaList();
             NovaTime=ReadWriteGeneric( nova,s);
             nova.close();
-
             //System.out.println("Unmanaged:");
     		Thread.sleep(1000);
     		OffHeapList off = new OffHeapList();
@@ -170,6 +140,8 @@ public class NovaListBenchmark {
             NovaMean.add(NovaTime);
             UnmanagedMean.add(Unmanaged);
     	}
+      myWriter.write("Nova  Mean:"+Mean(NovaMean)+" SE:"+StandardError(NovaMean)+" mode:"+s+" thread num:"+Threads+ "\n");
+      myWriter.write("Unman Mean:"+Mean(UnmanagedMean)+" SE:"+ StandardError(UnmanagedMean) + " mode:"+s+" thread num:"+Threads+ "\n");
         System.out.println("Nova  Mean:"+Mean(NovaMean)+" SE:"+StandardError(NovaMean)+" mode:"+s+" thread num:"+Threads+ "\n");
         System.out.println("Unman Mean:"+Mean(UnmanagedMean)+" SE:"+ StandardError(UnmanagedMean) + " mode:"+s+" thread num:"+Threads+ "\n");
         NovaMean.clear();
@@ -177,12 +149,20 @@ public class NovaListBenchmark {
     	}catch(Exception e) {
     		e.printStackTrace();
     	}
+      myWriter.close();
     }
-    
     @Test
     public void test() {
-    	ArrayList<Long> a= new ArrayList<Long>();
-    	for (int i=0; i<10 ; i++) {
+    	
+        int i=0;
+        ThreadLocalRandom random = ThreadLocalRandom.current();  
+        while(i<100) {
+        	System.out.println("round"+i+"value"+random.current().nextInt(1000_000)+"\n");
+        	i++;
+        }
+        
+        ArrayList<Long> a= new ArrayList<Long>();
+    	for ( i=0; i<10 ; i++) {
     		long n = (i);
     		a.add(n);
     	}

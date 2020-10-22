@@ -65,7 +65,7 @@ public class FacadeTest {
         @Override
         public void run() {
         	try {
-        		int result=facade.Read(ByteBuffer -> ByteBuffer.getInt(4));	
+//        		int result=facade.Read(ByteBuffer -> ByteBuffer.getInt(4));	
         	}catch (Exception e) {
         		System.out.print(e.toString());
         	}
@@ -214,15 +214,15 @@ public class FacadeTest {
         f.AllocateSlice(20);
         f.LocateSlice();
         
-        int a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
-        Object b=f.Write(ByteBuffer -> ByteBuffer.putInt(4, 3));
-        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
-        b=f.Write( ByteBuffer -> ByteBuffer.putInt(4,ByteBuffer.getInt(4)*3));
-        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
-
-        b=f.Write(this.f);
-
-        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
+//        int a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
+//        Object b=f.Write(ByteBuffer -> ByteBuffer.putInt(4, 3));
+//        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
+//        b=f.Write( ByteBuffer -> ByteBuffer.putInt(4,ByteBuffer.getInt(4)*3));
+//        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
+//
+//        b=f.Write(this.f);
+//
+//        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
 
         Facade r=f;
         f.Delete();

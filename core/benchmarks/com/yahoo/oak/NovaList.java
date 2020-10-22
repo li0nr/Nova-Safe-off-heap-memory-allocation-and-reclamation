@@ -86,7 +86,7 @@ public class NovaList implements ListInterface{
 	
  
 @Override
-public void close() throws IOException {
+public void close()  {
 	novaManager.close();
 }
 	

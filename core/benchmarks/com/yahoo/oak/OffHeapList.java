@@ -83,7 +83,7 @@ public class OffHeapList implements ListInterface{
 	}
 	
 	 @Override
-	public void close() throws IOException {
+	public void close()  {
 		 for (int i=0;i<size;i++){
 			 ByteBuffer buffer = ArrayOff[i];
 		        Field cleanerField = null;
