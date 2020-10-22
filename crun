@@ -1,4 +1,0 @@
-#!/bin/bash
-mvn compile
-cd target/classes
-java com.yahoo.oak.Main 
