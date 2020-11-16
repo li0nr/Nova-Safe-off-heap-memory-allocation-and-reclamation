@@ -37,6 +37,11 @@ public class NovaList implements ListInterface{
 		ArrayOfFacades=new Facade[DEFAULT_CAPACITY];
 
 	}
+	
+	public NovaList(int capacity){
+		ArrayOfFacades=new Facade[capacity];
+
+	}
 
 	public void add(Long e) {
 		if(size == ArrayOfFacades.length) {
@@ -92,19 +97,31 @@ public void close()  {
 	
 
 //	@Test
-	public void NovaListTest() throws InterruptedException{
-	    for (int i = 0; i < 12; i++) {
-	    	this.add((long)i);
-	    }
-	    for (int i = 0; i < 12; i++) {
-	    	int x=(int)this.get(i);
-	    	System.out.println(x);
-	    }	  
-	    for (int i = 0; i < 12; i++) {
-	    	this.remove(i);
-	    }
+//	public void NovaListTest() throws InterruptedException{
+//	    for (int i = 0; i < 12; i++) {
+//	    	this.add((long)i);
+//	    }
+//	    for (int i = 0; i < 12; i++) {
+//	    	int x=(int)this.get(i);
+//	    	System.out.println(x);
+//	    }	  
+//	    for (int i = 0; i < 12; i++) {
+//	    	this.remove(i);
+//	    }
+//	}
+public  static void main(String[] args)throws java.io.IOException {
+	NovaList s = new NovaList();
+	//s.RunBenchmark(4, 10, "R", "N");
+	for(int i=0; i<10_000_000; i++) {
+		s.add((long)i);
+	}
+
+	for(int i=0; i<10_000_000; i++) {
+		s.set(i,(long)i);
 	}
 	
+	
+}	
 	
 }
 

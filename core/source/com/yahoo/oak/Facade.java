@@ -104,25 +104,29 @@ public class Facade {
 	public <T> ByteBuffer Write(FacadeWriteTransformer<T> f) {
 
 		long facadeRef=buildRef(block,offset);
-		novaManager.setTap(facadeRef);
-
+		novaManager.setTap(block,facadeRef);
+		try {
 		UnsafeUtils.unsafe.fullFence();
+		}catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 		
 	//	boolean found=true;	//***locate slice**
 		if ((version&1)==1 ) {
-			 novaManager.UnsetTap(facadeRef);
+			 novaManager.UnsetTap(block,facadeRef);
 			throw new IllegalArgumentException("cant locate slice");
 		}
 
 		Block=novaManager.allocator.readByteBuffer(block);
 		//novaManager.readByteBuffer(this);//***locate slice**
 		 if(! (version == (int)(Block.getLong(offset)&0xFFFFFF))) {
-			 novaManager.UnsetTap(facadeRef);
+			 novaManager.UnsetTap(block,facadeRef);
 			 throw new IllegalArgumentException("slice changed");
 		 }
 //		T ResultToReturn= caluclate(sliceLocated.s,f);
 		ByteBuffer ResultToReturn = Block.putLong(HeaderSize+offset, 3);
-		novaManager.UnsetTap(facadeRef);
+		novaManager.UnsetTap(block,facadeRef);
 		
 		 return ResultToReturn;
 		

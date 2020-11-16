@@ -42,6 +42,8 @@ interface BlockMemoryAllocator {
     void readByteBuffer(Facade f);
 
     ByteBuffer readByteBuffer(int block);
+    
+    int getBlocks();
 
     // Check if this Allocator was already closed
     boolean isClosed();

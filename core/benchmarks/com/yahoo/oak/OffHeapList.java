@@ -25,7 +25,10 @@ public class OffHeapList implements ListInterface{
 	public OffHeapList(){
 		ArrayOff=new ByteBuffer[DEFAULT_CAPACITY];
 	}
-	
+	public OffHeapList(int capacity){
+		ArrayOff=new ByteBuffer[capacity];
+
+	}
 	public void add(Long e) {
 		if(size == ArrayOff.length) {
 			EnsureCap();

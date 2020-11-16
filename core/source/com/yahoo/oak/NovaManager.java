@@ -11,15 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import sun.misc.Contended;
-
 
 
 class NovaManager implements MemoryManager {
     static final int RELEASE_LIST_LIMIT = 1024;
+    
+    static final int IDENTRY = 8;
+    static final int REFENTRY = 9;
     private final ThreadIndexCalculator threadIndexCalculator;
     private final List<List<Slice>> releaseLists;
     private final List<List<NovaSlice>> NreleaseLists;
@@ -27,9 +28,10 @@ class NovaManager implements MemoryManager {
     private final AtomicInteger globalNovaNumber;
     public final BlockMemoryAllocator allocator;
     
+    private final int blockcount;
     //private final CopyOnWriteArrayList<Long> TAP;
-
-    private final TAP_entry TAP[];
+    
+    private final long TAP[][][];
     private final List<NovaReadBuffer> ReadBuffers;
     private final List<NovaWriteBuffer> WriteBuffers;
     private final List<NovaSlice> Slices;
@@ -58,13 +60,22 @@ class NovaManager implements MemoryManager {
         for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
             this.Slices.add(new NovaSlice(0,-1,0));
         }
-        TAP = new TAP_entry[ThreadIndexCalculator.MAX_THREADS];
-        for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
-        	this.TAP[i] = new TAP_entry();
-        }
+        blockcount = allocator.getBlocks();
+//        TAP = new TAP_entry[blockcount][ThreadIndexCalculator.MAX_THREADS];
+//        for(int j=0; j<blockcount ; j++) {
+//            for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
+//        		this.TAP[j][i] = new TAP_entry();
+//        	}
+//        }
+      TAP = new long[blockcount][ThreadIndexCalculator.MAX_THREADS][16];
+      for(int j=0; j<blockcount ; j++) {
+          for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
+      		this.TAP[j][i][8] =-1;
+      		this.TAP[j][i][9] =-1;
 
+      	}
+      }
 
-        
         globalNovaNumber = new AtomicInteger(1);
         this.allocator = allocator;
     }
@@ -124,33 +135,67 @@ class NovaManager implements MemoryManager {
         if (myReleaseList.size() >= 1) {
             globalNovaNumber.incrementAndGet();
             for (NovaSlice allocToRelease : myReleaseList) {
-            	if(!containsRef(allocToRelease.getRef()))
+            	if(!containsRef(allocToRelease.getAllocatedBlockID() ,allocToRelease.getRef()))
             			allocator.free(allocToRelease);
             }
             myReleaseList.clear();
         }
     }
 
-    public  void setTap(long ref) {
-    	long index = Thread.currentThread().getId();
-    	for(int i=(int)index%threadIndexCalculator.MAX_THREADS ; i<ThreadIndexCalculator.MAX_THREADS; i++) {
-    		if(TAP[i].id == -1){
-    			TAP[i].ref = ref;
-    			TAP[i].id = index;
-    			return;
-    		}
-    	}throw new IllegalAccessError("FAILED SETTING TAP");
-    }
+//    public  void setTaps(int block,long ref) {
+//    	long index = Thread.currentThread().getId();
+//    	TAPS.putIfAbsent(block, new TAP_entry[32]())
+//    	for(int i=(int)index%threadIndexCalculator.MAX_THREADS ; i<ThreadIndexCalculator.MAX_THREADS; i++) {
+//    		if(TAP[i].id == -1){
+//    			TAP[i].ref = ref;
+//    			TAP[i].id = index;
+//    			return;
+//    		}
+//    	}throw new IllegalAccessError("FAILED SETTING TAP");
+//    }
+//    public  void setTap(int block,long ref) {
+//    	long index = Thread.currentThread().getId();
+//    	int i= (int)index%32;
+//    	//for(int i=(int)index%threadIndexCalculator.MAX_THREADS ; i<ThreadIndexCalculator.MAX_THREADS; i++) {
+//    		if(TAP[block][i].id == -1){
+//    			TAP[block][i].ref = ref;
+//    			TAP[block][i].id = index;
+//    			return;
+//    		}
+//    		else throw new IllegalAccessError("FAILED SETTING TAP");
+//    }
 
-    public  void UnsetTap(long ref) {
-    	long index = Thread.currentThread().getId();
-    	for(int i=(int)index%threadIndexCalculator.MAX_THREADS ; i<ThreadIndexCalculator.MAX_THREADS; i++) {
-    		if(TAP[i].id == index){
-    			TAP[i].id = -1;
-    			return;
-    		}
-    	}throw new IllegalAccessError("FAILED SETTING TAP");
-	}
+//    public  void UnsetTap(int block,long ref) {
+//    	long index = Thread.currentThread().getId();
+//    	int i= (int)index%32;
+//    		if(TAP[block][i].id == index){
+//    			TAP[block][i].id = -1;
+//    			return;
+//    		}
+//    		else throw new IllegalAccessError("FAILED SETTING TAP");
+//	}
+    
+  public  void setTap(int block,long ref) {
+	long index = Thread.currentThread().getId();
+	int i= (int)index%32;
+	//for(int i=(int)index%threadIndexCalculator.MAX_THREADS ; i<ThreadIndexCalculator.MAX_THREADS; i++) {
+		if(TAP[block][i][IDENTRY]== -1){
+			TAP[block][i][REFENTRY]= ref;
+			TAP[block][i][IDENTRY] = index;
+			return;
+		}
+		else throw new IllegalAccessError("FAILED SETTING TAP");
+}
+    
+  public  void UnsetTap(int block,long ref) {
+	long index = Thread.currentThread().getId();
+	int i= (int)index%32;
+		if(TAP[block][i][IDENTRY] == index){
+			TAP[block][i][IDENTRY] = -1;
+			return;
+		}
+		else throw new IllegalAccessError("FAILED SETTING TAP");
+}
 
     @Override
     public void readByteBuffer(Slice s) {
@@ -198,19 +243,20 @@ class NovaManager implements MemoryManager {
         return globalNovaNumber.get();
     }
     
-    @Contended
-    private class TAP_entry {
-        volatile public long ref;
-        volatile public long id;
-        
-    TAP_entry(){
-    	id = -1;
-    }
+//    @Contended
+//    private class TAP_entry {
+//         public long ref;
+//         public long id;
+//        
+//    TAP_entry(){
+//    	id = -1;
+//    }
 
-    }
-    boolean containsRef(long ref) {
-    	for( TAP_entry entry: TAP) {
-    		if(entry.ref == ref) return true;
+//    }
+    private
+    boolean containsRef(int block,long ref) {
+    	for( long[] entry: TAP[block]) {
+    		if(entry[IDENTRY]!=-1 && entry[REFENTRY] == ref) return true;
     	}
     	return false;
     }

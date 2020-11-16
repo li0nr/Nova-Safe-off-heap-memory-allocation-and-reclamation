@@ -172,9 +172,9 @@ public class FacadeTest {
 	        threads.get(i).start();
 	    }
 	    CountDownLatch latch2 = new CountDownLatch(2);
-	   // threads.add(new Thread(new delteThead(latch)));
+	    threads.add(new Thread(new delteThead(latch)));
 //	    threads.get(i).setPriority(9);
-//	    threads.get(i).start();
+	    threads.get(i).start();
         
         latch.countDown();
         for (i = 0; i < NUM_THREADS; i++) {

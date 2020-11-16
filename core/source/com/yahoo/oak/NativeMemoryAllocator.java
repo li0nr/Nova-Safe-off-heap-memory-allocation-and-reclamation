@@ -23,6 +23,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     private static final int headerSize=8;
     // mapping IDs to blocks allocated solely to this Allocator
     private Block[] blocksArray;
+    private static int  blockcount=0;
+    
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     /**
@@ -63,6 +65,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     NativeMemoryAllocator(long capacity, BlocksProvider blocksProvider) {
         this.blocksProvider = blocksProvider;
         int blockArraySize = ((int) (capacity / blocksProvider.blockSize())) + 1;
+        blockcount= blockArraySize+1;
         // first entry of blocksArray is always empty
         this.blocksArray = new Block[blockArraySize + 1];
         // initially allocate one single block from pool
@@ -306,9 +309,23 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.readByteBuffer(s);
     }
     public ByteBuffer readByteBuffer(int block) {
-        Block b = blocksArray[block];
-        return b.readByteBuffer();
+    	try {
+            Block b = blocksArray[block];
+            return b.readByteBuffer();
+
+    	}catch(Exception e){
+    		e.printStackTrace();
+    		System.out.println("block :" + block);
+    		System.out.println("blocksArray :" + blocksArray.length);
+    		return null;
+    	}
     }
+    
+    @Override
+    public int getBlocks() {
+    	return blockcount;
+    }
+
 
     // used only for testing
     Block getCurrentBlock() {
