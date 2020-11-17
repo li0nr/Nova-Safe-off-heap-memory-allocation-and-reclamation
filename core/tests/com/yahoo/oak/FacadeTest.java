@@ -90,6 +90,22 @@ public class FacadeTest {
         }
     }
     
+    public class allocateThreads implements Runnable{
+        CountDownLatch latch;
+
+        allocateThreads(CountDownLatch latch) {
+            this.latch = latch;
+        }
+        @Override
+        public void run() {
+        	try {
+        		facade.AllocateSlice(8);	
+        	}catch (Exception e) {
+        		System.out.print(e.toString());
+        	}
+        }
+    }
+    
     
     public class delteThead implements Runnable{
         CountDownLatch latch;
@@ -194,50 +210,36 @@ public class FacadeTest {
 	}
 	
 	
+	@Test 
+	public void sequentialinitdelete() throws InterruptedException {
+		initNova();
+    	facade= new Facade(novaManager);
+    	facade.AllocateSlice(8);;
+		facade.Delete();
+		facade.AllocateSlice(8);
+		
+	}
 	
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-    @Test(expected =  IllegalArgumentException.class)
-    public void SanitySimple() {
-        final NativeMemoryAllocator allocator = new NativeMemoryAllocator(128);
-        NovaManager novaManager = new NovaManager(allocator);
-        Facade f=new Facade(novaManager);
-        f.AllocateSlice(20);
-        f.LocateSlice();
+	@Test 
+	public void concurrenallocate() throws InterruptedException {
+		initNova();
+    	facade= new Facade(novaManager);
+		int i = 0;
+	    for ( ;i < NUM_THREADS; i++) {
+	        threads.add(new Thread(new allocateThreads(latch)));
+	        //threads.get(i).setPriority(6);
+	        threads.get(i).start();
+	    }
         
-//        int a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
-//        Object b=f.Write(ByteBuffer -> ByteBuffer.putInt(4, 3));
-//        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
-//        b=f.Write( ByteBuffer -> ByteBuffer.putInt(4,ByteBuffer.getInt(4)*3));
-//        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
-//
-//        b=f.Write(this.f);
-//
-//        a=f.Read( ByteBuffer -> ByteBuffer.getInt(4));
-
-        Facade r=f;
-        f.Delete();
-        f.Read( ByteBuffer ->ByteBuffer.getInt(4));
-
-    }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-   
+        latch.countDown();
+        for (i = 0; i < NUM_THREADS; i++) {
+            threads.get(i).join();
+        }
+		
+	}
+	
 
 }

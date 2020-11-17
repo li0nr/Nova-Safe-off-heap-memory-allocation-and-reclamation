@@ -207,8 +207,8 @@ class NovaManager implements MemoryManager {
         allocator.readByteBuffer(s);
     }
     
-    public void readByteBuffer(Facade f) {
-        allocator.readByteBuffer(f);
+    public void readByteBuffer(Facade f,int block) {
+        allocator.readByteBuffer(f,block);
     }
 
 

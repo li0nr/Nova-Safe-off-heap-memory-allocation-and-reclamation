@@ -39,7 +39,7 @@ interface BlockMemoryAllocator {
     
     void readByteBuffer(NovaSlice s);// TODO to delete 
 
-    void readByteBuffer(Facade f);
+    void readByteBuffer(Facade f,int block);
 
     ByteBuffer readByteBuffer(int block);
     

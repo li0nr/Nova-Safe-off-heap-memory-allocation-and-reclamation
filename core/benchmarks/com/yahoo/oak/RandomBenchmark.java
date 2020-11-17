@@ -135,7 +135,7 @@ public class RandomBenchmark {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( nova,mode,myWriter);
 	        	}
-	        	for (int j=0; j<5 ; j++) {
+	        	for (int j=0; j<7 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( nova,mode,myWriter);
 	                Mean.add(Time);
@@ -152,7 +152,7 @@ public class RandomBenchmark {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	        	}
-	        	for (int j=0; j<5 ; j++) {
+	        	for (int j=0; j<7 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	                Mean.add(Time);
@@ -175,11 +175,10 @@ public class RandomBenchmark {
 	
     public  static void main(String[] args)throws java.io.IOException {
     	RandomBenchmark s = new RandomBenchmark();
-    	//s.RunBenchmark(4, 10, "R", "N");
 		  String mode = args[0];
 		  int num = Integer.parseInt(args[1]);
 		  String list = args[2];
-    	s.RunBenchmark(num, 100_000_000, mode, list);
+    	s.RunBenchmark(num, 1000, mode, list);
     }
     
 

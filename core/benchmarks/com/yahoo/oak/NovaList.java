@@ -2,8 +2,12 @@ package com.yahoo.oak;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.yahoo.oak.*;
 //import org.junit.Test;
+
+import sun.misc.Unsafe;
 
 
 public class NovaList implements ListInterface{
@@ -96,32 +100,16 @@ public void close()  {
 }
 	
 
-//	@Test
-//	public void NovaListTest() throws InterruptedException{
-//	    for (int i = 0; i < 12; i++) {
-//	    	this.add((long)i);
-//	    }
-//	    for (int i = 0; i < 12; i++) {
-//	    	int x=(int)this.get(i);
-//	    	System.out.println(x);
-//	    }	  
-//	    for (int i = 0; i < 12; i++) {
-//	    	this.remove(i);
-//	    }
-//	}
 public  static void main(String[] args)throws java.io.IOException {
 	NovaList s = new NovaList();
-	//s.RunBenchmark(4, 10, "R", "N");
-	for(int i=0; i<10_000_000; i++) {
+	for(int i=0; i<100; i++) {
 		s.add((long)i);
+		}
+	for(int i=0; i<100; i++) {
+		s.set(i,(long)i);
+		}
+	s.close();
 	}
 
-	for(int i=0; i<10_000_000; i++) {
-		s.set(i,(long)i);
-	}
-	
-	
-}	
-	
 }
 

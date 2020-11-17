@@ -127,13 +127,13 @@ public class NovaListBenchmark {
         		NovaList nova=new NovaList(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			nova.add((long)i);
-		        System.out.println("finsished init\n");
+//		        System.out.println("finsished init\n");
 
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( nova,mode,myWriter);
 	        	}
-	        	for (int j=0; j<5 ; j++) {
+	        	for (int j=0; j<7 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( nova,mode,myWriter);
 	                Mean.add(Time);
@@ -144,13 +144,13 @@ public class NovaListBenchmark {
         		OffHeapList un=new OffHeapList();
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			un.add((long)i);
-		        System.out.println("finsished init\n");
+//		        System.out.println("finsished init\n");
 	    		
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	        	}
-	        	for (int j=0; j<5 ; j++) {
+	        	for (int j=0; j<7 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	                Mean.add(Time);
@@ -170,11 +170,10 @@ public class NovaListBenchmark {
 
     public  static void main(String[] args)throws java.io.IOException {
     	NovaListBenchmark s = new NovaListBenchmark();
-    	//s.RunBenchmark(4, 10, "R", "N");
 		  String mode = args[0];
 		  int num = Integer.parseInt(args[1]);
 		  String list = args[2];
-		  s.RunBenchmark(num, 100_000_000, mode, list);
+		  s.RunBenchmark(num, 1000, mode, list);
     }
     
     

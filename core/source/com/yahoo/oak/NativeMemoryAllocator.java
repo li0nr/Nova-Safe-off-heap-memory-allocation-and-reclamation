@@ -297,8 +297,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.readByteBuffer(s);
     }
     
-    public void readByteBuffer(Facade f) {
-        Block b = blocksArray[f.block];
+    public void readByteBuffer(Facade f,int block) {
+        Block b = blocksArray[block];
         b.readByteBuffer(f);
     }
 
@@ -308,7 +308,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         Block b = blocksArray[s.getAllocatedBlockID()];
         b.readByteBuffer(s);
     }
-    public ByteBuffer readByteBuffer(int block) {
+    public ByteBuffer readByteBuffer(int block) {//FIXME
     	try {
             Block b = blocksArray[block];
             return b.readByteBuffer();
