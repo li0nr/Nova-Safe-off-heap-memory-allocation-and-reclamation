@@ -19,7 +19,7 @@ public class RandomBenchmark {
 	static  int RUNS= 10;
 	static  int Section = 8;//128 cache line /16 nova number  
 	static int Limit = 0;
-	static int rangeforReadWrite=20;
+	static int rangeforReadWrite=1000;
 
     public RandomBenchmark(){    }
 
