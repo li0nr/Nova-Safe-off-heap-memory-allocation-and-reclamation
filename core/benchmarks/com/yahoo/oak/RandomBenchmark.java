@@ -19,7 +19,7 @@ public class RandomBenchmark {
 	static  int RUNS= 10;
 	static  int Section = 8;//128 cache line /16 nova number  
 	static int Limit = 0;
-	static int rangeforReadWrite=1000;
+	static int rangeforReadWrite=20;
 
     public RandomBenchmark(){    }
 
@@ -261,7 +261,7 @@ public class RandomBenchmark {
 	        		Thread.sleep(1000);
 	        		Time=ReadandWrite( nova,myWriter);
 	        	}
-	        	for (int j=0; j<7 ; j++) {
+	        	for (int j=0; j<5 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadandWrite( nova,myWriter);
 	                Mean.add(Time);
@@ -277,7 +277,7 @@ public class RandomBenchmark {
 	        		Thread.sleep(1000);
 	        		Time=ReadandWrite( un,myWriter);
 	        	}
-	        	for (int j=0; j<7 ; j++) {
+	        	for (int j=0; j<5 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadandWrite(un,myWriter);
 	                Mean.add(Time);
@@ -298,12 +298,24 @@ public class RandomBenchmark {
 	
     public  static void main(String[] args)throws java.io.IOException {
     	RandomBenchmark s = new RandomBenchmark();
-    	//s.RunBenchmark(4, 10, "R", "N");
-		  String mode = args[0];
-		  int num = Integer.parseInt(args[1]);
-		  String list = args[2];
-    	//s.RunBenchmark(num, 1000, mode, list);
-    	s.ReadWriteBenchmark(4, 1000, list);
+    	String mode=null;
+    	String list=null;
+    	int threads = -1;
+    	int benchmark=0;
+    	
+    	if (args.length > 1) 
+    		benchmark =Integer.parseInt(args[1]);
+    	if (args.length > 3) 
+			  mode = args[3];
+    	if (args.length > 2) 
+    		threads = Integer.parseInt(args[2]);
+    	if (args.length > 0) 
+    		list = args[0];
+    	
+    	if(benchmark==0)
+    		s.RunBenchmark(threads, 1000, mode, list);
+    	else 
+    		s.ReadWriteBenchmark(threads, 1000, list);
 
     }
     
