@@ -310,7 +310,7 @@ public class RandomBenchmark {
     	if (args.length > 4) 
 			  mode = args[4];
     	if (args.length > 3) 
-			  mode = args[3];
+    		listSize =  Integer.parseInt(args[3]);
     	if (args.length > 2) 
     		threads = Integer.parseInt(args[2]);
     	if (args.length > 0) 
