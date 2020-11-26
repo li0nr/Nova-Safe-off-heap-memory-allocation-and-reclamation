@@ -19,7 +19,7 @@ public class RandomBenchmark {
 	static  int RUNS= 10;
 	static  int Section = 8;//128 cache line /16 nova number  
 	static int Limit = 0;
-	static int rangeforReadWrite=20;
+	static int rangeforReadWrite=1000;
 
     public RandomBenchmark(){    }
 
@@ -209,7 +209,7 @@ public class RandomBenchmark {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( nova,mode,myWriter);
 	        	}
-	        	for (int j=0; j<7 ; j++) {
+	        	for (int j=0; j<5 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( nova,mode,myWriter);
 	                Mean.add(Time);
@@ -225,7 +225,7 @@ public class RandomBenchmark {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	        	}
-	        	for (int j=0; j<7 ; j++) {
+	        	for (int j=0; j<5 ; j++) {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	                Mean.add(Time);
@@ -250,6 +250,7 @@ public class RandomBenchmark {
         NUM_THREADS=Threads;
         Limit = LIST_SIZE/NUM_THREADS+1;
         FileWriter myWriter = new FileWriter("rand read and wirte"+".txt");
+        System.out.println("concurrent Read Write benchmark\n");
 		long Time=0;
 		try {
 	        if(list.equals("N")) {//nova 
@@ -302,9 +303,12 @@ public class RandomBenchmark {
     	String list=null;
     	int threads = -1;
     	int benchmark=0;
+    	int listSize=1000;
     	
     	if (args.length > 1) 
     		benchmark =Integer.parseInt(args[1]);
+    	if (args.length > 4) 
+			  mode = args[4];
     	if (args.length > 3) 
 			  mode = args[3];
     	if (args.length > 2) 
@@ -315,7 +319,7 @@ public class RandomBenchmark {
     	if(benchmark==0)
     		s.RunBenchmark(threads, 1000, mode, list);
     	else 
-    		s.ReadWriteBenchmark(threads, 1000, list);
+    		s.ReadWriteBenchmark(threads, listSize, list);
 
     }
     
