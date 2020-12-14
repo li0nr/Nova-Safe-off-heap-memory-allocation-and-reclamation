@@ -17,18 +17,7 @@ public class NovaList implements ListInterface{
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     final NovaManager novaManager = new NovaManager(allocator);
     
-
-	FacadeReadTransformer<Integer> fread=(ByteBuffer) -> {	return ByteBuffer.getInt(0);  };
 	
-	
-	private FacadeWriteTransformer<Void> serialiaze(long e) {
-	    FacadeWriteTransformer<Void> f=(ByteBuffer) -> {	ByteBuffer.putLong(0,e); 
-											return null; };
-		return f;
-		
-	}
-	
-	private FacadeWriteTransformer<Void> f= serialiaze(0);
 
 
 
@@ -47,40 +36,40 @@ public class NovaList implements ListInterface{
 
 	}
 
-	public void add(Long e) {
+	public void add(Long e,int idx) {
 		if(size == ArrayOfFacades.length) {
 			EnsureCap();
 		}
 
 		if(ArrayOfFacades[size]== null)
 			ArrayOfFacades[size]=new Facade(novaManager);
-		ArrayOfFacades[size].AllocateSlice(Long.BYTES);
-	    ArrayOfFacades[size].Write(f);
+		ArrayOfFacades[size].AllocateSlice(Long.BYTES,idx);
+	    ArrayOfFacades[size].Write(idx);
 	    size++;
 	}
 	
-	public long get(int i) {
+	public long get(int i, int idx) {
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		return ArrayOfFacades[i].Read(fread);
+		return ArrayOfFacades[i].Read();
 	}
 	
-	public void set(int index, long e) {
+	public void set(int index, long e, int idx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOfFacades[index].Write(f);
+		 ArrayOfFacades[index].Write(idx);
 	}
 	
 	public int getSize(){
 		return size;
 	}
 	
-   public void remove(int index) {
+   public void remove(int index, int idx) {
         Facade removeItem = ArrayOfFacades[index];
-        removeItem.Delete();
+        removeItem.Delete(idx);
         for (int i = index; i < getSize() - 1; i++) {
         	ArrayOfFacades[i] = ArrayOfFacades[i + 1];
         }

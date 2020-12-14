@@ -22,12 +22,7 @@ public class FacadeTest {
 
     private  final int NUM_THREADS = 3;
     
-    FacadeWriteTransformer<Void> f=(ByteBuffer) -> {	
-    for(int i=0;i <20; i++) {
-    	ByteBuffer.putInt(4,4);
-    	}
-    return null;
-    };
+
 
     private  void initNova() {
         final NativeMemoryAllocator allocator = new NativeMemoryAllocator(128);
@@ -39,7 +34,7 @@ public class FacadeTest {
     private void initFacade() {
     	facade= new Facade(novaManager);
     	facade.AllocateSlice(8,0);
-    	facade.Write(ByteBuffer -> ByteBuffer.putInt(4,3),0);
+    	facade.Write(0);
 
     }
     
@@ -67,7 +62,7 @@ public class FacadeTest {
         @Override
         public void run() {
         	try {
-        		long result=facade.Read(ByteBuffer -> ByteBuffer.getInt(4));	
+        		long result=facade.Read();	
         	}catch (Exception e) {
         		System.out.print(e.toString());
         	}
@@ -86,7 +81,7 @@ public class FacadeTest {
         @Override
         public void run() {
         	try {
-        		facade.Write(f,idx);	
+        		facade.Write(idx);	
         	}catch (Exception e) {
         		System.out.print(e.toString());
         	}
