@@ -250,6 +250,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
             stats.release(size);
         }
         NovafreeList.add(new NovaSlice(s));
+        //NovafreeList.add(s);// FIXME i think this should do 
+
     }
 
     // Releases all memory allocated for this Oak (should be used as part of the Oak destruction)
@@ -297,10 +299,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.readByteBuffer(s);
     }
     
-    public void readByteBuffer(Facade f,int block) {
-        Block b = blocksArray[block];
-        b.readByteBuffer(f);
-    }
 
     
     @Override
@@ -309,16 +307,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.readByteBuffer(s);
     }
     public ByteBuffer readByteBuffer(int block) {//FIXME
-    	try {
-            Block b = blocksArray[block];
-            return b.readByteBuffer();
-
-    	}catch(Exception e){
-    		e.printStackTrace();
-    		System.out.println("block :" + block);
-    		System.out.println("blocksArray :" + blocksArray.length);
-    		return null;
-    	}
+    	Block b = blocksArray[block];
+    	return b == null ? null : b.readByteBuffer();
     }
     
     @Override
