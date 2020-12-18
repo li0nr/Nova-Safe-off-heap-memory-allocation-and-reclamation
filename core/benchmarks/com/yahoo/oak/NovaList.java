@@ -44,7 +44,7 @@ public class NovaList implements ListInterface{
 		if(ArrayOfFacades[size]== null)
 			ArrayOfFacades[size]=new Facade(novaManager);
 		ArrayOfFacades[size].AllocateSlice(Long.BYTES,idx);
-	    ArrayOfFacades[size].Write(idx);
+	    ArrayOfFacades[size].Write(e,idx);
 	    size++;
 	}
 	
@@ -60,7 +60,7 @@ public class NovaList implements ListInterface{
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOfFacades[index].Write(idx);
+		 ArrayOfFacades[index].Write(e,idx);
 	}
 	
 	public int getSize(){

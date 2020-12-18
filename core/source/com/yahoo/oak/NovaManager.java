@@ -8,6 +8,7 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,9 +27,9 @@ class NovaManager implements MemoryManager {
     static final int IDENTRY = 0;
     static final int REFENTRY = 1;
     static final int CACHE_PADDING = 16;
-    static final int CACHE_MAX_THREADS = CACHE_PADDING*MAX_THREADS;
+    static final int BLOCK_TAP = CACHE_PADDING*MAX_THREADS;
     
-    private final List<List<Slice>> releaseLists;
+    private final List<List<Slice>> OreleaseLists;
     private final List<List<NovaSlice>> NreleaseLists;
 
     private final AtomicInteger globalNovaNumber;
@@ -42,9 +43,9 @@ class NovaManager implements MemoryManager {
     private final List<NovaSlice> Slices;
 
     NovaManager(BlockMemoryAllocator allocator) {
-        this.releaseLists = new CopyOnWriteArrayList<>();
+        this.OreleaseLists = new CopyOnWriteArrayList<>();
         for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
-            this.releaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
+            this.OreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
         }
         this.NreleaseLists = new CopyOnWriteArrayList<>();
         for (int i = 0; i < MAX_THREADS; i++) {
@@ -67,7 +68,12 @@ class NovaManager implements MemoryManager {
             this.Slices.add(new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE));
         }
         blockcount = allocator.getBlocks();
+        
+        
         TAP = new long[blockcount * MAX_THREADS*CACHE_PADDING];
+        for(int i=BLOCK_TAP; i<blockcount*MAX_THREADS*CACHE_PADDING; i+=CACHE_PADDING)
+        	TAP[i+IDENTRY]=-1;
+
         
         globalNovaNumber = new AtomicInteger(1);
         this.allocator = allocator;
@@ -110,7 +116,7 @@ class NovaManager implements MemoryManager {
     @Override
     public void release(Slice s) {
         int idx = 0;
-        List<Slice> myReleaseList = this.releaseLists.get(idx);
+        List<Slice> myReleaseList = this.OreleaseLists.get(idx);
         myReleaseList.add(new Slice(s));
         if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
             globalNovaNumber.incrementAndGet();
@@ -125,26 +131,45 @@ class NovaManager implements MemoryManager {
     	
         List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
         myReleaseList.add(new NovaSlice(block,offset,len));
+        
         if (myReleaseList.size() >= 1) {
-            globalNovaNumber.incrementAndGet();
-            //one traverse on TAP
-            myReleaseList.forEach(s -> {if(!containsRef(s.getAllocatedBlockID(),s.getRef()))
-            								allocator.free(s);
-            							});
-            myReleaseList.removeIf(s->!containsRef(s.getAllocatedBlockID(),s.getRef()));
+        	
+            ArrayList<Long> releasedSlices=new ArrayList<>();
+        	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {
+        		if(TAP[i+IDENTRY] != -1)
+        			releasedSlices.add(TAP[i+REFENTRY]);
+        	}
+        	globalNovaNumber.incrementAndGet();
+        	Iterator<NovaSlice> itr=myReleaseList.iterator();
+        	while(itr.hasNext()) {
+        		NovaSlice tmp=itr.next();
+        		if(!releasedSlices.contains(tmp.getRef())) {
+        			allocator.free(tmp);
+        			itr.remove();
+        		}
+        	}
+//            myReleaseList.forEach(s -> {if(!containsRef(s.getAllocatedBlockID(),s.getRef()))
+//            								allocator.free(s);
+//            							});
+//            myReleaseList.removeIf(s->!containsRef(s.getAllocatedBlockID(),s.getRef()));
         }
+    }
+    
+    public boolean free(NovaSlice s) {
+    	allocator.free(s);
+    	return true; //assumes always successful!
     }
 
 
   public  void setTap(int block,long ref,int idx) {
 	int i= idx%MAX_THREADS;
-	TAP[block*CACHE_MAX_THREADS+16*i+IDENTRY]=idx;
-	TAP[block*CACHE_MAX_THREADS+16*i+REFENTRY]=ref;
+	TAP[block*BLOCK_TAP+CACHE_PADDING*i+IDENTRY]=idx;
+	TAP[block*BLOCK_TAP+CACHE_PADDING*i+REFENTRY]=ref;
 }
     
-  public  void UnsetTap(int block,long ref,int idx) {
+  public  void UnsetTap(int block,int idx) {
 	int i= idx%MAX_THREADS;
-	TAP[block*CACHE_MAX_THREADS+16*i+REFENTRY]=-1;
+	TAP[block*BLOCK_TAP+CACHE_PADDING*i+IDENTRY]=-1;
 }
 
     @Override
@@ -194,7 +219,7 @@ class NovaManager implements MemoryManager {
     }
     
     private  boolean containsRef(int block,long ref) {
-    	for(int i=block*CACHE_MAX_THREADS;i<block*CACHE_MAX_THREADS+MAX_THREADS+CACHE_PADDING; i+=CACHE_PADDING) {
+    	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {
     		if(TAP[i+IDENTRY]!=-1 && TAP[i+REFENTRY] == ref) return true;
     	}
     	return false;

@@ -19,7 +19,7 @@ public class Facade {
 	
 	static final int HeaderSize = Long.BYTES;
 	
-	static final long valueOffset;
+	static final long FacadeMetaData_offset;
 	
 	static NovaManager novaManager;	
 	
@@ -27,23 +27,23 @@ public class Facade {
 	static final Unsafe UNSAFE=UnsafeUtils.unsafe;
 	static {
 		try {
-			 valueOffset=UNSAFE.objectFieldOffset
-				    (Facade.class.getDeclaredField("block_offset_ver_del_"));
+			FacadeMetaData_offset=UNSAFE.objectFieldOffset
+				    (Facade.class.getDeclaredField("FacadeMetaData"));
 			 } catch (Exception ex) { throw new Error(ex); }
 	}
 	
-	long   block_offset_ver_del_;
+	long   FacadeMetaData;
 
 	
 	public Facade(NovaManager novaManager) {
-		block_offset_ver_del_= 1;
+		FacadeMetaData= 1;
 		this.novaManager=novaManager;
 	}
 	
 	public boolean AllocateSlice(int size, int ThreadIdx) {
 		
-		long data = block_offset_ver_del_;
-		if(block_offset_ver_del_%2!=DELETED)//FIXME add note why you did this
+		long data = FacadeMetaData;
+		if(data%2!=DELETED)
 			return false;
 	
 		NovaSlice 	newslice = novaManager.getSlice(size,ThreadIdx);
@@ -53,88 +53,100 @@ public class Facade {
         
         long facadeNewData = combine(block,offset,version);
 
-        return UNSAFE.compareAndSwapLong(this, valueOffset, data, facadeNewData);//FIXME need to free slice?
-        //add if condition if CAS fails
+        return UNSAFE.compareAndSwapLong(this, FacadeMetaData_offset, data, facadeNewData) ?
+        		true : !novaManager.free(newslice); 
 	}
 	
+	
 	public boolean Delete(int idx) {
-		long facadeHeader=block_offset_ver_del_;
+		long facademeta=FacadeMetaData;
 		
-		int block 	= Extractblock(facadeHeader);
-		int offset	= ExtractOffset(facadeHeader);
-		ByteBuffer Block=novaManager.readByteBuffer(block);//do we want to add this to every read write?
+		if(facademeta %2 != 0) 
+			return false;
+		int block 	= Extractblock(facademeta);
+		int offset	= ExtractOffset(facademeta);
+		
+		ByteBuffer Block=novaManager.readByteBuffer(block);
 		if(Block == null)
 			return false;
-			//throw new RunnerException("facade not constucted yet");
-		long OffHeapMetaData= Block.getLong(offset); //if facade data is deleted header has a deleted version as well
 
-		if(block_offset_ver_del_%2!=0)
-			return false;
+		long OffHeapMetaData= Block.getLong(offset);//reads off heap meta
+		
+		//if(off heap deleted || version is correct )//removed this
+		
+		long len=OffHeapMetaData>>>24; //get the lenght 
+		long version = ExtractVer_Del(facademeta); //get the version in the facade including delete
+		OffHeapMetaData = len <<24 | version; // created off heap style meta 
 
-		//if off heap needs to be deleted
-		long len=OffHeapMetaData>>>24;// FIXME check for errors here since i think len is always int (release)
+		long SliceHeaderAddress= ((DirectBuffer) Block).address() + offset;
 
-		 long NewVer = OffHeapMetaData |1;
-		 long SliceHeaderAddress= ((DirectBuffer) Block).address() + offset;
-
-		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, Long.reverseBytes(OffHeapMetaData), Long.reverseBytes(NewVer)))
+		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, Long.reverseBytes(OffHeapMetaData),
+				Long.reverseBytes(OffHeapMetaData|1))) //swap with CAS
 			 return false;
 		
-		 NewVer = facadeHeader |1;
-		 UNSAFE.compareAndSwapLong(this, valueOffset, facadeHeader, NewVer);
+
+		 UNSAFE.compareAndSwapLong(this, FacadeMetaData_offset, facademeta, facademeta |1);
 		 
 		 novaManager.release(block,offset,(int)len,idx); 
 		 return true; 
 	}
 	
 	//for now we need to Read wihtout anything
-	public <T> long Read(FacadeReadTransformer<T> f) {
-		int version	= ExtractVer_Del(block_offset_ver_del_);
-		int block 	= Extractblock	(block_offset_ver_del_);
-		int offset 	= ExtractOffset	(block_offset_ver_del_);
-		if(block_offset_ver_del_%2!=0)
+	public long Read() {
+		long facademeta = FacadeMetaData;
+		
+		if(facademeta%2!=0)
 			throw new IllegalArgumentException("cant locate slice");
 		
-		ByteBuffer Block=novaManager.readByteBuffer(block);
+		int version	= ExtractVer_Del(facademeta);
+		int block 	= Extractblock	(facademeta);
+		int offset 	= ExtractOffset	(facademeta);
+
+		
+		ByteBuffer Block=novaManager.readByteBuffer(block);//try with block attached to facade
 
 		//T R = f.apply(novaManager.getReadBuffer(sliceLocated.s));
 		
 		long R = Block.getLong(HeaderSize+offset);
 		
-		UNSAFE.loadFence();
+		if(Flags.Fences)UNSAFE.loadFence();
+		
 		if(! (version == (int)(Block.getLong(offset)&0xFFFFFF))) 
 			throw new IllegalArgumentException("slice changed");
 		return R;
 	}
 	
 	
-	public <T> ByteBuffer Write(FacadeWriteTransformer<T> f,int idx) {
-		int block	= Extractblock(block_offset_ver_del_);
-		int offset 	= ExtractDel(block_offset_ver_del_);
-		long facadeRef=buildRef(block,offset);
-		
-		novaManager.setTap(block,facadeRef,idx);
-		
-		UNSAFE.fullFence();
-		
-		if(block_offset_ver_del_%2!=0) {
-			novaManager.UnsetTap(block,facadeRef,idx);
+	public ByteBuffer Write(long toWrite,int idx ) {//for now write doesnt take lambda for writing 
+
+		long facademeta = FacadeMetaData;
+		if(facademeta%2!=0) {
 			throw new IllegalArgumentException("cant locate slice");
 		}
+		
+		int block		= Extractblock	(facademeta);
+		int offset 		= ExtractDel	(facademeta);
+		long facadeRef	= buildRef		(block,offset);
+		
+		if(Flags.TAP)novaManager.setTap(block,facadeRef,idx);	
+		
+		if(Flags.Fences)UNSAFE.fullFence();
 
 		ByteBuffer Block=novaManager.readByteBuffer(block);
 		
-		int version = ExtractVer_Del(block_offset_ver_del_);
-		 if(! (version == (int)(Block.getLong(offset)&0xFFFFFF))) {
-			 novaManager.UnsetTap(block,facadeRef,idx);
-			 throw new IllegalArgumentException("slice changed");
-		 }
-		 
+		int version = ExtractVer_Del(facademeta);
+		if(! (version == (int)(Block.getLong(offset)&0xFFFFFF))) {
+			novaManager.UnsetTap(block,idx);
+			throw new IllegalArgumentException("slice was deleted");
+			}
 //		T ResultToReturn= caluclate(sliceLocated.s,f);
-		ByteBuffer ResultToReturn = Block.putLong(HeaderSize+offset, 3);
-		novaManager.UnsetTap(block,facadeRef,idx);
+		ByteBuffer returnBlock = Block.putLong(HeaderSize+offset, toWrite);	
+		if(Flags.UNSet) {
+			UNSAFE.storeFence();
+			novaManager.UnsetTap(block,idx);
+		}
+		return returnBlock;
 		
-		 return ResultToReturn;
 		
 	}
 	

@@ -34,7 +34,7 @@ public class FacadeTest {
     private void initFacade() {
     	facade= new Facade(novaManager);
     	facade.AllocateSlice(8,0);
-    	facade.Write(0);
+    	facade.Write(0,0);
 
     }
     
@@ -81,7 +81,7 @@ public class FacadeTest {
         @Override
         public void run() {
         	try {
-        		facade.Write(idx);	
+        		facade.Write(0,idx);	
         	}catch (Exception e) {
         		System.out.print(e.toString());
         	}
@@ -260,6 +260,19 @@ public class FacadeTest {
 		
 	}
 
+	
+	@Test 
+	public void releaseTest() throws InterruptedException {
+		initNova();
+		Facade[] f=new Facade[5];
+		for(int i=0; i< f.length; i++) {
+			f[i]=new Facade(novaManager);
+			f[i].AllocateSlice(Long.BYTES, 0);
+		}
+		for(int i=0; i< f.length; i++)
+			f[i].Delete(0);
+		
+	}
 	
 	@Test 
 	public void ConcurrentAllocateDelete() throws InterruptedException {
