@@ -205,11 +205,20 @@ public class RandomBenchmark {
     	s.ConcurrentReadWriteBenchmark(List, mode, lenght, threads);
     }
     
-    public static void main (String []args) {
+    public static void main(String[] args)throws java.io.IOException {
+    	int lenght = 1000;
+    	if(args[0]==null) {
+    		System.out.print("No args !\n");
+    	}
+    	String List	=	args[0];
+    	String mode	=	args[1];
+    	int threads	= 	Integer.parseInt(args[2]);
+    	if(args.length == 4) 
+    		lenght 	= 	Integer.parseInt(args[3]);
+
+    	RandBenchmark(List,mode,lenght,threads);
     	
     }
-    
-    
     
     
     /*******************Runnable Threads*********************************************/

@@ -110,11 +110,25 @@ public class SequntialBenchmark {
     	}
     }
 
-    public  static void SeqBenchmark(String List, String mode, int lenght, int threads)throws java.io.IOException {
+    public void SeqBenchmark(String List, String mode, int lenght, int threads)throws java.io.IOException {
     	SequntialBenchmark s = new SequntialBenchmark();
     	s.RunBenchmark(List, mode, lenght, threads);
     }
     
+    public static void main(String[] args)throws java.io.IOException {
+    	int lenght = 1000;
+    	if(args[0]==null) {
+    		System.out.print("No args !\n");
+    	}
+    	String List	=	args[0];
+    	String mode	=	args[1];
+    	int threads	= 	Integer.parseInt(args[2]);
+    	if(args.length == 4) 
+    		lenght 	= 	Integer.parseInt(args[3]);
+    	SequntialBenchmark benchmark= new SequntialBenchmark();
+    	benchmark.SeqBenchmark(List, mode, lenght, threads);
+    	
+    }
     
     
     /****************************************************************************/
