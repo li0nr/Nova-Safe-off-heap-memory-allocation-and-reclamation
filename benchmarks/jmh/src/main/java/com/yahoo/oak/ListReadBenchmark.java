@@ -58,11 +58,11 @@ public class ListReadBenchmark {
         public void setup() {
         	nlist= new NovaList();
         	for (int i=0; i <LIST_SIZE ; i++) {
-        		nlist.add((long)i);
+        		nlist.add((long)i,0);
         	}
         	olist= new OffHeapList();
         	for (int i=0; i <LIST_SIZE ; i++) {
-        		olist.add((long)i);
+        		olist.add((long)i,0);
         	}
         }
 
@@ -110,7 +110,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/1 ; 
         		i<threadState.i*BenchmarkState.LIST_SIZE/1  +BenchmarkState.LIST_SIZE/1
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -126,7 +126,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/1 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/1  +BenchmarkState.LIST_SIZE/1
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -146,7 +146,7 @@ public class ListReadBenchmark {
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread2  +BenchmarkState.LIST_SIZE/thread2
         		&& i<BenchmarkState.LIST_SIZE
         		; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -163,7 +163,7 @@ public class ListReadBenchmark {
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread2  +BenchmarkState.LIST_SIZE/thread2
         		&& i<BenchmarkState.LIST_SIZE;
         		i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -182,7 +182,7 @@ public class ListReadBenchmark {
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread4  +BenchmarkState.LIST_SIZE/thread4
         		&& i<BenchmarkState.LIST_SIZE;
         		i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -198,7 +198,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread4 ; 
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread4  +BenchmarkState.LIST_SIZE/thread4	&& i<BenchmarkState.LIST_SIZE;
         		i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -216,7 +216,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread8 ; 
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread8  +BenchmarkState.LIST_SIZE/thread8
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -232,7 +232,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread8 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread8  +BenchmarkState.LIST_SIZE/thread8
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -250,7 +250,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread12 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread12  +BenchmarkState.LIST_SIZE/thread12
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -266,7 +266,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread12 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread12  +BenchmarkState.LIST_SIZE/thread12
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -284,7 +284,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread16 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread16  +BenchmarkState.LIST_SIZE/thread16
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -300,7 +300,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread16 ; 
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread16  +BenchmarkState.LIST_SIZE/thread16
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -318,7 +318,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread20 ; 
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread20  +BenchmarkState.LIST_SIZE/thread20
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -334,7 +334,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread20 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread20  +BenchmarkState.LIST_SIZE/thread20
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -352,7 +352,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread24 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread24  +BenchmarkState.LIST_SIZE/thread24
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -368,7 +368,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread24 ; 
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread24  +BenchmarkState.LIST_SIZE/thread24
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }
@@ -386,7 +386,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread32 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread32  +BenchmarkState.LIST_SIZE/thread32
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.get(i);
+        	state.nlist.get(i,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -402,7 +402,7 @@ public class ListReadBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/thread32 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/thread32  +BenchmarkState.LIST_SIZE/thread32
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.get(i);
+        	state.olist.get(i,0);
             blackhole.consume(state.olist);
     	}
     }

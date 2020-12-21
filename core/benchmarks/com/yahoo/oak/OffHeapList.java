@@ -29,7 +29,7 @@ public class OffHeapList implements ListInterface{
 		ArrayOff=new ByteBuffer[capacity];
 
 	}
-	public void add(Long e) {
+	public void add(Long e, int idx) {
 		if(size == ArrayOff.length) {
 			EnsureCap();
 		}
@@ -40,14 +40,14 @@ public class OffHeapList implements ListInterface{
 		size++;
 	}
 	
-	public long get(int i) {
+	public long get(int i,int idx) {
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 		}
 			return ArrayOff[i].getLong(0);
 	}
 	
-	public void set(int index, long e) {
+	public void set(int index, long e,int idx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}

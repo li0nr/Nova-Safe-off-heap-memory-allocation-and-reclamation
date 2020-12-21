@@ -92,10 +92,10 @@ public void close()  {
 public  static void main(String[] args)throws java.io.IOException {
 	NovaList s = new NovaList();
 	for(int i=0; i<100; i++) {
-		s.add((long)i);
+		s.add((long)i,0);
 		}
 	for(int i=0; i<100; i++) {
-		s.set(i,(long)i);
+		s.set(i,(long)i,0);
 		}
 	s.close();
 	}

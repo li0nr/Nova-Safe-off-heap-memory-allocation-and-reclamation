@@ -19,13 +19,13 @@ public class OverheadNovaTest {
     public void init() {
     	nList = new NovaList();
     	for (int i =0; i<NUM_OF_ENTRIES; i++)
-    		nList.add((long)i);
+    		nList.add((long)i,0);
     }
 
     @Test
     public void main() {
     	for (int i =0; i<NUM_OF_ENTRIES; i++)
-    		nList.set(i,(long)i);
+    		nList.set(i,(long)i,0);
     
         System.gc();
         long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes

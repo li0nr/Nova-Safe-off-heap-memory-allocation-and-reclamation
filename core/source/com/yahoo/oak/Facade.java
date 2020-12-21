@@ -141,7 +141,8 @@ public class Facade {
 			}
 //		T ResultToReturn= caluclate(sliceLocated.s,f);
 		ByteBuffer returnBlock = Block.putLong(HeaderSize+offset, toWrite);	
-		if(Flags.UNSet) {
+
+		if(Flags.TAP) {
 			UNSAFE.storeFence();
 			novaManager.UnsetTap(block,idx);
 		}

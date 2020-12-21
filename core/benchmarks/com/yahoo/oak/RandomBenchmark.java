@@ -100,7 +100,7 @@ public class RandomBenchmark {
 	        if(list.equals("N")) {//nova 
         		NovaList nova=new NovaList(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
-	    			nova.add((long)i);
+	    			nova.add((long)i,0);
 
 	    		for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
@@ -116,7 +116,7 @@ public class RandomBenchmark {
 	        if(list.equals("U")) {//un-man
         		OffHeapList un=new OffHeapList(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
-	    			un.add((long)i);
+	    			un.add((long)i,0);
 
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
@@ -153,7 +153,7 @@ public class RandomBenchmark {
 	        if(list.equals("N")) {//nova 
         		NovaList nova=new NovaList(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
-	    			nova.add((long)i);
+	    			nova.add((long)i,0);
 
 	    		for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
@@ -169,7 +169,7 @@ public class RandomBenchmark {
 	        if(list.equals("U")) {//un-man
         		OffHeapList un=new OffHeapList(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
-	    			un.add((long)i);
+	    			un.add((long)i,0);
 
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
@@ -239,7 +239,7 @@ public class RandomBenchmark {
     		int j=0,i=0;
     		while(i<Limit) {
     			j=random.nextInt(LIST_SIZE);
-            	list.set(j,2);
+            	list.set(j,2,idx);
             	i++;
             	}
     		}
@@ -260,7 +260,7 @@ public class RandomBenchmark {
 			while(i<Limit) {
 				j=random.nextInt(rangeforReadWrite);
 				j+=LIST_SIZE/2;
-            	list.set(j,3);
+            	list.set(j,3,idx);
             	i++;
             	}
 			}
@@ -281,7 +281,7 @@ public class RandomBenchmark {
             int j=0,i=0;
             while(i<Limit) {
             	j=random.nextInt(LIST_SIZE);
-            	list.get(j);
+            	list.get(j,idx);
             	i++;
             	}
             }
@@ -302,7 +302,7 @@ public class RandomBenchmark {
             while(!stop) {
             	j=random.nextInt(rangeforReadWrite);
             	j+=LIST_SIZE/2;
-            	list.get(j);
+            	list.get(j,idx);
             	i++;
         	}
         }

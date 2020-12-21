@@ -69,7 +69,7 @@ public class SequntialBenchmark {
 	        if(list.equals("N")) {//nova 
         		NovaList nova=new NovaList(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
-	    			nova.add((long)i);
+	    			nova.add((long)i,0);
 //		        System.out.println("finsished init\n");
 
 	        	for (int j=0; j<3 ; j++) {
@@ -86,7 +86,7 @@ public class SequntialBenchmark {
 	        if(list.equals("U")) {//un-man
         		OffHeapList un=new OffHeapList();
 	    		for (int i=0; i<LIST_SIZE; i++)
-	    			un.add((long)i);
+	    			un.add((long)i,0);
 
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
@@ -144,7 +144,7 @@ public class SequntialBenchmark {
             		e.printStackTrace();
             		}
         	for(int i=idx*Limit ; i<idx*Limit  +Limit && i<LIST_SIZE; i=i+1 ) {
-        		list.set(i, 2);
+        		list.set(i, 2,idx);
         		}
         	}
         }
@@ -161,7 +161,7 @@ public class SequntialBenchmark {
             		e.printStackTrace();
             		}
             for(int i=idx*Limit ; i<idx*Limit  +Limit && i<LIST_SIZE; i=i+1 ) {
-            	list.get(i);
+            	list.get(i,idx);
             	}
             }
         }
