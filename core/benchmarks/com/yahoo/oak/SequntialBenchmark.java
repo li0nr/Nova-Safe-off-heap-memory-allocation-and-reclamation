@@ -87,6 +87,8 @@ public class SequntialBenchmark {
         		OffHeapList un=new OffHeapList();
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			un.add((long)i,0);
+		        System.gc();
+
 
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
@@ -97,7 +99,7 @@ public class SequntialBenchmark {
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	                Mean.add(Time);
 	        	}
-        		un.close();
+        	//	un.close();
 	        }
 	        myWriter.write(list+"Mean:"+benchMath.Mean(Mean)+" SE:"+benchMath.StandardError(Mean)
 	        									+" mode:"+mode+" thread num:"+threads+ "\n");
@@ -144,7 +146,7 @@ public class SequntialBenchmark {
             		e.printStackTrace();
             		}
         	for(int i=idx*Limit ; i<idx*Limit  +Limit && i<LIST_SIZE; i=i+1 ) {
-        		list.set(i, 2,idx);
+        		list.set(i, i,idx);
         		}
         	}
         }

@@ -239,7 +239,7 @@ public class RandomBenchmark {
     		int j=0,i=0;
     		while(i<Limit) {
     			j=random.nextInt(LIST_SIZE);
-            	list.set(j,2,idx);
+            	list.set(j,j,idx);
             	i++;
             	}
     		}
@@ -260,7 +260,7 @@ public class RandomBenchmark {
 			while(i<Limit) {
 				j=random.nextInt(rangeforReadWrite);
 				j+=LIST_SIZE/2;
-            	list.set(j,3,idx);
+            	list.set(j,j,idx);
             	i++;
             	}
 			}

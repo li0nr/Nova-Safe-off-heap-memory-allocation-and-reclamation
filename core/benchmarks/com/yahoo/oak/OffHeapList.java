@@ -1,17 +1,14 @@
 package com.yahoo.oak;
 
 
-//import org.junit.Test;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import sun.misc.Cleaner;
-
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
 
 public class OffHeapList implements ListInterface{
 	
@@ -52,7 +49,7 @@ public class OffHeapList implements ListInterface{
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOff[index].putLong(0, 3);
+		 ArrayOff[index].putLong(0, e);
 	}
 	
 	public int getSize(){
@@ -72,13 +69,7 @@ public class OffHeapList implements ListInterface{
         }catch(Exception e) {
         	e.printStackTrace();
         }
-
-
-
-        for (int i = index; i < getSize() - 1; i++) {
-        	ArrayOff[i] = ArrayOff[i + 1];
-        }
-        size--;
+        ArrayOff[index]=null;
     }
 	private void EnsureCap() {
 		int newSize = ArrayOff.length *2;
@@ -107,18 +98,19 @@ public class OffHeapList implements ListInterface{
 		        cleaner.clean();
 		 }
 	}
-//	@Test
-//	public void NovaListTest() throws InterruptedException{
-//	    for (int i = 0; i < 12; i++) {
-//	    	this.add(i);
-//	    }
-//	    for (int i = 0; i < 12; i++) {
-//	    	int x=this.get(i);
-//	    	System.out.println(x);
-//	    }	  
-//	    for (int i = 0; i < 12; i++) {
-//	    	this.remove(i);
-//	    }
-//	}
+	 
+	@Test
+	public void NovaListTest() throws InterruptedException{
+	    for (int i = 0; i < 12; i++) {
+	    	this.add((long)i,0);
+	    }
+	    for (int i = 0; i < 12; i++) {
+	    	long x=this.get(i,0);
+	    	System.out.println(x);
+	    }	  
+	    for (int i = 0; i < 12; i++) {
+	    	this.remove(i);
+	    }
+	}
 
 }

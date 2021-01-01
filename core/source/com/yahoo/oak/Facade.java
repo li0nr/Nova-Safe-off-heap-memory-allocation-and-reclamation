@@ -128,9 +128,11 @@ public class Facade {
 		int offset 		= ExtractDel	(facademeta);
 		long facadeRef	= buildRef		(block,offset);
 		
-		if(Flags.TAP)novaManager.setTap(block,facadeRef,idx);	
+		if(Flags.TAP) {
+			novaManager.setTap(block,facadeRef,idx);	
+			if(Flags.Fences)UNSAFE.fullFence();
+		}
 		
-		if(Flags.Fences)UNSAFE.fullFence();
 
 		ByteBuffer Block=novaManager.readByteBuffer(block);
 		
@@ -142,10 +144,11 @@ public class Facade {
 //		T ResultToReturn= caluclate(sliceLocated.s,f);
 		ByteBuffer returnBlock = Block.putLong(HeaderSize+offset, toWrite);	
 
-		if(Flags.TAP) {
-			UNSAFE.storeFence();
-			novaManager.UnsetTap(block,idx);
-		}
+		 if(Flags.TAP) {
+             if(Flags.Fences)UNSAFE.storeFence();
+            novaManager.UnsetTap(block,idx);
+            }
+
 		return returnBlock;
 		
 		
