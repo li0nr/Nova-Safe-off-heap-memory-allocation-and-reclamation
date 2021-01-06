@@ -63,6 +63,13 @@ public class NovaList implements ListInterface{
 		 ArrayOfFacades[index].Write(e,idx);
 	}
 	
+	public void Delete_Write(int index, long toWrite ,int idx) {
+		 if(!ArrayOfFacades[index].Delete(idx)) {
+			 ArrayOfFacades[index].AllocateSlice(Long.BYTES,idx);
+			 ArrayOfFacades[index].Write(toWrite, idx);
+		 }
+	}
+	
 	public int getSize(){
 		return size;
 	}
@@ -70,15 +77,20 @@ public class NovaList implements ListInterface{
    public void remove(int index, int idx) {
         Facade removeItem = ArrayOfFacades[index];
         removeItem.Delete(idx);
-        for (int i = index; i < getSize() - 1; i++) {
-        	ArrayOfFacades[i] = ArrayOfFacades[i + 1];
-        }
-        size--;
+        
     }
 	
 	private void EnsureCap() {
 		int newSize = ArrayOfFacades.length *2;
 		ArrayOfFacades = Arrays.copyOf(ArrayOfFacades, newSize);
+	}
+	
+	public long getUsedMem() {
+		return novaManager.allocated();
+	}
+	
+	public long getAllocatedMem() {
+		return allocator.numOfAllocatedBlocks()*1024*1024;
 	}
 	
 	

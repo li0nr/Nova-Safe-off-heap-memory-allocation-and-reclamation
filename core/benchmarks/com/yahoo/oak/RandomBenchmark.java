@@ -15,7 +15,7 @@ public class RandomBenchmark {
 	static  int RUNS= 10;
 	static  int Section = 8;//128 cache line /16 nova number  
 	static  int Limit = 0;
-	static  int rangeforReadWrite=1000;
+	static  int rangeforReadWrite=1000; //range for the concurrent test all the 15 reader read from the same 1000section, so does the writer.
 	
 	static boolean stop=false;
 
@@ -141,7 +141,7 @@ public class RandomBenchmark {
     }
     
   
-    public  void ConcurrentReadWriteBenchmark(String list, String mode, int lenght, int threads)throws java.io.IOException {
+    public  void ConcurrentReadWriteBenchmark(String list, int lenght, int threads)throws java.io.IOException {
         ArrayList<Long>	 Mean = new ArrayList<>();
         LIST_SIZE	= lenght;
         NUM_THREADS	= threads;
@@ -202,7 +202,7 @@ public class RandomBenchmark {
     }
     public  static void ConcurrentRandBenchmark(String List, String mode, int lenght, int threads)throws java.io.IOException {
     	RandomBenchmark s = new RandomBenchmark();
-    	s.ConcurrentReadWriteBenchmark(List, mode, lenght, threads);
+    	s.ConcurrentReadWriteBenchmark(List, lenght, threads);
     }
     
     public static void main(String[] args)throws java.io.IOException {
@@ -215,7 +215,11 @@ public class RandomBenchmark {
     	int threads	= 	Integer.parseInt(args[2]);
     	if(args.length == 4) 
     		lenght 	= 	Integer.parseInt(args[3]);
-
+    	
+    	if(args.length == 5) {
+    		lenght = Integer.parseInt(args[3]);
+    		ConcurrentRandBenchmark(List,mode,lenght, threads);
+    	}else 
     	RandBenchmark(List,mode,lenght,threads);
     	
     }

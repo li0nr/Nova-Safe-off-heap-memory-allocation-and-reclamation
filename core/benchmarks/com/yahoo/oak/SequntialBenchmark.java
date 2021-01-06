@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;
+import java.lang.management.BufferPoolMXBean;
+import java.lang.management.ManagementFactory;
 
 import org.junit.Test;
 
@@ -98,6 +100,15 @@ public class SequntialBenchmark {
 	        		Thread.sleep(1000);
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	                Mean.add(Time);
+	        	}
+	        	List<BufferPoolMXBean> pools = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
+
+	        	for (BufferPoolMXBean pool : pools) {
+	        	    System.out.println(pool.getName());
+	        	    System.out.println(pool.getCount());
+	        	    System.out.println("memory used " + pool.getMemoryUsed());
+	        	    System.out.println("total capacity" + pool.getTotalCapacity());
+	        	    System.out.println();
 	        	}
         	//	un.close();
 	        }

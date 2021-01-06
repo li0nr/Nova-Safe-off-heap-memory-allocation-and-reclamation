@@ -1,8 +1,6 @@
 package com.yahoo.oak;
 
 
-import org.junit.Test;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -52,13 +50,20 @@ public class OffHeapList implements ListInterface{
 		 ArrayOff[index].putLong(0, e);
 	}
 	
+	public void Delete_Write(int index, long toWrite ,int idx) {
+		 if(!this.delete(index)) {
+			 ArrayOff[index]=ByteBuffer.allocateDirect(Long.BYTES);
+			this.set(index,toWrite, idx);
+		 }
+	}
+	
 	public int getSize(){
 		return size;
 	}
 	
-   public void remove(int index) {
+   public boolean delete(int index) {
         ByteBuffer removeItem = ArrayOff[index];
-
+        if(removeItem == null ) return false;
         try {
             Method cleanerMethod = removeItem.getClass().getMethod("cleaner");
             cleanerMethod.setAccessible(true);
@@ -70,7 +75,9 @@ public class OffHeapList implements ListInterface{
         	e.printStackTrace();
         }
         ArrayOff[index]=null;
+        return true;
     }
+   
 	private void EnsureCap() {
 		int newSize = ArrayOff.length *2;
 		ArrayOff = Arrays.copyOf(ArrayOff, newSize);
@@ -80,36 +87,41 @@ public class OffHeapList implements ListInterface{
 	public void close()  {
 		 for (int i=0;i<size;i++){
 			 ByteBuffer buffer = ArrayOff[i];
-		        Field cleanerField = null;
-		        try {
-		            cleanerField = buffer.getClass().getDeclaredField("cleaner");
-		        } catch (NoSuchFieldException e) {
-		            e.printStackTrace();
-		        }
-		        assert cleanerField != null;
-		        cleanerField.setAccessible(true);
-		        Cleaner cleaner = null;
-		        try {
-		            cleaner = (Cleaner) cleanerField.get(buffer);
-		        } catch (IllegalAccessException e) {
-		            e.printStackTrace();
-		        }
-		        assert cleaner != null;
-		        cleaner.clean();
+			 if(buffer == null) continue;
+			 Field cleanerField = null;
+			 try {
+	            cleanerField = buffer.getClass().getDeclaredField("cleaner");
+	            } catch (NoSuchFieldException e) {
+	            	e.printStackTrace();
+	            	}
+			 assert cleanerField != null;
+	         cleanerField.setAccessible(true);
+	         Cleaner cleaner = null;
+	         try {
+	        	 cleaner = (Cleaner) cleanerField.get(buffer);
+	        	 } catch (IllegalAccessException e) {
+	        		 e.printStackTrace();
+	        		 }
+	         assert cleaner != null;
+	         cleaner.clean();
+	         }
 		 }
-	}
 	 
-	@Test
-	public void NovaListTest() throws InterruptedException{
+
+	static public void main(String args[]) throws InterruptedException{
+		OffHeapList list = new OffHeapList(12);
 	    for (int i = 0; i < 12; i++) {
-	    	this.add((long)i,0);
+	    	list.add((long)i,0);
 	    }
 	    for (int i = 0; i < 12; i++) {
-	    	long x=this.get(i,0);
+	    	long x=list.get(i,0);
 	    	System.out.println(x);
 	    }	  
-	    for (int i = 0; i < 12; i++) {
-	    	this.remove(i);
+	    for (int i = 0; i < 6; i++) {
+	    	list.delete(i);
+	    }
+	    for (int i=0; i < 12; i++) {
+	    	list.Delete_Write(i, i, 0);
 	    }
 	}
 

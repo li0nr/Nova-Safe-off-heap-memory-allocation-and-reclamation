@@ -12,5 +12,7 @@ public interface ListInterface extends Closeable{
 	
 
 	public void set(int index, long e,int threadidx);
+	
+	public void Delete_Write(int toDelete, long toWrite ,int threadidx);
 		
 }

@@ -178,6 +178,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
                 readByteBuffer(s);
+                allocated.addAndGet(size+headerSize);
                 return true;
             }
         }

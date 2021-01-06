@@ -40,13 +40,13 @@ public class Facade {
 		this.novaManager=novaManager;
 	}
 	
-	public boolean AllocateSlice(int size, int ThreadIdx) {
+	public boolean AllocateSlice(int size, int idx) {
 		
 		long data = FacadeMetaData;
 		if(data%2!=DELETED)
 			return false;
 	
-		NovaSlice 	newslice = novaManager.getSlice(size,ThreadIdx);
+		NovaSlice 	newslice = novaManager.getSlice(size,idx);
 		int offset=	newslice.getAllocatedOffset();
 		int block =	newslice.getAllocatedBlockID();
 		int version=newslice.getVersion();
@@ -58,6 +58,11 @@ public class Facade {
 	}
 	
 	
+    /**
+     * deletes the object referenced by the current facade 
+     *
+     * @param idx          the thread index that wants to delete
+     */
 	public boolean Delete(int idx) {
 		long facademeta=FacadeMetaData;
 		
@@ -120,12 +125,12 @@ public class Facade {
 	public ByteBuffer Write(long toWrite,int idx ) {//for now write doesnt take lambda for writing 
 
 		long facademeta = FacadeMetaData;
-		if(facademeta%2!=0) {
+		if(facademeta%2==DELETED) {
 			throw new IllegalArgumentException("cant locate slice");
 		}
 		
 		int block		= Extractblock	(facademeta);
-		int offset 		= ExtractDel	(facademeta);
+		int offset 		= ExtractOffset	(facademeta);
 		long facadeRef	= buildRef		(block,offset);
 		
 		if(Flags.TAP) {
