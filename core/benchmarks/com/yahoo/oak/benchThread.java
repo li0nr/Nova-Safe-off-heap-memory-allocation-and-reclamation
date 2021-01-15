@@ -8,23 +8,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class benchThread implements Runnable{
     ListInterface list;
 	CountDownLatch latch;
-	AtomicInteger index;
     Random random;  
 
     public int idx;
     
-    benchThread(CountDownLatch latch,ListInterface list,AtomicInteger index) {
+    benchThread(CountDownLatch latch,ListInterface list,int index) {
         this.latch = latch;
         this.list = list;
-        this.index = index;
-		idx=index.getAndAdd(1);
+		idx=index;
     }
     
-    benchThread(CountDownLatch latch,ListInterface list,AtomicInteger index, long seed) {
+    benchThread(CountDownLatch latch,ListInterface list,int index, long seed) {
         this.latch = latch;
         this.list = list;
-        this.index = index;
-		idx=index.getAndAdd(1);
+		idx=index;
 		random = new Random(seed);
     }
     

@@ -178,6 +178,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
                 readByteBuffer(s);
+                allocated.addAndGet(size+headerSize);
                 return true;
             }
         }
@@ -250,6 +251,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
             stats.release(size);
         }
         NovafreeList.add(new NovaSlice(s));
+        //NovafreeList.add(s);// FIXME i think this should do 
+
     }
 
     // Releases all memory allocated for this Oak (should be used as part of the Oak destruction)
@@ -297,10 +300,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.readByteBuffer(s);
     }
     
-    public void readByteBuffer(Facade f) {
-        Block b = blocksArray[f.block];
-        b.readByteBuffer(f);
-    }
 
     
     @Override
@@ -308,17 +307,9 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         Block b = blocksArray[s.getAllocatedBlockID()];
         b.readByteBuffer(s);
     }
-    public ByteBuffer readByteBuffer(int block) {
-    	try {
-            Block b = blocksArray[block];
-            return b.readByteBuffer();
-
-    	}catch(Exception e){
-    		e.printStackTrace();
-    		System.out.println("block :" + block);
-    		System.out.println("blocksArray :" + blocksArray.length);
-    		return null;
-    	}
+    public ByteBuffer readByteBuffer(int block) {//FIXME
+    	Block b = blocksArray[block];
+    	return b == null ? null : b.readByteBuffer();
     }
     
     @Override

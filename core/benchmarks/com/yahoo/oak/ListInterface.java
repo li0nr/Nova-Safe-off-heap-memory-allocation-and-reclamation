@@ -4,13 +4,15 @@ import java.io.Closeable;
 
 public interface ListInterface extends Closeable{
 
-	public void add(Long e);
 	
-	public long get(int i) ;
+	/********needed for Nova threads indx**********/ 
+	public void add(Long e,int threadidx);
+	
+	public long get(int i,int threadidx);
+	
 
-	public void set(int index, long e) ;
+	public void set(int index, long e,int threadidx);
 	
-	public int getSize();
-	
-	
+	public void Delete_Write(int toDelete, long toWrite ,int threadidx);
+		
 }

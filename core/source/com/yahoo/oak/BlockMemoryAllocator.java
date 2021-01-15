@@ -37,10 +37,8 @@ interface BlockMemoryAllocator {
     // Read the buffer from an allocation object that its parameters are set: blockID, offset and length
     void readByteBuffer(Slice s);
     
-    void readByteBuffer(NovaSlice s);// TODO to delete 
-
-    void readByteBuffer(Facade f);
-
+    void readByteBuffer(NovaSlice s);
+    
     ByteBuffer readByteBuffer(int block);
     
     int getBlocks();

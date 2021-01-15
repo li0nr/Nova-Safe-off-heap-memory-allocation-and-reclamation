@@ -2,8 +2,12 @@ package com.yahoo.oak;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.yahoo.oak.*;
 //import org.junit.Test;
+
+import sun.misc.Unsafe;
 
 
 public class NovaList implements ListInterface{
@@ -13,18 +17,7 @@ public class NovaList implements ListInterface{
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     final NovaManager novaManager = new NovaManager(allocator);
     
-
-	FacadeReadTransformer<Integer> fread=(ByteBuffer) -> {	return ByteBuffer.getInt(0);  };
 	
-	
-	private FacadeWriteTransformer<Void> serialiaze(long e) {
-	    FacadeWriteTransformer<Void> f=(ByteBuffer) -> {	ByteBuffer.putLong(0,e); 
-											return null; };
-		return f;
-		
-	}
-	
-	private FacadeWriteTransformer<Void> f= serialiaze(0);
 
 
 
@@ -43,49 +36,61 @@ public class NovaList implements ListInterface{
 
 	}
 
-	public void add(Long e) {
+	public void add(Long e,int idx) {
 		if(size == ArrayOfFacades.length) {
 			EnsureCap();
 		}
 
 		if(ArrayOfFacades[size]== null)
 			ArrayOfFacades[size]=new Facade(novaManager);
-		ArrayOfFacades[size].AllocateSlice(Long.BYTES);
-	    ArrayOfFacades[size].Write(f);
+		ArrayOfFacades[size].AllocateSlice(Long.BYTES,idx);
+	    ArrayOfFacades[size].Write(e,idx);
 	    size++;
 	}
 	
-	public long get(int i) {
+	public long get(int i, int idx) {
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		return ArrayOfFacades[i].Read(fread);
+		return ArrayOfFacades[i].Read();
 	}
 	
-	public void set(int index, long e) {
+	public void set(int index, long e, int idx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOfFacades[index].Write(f);
+		 ArrayOfFacades[index].Write(e,idx);
+	}
+	
+	public void Delete_Write(int index, long toWrite ,int idx) {
+		 if(!ArrayOfFacades[index].Delete(idx)) {
+			 ArrayOfFacades[index].AllocateSlice(Long.BYTES,idx);
+			 ArrayOfFacades[index].Write(toWrite, idx);
+		 }
 	}
 	
 	public int getSize(){
 		return size;
 	}
 	
-   public void remove(int index) {
+   public void remove(int index, int idx) {
         Facade removeItem = ArrayOfFacades[index];
-        removeItem.Delete();
-        for (int i = index; i < getSize() - 1; i++) {
-        	ArrayOfFacades[i] = ArrayOfFacades[i + 1];
-        }
-        size--;
+        removeItem.Delete(idx);
+        
     }
 	
 	private void EnsureCap() {
 		int newSize = ArrayOfFacades.length *2;
 		ArrayOfFacades = Arrays.copyOf(ArrayOfFacades, newSize);
+	}
+	
+	public long getUsedMem() {
+		return novaManager.allocated();
+	}
+	
+	public long getAllocatedMem() {
+		return allocator.numOfAllocatedBlocks()*1024*1024;
 	}
 	
 	
@@ -96,32 +101,16 @@ public void close()  {
 }
 	
 
-//	@Test
-//	public void NovaListTest() throws InterruptedException{
-//	    for (int i = 0; i < 12; i++) {
-//	    	this.add((long)i);
-//	    }
-//	    for (int i = 0; i < 12; i++) {
-//	    	int x=(int)this.get(i);
-//	    	System.out.println(x);
-//	    }	  
-//	    for (int i = 0; i < 12; i++) {
-//	    	this.remove(i);
-//	    }
-//	}
 public  static void main(String[] args)throws java.io.IOException {
 	NovaList s = new NovaList();
-	//s.RunBenchmark(4, 10, "R", "N");
-	for(int i=0; i<10_000_000; i++) {
-		s.add((long)i);
+	for(int i=0; i<100; i++) {
+		s.add((long)i,0);
+		}
+	for(int i=0; i<100; i++) {
+		s.set(i,(long)i,0);
+		}
+	s.close();
 	}
 
-	for(int i=0; i<10_000_000; i++) {
-		s.set(i,(long)i);
-	}
-	
-	
-}	
-	
 }
 

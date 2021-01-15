@@ -58,11 +58,11 @@ public class ListWriteBenchmark {
         public void setup() {
         	nlist= new NovaList();
         	for (int i=0; i <LIST_SIZE ; i++) {
-        		nlist.add((long)i);
+        		nlist.add((long)i,0);
         	}
         	olist= new OffHeapList();
         	for (int i=0; i <LIST_SIZE ; i++) {
-        		olist.add((long)i);
+        		olist.add((long)i,0);
         	}
         }
 
@@ -102,7 +102,7 @@ public class ListWriteBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/1 ; 
         		i<threadState.i*BenchmarkState.LIST_SIZE/1  +BenchmarkState.LIST_SIZE/1
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.nlist.set(i, 2);
+        	state.nlist.set(i, 2,0);
             blackhole.consume(state.nlist);
     	}
     }
@@ -118,7 +118,7 @@ public class ListWriteBenchmark {
         for(int i=threadState.i*BenchmarkState.LIST_SIZE/1 ;
         		i<threadState.i*BenchmarkState.LIST_SIZE/1  +BenchmarkState.LIST_SIZE/1
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.olist.set(i, 2);
+        	state.olist.set(i, 2,0);
             blackhole.consume(state.olist);
     	}
     }

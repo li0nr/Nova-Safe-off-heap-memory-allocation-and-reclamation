@@ -16,13 +16,13 @@ public class OverHeadunman {
     public void init() {
     	List = new OffHeapList();
     	for (int i =0; i<NUM_OF_ENTRIES; i++)
-    		List.add((long)i);
+    		List.add((long)i,0);
     }
 
     @Test
     public void main() {
     	for (int i =0; i<NUM_OF_ENTRIES; i++)
-    		List.set(i,(long)i);
+    		List.set(i,(long)i,0);
     	
         System.gc();
         long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes

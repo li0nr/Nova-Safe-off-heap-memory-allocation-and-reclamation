@@ -1,6 +1,10 @@
 package com.yahoo.oak;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.junit.Test;
 
 public class benchMath {
 	
@@ -47,6 +51,28 @@ public class benchMath {
 		mean=Math.sqrt(mean);
 		return mean/Math.sqrt(n);
 		
+    }
+    
+    @Test
+    public void test() { 	
+        int i=0;
+        ThreadLocalRandom random = ThreadLocalRandom.current();  
+        while(i<100) {
+        	System.out.println("round"+i+"value"+random.current().nextInt(1000_000)+"\n");
+        	i++;
+        }
+        
+        ArrayList<Long> a= new ArrayList<Long>();
+    	for ( i=0; i<10 ; i++) {
+    		long n = (i);
+    		a.add(n);
+    	}
+    	double dt=benchMath.StandardDeviation(a);
+    	double se=benchMath.StandardError(a);
+    	double mean= benchMath.Mean(a);
+    	System.out.println("Mean:"+mean);
+    	System.out.println("sd :"+dt);
+    	System.out.println("se :"+se);
     }
 
 }
