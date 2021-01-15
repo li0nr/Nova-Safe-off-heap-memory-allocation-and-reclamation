@@ -25,7 +25,7 @@ public class FacadeTest {
 
 
     private  void initNova() {
-        final NativeMemoryAllocator allocator = new NativeMemoryAllocator(128);
+        final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
          novaManager = new NovaManager(allocator);
 
         threads = new ArrayList<>(NUM_THREADS);
@@ -304,6 +304,33 @@ public class FacadeTest {
     	facade= new Facade(novaManager);
     	facade.AllocateSlice(8,0);
 		facade.Delete(0);
+	}
+	
+	@Test 
+	public void checkallMethods() throws InterruptedException {
+		initNova();
+		Facade[] alotofFacades = new Facade[1024*1024/16];
+    	facade= new Facade(novaManager);
+    	facade.AllocateSlice(8,0);
+    	facade.Read();
+    	facade.Write(5, 0);
+    	facade.Read();
+		facade.Delete(0);
+		facade.AllocateSlice(8, 0);
+    	facade.Read();
+    	for(int i=0; i<20;i++) {
+    		alotofFacades[i] = new Facade(novaManager);
+    		alotofFacades[i].AllocateSlice(8, 0);
+    		alotofFacades[i].Write(i, 0);
+    		assert alotofFacades[i].Read() == i;
+    	}
+    	for(int i=0; i<20;i++) {
+    		alotofFacades[i].Delete(0);
+    	}
+    	for(int i=0; i<20;i++) {
+    		alotofFacades[i].AllocateSlice(8, 0);
+    	}
+    	novaManager.close();
 	}
 
 }

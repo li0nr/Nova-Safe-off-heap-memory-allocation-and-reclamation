@@ -7,6 +7,8 @@
 package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,14 +19,20 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     // When allocating n bytes and there are buffers in the free list, only free buffers of size <= n *
     // REUSE_MAX_MULTIPLIER will be recycled
     // This parameter may be tuned for performance vs off-heap memory utilization
+    static final int BLOCK_SIZE =  1024* 1024; //*256
     private static final int REUSE_MAX_MULTIPLIER = 2;
     public static final int INVALID_BLOCK_ID = 0;
 
     private static final int headerSize=8;
     // mapping IDs to blocks allocated solely to this Allocator
     private Block[] blocksArray;
+
     private static int  blockcount=0;
+    private AtomicInteger curr_allocated = new AtomicInteger(0);
     
+    private long[] addressArray;
+    private long curr_address;
+    private int curblockID=0;
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     /**
@@ -67,7 +75,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         int blockArraySize = ((int) (capacity / blocksProvider.blockSize())) + 1;
         blockcount= blockArraySize+1;
         // first entry of blocksArray is always empty
-        this.blocksArray = new Block[blockArraySize + 1];
+   //     this.blocksArray = new Block[blockArraySize + 1];
+        this.addressArray= new long[blockArraySize + 1];
         // initially allocate one single block from pool
         // this may lazy initialize the pool and take time if this is the first call for the pool
         allocateNewCurrentBlock();
@@ -106,7 +115,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
 
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
-                readByteBuffer(s);
+             //   readByteBuffer(s);
                 return true;
             }
         }
@@ -174,10 +183,9 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                     stats.reclaim(size+headerSize);
                 }
                 s.copyFrom(bestFit);
-
+                s.setAddress(addressArray[s.blockID]);
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
-                readByteBuffer(s);
                 allocated.addAndGet(size+headerSize);
                 return true;
             }
@@ -188,22 +196,23 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         while (!isAllocated) {
             try {
                 // The ByteBuffer inside this slice is the thread's ByteBuffer
-                isAllocated = currentBlock.allocate(s, size+headerSize);
+               // isAllocated = currentBlock.allocate(s, size+headerSize);
+                isAllocated = Blockallocate(s,size+headerSize);
             } catch (OakOutOfMemoryException e) {
                 // there is no space in current block
                 // may be a buffer bigger than any block is requested?
-                if (size +headerSize> blocksProvider.blockSize()) {
+                if (size +headerSize> BLOCK_SIZE) {
                     throw new OakOutOfMemoryException();
                 }
                 // does allocation of new block brings us out of capacity?
-                if ((numberOfBlocks() + 1) * blocksProvider.blockSize() > capacity) {
+                if ((numberOfBlocks() + 1) * BLOCK_SIZE> capacity) {
                 	throw new OakOutOfMemoryException();
                 } else {
                     // going to allocate additional block (big chunk of memory)
                     // need to be thread-safe, so not many blocks are allocated
                     // locking is actually the most reasonable way of synchronization here
                     synchronized (this) {
-                        if (currentBlock.allocated() + size +headerSize> currentBlock.getCapacity()) {
+                        if (curr_allocated.get() + size +headerSize> BLOCK_SIZE){
                             allocateNewCurrentBlock();
                         }
                     }
@@ -218,7 +227,16 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     
     
     
-    
+    public boolean Blockallocate(NovaSlice s, int size) {
+        int before = curr_allocated.getAndAdd(size);
+        if (before + size > BLOCK_SIZE) {
+        	curr_allocated.getAndAdd(-size);
+            throw new OakOutOfMemoryException();
+        }
+    	s.update(curblockID, before, size);
+    	s.setAddress(curr_address);
+    	return true;
+    }
     
     
     
@@ -247,11 +265,12 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     public void free(NovaSlice s) {
     	int size = s.length;
         allocated.addAndGet(-size);
+        
         if (stats != null) {
             stats.release(size);
         }
-        NovafreeList.add(new NovaSlice(s));
-        //NovafreeList.add(s);// FIXME i think this should do 
+        //NovafreeList.add(new NovaSlice(s));//FIXME check if we can remove the new
+        NovafreeList.add(s);// FIXME i think this should do 
 
     }
 
@@ -263,15 +282,13 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
             return;
         }
 
-        // Release the hold of the block array and return it the provider.
-        Block[] b = blocksArray;
-        blocksArray = null;
 
         // Reset "closed" to apply a memory barrier before actually returning the block.
         closed.set(true);
 
         for (int i = 1; i <= numberOfBlocks(); i++) {
-            blocksProvider.returnBlock(b[i]);
+            UnsafeUtils.unsafe.freeMemory(addressArray[i]);
+
         }
         // no need to do anything with the free list,
         // as all free list members were residing on one of the (already released) blocks
@@ -300,8 +317,10 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.readByteBuffer(s);
     }
     
-
-    
+    @Override
+    public long getAddress(int blockid) {
+    	return addressArray[blockid];
+    }
     @Override
     public void readByteBuffer(NovaSlice s) {
         Block b = blocksArray[s.getAllocatedBlockID()];
@@ -330,11 +349,11 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
 
     // This method MUST be called within a thread safe context !!!
     private void allocateNewCurrentBlock() {
-        Block b = blocksProvider.getBlock();
         int blockID = idGenerator.getAndIncrement();
-        this.blocksArray[blockID] = b;
-        b.setID(blockID);
-        this.currentBlock = b;
+        curblockID = (int)blockID;
+        curr_address = UnsafeUtils.unsafe.allocateMemory(BLOCK_SIZE);
+        curr_allocated.set(0);
+    	addressArray[blockID]= curr_address;
     }
 
     private long numberOfBlocks() {

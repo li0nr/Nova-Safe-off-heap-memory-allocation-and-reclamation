@@ -16,7 +16,7 @@ import java.io.ByteArrayOutputStream;
 
 // Represents a portion of a bigger block which is part of the underlying managed memory.
 // It is allocated via block memory allocator, and can be de-allocated later
-class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
+class NovaSlice implements  Comparable<NovaSlice> {
 
     /**
      * An allocated slice might have reserved space for meta-data, i.e., a header.
@@ -29,8 +29,8 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     protected int blockID;
     protected int offset;
     protected int length;
-    protected AtomicLong Ver;
 
+    protected long address;
     protected ByteBuffer buffer;
 
     
@@ -74,6 +74,10 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
         this.length = length;
         this.buffer = null;
     }
+    
+    void setAddress(long address) {
+    	this.address = address;
+    }
 
     // Copy the block allocation information from another block allocation.
     void copyFrom(NovaSlice other) {
@@ -96,13 +100,20 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     void setLen(int len) {
     	length=len;
     }
+//    void setHeader(int version, int size) {
+//    	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;
+//    	int newVer= (version<<1 | 0) & 0xFFF;
+//    	long header=header_slice | newVer ;
+//    	buffer.putLong(offset,header);
+//    	
+//    }
     void setHeader(int version, int size) {
     	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;
     	int newVer= (version<<1 | 0) & 0xFFF;
     	long header=header_slice | newVer ;
-    	buffer.putLong(offset,header);
-    	
+    	UnsafeUtils.unsafe.putLong(address+offset, header);
     }
+
 
 //    /* ------------------------------------------------------------------------------------
 //     * Allocation info getters
@@ -119,10 +130,10 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     int getAllocatedOffset() {
         return offset;
     }
-
-//    int getAllocatedLength() {
-//        return length;
-//    }
+    
+    int getLength() {
+        return length;
+    }
 
     /* ------------------------------------------------------------------------------------
      * Metadata getters
@@ -132,8 +143,8 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
 //    //    return version != EntrySet.INVALID_VERSION;
 //    }
 //
-    int getVersion() {
-    	return (int)buffer.getLong(offset)& 0xFFFFFF;
+    long getVersion() {
+    	return UnsafeUtils.unsafe.getLong(address+offset)& 0xFFFFFF;
     }
 	  long getRef() {
 		  int ref=blockID;
@@ -146,31 +157,31 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
 
     /*-------------- OakUnsafeDirectBuffer --------------*/
 
-    @Override
-    public ByteBuffer getByteBuffer() {
-        return buffer;
-    }
-
-    @Override
-    public int getOffset() {
-        return offset+headerSize;
-    }
-    
-    public int getHeaderOffset() {
-        return offset;
-    }
-
-    @Override
-    public int getLength() {
-    	if(buffer == null) return this.length;
-    	int header= (int) buffer.getLong(offset)>>24;
-    	return header;
-    }
-
-    @Override
-    public long getAddress() {
-        return ((DirectBuffer) buffer).address();
-    }
+//    @Override
+//    public ByteBuffer getByteBuffer() {
+//        return buffer;
+//    }
+//
+//    @Override
+//    public int getOffset() {
+//        return offset+headerSize;
+//    }
+//    
+//    public int getHeaderOffset() {
+//        return offset;
+//    }
+//
+//    @Override
+//    public int getLength() {
+//    	if(buffer == null) return this.length;
+//    	int header= (int) buffer.getLong(offset)>>24;
+//    	return header;
+//    }
+//
+//    @Override
+//    public long getAddress() {
+//        return ((DirectBuffer) buffer).address();
+//    }
 
     /*-------------- Comparable<Slice> --------------*/
 
@@ -180,7 +191,7 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
      */
     @Override
     public int compareTo(NovaSlice o) {
-        int cmp = Integer.compare(this.getLength(), o.getLength());
+        int cmp = Integer.compare(this.length, o.length);
         if (cmp != 0) {
             return cmp;
         }

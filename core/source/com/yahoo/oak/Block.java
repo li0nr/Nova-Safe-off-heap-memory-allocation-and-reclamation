@@ -16,25 +16,22 @@ class Block {
 
     private final ByteBuffer buffer;
 
+    private final long address;
     private final int capacity;
     private final AtomicInteger allocated = new AtomicInteger(0);
-    private int id; // placeholder might need to be set in the future
     
-    private final int headersize=8;
     
     Block(long capacity) {
         assert capacity > 0;
         assert capacity <= Integer.MAX_VALUE; // This is exactly 2GB
         this.capacity = (int) capacity;
-        this.id = NativeMemoryAllocator.INVALID_BLOCK_ID;
+//        this.id = NativeMemoryAllocator.INVALID_BLOCK_ID;
         // Pay attention in allocateDirect the data is *zero'd out*
         // which has an overhead in clearing and you end up touching every page
         this.buffer = ByteBuffer.allocateDirect(this.capacity);
+        this.address = UnsafeUtils.unsafe.allocateMemory(this.capacity);
     }
 
-    void setID(int id) {
-        this.id = id;
-    }
 
     // Block manages its linear allocation. Thread safe.
     // The returned buffer doesn't have all zero bytes.
@@ -44,7 +41,7 @@ class Block {
             allocated.getAndAdd(-size);
             throw new OakOutOfMemoryException();
         }
-        s.update(id, now, size);
+        s.update(NativeMemoryAllocator.INVALID_BLOCK_ID, now, size);
         readByteBuffer(s);
         return true;
     }
@@ -57,7 +54,7 @@ class Block {
             allocated.getAndAdd(-size );
             throw new OakOutOfMemoryException();
         }
-        s.update(id, now, size);
+        s.update(NativeMemoryAllocator.INVALID_BLOCK_ID, now, size);
         readByteBuffer(s);
         return true;
     }

@@ -39,6 +39,8 @@ interface BlockMemoryAllocator {
     
     void readByteBuffer(NovaSlice s);
     
+    long getAddress(int blockID);
+    
     ByteBuffer readByteBuffer(int block);
     
     int getBlocks();

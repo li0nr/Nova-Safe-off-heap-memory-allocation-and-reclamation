@@ -312,6 +312,27 @@ public class RandomBenchmark {
         }
     }
     
+    public class ReaderThreadWithRangeinfinite extends benchThread{
+    	ReaderThreadWithRangeinfinite(CountDownLatch latch,ListInterface list,int index,long seed) {
+    		super(latch, list, index,seed);
+    	}  
+        @Override
+        public void run() {
+            try {
+                latch.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            int j=0,i=0;
+            while(!stop) {
+            	j=random.nextInt(rangeforReadWrite);
+            	j+=LIST_SIZE/2;
+            	list.get(j,idx);
+            	i++;
+        	}
+        }
+    }
+    
 }
 
 
