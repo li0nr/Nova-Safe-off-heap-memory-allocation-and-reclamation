@@ -4,7 +4,6 @@ package com.yahoo.oak;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Random;
 
 public class OverHeadunman {
     private static final int K = 1024;

@@ -114,7 +114,7 @@ public class Facade {
 		
 		long R =UNSAFE.getLong(address+offset+HeaderSize);
 		
-		if(Flags.Fences)UNSAFE.loadFence();
+		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
 			throw new IllegalArgumentException("slice changed");
@@ -133,9 +133,9 @@ public class Facade {
 		int offset 		= ExtractOffset	(facademeta);
 		long facadeRef	= buildRef		(block,offset);
 		
-		if(Flags.TAP) {
+		if(bench_Flags.TAP) {
 			novaManager.setTap(block,facadeRef,idx);	
-			if(Flags.Fences)UNSAFE.fullFence();
+			if(bench_Flags.Fences)UNSAFE.fullFence();
 		}
 		
 		long address = novaManager.getAdress(block);
@@ -150,8 +150,8 @@ public class Facade {
 		 UNSAFE.putLong(address+HeaderSize+offset, toWrite);	
 
 
-		 if(Flags.TAP) {
-             if(Flags.Fences)UNSAFE.storeFence();
+		 if(bench_Flags.TAP) {
+             if(bench_Flags.Fences)UNSAFE.storeFence();
             novaManager.UnsetTap(block,idx);
             }
 

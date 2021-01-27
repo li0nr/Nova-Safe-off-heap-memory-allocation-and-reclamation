@@ -3,21 +3,18 @@ package com.yahoo.oak;
 
 import java.util.ArrayList;
 import java.util.List;
-import 	java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
 
-import org.junit.Test;
 
 
 
 
-public class SequntialBenchmark {
+public class BenchmarkSequntial {
 		
 	static  int NUM_THREADS=1;
 	static  int LIST_SIZE=50_000_000;
@@ -25,7 +22,7 @@ public class SequntialBenchmark {
 	static  int Section = 8;//128 cache line /16 nova number  
 	static 	int Limit = 0;
 
-    public SequntialBenchmark(){    }
+    public BenchmarkSequntial(){    }
 
     
 	public long ReadWriteGeneric(ListInterface list,String s,  FileWriter myWriter) throws InterruptedException, IOException{
@@ -112,9 +109,9 @@ public class SequntialBenchmark {
 	        	}
         	//	un.close();
 	        }
-	        myWriter.write(list+"Mean:"+benchMath.Mean(Mean)+" SE:"+benchMath.StandardError(Mean)
+	        myWriter.write(list+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
 	        									+" mode:"+mode+" thread num:"+threads+ "\n");
-	        System.out.println(list+"Mean:"+benchMath.Mean(Mean)+" SE:"+benchMath.StandardError(Mean)
+	        System.out.println(list+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
 	        									+" mode:"+mode+" thread num:"+threads+ "\n");
 	        myWriter.close();
 	        System.gc();
@@ -123,10 +120,6 @@ public class SequntialBenchmark {
     	}
     }
 
-    public void SeqBenchmark(String List, String mode, int lenght, int threads)throws java.io.IOException {
-    	SequntialBenchmark s = new SequntialBenchmark();
-    	s.RunBenchmark(List, mode, lenght, threads);
-    }
     
     public static void main(String[] args)throws java.io.IOException {
     	int lenght = 1000;
@@ -138,14 +131,14 @@ public class SequntialBenchmark {
     	int threads	= 	Integer.parseInt(args[2]);
     	if(args.length == 4) 
     		lenght 	= 	Integer.parseInt(args[3]);
-    	SequntialBenchmark benchmark= new SequntialBenchmark();
-    	benchmark.SeqBenchmark(List, mode, lenght, threads);
+    	BenchmarkSequntial benchmark= new BenchmarkSequntial();
+    	benchmark.RunBenchmark(List, mode, lenght, threads);
     	
     }
     
     
     /****************************************************************************/
-    public class GenericThreadW extends benchThread{
+    public class GenericThreadW extends bench_Thread{
     	GenericThreadW(CountDownLatch latch,ListInterface list,int index) {
     		super(latch, list, index);
     	}  
@@ -162,7 +155,7 @@ public class SequntialBenchmark {
         	}
         }
     
-    public class GenericThreadR extends benchThread{
+    public class GenericThreadR extends bench_Thread{
     	GenericThreadR(CountDownLatch latch,ListInterface list,int index) {
     		super(latch, list, index);
     	}  

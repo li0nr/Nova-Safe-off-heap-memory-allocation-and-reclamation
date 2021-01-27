@@ -1,7 +1,7 @@
 package com.yahoo.oak;
 import org.junit.Test;
 
-public class Flags {
+public class bench_Flags {
 	static final boolean Fences	= true;
 	static final boolean TAP 	= true;
 	static final boolean UNSet 	= true;
@@ -9,7 +9,7 @@ public class Flags {
     @Test
     public void Test() throws java.io.IOException{
     	//SequntialBenchmark.SeqBenchmark("N", "R", 1000, 4);
-    	RandomBenchmark.ConcurrentRandBenchmark("N", "R", 1000, 4);
+    	BenchmarkRandom.RandBenchmark("N", "R", 1000, 4);
 
     }
 }

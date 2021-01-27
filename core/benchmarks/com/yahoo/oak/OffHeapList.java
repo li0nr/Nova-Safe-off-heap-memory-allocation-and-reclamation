@@ -3,12 +3,8 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.List;
 
 import sun.misc.Cleaner;
-
-import java.lang.management.BufferPoolMXBean;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -54,6 +50,10 @@ public class OffHeapList implements ListInterface{
 		 ArrayOff[index].putLong(0, e);
 	}
 	
+	
+	public int getSize(){
+		return size;
+	}
 	public void allocate(int index, int threadidx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
@@ -61,7 +61,8 @@ public class OffHeapList implements ListInterface{
 		ArrayOff[index]= ByteBuffer.allocateDirect(Long.BYTES);
 
 	}
-	public boolean delete(int index, int threadidx) {
+	
+   public boolean delete(int index , int threadidx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
@@ -79,35 +80,8 @@ public class OffHeapList implements ListInterface{
         }
         ArrayOff[index]=null;
         return true;
-
-	}
-	
-	
-	public int getSize(){
-		return size;
-	}
-	
-	public long getUsedMem() {
-		List<BufferPoolMXBean> pools = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
-		for (BufferPoolMXBean pool : pools) {
-			if(pool.getName().equalsIgnoreCase("direct")) {
-				return pool.getMemoryUsed();
-    			}
-			}
-	return 0;	
-	}
-	
-	public long getAllocatedMem() {
-		List<BufferPoolMXBean> pools = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
-		for (BufferPoolMXBean pool : pools) {
-			if(pool.getName().equalsIgnoreCase("direct")) {
-				return pool.getTotalCapacity();
-    			}
-			}
-	return 0;	
-	}
-	
-	
+    }
+   
 	private void EnsureCap() {
 		int newSize = ArrayOff.length *2;
 		ArrayOff = Arrays.copyOf(ArrayOff, newSize);
@@ -138,18 +112,21 @@ public class OffHeapList implements ListInterface{
 		 }
 	 
 
-	static public void main(String args[]) throws InterruptedException{
-		OffHeapList list = new OffHeapList(12);
-	    for (int i = 0; i < 12; i++) {
-	    	list.add((long)i,0);
-	    }
-	    for (int i = 0; i < 12; i++) {
-	    	long x=list.get(i,0);
-	    	System.out.println(x);
-	    }	  
-	    for (int i = 0; i < 6; i++) {
-	    	list.delete(i,0);
-	    }
-	}
+//	static public void main(String args[]) throws InterruptedException{
+//		OffHeapList list = new OffHeapList(12);
+//	    for (int i = 0; i < 12; i++) {
+//	    	list.add((long)i,0);
+//	    }
+//	    for (int i = 0; i < 12; i++) {
+//	    	long x=list.get(i,0);
+//	    	System.out.println(x);
+//	    }	  
+//	    for (int i = 0; i < 6; i++) {
+//	    	list.delete(i);
+//	    }
+//	    for (int i=0; i < 12; i++) {
+//	    	list.Delete_Write(i, i, 0);
+//	    }
+//	}
 
 }
