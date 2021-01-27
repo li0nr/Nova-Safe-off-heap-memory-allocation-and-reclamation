@@ -50,18 +50,22 @@ public class OffHeapList implements ListInterface{
 		 ArrayOff[index].putLong(0, e);
 	}
 	
-	public void Delete_Write(int index, long toWrite ,int idx) {
-		 if(!this.delete(index)) {
-			 ArrayOff[index]=ByteBuffer.allocateDirect(Long.BYTES);
-			this.set(index,toWrite, idx);
-		 }
-	}
 	
 	public int getSize(){
 		return size;
 	}
+	public void allocate(int index, int threadidx) {
+		if(index>= size || index<0) {
+			throw new IndexOutOfBoundsException();
+		}
+		ArrayOff[index]= ByteBuffer.allocateDirect(Long.BYTES);
+
+	}
 	
-   public boolean delete(int index) {
+   public boolean delete(int index , int threadidx) {
+		if(index>= size || index<0) {
+			throw new IndexOutOfBoundsException();
+		}
         ByteBuffer removeItem = ArrayOff[index];
         if(removeItem == null ) return false;
         try {
@@ -108,21 +112,21 @@ public class OffHeapList implements ListInterface{
 		 }
 	 
 
-	static public void main(String args[]) throws InterruptedException{
-		OffHeapList list = new OffHeapList(12);
-	    for (int i = 0; i < 12; i++) {
-	    	list.add((long)i,0);
-	    }
-	    for (int i = 0; i < 12; i++) {
-	    	long x=list.get(i,0);
-	    	System.out.println(x);
-	    }	  
-	    for (int i = 0; i < 6; i++) {
-	    	list.delete(i);
-	    }
-	    for (int i=0; i < 12; i++) {
-	    	list.Delete_Write(i, i, 0);
-	    }
-	}
+//	static public void main(String args[]) throws InterruptedException{
+//		OffHeapList list = new OffHeapList(12);
+//	    for (int i = 0; i < 12; i++) {
+//	    	list.add((long)i,0);
+//	    }
+//	    for (int i = 0; i < 12; i++) {
+//	    	long x=list.get(i,0);
+//	    	System.out.println(x);
+//	    }	  
+//	    for (int i = 0; i < 6; i++) {
+//	    	list.delete(i);
+//	    }
+//	    for (int i=0; i < 12; i++) {
+//	    	list.Delete_Write(i, i, 0);
+//	    }
+//	}
 
 }

@@ -12,7 +12,14 @@ public interface ListInterface extends Closeable{
 	
 
 	public void set(int index, long e,int threadidx);
+			
+	public boolean delete(int index, int threadidx);
 	
-	public void Delete_Write(int toDelete, long toWrite ,int threadidx);
+	public void allocate(int index,int threadidx);
+	
+//	//memory loggers
+//	public long getUsedMem();
+//	
+//	public long getAllocatedMem();
 		
 }

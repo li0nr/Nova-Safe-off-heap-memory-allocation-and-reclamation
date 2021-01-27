@@ -4,8 +4,6 @@ package com.yahoo.oak;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Random;
-
 public class OverheadNovaTest {
     private static final int K = 1024;
     private static final int M = K * K;

@@ -2,23 +2,22 @@ package com.yahoo.oak;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class benchThread implements Runnable{
+
+public class bench_Thread implements Runnable{
     ListInterface list;
 	CountDownLatch latch;
     Random random;  
 
     public int idx;
     
-    benchThread(CountDownLatch latch,ListInterface list,int index) {
+    bench_Thread(CountDownLatch latch,ListInterface list,int index) {
         this.latch = latch;
         this.list = list;
 		idx=index;
     }
     
-    benchThread(CountDownLatch latch,ListInterface list,int index, long seed) {
+    bench_Thread(CountDownLatch latch,ListInterface list,int index, long seed) {
         this.latch = latch;
         this.list = list;
 		idx=index;

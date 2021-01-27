@@ -1,13 +1,9 @@
 package com.yahoo.oak;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicLong;
 
-import com.yahoo.oak.*;
+import java.util.Arrays;
 //import org.junit.Test;
 
-import sun.misc.Unsafe;
 
 
 public class NovaList implements ListInterface{
@@ -63,11 +59,19 @@ public class NovaList implements ListInterface{
 		 ArrayOfFacades[index].Write(e,idx);
 	}
 	
-	public void Delete_Write(int index, long toWrite ,int idx) {
-		 if(!ArrayOfFacades[index].Delete(idx)) {
-			 ArrayOfFacades[index].AllocateSlice(Long.BYTES,idx);
-			 ArrayOfFacades[index].Write(toWrite, idx);
-		 }
+	public void allocate(int index, int threadidx) {
+		if(index>= size || index<0) {
+			throw new IndexOutOfBoundsException();
+		}
+		ArrayOfFacades[index].AllocateSlice(8, threadidx);
+
+	}
+	public boolean delete(int index, int threadidx) {
+		if(index>= size || index<0) {
+			throw new IndexOutOfBoundsException();
+		}
+		return  ArrayOfFacades[index].Delete(threadidx);
+
 	}
 	
 	public int getSize(){

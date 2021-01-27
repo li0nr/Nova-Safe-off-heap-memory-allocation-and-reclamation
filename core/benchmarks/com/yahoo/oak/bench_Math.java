@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-public class benchMath {
+public class bench_Math {
 	
     static double Mean(List<Long> means) {
     	int n=0;
@@ -67,9 +67,9 @@ public class benchMath {
     		long n = (i);
     		a.add(n);
     	}
-    	double dt=benchMath.StandardDeviation(a);
-    	double se=benchMath.StandardError(a);
-    	double mean= benchMath.Mean(a);
+    	double dt=bench_Math.StandardDeviation(a);
+    	double se=bench_Math.StandardError(a);
+    	double mean= bench_Math.Mean(a);
     	System.out.println("Mean:"+mean);
     	System.out.println("sd :"+dt);
     	System.out.println("se :"+se);
