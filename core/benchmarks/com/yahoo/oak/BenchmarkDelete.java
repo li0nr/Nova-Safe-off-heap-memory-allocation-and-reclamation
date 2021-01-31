@@ -22,16 +22,16 @@ public class BenchmarkDelete {
 	static  int Limit = 0;
 	static  int rangeforReadWrite=1000;
 	
-	static int SleepTime= 5*60*1000;
+	static int SleepTime=5*60*1000;
 	static volatile boolean stop=false;
 	
 //	static final String scriptpath= "/mnt/c/Users/li0nR/Projects/Nova/Nova_root/core/benchmarks";
-	static final String scriptpath= "/core/benchmarks";
+	static final String scriptpath= "../../benchmarks";
 
     public BenchmarkDelete(){    }
 
     
-	public long DeleteWrite(ListInterface list,  FileWriter myWriter, String List) throws InterruptedException, IOException{
+	public long DeleteWrite(ListInterface list,  String myWriter, String List) throws InterruptedException, IOException{
 		CountDownLatch latch = new CountDownLatch(NUM_THREADS);
 	    ArrayList<Thread> threads = new ArrayList<>();
 	    Random rng = new Random();
@@ -70,7 +70,7 @@ public class BenchmarkDelete {
         NUM_THREADS=threads;
         Limit = LIST_SIZE/NUM_THREADS; //operation to do per thread
         rangeforReadWrite= LIST_SIZE/NUM_THREADS; // the range accessed by each thread
-        FileWriter myWriter = new FileWriter("WD"+list+"_"+threads+".txt");
+        String  myWriter = "WD"+list+"_"+threads+".txt";
 		try {
 	        if(list.equals("N")) {//nova 
         		NovaList nova=new NovaList(LIST_SIZE);
@@ -84,7 +84,7 @@ public class BenchmarkDelete {
 	        		DeleteWrite( nova,myWriter,"N");
 
 	        	}
-                nova.close();
+                nova.close();			
 	        }
 	        if(list.equals("U")) {//un-man
         		OffHeapList un=new OffHeapList(LIST_SIZE);
@@ -99,7 +99,6 @@ public class BenchmarkDelete {
 	        		}
 	        	un.close();
 	        }
-	        myWriter.close();
 		}catch(Exception e) {
     		e.printStackTrace();
     	}
@@ -132,10 +131,10 @@ public class BenchmarkDelete {
     
     
     
-    public void log_mem(ListInterface L,FileWriter myWriter, String List) {
+    public void log_mem(ListInterface L,String myWriter, String List) {
 	    //"/bin/bash"
     	try {
-            Process p = new ProcessBuilder("cmd.exe", "/c","wsl",  scriptpath+"/MemLog.sh", "MemLog"+List+".txt","2>Error.txt").start();
+            Process p = new ProcessBuilder("/bin/sh",scriptpath+"/MemLog.sh", myWriter,"2>Error.txt").start();
             p.waitFor();  
     	} catch(Exception e) {}
 

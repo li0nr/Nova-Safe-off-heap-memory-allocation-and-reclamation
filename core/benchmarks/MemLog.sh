@@ -3,8 +3,8 @@
 date >> $1
 echo "**********" >> $1
 echo "top:" >> $1
-echo "	Virt" >> $1 | top -b -n1 | grep java | awk '{print $5}'>>$1 
-echo "	Rss" >> $1 |top -b -n1 | grep java | awk '{print $6}'>>$1 
+echo "	Virt" >> $1 | top -u ramy.f -b -n1 | grep java | awk '{print $5}'>>$1 
+echo "	Rss" >> $1 |top -u ramy.f -b -n1 | grep java | awk '{print $6}'>>$1 
 echo "**********" >> $1
 PID=$(top -b -n1 | grep java | awk '{ print $1}')
 echo "jcmd:" >> $1
