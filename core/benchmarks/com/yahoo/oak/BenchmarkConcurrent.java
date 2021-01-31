@@ -21,14 +21,14 @@ public class BenchmarkConcurrent {
 	
     public  void ConcurrentReadWriteBenchmark(String list, int threads, String Mode)throws java.io.IOException {
         ArrayList<Long>	 Mean = new ArrayList<>();
-        Limit 			= 2_000_000;
+        Limit 			= 10_000_000;
         NUM_THREADS	= threads;
 
         FileWriter myWriter = new FileWriter("Random concurrent Read Write"+".txt");
         System.out.println("concurrent Read Write benchmark\n");
 		long Time=0;
 		try {
-	        if(list.equals("N")) {//nova 
+	        if(list.equals("N")) {//nova
         		NovaList nova=new NovaList(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			nova.add((long)i,0);
@@ -109,11 +109,12 @@ public class BenchmarkConcurrent {
 	    final long startTime = System.nanoTime();
 	    
 	    threads.get(NUM_THREADS-1).join();
+	    final long endTime = System.nanoTime();
+
 	    stop=true;
 	    for (int i = 0; i < NUM_THREADS-1; i++) 
 	    	threads.get(i).join();
 	    stop=false;
-	    final long endTime = System.nanoTime();
 	    if(myWriter!= null) {
 	    	myWriter.write((endTime - startTime)+"\n");
 	    	}
