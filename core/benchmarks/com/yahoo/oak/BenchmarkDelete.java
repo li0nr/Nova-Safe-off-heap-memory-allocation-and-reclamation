@@ -16,17 +16,17 @@ public class BenchmarkDelete {
 	
 	
 	static  int NUM_THREADS=1;
-	static  int LIST_SIZE=10_000_000;
+	static  int LIST_SIZE=5_000_000;
 	static  int RUNS= 10;
 	static  int Section = 8;//128 cache line /16 nova number  
 	static  int Limit = 0;
 	static  int rangeforReadWrite=1000;
 	
-	static int SleepTime= 100;//5*60*1000;
+	static int SleepTime= 5*60*1000;
 	static volatile boolean stop=false;
 	
-	static final String scriptpath= "/mnt/c/Users/li0nR/Projects/Nova/Nova_root/core/benchmarks";
-//	static final String scriptpath= "/core/benchmarks";
+//	static final String scriptpath= "/mnt/c/Users/li0nR/Projects/Nova/Nova_root/core/benchmarks";
+	static final String scriptpath= "/core/benchmarks";
 
     public BenchmarkDelete(){    }
 
@@ -67,7 +67,6 @@ public class BenchmarkDelete {
     
     public  void DeleteBenchmark(String list, int lenght, int threads)throws java.io.IOException {
         ArrayList<Long>	 Mean = new ArrayList<>();
-        LIST_SIZE= lenght;
         NUM_THREADS=threads;
         Limit = LIST_SIZE/NUM_THREADS; //operation to do per thread
         rangeforReadWrite= LIST_SIZE/NUM_THREADS; // the range accessed by each thread
