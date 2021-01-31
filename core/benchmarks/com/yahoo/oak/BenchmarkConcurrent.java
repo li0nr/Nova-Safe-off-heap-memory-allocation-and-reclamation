@@ -24,7 +24,7 @@ public class BenchmarkConcurrent {
         Limit 			= 10_000_000;
         NUM_THREADS	= threads;
 
-        FileWriter myWriter = new FileWriter("Random concurrent Read Write"+".txt");
+        FileWriter myWriter = new FileWriter("Random_WR"+list+threads+Mode+".txt");
         System.out.println("concurrent Read Write benchmark\n");
 		long Time=0;
 		try {
