@@ -98,15 +98,6 @@ public class BenchmarkSequntial {
 	        		Time=ReadWriteGeneric( un,mode,myWriter);
 	                Mean.add(Time);
 	        	}
-	        	List<BufferPoolMXBean> pools = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
-
-	        	for (BufferPoolMXBean pool : pools) {
-	        	    System.out.println(pool.getName());
-	        	    System.out.println(pool.getCount());
-	        	    System.out.println("memory used " + pool.getMemoryUsed());
-	        	    System.out.println("total capacity" + pool.getTotalCapacity());
-	        	    System.out.println();
-	        	}
         	//	un.close();
 	        }
 	        myWriter.write(list+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
