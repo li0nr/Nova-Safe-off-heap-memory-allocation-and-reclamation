@@ -24,7 +24,7 @@ public class BenchmarkDelete {
 	static  int Limit = 0;
 	static  int rangeforReadWrite=1000;
 	
-	static int SleepTime=1000;//5*60*1000;
+	static int SleepTime=5*60*1000;
 	static volatile boolean stop=false;
 	
 	static final String scriptpath= "../../benchmarks";
@@ -45,7 +45,7 @@ public class BenchmarkDelete {
 	    for (int i=0; i<=NUM_THREADS; i++)
 	    	latch.countDown();
 	    
-      
+        log_mem(list,myWriter,List);
         Thread.sleep(SleepTime);
         log_mem(list,myWriter,List);
         Thread.sleep(SleepTime);
