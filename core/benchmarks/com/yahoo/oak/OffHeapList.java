@@ -3,18 +3,21 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import sun.misc.Cleaner;
+
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class OffHeapList implements ListInterface{
 	
-	
 	private static final int DEFAULT_CAPACITY=10;
 	
 	ByteBuffer[] ArrayOff;
 	private int size=0;
+
 	
 	
 	public OffHeapList(){
@@ -22,11 +25,10 @@ public class OffHeapList implements ListInterface{
 	}
 	public OffHeapList(int capacity){
 		ArrayOff=new ByteBuffer[capacity];
-
 	}
 	public void add(Long e, int idx) {
 		if(size == ArrayOff.length) {
-			EnsureCap();
+		
 		}
 
 		if(ArrayOff[size]== null)
@@ -68,16 +70,16 @@ public class OffHeapList implements ListInterface{
 		}
         ByteBuffer removeItem = ArrayOff[index];
         if(removeItem == null ) return false;
-        try {
-            Method cleanerMethod = removeItem.getClass().getMethod("cleaner");
-            cleanerMethod.setAccessible(true);
-            Object cleaner = cleanerMethod.invoke(removeItem);
-            Method cleanMethod = cleaner.getClass().getMethod("clean");
-            cleanMethod.setAccessible(true);
-            cleanMethod.invoke(cleaner);
-        }catch(Exception e) {
-        	e.printStackTrace();
-        }
+//        try {
+//            Method cleanerMethod = removeItem.getClass().getMethod("cleaner");
+//            cleanerMethod.setAccessible(true);
+//            Object cleaner = cleanerMethod.invoke(removeItem);
+//            Method cleanMethod = cleaner.getClass().getMethod("clean");
+//            cleanMethod.setAccessible(true);
+//            cleanMethod.invoke(cleaner);
+//        }catch(Exception e) {
+//        	e.printStackTrace();
+//        }
         ArrayOff[index]=null;
         return true;
     }
@@ -86,6 +88,7 @@ public class OffHeapList implements ListInterface{
 		int newSize = ArrayOff.length *2;
 		ArrayOff = Arrays.copyOf(ArrayOff, newSize);
 	}
+	
 	
 	 @Override
 	public void close()  {
@@ -112,21 +115,15 @@ public class OffHeapList implements ListInterface{
 		 }
 	 
 
-//	static public void main(String args[]) throws InterruptedException{
-//		OffHeapList list = new OffHeapList(12);
-//	    for (int i = 0; i < 12; i++) {
-//	    	list.add((long)i,0);
-//	    }
-//	    for (int i = 0; i < 12; i++) {
-//	    	long x=list.get(i,0);
-//	    	System.out.println(x);
-//	    }	  
-//	    for (int i = 0; i < 6; i++) {
-//	    	list.delete(i);
-//	    }
-//	    for (int i=0; i < 12; i++) {
-//	    	list.Delete_Write(i, i, 0);
-//	    }
-//	}
+	static public void main(String args[]) throws InterruptedException{
+		OffHeapList list = new OffHeapList(12);
+	    for (int i = 0; i < 12; i++) {
+	    	list.add((long)i,0);
+	    }
+	    for (int i = 0; i < 12; i++) {
+	    	long x=list.get(i,0);
+	    	System.out.println(x);
+	    }	  
+	}
 
 }

@@ -9,6 +9,8 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.experimental.theories.FromDataPoints;
 
+import java.lang.management.BufferPoolMXBean;
+import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.nio.ByteBuffer;
 
@@ -22,10 +24,9 @@ public class BenchmarkDelete {
 	static  int Limit = 0;
 	static  int rangeforReadWrite=1000;
 	
-	static int SleepTime=5*60*1000;
+	static int SleepTime=1000;//5*60*1000;
 	static volatile boolean stop=false;
 	
-//	static final String scriptpath= "/mnt/c/Users/li0nR/Projects/Nova/Nova_root/core/benchmarks";
 	static final String scriptpath= "../../benchmarks";
 
     public BenchmarkDelete(){    }
@@ -133,8 +134,20 @@ public class BenchmarkDelete {
     
     public void log_mem(ListInterface L,String myWriter, String List) {
 	    //"/bin/bash"
+    	final  long GB = 1024*1024*1024;
     	try {
-            Process p = new ProcessBuilder("/bin/sh",scriptpath+"/MemLog.sh", myWriter,"2>Error.txt").start();
+            float heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes
+            float heapFreeSize = Runtime.getRuntime().freeMemory();
+            float allocated = Float.NaN;
+            
+            System.out.format("      Heap Total: %.4f GB\n",  heapSize / GB);
+            System.out.format("      Heap Usage: %.4f GB\n", (heapSize - heapFreeSize) / GB);
+    	
+            //to get approximate for directalloc
+    	//    Process p = new ProcessBuilder("/bin/sh",scriptpath+"/MemLog.sh", myWriter,"2>Error.txt").start();
+    	    Process p = new ProcessBuilder("cmd.exe", "/c","wsl",scriptpath+"/MemLog.sh", myWriter,"2>Error.txt").start();
+
+    	  
             p.waitFor();  
     	} catch(Exception e) {}
 
@@ -184,3 +197,15 @@ public class BenchmarkDelete {
 		}
 
 }
+
+
+
+//List<BufferPoolMXBean> pools = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
+//
+//for (BufferPoolMXBean pool : pools) {
+//    System.out.println(pool.getName());
+//    System.out.println(pool.getCount());
+//    System.out.println("memory used " + pool.getMemoryUsed());
+//    System.out.println("total capacity" + pool.getTotalCapacity());
+//    System.out.println();
+//}
