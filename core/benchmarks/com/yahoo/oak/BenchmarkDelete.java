@@ -144,7 +144,7 @@ public class BenchmarkDelete {
             System.out.format("      Heap Usage: %.4f GB\n", (heapSize - heapFreeSize) / GB);
     	
             //to get approximate for directalloc
-    	//    Process p = new ProcessBuilder("/bin/sh",scriptpath+"/MemLog.sh", myWriter,"2>Error.txt").start();
+    	 //   Process p = new ProcessBuilder("/bin/sh",scriptpath+"/MemLog.sh", myWriter,"2>Error.txt").start();
     	    Process p = new ProcessBuilder("cmd.exe", "/c","wsl",scriptpath+"/MemLog.sh", myWriter,"2>Error.txt").start();
 
     	  

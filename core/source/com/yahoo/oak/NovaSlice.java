@@ -6,12 +6,7 @@
 
 package com.yahoo.oak;
 
-import java.util.concurrent.atomic.AtomicLong; 
-
-import sun.nio.ch.DirectBuffer;
-
 import java.nio.ByteBuffer;
-import java.io.ByteArrayOutputStream;
 
 
 // Represents a portion of a bigger block which is part of the underlying managed memory.
@@ -29,7 +24,6 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     protected int blockID;
     protected int offset;
     protected int length;
-    protected AtomicLong Ver;
 
     protected ByteBuffer buffer;
 
@@ -53,15 +47,6 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     /* ------------------------------------------------------------------------------------
      * Allocation info and metadata setters
      * ------------------------------------------------------------------------------------*/
-
-    // Reset to invalid state
-    void invalidate() {
-//        blockID = NativeMemoryAllocator.INVALID_BLOCK_ID;
-//        offset = -1;
-//        length = -1;
-//        version = EntrySet.INVALID_VERSION;
-        buffer.putLong(offset,1);
-    }
 
     /*
      * Updates the allocation object.
@@ -93,9 +78,7 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
         this.buffer = buffer;
     }
 
-    void setLen(int len) {
-    	length=len;
-    }
+
     void setHeader(int version, int size) {
     	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;
     	int newVer= (version<<1 | 0) & 0xFFF;
@@ -107,11 +90,7 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
 //    /* ------------------------------------------------------------------------------------
 //     * Allocation info getters
 //     * ------------------------------------------------------------------------------------*/
-//
-//    boolean isAllocated() {
-//  //      return blockID != NativeMemoryAllocator.INVALID_BLOCK_ID;
-//    }
-//
+
     int getAllocatedBlockID() {
         return blockID;
     }
@@ -120,9 +99,7 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
         return offset;
     }
 
-//    int getAllocatedLength() {
-//        return length;
-//    }
+
 
     /* ------------------------------------------------------------------------------------
      * Metadata getters
@@ -140,9 +117,9 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
 		  return ref<<20 | offset;
 	 }
 
-    long getMetadataAddress() {
-        return ((DirectBuffer) buffer).address() + offset;
-    }
+//    long getMetadataAddress() {
+//        return ((DirectBuffer) buffer).address() + offset;
+//    }
 
     /*-------------- OakUnsafeDirectBuffer --------------*/
 
@@ -156,9 +133,6 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
         return offset+headerSize;
     }
     
-    public int getHeaderOffset() {
-        return offset;
-    }
 
     @Override
     public int getLength() {
@@ -167,10 +141,10 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     	return header;
     }
 
-    @Override
-    public long getAddress() {
-        return ((DirectBuffer) buffer).address();
-    }
+//    @Override
+//    public long getAddress() {
+//        return ((DirectBuffer) buffer).address();
+//    }
 
     /*-------------- Comparable<Slice> --------------*/
 
