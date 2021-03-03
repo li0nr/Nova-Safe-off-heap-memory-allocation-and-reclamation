@@ -27,9 +27,8 @@ class NovaSlice implements  Comparable<NovaSlice> {
     protected int blockID;
     protected int offset;
     protected int length;
-
-
     protected long address;
+
     protected ByteBuffer buffer;
 
     
