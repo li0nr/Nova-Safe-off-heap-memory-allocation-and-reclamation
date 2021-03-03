@@ -6,12 +6,10 @@
 
 package com.yahoo.oak;
 
-import java.util.concurrent.atomic.AtomicLong; 
 
-import sun.nio.ch.DirectBuffer;
 
 import java.nio.ByteBuffer;
-import java.io.ByteArrayOutputStream;
+
 
 
 // Represents a portion of a bigger block which is part of the underlying managed memory.
@@ -29,6 +27,7 @@ class NovaSlice implements  Comparable<NovaSlice> {
     protected int blockID;
     protected int offset;
     protected int length;
+
 
     protected long address;
     protected ByteBuffer buffer;
@@ -100,20 +99,12 @@ class NovaSlice implements  Comparable<NovaSlice> {
     void setLen(int len) {
     	length=len;
     }
-//    void setHeader(int version, int size) {
-//    	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;
-//    	int newVer= (version<<1 | 0) & 0xFFF;
-//    	long header=header_slice | newVer ;
-//    	buffer.putLong(offset,header);
-//    	
-//    }
     void setHeader(int version, int size) {
     	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;
     	int newVer= (version<<1 | 0) & 0xFFF;
     	long header=header_slice | newVer ;
     	UnsafeUtils.unsafe.putLong(address+offset, header);
     }
-
 
 //    /* ------------------------------------------------------------------------------------
 //     * Allocation info getters

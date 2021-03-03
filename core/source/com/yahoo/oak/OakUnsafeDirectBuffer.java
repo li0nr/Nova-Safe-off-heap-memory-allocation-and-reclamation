@@ -67,6 +67,6 @@ public interface OakUnsafeDirectBuffer {
      *
      * @return the exact memory address of the underlying buffer in the position of the data.
      */
-    long getAddress();
+ //   long getAddress();
 
 }

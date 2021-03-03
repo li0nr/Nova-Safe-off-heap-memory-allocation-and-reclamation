@@ -7,6 +7,8 @@
 package com.yahoo.oak;
 
 import java.io.Closeable;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -38,6 +40,21 @@ final class BlocksPool implements BlocksProvider, Closeable {
     private static final int LOW_RESERVED_BLOCKS = 24;
 
     private final int blockSize;
+    
+    ///////************************does it work for lock free
+//    private static  long blockoffset;
+//    static {
+//    	try {
+//    		blockoffset=UnsafeUtils.unsafe.staticFieldOffset(BlocksPool.class.getDeclaredField("test"));
+//			}catch(Exception e) { 
+//				System.out.print(e);
+//				throw new Error(e); };
+//
+//    	}
+//    private static ArrayList<Block> test=null;
+
+    ///////************************does it work for lock free
+
 
     // not thread safe, private constructor; should be called only once
     private BlocksPool() {
@@ -100,8 +117,19 @@ final class BlocksPool implements BlocksProvider, Closeable {
                         prealloc(NEW_ALLOC_BLOCKS);
                     }
                 }
-            }
-        }
+//                ArrayList<Block> testblock= new ArrayList<>();
+//                for (int i = 0; i < NEW_ALLOC_BLOCKS; i++) {
+//                	testblock.add(new Block(blockSize));
+//                	}
+//                if(UnsafeUtils.unsafe.compareAndSwapObject(this,
+//                		blockoffset
+//                		,test, testblock))
+//                		this.blocks.addAll(testblock);
+//                        // The blocks are allocated without ids.
+//                        // They are given an id when they are given to an OakNativeMemoryAllocator.
+                    }
+                }
+  
         return b;
     }
 
