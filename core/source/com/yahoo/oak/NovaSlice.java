@@ -141,10 +141,10 @@ class NovaSlice implements OakUnsafeDirectBuffer, Comparable<NovaSlice> {
     	return header;
     }
 
-//    @Override
-//    public long getAddress() {
-//        return ((DirectBuffer) buffer).address();
-//    }
+    @Override
+    public long getAddress() {
+        return -1;
+    }
 
     /*-------------- Comparable<Slice> --------------*/
 

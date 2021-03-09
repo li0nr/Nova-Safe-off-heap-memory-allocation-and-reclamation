@@ -70,7 +70,8 @@ class NovaManager implements MemoryManager {
         blockcount = allocator.getBlocks();
         
         
-        TAP = new long[blockcount * MAX_THREADS*CACHE_PADDING];
+        TAP = new long[blockcount * MAX_THREADS * CACHE_PADDING];
+        //block 0 is not used ?
         for(int i=BLOCK_TAP; i<blockcount*MAX_THREADS*CACHE_PADDING; i+=CACHE_PADDING)
         	TAP[i+IDENTRY]=-1;
 
