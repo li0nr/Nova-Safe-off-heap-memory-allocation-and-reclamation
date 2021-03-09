@@ -19,7 +19,7 @@ public class BenchmarkConcurrent {
 
 	
 	
-    public  void ConcurrentReadWriteBenchmark(String list, int threads, String Mode)throws java.io.IOException {
+    public  void ConcurrentReadWriteBenchmark(String list, int threads, String Mode, int random)throws java.io.IOException {
         ArrayList<Long>	 Mean = new ArrayList<>();
         Limit 			= 10_000_000;
         NUM_THREADS	= threads;
@@ -36,16 +36,16 @@ public class BenchmarkConcurrent {
 	    		for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
 	        		if(Mode.equals("R"))
-	        			ReaderMeasurement(nova,myWriter);
+	        			ReaderMeasurement(nova,myWriter,random);
 	        		if(Mode.equals("W"))
-	        			WriterMeasurement(nova,myWriter);
+	        			WriterMeasurement(nova,myWriter,random);
 	        	}
 	        	for (int j=0; j<5 ; j++) {
 	        		Thread.sleep(1000);
 	        		if(Mode.equals("R"))
-	        			Time =ReaderMeasurement(nova,myWriter);
+	        			Time =ReaderMeasurement(nova,myWriter,random);
 	        		if(Mode.equals("W"))
-	        			Time =WriterMeasurement(nova,myWriter);
+	        			Time =WriterMeasurement(nova,myWriter,random);
 	        		Mean.add(Time);
 	        	}
                 nova.close();
@@ -58,16 +58,16 @@ public class BenchmarkConcurrent {
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
 	        		if(Mode.equals("R"))
-	        			ReaderMeasurement(un,myWriter);
+	        			ReaderMeasurement(un,myWriter,random);
 	        		if(Mode.equals("W"))
-	        			WriterMeasurement(un,myWriter);	  
+	        			WriterMeasurement(un,myWriter,random);	  
 	        		}
 	        	for (int j=0; j<5 ; j++) {
 	        		Thread.sleep(1000);
 	        		if(Mode.equals("R"))
-	        			Time =ReaderMeasurement(un,myWriter);
+	        			Time =ReaderMeasurement(un,myWriter,random);
 	        		if(Mode.equals("W"))
-	        			Time =WriterMeasurement(un,myWriter);
+	        			Time =WriterMeasurement(un,myWriter,random);
 	                Mean.add(Time);
 	        	}
         		un.close();
@@ -84,22 +84,38 @@ public class BenchmarkConcurrent {
     }
 
 	
-	public long Measurement(ListInterface list,  FileWriter myWriter , String Mode) throws InterruptedException, IOException{
+	public long Measurement(ListInterface list,  FileWriter myWriter , String Mode , int random) throws InterruptedException, IOException{
 		CountDownLatch latch = new CountDownLatch(NUM_THREADS);
 	    ArrayList<Thread> threads = new ArrayList<>();
 	    Random rng = new Random();
 	    
 	    for (int i = 0; i < NUM_THREADS-2; i++) {
-	    	threads.add(new Thread(new ReaderThread(latch,list,i,rng.nextLong(),false)));
+	    	if( random  == 0) 	    
+	    		threads.add(new Thread(new ReaderThreadSerial(latch,list,i,false)));
+	    	else
+	    		threads.add(new Thread(new ReaderThread(latch,list,i,rng.nextLong(),false)));
+
 	    	threads.get(i).start();
 	    	}	 			
     	if(Mode.equals("R")) {
-        	threads.add(new Thread(new WriterThread(latch,list,NUM_THREADS-2,rng.nextLong(),false)));
-    		threads.add(new Thread(new ReaderThread(latch,list,NUM_THREADS-1,rng.nextLong(),true)));
+		    	if( random  == 0){
+		        	threads.add(new Thread(new WriterThreadSerial(latch,list,NUM_THREADS-2,false)));
+		    		threads.add(new Thread(new ReaderThreadSerial(latch,list,NUM_THREADS-1,true)));
+		    	}
+		    	else {
+		        	threads.add(new Thread(new WriterThread(latch,list,NUM_THREADS-2,rng.nextLong(),false)));
+		    		threads.add(new Thread(new ReaderThread(latch,list,NUM_THREADS-1,rng.nextLong(),true)));
+		    	}
         	}
     	if(Mode.equals("W")) {
-    		threads.add(new Thread(new ReaderThread(latch,list,NUM_THREADS-2,rng.nextLong(),false)));
-        	threads.add(new Thread(new WriterThread(latch,list,NUM_THREADS-1,rng.nextLong(),true)));
+		    	if( random  == 0){
+		        	threads.add(new Thread(new ReaderThreadSerial(latch,list,NUM_THREADS-2,false)));
+		    		threads.add(new Thread(new WriterThreadSerial(latch,list,NUM_THREADS-1,true)));
+		    	}
+		    	else {
+		    		threads.add(new Thread(new ReaderThread(latch,list,NUM_THREADS-2,rng.nextLong(),false)));
+		        	threads.add(new Thread(new WriterThread(latch,list,NUM_THREADS-1,rng.nextLong(),true)));
+		    	}
     		}
 	    threads.get(NUM_THREADS-2).start();
     	threads.get(NUM_THREADS-1).start();
@@ -121,22 +137,22 @@ public class BenchmarkConcurrent {
 	    return (endTime - startTime);
 	}
 	
-	public long ReaderMeasurement(ListInterface list, FileWriter file) {
+	public long ReaderMeasurement(ListInterface list, FileWriter file, int random) {
 		try {
-			return Measurement(list, file, "R");
+			return Measurement(list, file, "R" , random);
 		}catch(Exception e) {}
 		return 0;
 	}
 	
-	public long WriterMeasurement(ListInterface list, FileWriter file) {
+	public long WriterMeasurement(ListInterface list, FileWriter file, int random) {
 		try {
-			return Measurement(list, file, "W");
+			return Measurement(list, file, "W", random);
 		}catch(Exception e) {}
 		return 0;
 	}	
 	
 	
-	
+	//java -cp target/nova-0.0.1-SNAPSHOT.jar -server com.yahoo.oak.BenchmarkConcurrent List Operation Threads Rand
 	
 	public static void main(String[] args) throws java.io.IOException {
     	if(args[0]==null) {
@@ -145,8 +161,9 @@ public class BenchmarkConcurrent {
     	String List	=	args[0];
     	String mode	=	args[1];
     	int threads	= 	Integer.parseInt(args[2]);
+    	int random  =   Integer.parseInt(args[3]);
     	BenchmarkConcurrent test= new BenchmarkConcurrent();
-    	test.ConcurrentReadWriteBenchmark(List,threads,mode);
+    	test.ConcurrentReadWriteBenchmark(List,threads,mode,random);
     	
     }
     
@@ -180,7 +197,6 @@ public class BenchmarkConcurrent {
                 	j=random.nextInt(rangeforReadWrite);
                 	j+=LIST_SIZE/2;
                 	list.get(j,idx);
-                	i++;
             	}
             }
 
@@ -213,6 +229,79 @@ public class BenchmarkConcurrent {
 					j=random.nextInt(rangeforReadWrite);
 					j+=LIST_SIZE/2;
 	            	list.set(j,j,idx);
+	            	}
+				}
+			}
+
+		}
+	
+	
+    public class ReaderThreadSerial extends bench_Thread{
+    	boolean Measured;
+    	ReaderThreadSerial(CountDownLatch latch,ListInterface list,int index, boolean Measured) {
+    		super(latch, list, index);
+    		this.Measured = Measured;
+    	}  
+        @Override
+        public void run() {
+            try {
+                latch.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            int j=LIST_SIZE/2,i=0;
+            if (Measured) {
+				while(i<Limit) {
+	            	list.get(j,idx);
+					j++;
+					i++;
+	            	if(j == LIST_SIZE)
+	            		j = LIST_SIZE/2;
+	            	}
+            }else {
+                while(!stop) {
+                	list.get(j,idx);
+					j++;
+					i++;
+	            	if(j == LIST_SIZE)
+	            		j = LIST_SIZE/2;
+            	}
+            }
+
+        }
+    }
+    
+	public class WriterThreadSerial extends bench_Thread{
+		boolean Measured;
+		WriterThreadSerial(CountDownLatch latch,ListInterface list,int index, boolean Measured) {
+			super(latch, list, index);
+			this.Measured= Measured;
+			}  
+		@Override
+		public void run() {
+			try {
+				latch.await();
+				} catch (Exception e) {
+					e.printStackTrace();
+					}
+			int j=LIST_SIZE/2,i=0;
+			if (Measured) {
+				while(i<Limit) {
+					list.set(i,i,idx);
+					j++;
+					if(j == LIST_SIZE/2 + rangeforReadWrite)
+						j = LIST_SIZE/2;
+					}
+				
+			}else {
+				while(!stop) {
+					while(i<Limit) {
+						list.set(j, j, idx);
+						j++;
+						i++;
+						if(j == LIST_SIZE/2 + rangeforReadWrite)
+							j = LIST_SIZE/2;
+						}
 	            	}
 				}
 			}

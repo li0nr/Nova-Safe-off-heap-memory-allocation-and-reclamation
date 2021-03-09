@@ -6,10 +6,7 @@
 
 package com.yahoo.oak;
 
-
-
 import java.nio.ByteBuffer;
-
 
 
 // Represents a portion of a bigger block which is part of the underlying managed memory.
@@ -51,15 +48,6 @@ class NovaSlice implements  Comparable<NovaSlice> {
     /* ------------------------------------------------------------------------------------
      * Allocation info and metadata setters
      * ------------------------------------------------------------------------------------*/
-
-    // Reset to invalid state
-    void invalidate() {
-//        blockID = NativeMemoryAllocator.INVALID_BLOCK_ID;
-//        offset = -1;
-//        length = -1;
-//        version = EntrySet.INVALID_VERSION;
-        buffer.putLong(offset,1);
-    }
 
     /*
      * Updates the allocation object.
@@ -108,11 +96,7 @@ class NovaSlice implements  Comparable<NovaSlice> {
 //    /* ------------------------------------------------------------------------------------
 //     * Allocation info getters
 //     * ------------------------------------------------------------------------------------*/
-//
-//    boolean isAllocated() {
-//  //      return blockID != NativeMemoryAllocator.INVALID_BLOCK_ID;
-//    }
-//
+
     int getAllocatedBlockID() {
         return blockID;
     }
