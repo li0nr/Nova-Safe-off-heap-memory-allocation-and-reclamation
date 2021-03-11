@@ -28,7 +28,7 @@ public class ListOffHeap implements ListInterface{
 	}
 	public void add(Long e, int idx) {
 		if(size == ArrayOff.length) {
-		
+			EnsureCap();
 		}
 
 		if(ArrayOff[size]== null)
