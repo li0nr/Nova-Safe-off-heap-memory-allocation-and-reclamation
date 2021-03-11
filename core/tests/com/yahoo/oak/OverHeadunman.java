@@ -9,11 +9,11 @@ public class OverHeadunman {
     private static final int K = 1024;
     private static final int M = K * K;
     private static final int NUM_OF_ENTRIES = 10_000_000;
-    private static OffHeapList List;
+    private static ListOffHeap List;
 
     @Before
     public void init() {
-    	List = new OffHeapList();
+    	List = new ListOffHeap();
     	for (int i =0; i<NUM_OF_ENTRIES; i++)
     		List.add((long)i,0);
     }

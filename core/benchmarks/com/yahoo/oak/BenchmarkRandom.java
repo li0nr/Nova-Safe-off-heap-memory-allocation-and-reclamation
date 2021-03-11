@@ -60,7 +60,7 @@ public class BenchmarkRandom {
 		long Time=0;
 		try {
 	        if(list.equals("N")) {//nova 
-        		NovaList nova=new NovaList(LIST_SIZE);
+        		ListNova nova=new ListNova(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			nova.add((long)i,0);
 
@@ -76,7 +76,7 @@ public class BenchmarkRandom {
                 nova.close();
 	        }
 	        if(list.equals("U")) {//un-man
-        		OffHeapList un=new OffHeapList(LIST_SIZE);
+        		ListOffHeap un=new ListOffHeap(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			un.add((long)i,0);
 

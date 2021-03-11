@@ -51,16 +51,16 @@ public class ListReadBenchmark {
   	  @Param({"1000000"})
   	  public static int LIST_SIZE;
   	  
-        private NovaList nlist ;
-        private OffHeapList olist ;
+        private ListNova nlist ;
+        private ListOffHeap olist ;
 
         @Setup(Level.Iteration)
         public void setup() {
-        	nlist= new NovaList();
+        	nlist= new ListNova();
         	for (int i=0; i <LIST_SIZE ; i++) {
         		nlist.add((long)i,0);
         	}
-        	olist= new OffHeapList();
+        	olist= new ListOffHeap();
         	for (int i=0; i <LIST_SIZE ; i++) {
         		olist.add((long)i,0);
         	}
