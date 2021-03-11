@@ -10,7 +10,6 @@ public interface ListInterface extends Closeable{
 	
 	public long get(int i,int threadidx);
 	
-
 	public void set(int index, long e,int threadidx);
 			
 	public boolean delete(int index, int threadidx);

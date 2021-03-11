@@ -11,7 +11,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class OffHeapList implements ListInterface{
+public class ListOffHeap implements ListInterface{
 	
 	private static final int DEFAULT_CAPACITY=10;
 	
@@ -20,10 +20,10 @@ public class OffHeapList implements ListInterface{
 
 	
 	
-	public OffHeapList(){
+	public ListOffHeap(){
 		ArrayOff=new ByteBuffer[DEFAULT_CAPACITY];
 	}
-	public OffHeapList(int capacity){
+	public ListOffHeap(int capacity){
 		ArrayOff=new ByteBuffer[capacity];
 	}
 	public void add(Long e, int idx) {
@@ -116,7 +116,7 @@ public class OffHeapList implements ListInterface{
 	 
 
 	static public void main(String args[]) throws InterruptedException{
-		OffHeapList list = new OffHeapList(12);
+		ListOffHeap list = new ListOffHeap(12);
 	    for (int i = 0; i < 12; i++) {
 	    	list.add((long)i,0);
 	    }

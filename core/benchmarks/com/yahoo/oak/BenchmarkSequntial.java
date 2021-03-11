@@ -66,7 +66,7 @@ public class BenchmarkSequntial {
 		long Time=0;
 		try {
 	        if(list.equals("N")) {//nova 
-        		NovaList nova=new NovaList(LIST_SIZE);
+        		ListNova nova=new ListNova(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			nova.add((long)i,0);
 //		        System.out.println("finsished init\n");
@@ -83,7 +83,7 @@ public class BenchmarkSequntial {
                 nova.close();
 	        }
 	        if(list.equals("U")) {//un-man
-        		OffHeapList un=new OffHeapList();
+        		ListOffHeap un=new ListOffHeap();
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			un.add((long)i,0);
 		        System.gc();
@@ -111,7 +111,8 @@ public class BenchmarkSequntial {
     	}
     }
 
-    
+    //java -cp target/nova-0.0.1-SNAPSHOT.jar -server com.yahoo.oak.BenchmarkSequntial N W 32 1000000
+
     public static void main(String[] args)throws java.io.IOException {
     	int lenght = 1000;
     	if(args[0]==null) {

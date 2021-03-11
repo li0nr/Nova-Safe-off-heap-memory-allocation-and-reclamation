@@ -11,11 +11,11 @@ public class OverheadNovaTest {
     private static final int KEY_SIZE = 100;
     private static final int VALUE_SIZE = 1000;
     private static final double MAX_ON_HEAP_OVERHEAD_PERCENTAGE = 0.05;
-    private static NovaList nList;
+    private static ListNova nList;
 
     @Before
     public void init() {
-    	nList = new NovaList();
+    	nList = new ListNova();
     	for (int i =0; i<NUM_OF_ENTRIES; i++)
     		nList.add((long)i,0);
     }

@@ -76,32 +76,30 @@ public class _HazardEras_ {
     /**
      * Progress Condition: lock-free
      */
-     void  get_protected(int index, int tid) {
+     <T> T get_protected(T obj, int index, int tid) {
     	 long prevEra = he[(tid+index)*CLPAD].get();
 		while (true) {
 		   // T* ptr = atom.load();
 		    long era = eraClock.get();
 			UNSAFE.loadFence();
 
-		    if (era == prevEra) return ;
+		    if (era == prevEra) return obj ;
 		    he[(tid+index)*CLPAD].set(era);
             prevEra = era;
 		}
     }
 
      
-
-
     /**
      * Retire an object (node)
      * Progress Condition: wait-free bounded
      *
      */
-      <T> void retire(long ptr, int mytid, _HazardEras_interface obj) {
+      <T> void retire(int mytid, _HazardEras_interface obj) {
         long currEra = eraClock.get();
 //        ptr->delEra = currEra;
         obj.setDeleteEra(currEra);
-        ArrayList rlist = retiredList[mytid*CLPAD];
+        ArrayList<_HazardEras_interface> rlist = retiredList[mytid*CLPAD];
         rlist.add(obj);
         if (eraClock.get() == currEra) eraClock.getAndAdd(1);
         _HazardEras_interface toDeleteObj;
