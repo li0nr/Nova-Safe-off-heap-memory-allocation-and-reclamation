@@ -2,12 +2,14 @@ package com.yahoo.oak;
 
 import java.util.Arrays;
 
+import org.openjdk.jmh.runner.RunnerException;
+
 public class ListHE implements ListInterface{
 	
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final _HazardEras_ HE = new _HazardEras_(1, 32);
+    final HazardEras HE = new HazardEras(1, 32, allocator);
 	
 
 
@@ -32,10 +34,11 @@ public class ListHE implements ListInterface{
 
 		if(Slices[size]== null)
 			Slices[size]=new HEslice(HE.getEra());
-		allocator.allocate(Slices[size], Long.BYTES);
+		allocator.allocate_otherApproaches(Slices[size], Long.BYTES);
 		HE.get_protected(Slices[size], 1, idx); //needed?
 		Slices[size].getByteBuffer().putLong(Slices[size].getAllocatedOffset(), e);
-	    size++;
+	    HE.clear(1);
+		size++;
 	}
 	
 	public long get(int i, int idx) {
@@ -47,12 +50,19 @@ public class ListHE implements ListInterface{
 		}
 	
 
-	public void set(int index, long e, int idx) {
+	public void set(int index, long e, int idx)  {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		HE.get_protected(Slices[index], 1, idx);
-		Slices[index].getByteBuffer().putLong(Slices[index].getAllocatedOffset(), e);
+		HEslice access = HE.get_protected(Slices[index], 1, idx);
+		if(access != null)
+			access.getByteBuffer().putLong(access.getAllocatedOffset(), e);
+		else {
+		    HE.clear(idx);
+			throw new DeletedEntry();
+		}
+		HE.clear(idx);
+
 		}
 	
 	public void allocate(int index, int threadidx) {
@@ -66,7 +76,9 @@ public class ListHE implements ListInterface{
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		HE.retire(threadidx, Slices[index]);
+		HEslice toDelete = Slices[index];
+		Slices[index]= null;
+		HE.retire(threadidx, toDelete);
 		return  true;
 
 	}
@@ -90,10 +102,24 @@ public void close()  {
 	
 
 public  static void main(String[] args)throws java.io.IOException {
+
+	
 	ListHE s = new ListHE();
 	for(int i=0; i<100; i++) {
 		s.add((long)i,0);
 		}
+	
+	Runnable runnable =
+	        () -> { s.delete(4, 1); };
+    Runnable runnable1 =
+	    	        () -> { s.set(4, 4, 2);};
+	    	        
+	    	    	Thread write= new Thread(runnable1);
+	    	    	Thread delete= new Thread(runnable);
+	    	    	write.start();
+	    	    	delete.start();
+	    	    	
+       
 	for(int i=0; i<100; i++) {
 		s.set(i,(long)i,0);
 		}
@@ -103,7 +129,11 @@ public  static void main(String[] args)throws java.io.IOException {
 
 }
 
-class HEslice extends NovaSlice implements _HazardEras_interface{
+class DeletedEntry extends RuntimeException {
+	
+	
+}
+class HEslice extends NovaSlice implements HazardEras_interface{
 	private long bornEra;
 	private long deadEra;
 	
@@ -127,6 +157,7 @@ class HEslice extends NovaSlice implements _HazardEras_interface{
 	 public long getdelEra() {
 		 return deadEra;
 	 }
+	 
 	 
 	
 }

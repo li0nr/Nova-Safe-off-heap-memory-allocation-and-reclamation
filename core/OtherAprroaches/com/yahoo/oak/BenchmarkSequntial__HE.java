@@ -86,7 +86,6 @@ public class BenchmarkSequntial__HE {
 	        System.out.println("HE"+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
 	        									+" mode:"+mode+" thread num:"+threads+ "\n");
 	        myWriter.close();
-	        System.gc();
 		}catch(Exception e) {
     		e.printStackTrace();
     	}
