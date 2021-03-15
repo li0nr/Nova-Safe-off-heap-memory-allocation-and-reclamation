@@ -124,10 +124,12 @@ class NovaSlice implements  Comparable<NovaSlice> {
 		  int ref=blockID;
 		  return ref<<20 | offset;
 	 }
+	  
+	  public long getAddress() {
+		  return address;
+	  }
 
-    long getMetadataAddress() {
-        return ((DirectBuffer) buffer).address() + offset;
-    }
+
 
     /*-------------- OakUnsafeDirectBuffer --------------*/
 
