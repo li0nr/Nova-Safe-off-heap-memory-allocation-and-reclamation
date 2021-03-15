@@ -312,8 +312,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         if (stats != null) {
             stats.release(size);
         }
-        NovafreeList.add(new NovaSlice(s));
-        //NovafreeList.add(s);// FIXME i think this should do 
+        NovafreeList.add(s);// FIXME i think this should do 
 
     }
 
