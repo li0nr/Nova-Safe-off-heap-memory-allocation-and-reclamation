@@ -279,22 +279,23 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         while (!isAllocated) {
             try {
                 // The ByteBuffer inside this slice is the thread's ByteBuffer
-                isAllocated = currentBlock.allocate(s, size);
+               // isAllocated = currentBlock.allocate(s, size+headerSize);
+                isAllocated = Blockallocate(s,size+headerSize);
             } catch (OakOutOfMemoryException e) {
                 // there is no space in current block
                 // may be a buffer bigger than any block is requested?
-                if (size > blocksProvider.blockSize()) {
+                if (size +headerSize> BLOCK_SIZE) {
                     throw new OakOutOfMemoryException();
                 }
                 // does allocation of new block brings us out of capacity?
-                if ((numberOfBlocks() + 1) * blocksProvider.blockSize() > capacity) {
+                if ((numberOfBlocks() + 1) * BLOCK_SIZE> capacity) {
                 	throw new OakOutOfMemoryException();
                 } else {
                     // going to allocate additional block (big chunk of memory)
                     // need to be thread-safe, so not many blocks are allocated
                     // locking is actually the most reasonable way of synchronization here
                     synchronized (this) {
-                        if (currentBlock.allocated() + size > currentBlock.getCapacity()) {
+                        if (curr_allocated.get() + size +headerSize> BLOCK_SIZE){
                             allocateNewCurrentBlock();
                         }
                     }
