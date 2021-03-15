@@ -38,8 +38,8 @@ class NovaManager implements MemoryManager {
     private final int blockcount;    
     private final long TAP[];
 
-    private final List<NovaReadBuffer> ReadBuffers;
-    private final List<NovaWriteBuffer> WriteBuffers;
+//    private final List<NovaReadBuffer> ReadBuffers;
+//    private final List<NovaWriteBuffer> WriteBuffers;
     private final List<NovaSlice> Slices;
 
     NovaManager(BlockMemoryAllocator allocator) {
@@ -53,15 +53,15 @@ class NovaManager implements MemoryManager {
         }
         //initialized once to be always used!
         /***************************************************/
-        NovaSlice s=new NovaSlice(0,-1,0);
-        this.ReadBuffers = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < MAX_THREADS; i++) {
-            this.ReadBuffers.add(new NovaReadBuffer(s));
-        }
-        this.WriteBuffers = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < MAX_THREADS; i++) {
-            this.WriteBuffers.add(new NovaWriteBuffer(s));
-        }
+//        NovaSlice s=new NovaSlice(0,-1,0);
+//        this.ReadBuffers = new CopyOnWriteArrayList<>();
+//        for (int i = 0; i < MAX_THREADS; i++) {
+//            this.ReadBuffers.add(new NovaReadBuffer(s));
+//        }
+//        this.WriteBuffers = new CopyOnWriteArrayList<>();
+//        for (int i = 0; i < MAX_THREADS; i++) {
+//            this.WriteBuffers.add(new NovaWriteBuffer(s));
+//        }
         /***************************************************/
         this.Slices = new ArrayList<>();
         for (int i = 0; i < MAX_THREADS; i++) {
@@ -133,7 +133,7 @@ class NovaManager implements MemoryManager {
         List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
         myReleaseList.add(new NovaSlice(block,offset,len));
         
-        if (myReleaseList.size() >= 1) {
+        if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
         	
             ArrayList<Long> releasedSlices=new ArrayList<>();
         	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {
@@ -149,10 +149,6 @@ class NovaManager implements MemoryManager {
         			itr.remove();
         		}
         	}
-//            myReleaseList.forEach(s -> {if(!containsRef(s.getAllocatedBlockID(),s.getRef()))
-//            								allocator.free(s);
-//            							});
-//            myReleaseList.removeIf(s->!containsRef(s.getAllocatedBlockID(),s.getRef()));
         }
     }
     
@@ -183,11 +179,10 @@ class NovaManager implements MemoryManager {
         allocator.readByteBuffer(s);
     }
 
-
     public ByteBuffer readByteBuffer(int block) {
         return allocator.readByteBuffer(block);
     }
-    
+
     /***************************************************/
 //    public NovaReadBuffer getReadBuffer(NovaSlice s) {
 //    	int idx = threadIndexCalculator.getIndex();

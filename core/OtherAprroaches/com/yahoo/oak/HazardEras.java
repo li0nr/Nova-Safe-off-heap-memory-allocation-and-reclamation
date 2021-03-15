@@ -31,10 +31,13 @@ public class HazardEras {
 	private static final int  HE_MAX_THREADS = 32;
 	private static final int CLPAD = 16;
 	private static final int  HE_THRESHOLD_R = 0; 
+	private static final int RELEASE_LIST_LIMIT = 1024;
+
 	private static int  MAX_HES = 5; 
 
 
     private final int             maxThreads= 32;
+    private int[] releasecounter = new int[maxThreads*CLPAD];
 
     private final AtomicLong eraClock;
     private AtomicLong[] he = new AtomicLong[HE_MAX_THREADS*MAX_HES*CLPAD];
@@ -106,17 +109,21 @@ public class HazardEras {
         ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD];
         rlist.add(obj);
         if (eraClock.get() == currEra) eraClock.getAndAdd(1);
-        HazardEras_interface toDeleteObj;
-        for (int iret = 0; iret < rlist.size();) {
-        	toDeleteObj = (HazardEras_interface)rlist.get(iret);
-            if (canDelete(toDeleteObj, mytid)) {
-            	rlist.remove(toDeleteObj);
-            	allocator.free((NovaSlice)toDeleteObj);
-             //   delete obj;
-                continue;
+        releasecounter[mytid *CLPAD]++;
+        if(releasecounter[mytid *CLPAD] == RELEASE_LIST_LIMIT) {
+            HazardEras_interface toDeleteObj;
+            for (int iret = 0; iret < rlist.size();) {
+            	toDeleteObj = (HazardEras_interface)rlist.get(iret);
+                if (canDelete(toDeleteObj, mytid)) {
+                	rlist.remove(toDeleteObj);
+                	allocator.free((NovaSlice)toDeleteObj);
+                    continue;
+                }
+                iret++;
             }
-            iret++;
+            releasecounter[mytid *CLPAD]=0;
         }
+
     }
 
 private    boolean  canDelete(HazardEras_interface obj,  int mytid) {
