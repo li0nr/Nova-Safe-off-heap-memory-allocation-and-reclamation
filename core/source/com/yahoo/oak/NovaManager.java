@@ -133,7 +133,7 @@ class NovaManager implements MemoryManager {
         List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
         myReleaseList.add(new NovaSlice(block,offset,len));
         
-        if (myReleaseList.size() >= 10) {
+        if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
         	
             ArrayList<Long> releasedSlices=new ArrayList<>();
         	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {
