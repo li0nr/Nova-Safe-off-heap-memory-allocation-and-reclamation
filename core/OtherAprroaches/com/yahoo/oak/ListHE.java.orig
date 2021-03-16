@@ -29,15 +29,21 @@ public class ListHE implements ListInterface{
 
 	public void add(Long e,int idx) {
 		if(size == Slices.length) {
-			EnsureCap();
+			EnsureCap();//might be problematic 
 		}
 
 		if(Slices[size]== null)
 			Slices[size]=new HEslice(HE.getEra());
 		allocator.allocate_otherApproaches(Slices[size], Long.BYTES);
-		//HE.get_protected(Slices[size], 1, idx); //needed? -- not measured for now!
+<<<<<<< HEAD:core/benchmarks/com/yahoo/oak/ListHE.java
+		HE.get_protected(Slices[size], 1, idx); //needed?
 		Slices[size].getByteBuffer().putLong(Slices[size].getAllocatedOffset(), e);
+	    HE.clear(1);
+=======
+		//HE.get_protected(Slices[size], 1, idx); //needed? -- not measured for now!
+		UnsafeUtils.unsafe.putLong(Slices[size].getAddress() + Slices[size].getAllocatedOffset(), e);
 	    //HE.clear(1);
+>>>>>>> 3df835b... HE more modifications:core/OtherAprroaches/com/yahoo/oak/ListHE.java
 		size++;
 	}
 	
@@ -46,9 +52,14 @@ public class ListHE implements ListInterface{
 			throw new IndexOutOfBoundsException();
 			}
 		HE.get_protected(Slices[i], 1, idx);
-		long x  = Slices[i].getByteBuffer().getLong(Slices[i].getAllocatedOffset());
+<<<<<<< HEAD:core/benchmarks/com/yahoo/oak/ListHE.java
+		return Slices[i].getByteBuffer().getLong(Slices[i].getAllocatedOffset());
+=======
+		long x= UnsafeUtils.unsafe.getLong(Slices[i].getAddress() + Slices[i].getAllocatedOffset());
 		HE.clear(idx);
-		return x;		
+		return x;
+
+>>>>>>> 3df835b... HE more modifications:core/OtherAprroaches/com/yahoo/oak/ListHE.java
 		}
 	
 
