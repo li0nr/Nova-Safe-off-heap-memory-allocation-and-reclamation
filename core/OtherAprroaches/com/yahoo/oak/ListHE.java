@@ -29,15 +29,15 @@ public class ListHE implements ListInterface{
 
 	public void add(Long e,int idx) {
 		if(size == Slices.length) {
-			EnsureCap();
+			EnsureCap();//might be problematic 
 		}
 
 		if(Slices[size]== null)
 			Slices[size]=new HEslice(HE.getEra());
 		allocator.allocate_otherApproaches(Slices[size], Long.BYTES);
-		HE.get_protected(Slices[size], 1, idx); //needed?
+		//HE.get_protected(Slices[size], 1, idx); //needed? -- not measured for now!
 		UnsafeUtils.unsafe.putLong(Slices[size].getAddress() + Slices[size].getAllocatedOffset(), e);
-	    HE.clear(1);
+	    //HE.clear(1);
 		size++;
 	}
 	
@@ -46,7 +46,9 @@ public class ListHE implements ListInterface{
 			throw new IndexOutOfBoundsException();
 			}
 		HE.get_protected(Slices[i], 1, idx);
-		return UnsafeUtils.unsafe.getLong(Slices[i].getAddress() + Slices[i].getAllocatedOffset());
+		long x= UnsafeUtils.unsafe.getLong(Slices[i].getAddress() + Slices[i].getAllocatedOffset());
+		HE.clear(idx);
+		return x;
 
 		}
 	

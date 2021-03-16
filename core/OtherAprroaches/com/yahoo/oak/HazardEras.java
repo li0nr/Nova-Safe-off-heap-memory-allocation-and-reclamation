@@ -40,7 +40,7 @@ public class HazardEras {
     private int[] releasecounter = new int[maxThreads*CLPAD];
 
     private final AtomicLong eraClock;
-    private AtomicLong[] he = new AtomicLong[HE_MAX_THREADS*MAX_HES*CLPAD];
+    private long[] he = new long[HE_MAX_THREADS*MAX_HES*CLPAD];
     private final ArrayList<HazardEras_interface>[] retiredList= new ArrayList[HE_MAX_THREADS*CLPAD];//CLPAD is for cache padding
     private final NativeMemoryAllocator allocator;
     
@@ -54,7 +54,7 @@ public class HazardEras {
             //he[it] = new std::atomic<uint64_t>[CLPAD*2]; // We allocate four cache lines to allow for many hps and without false sharing
     		//retiredList[it*CLPAD].reserve(maxThreads*maxHEs); java deals with this 
     		for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
-    			he[(it+ihe)*CLPAD]= new AtomicLong(NONE);
+    			he[(it+ihe)*CLPAD]= (NONE);
     		}
     		retiredList[it*CLPAD] = new ArrayList<HazardEras_interface>();
            // static_assert(std::is_same<decltype(T::newEra), uint64_t>::value, "T::newEra must be uint64_t");
@@ -72,7 +72,8 @@ public class HazardEras {
      */
      void clear(int tid) {
     	 for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
-    		 he[(tid+ihe)*CLPAD]= new AtomicLong(NONE);
+    		 UnsafeUtils.unsafe.fullFence();
+    		 he[(tid+ihe)*CLPAD]= 0;
     		 }
     	 }
      
@@ -82,16 +83,20 @@ public class HazardEras {
      * Progress Condition: lock-free
      */
      <T> T get_protected(T obj, int index, int tid) {
-    	 long prevEra = he[(tid+index)*CLPAD].get();
+    	 long prevEra = he[(tid+index-1)*CLPAD];
 		while (true) {
-		    T loadedOBJ= obj;
+		    T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
+		    				//A load operation with this memory order performs an acquire operation,
+		    				//a store performs a release operation,
+		    				//and read-modify-write performs both an acquire operation and a release operation,
+		    				//plus a single total order exists in which all threads observe all modifications in the same order
 			UNSAFE.loadFence();
 		    long era = eraClock.get();
 			UNSAFE.loadFence();
 
 		    if (era == prevEra) return loadedOBJ ;
-		    he[(tid+index)*CLPAD].set(era);
-		    UNSAFE.storeFence();
+		    UNSAFE.fullFence();
+		    he[(tid+index-1)*CLPAD] = era;
             prevEra = era;
 		}
     }
@@ -129,7 +134,7 @@ public class HazardEras {
 private    boolean  canDelete(HazardEras_interface obj,  int mytid) {
         for (int tid = 0; tid < maxThreads; tid++) {
             for (int ihe = 0; ihe < MAX_HES; ihe++) {
-                long era = (long)he[(tid+ihe)*CLPAD].get();
+                long era = (long)he[(tid+ihe)*CLPAD];
                 UNSAFE.loadFence();
                 if (era == NONE || era < obj.getnewEra() || era > obj.getdelEra()) continue;
                 return false;
