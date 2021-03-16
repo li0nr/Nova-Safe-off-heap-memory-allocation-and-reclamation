@@ -35,9 +35,9 @@ public class ListHE implements ListInterface{
 		if(Slices[size]== null)
 			Slices[size]=new HEslice(HE.getEra());
 		allocator.allocate_otherApproaches(Slices[size], Long.BYTES);
-		HE.get_protected(Slices[size], 1, idx); //needed?
-		Slices[size].getByteBuffer().putLong(Slices[size].getAllocatedOffset(), e);
-	    HE.clear(1);
+		//HE.get_protected(Slices[size], 1, idx); //needed? -- not measured for now!
+		UnsafeUtils.unsafe.putLong(Slices[size].getAddress() + Slices[size].getAllocatedOffset(), e);
+	    //HE.clear(1);
 		size++;
 	}
 	
@@ -46,7 +46,11 @@ public class ListHE implements ListInterface{
 			throw new IndexOutOfBoundsException();
 			}
 		HE.get_protected(Slices[i], 1, idx);
-		return Slices[i].getByteBuffer().getLong(Slices[i].getAllocatedOffset());
+		long x = UnsafeUtils.unsafe.getLong(Slices[i].getAddress() + Slices[i].getAllocatedOffset());
+
+
+		HE.clear(idx);
+		return x;		
 		}
 	
 
@@ -56,7 +60,7 @@ public class ListHE implements ListInterface{
 		}
 		HEslice access = HE.get_protected(Slices[index], 1, idx);
 		if(access != null)
-			access.getByteBuffer().putLong(access.getAllocatedOffset(), e);
+			UnsafeUtils.unsafe.putLong(Slices[index].getAddress() + Slices[index].getAllocatedOffset(),e);
 		else {
 		    HE.clear(idx);
 			throw new DeletedEntry();
