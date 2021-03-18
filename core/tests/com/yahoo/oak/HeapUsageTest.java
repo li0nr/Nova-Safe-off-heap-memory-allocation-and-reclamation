@@ -22,7 +22,7 @@ public class HeapUsageTest {
     private static final long M = K * K;
     private static int keySize = 10;
     private static int valSize = (int) Math.round(5 * K);
-
+    @Ignore		
     @Test
     public void testMain() throws InterruptedException {
 

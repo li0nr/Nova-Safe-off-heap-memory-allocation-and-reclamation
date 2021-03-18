@@ -50,6 +50,7 @@ public class HazardEras {
 		allocator = alloc;
 		MAX_HES = maxHEs;
 		eraClock = new AtomicLong(1);
+		he = new long[HE_MAX_THREADS*MAX_HES*CLPAD];
     	for(int it=0; it< HE_MAX_THREADS; it++) {
             //he[it] = new std::atomic<uint64_t>[CLPAD*2]; // We allocate four cache lines to allow for many hps and without false sharing
     		//retiredList[it*CLPAD].reserve(maxThreads*maxHEs); java deals with this 
