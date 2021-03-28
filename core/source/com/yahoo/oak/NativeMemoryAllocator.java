@@ -32,9 +32,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
      * They are sorted by the slice length, then by the block id, then by their offset.
      * See {@code Slice.compareTo(Slice)} for more information.
      */
-    private final ConcurrentSkipListSet<Slice> freeList = new ConcurrentSkipListSet<>();
-
-
     private final ConcurrentSkipListSet<NovaSlice> NovafreeList = new ConcurrentSkipListSet<>();
 
     
@@ -77,78 +74,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     // Allocates ByteBuffer of the given size, either from freeList or (if it is still possible)
     // within current block bounds.
     // Otherwise, new block is allocated within Oak memory bounds. Thread safe.
-    @Override
-    public boolean allocate(Slice s, int size, MemoryManager.Allocate allocate) {
-        // While the free list is not empty there can be a suitable free slice to reuse.
-        // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
-        // Then, we use freeList.higher(s) which returns a free slice with greater or equal length to the length of the
-        // dummy with time complexity of O(log N), where N is the number of free slices.
-        while (!freeList.isEmpty()) {
-            s.update(0, 0, size);
-            Slice bestFit = freeList.higher(s);
-            if (bestFit == null) {
-                break;
-            }
-            // If the best fit is more than REUSE_MAX_MULTIPLIER times as big than the desired length, than a new
-            // buffer is allocated instead of reusing.
-            // This means that currently buffers are not split, so there is some internal fragmentation.
-            if (bestFit.getAllocatedLength() > (REUSE_MAX_MULTIPLIER * size)) {
-                break;     // all remaining buffers are too big
-            }
-            // If multiple threads got the same bestFit only one can use it (the one which succeeds in removing it
-            // from the free list).
-            // The rest restart the while loop.
-            if (freeList.remove(bestFit)) {
-                if (stats != null) {
-                    stats.reclaim(size);
-                }
-                s.copyFrom(bestFit);
-
-                // We read again the buffer so to get the per-thread buffer.
-                // TODO: This will be redundant once we eliminate the per-thread buffers.
-                readByteBuffer(s);
-                return true;
-            }
-        }
-
-        boolean isAllocated = false;
-        // freeList is empty or there is no suitable slice
-        while (!isAllocated) {
-            try {
-                // The ByteBuffer inside this slice is the thread's ByteBuffer
-                isAllocated = currentBlock.allocate(s, size);
-            } catch (OakOutOfMemoryException e) {
-                // there is no space in current block
-                // may be a buffer bigger than any block is requested?
-                if (size > blocksProvider.blockSize()) {
-                    throw new OakOutOfMemoryException();
-                }
-                // does allocation of new block brings us out of capacity?
-                if ((numberOfBlocks() + 1) * blocksProvider.blockSize() > capacity) {
-                    throw new OakOutOfMemoryException();
-                } else {
-                    // going to allocate additional block (big chunk of memory)
-                    // need to be thread-safe, so not many blocks are allocated
-                    // locking is actually the most reasonable way of synchronization here
-                    synchronized (this) {
-                        if (currentBlock.allocated() + size > currentBlock.getCapacity()) {
-                            allocateNewCurrentBlock();
-                        }
-                    }
-                }
-            }
-        }
-        allocated.addAndGet(size);
-        if (allocate == MemoryManager.Allocate.KEY) {
-            keysAllocated.incrementAndGet();
-        } else {
-            valuesAllocated.incrementAndGet();
-        }
-        return true;
-    }
-    
-    
-    
+   
     public boolean allocate(NovaSlice s, int size) {
         // While the free list is not empty there can be a suitable free slice to reuse.
         // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
@@ -296,16 +222,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     // IMPORTANT: it is assumed free will get an allocation only initially allocated from this
     // Allocator!
     @Override
-    public void free(Slice s) {
-        int size = s.getAllocatedLength();
-        allocated.addAndGet(-size);
-        if (stats != null) {
-            stats.release(size);
-        }
-        freeList.add(new Slice(s));
-    }
-    
-    @Override
     public void free(NovaSlice s) {
     	int size = s.length;
         allocated.addAndGet(-size);
@@ -344,25 +260,13 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         return allocated.get();
     }
 
-    public int getFreeListLength() {
-        return freeList.size();
-    }
-
-
     @Override
     public boolean isClosed() {
         return closed.get();
     }
 
     // When some buffer need to be read from a random block
-    @Override
-    public void readByteBuffer(Slice s) {
-        Block b = blocksArray[s.getAllocatedBlockID()];
-        b.readByteBuffer(s);
-    }
-    
-
-    
+   
     @Override
     public void readByteBuffer(NovaSlice s) {
         Block b = blocksArray[s.getAllocatedBlockID()];

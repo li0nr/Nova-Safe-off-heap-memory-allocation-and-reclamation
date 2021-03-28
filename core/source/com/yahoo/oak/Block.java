@@ -37,20 +37,7 @@ class Block {
     }
 
     // Block manages its linear allocation. Thread safe.
-    // The returned buffer doesn't have all zero bytes.
-    boolean allocate(Slice s, int size) {
-        int now = allocated.getAndAdd(size);
-        if (now + size > this.capacity) {
-            allocated.getAndAdd(-size);
-            throw new OakOutOfMemoryException();
-        }
-        s.update(id, now, size);
-        readByteBuffer(s);
-        return true;
-    }
-    
-    
-    
+    // The returned buffer doesn't have all zero bytes.    
     boolean allocate(NovaSlice s, int size) {
         int now = allocated.getAndAdd(size );
         if (now + size  > this.capacity) {
@@ -94,11 +81,6 @@ class Block {
         assert cleaner != null;
         cleaner.clean();
     }
-
-    void readByteBuffer(Slice s) {
-        s.setBuffer(buffer);
-    }
-    
     
     ByteBuffer readByteBuffer() {
         return (buffer);

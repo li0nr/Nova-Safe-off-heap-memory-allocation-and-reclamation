@@ -33,9 +33,6 @@ interface MemoryManager extends Closeable {
      * @param size     - the size of the Slice to allocate
      * @param allocate - whether this Slice is for a key or a value
      */
-    void allocate(Slice s, int size, Allocate allocate);
-
-    
     void allocate(NovaSlice s, int size);
     /**
      * When returning an allocated Slice to the Memory Manager, depending on the implementation, there might be a
@@ -43,13 +40,10 @@ interface MemoryManager extends Closeable {
      *
      * @param s the allocation object to release
      */
-    void release(Slice s);
     
     /**
      * Fetch the buffer for an allocation that is already set with its parameters: blockID, offset and length.
-     */
-    void readByteBuffer(Slice s);
-    
+     */    
     void readByteBuffer(NovaSlice s);
 
 

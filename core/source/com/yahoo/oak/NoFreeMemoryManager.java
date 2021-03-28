@@ -27,11 +27,6 @@ class NoFreeMemoryManager implements MemoryManager {
         return valuesMemoryAllocator.allocated();
     }
 
-    @Override
-    public void allocate(Slice s, int size, Allocate allocate) {
-        boolean allocated = keysMemoryAllocator.allocate(s, size, allocate);
-        assert allocated;
-    }
 
     @Override
     public void allocate(NovaSlice s, int size) {
@@ -40,14 +35,6 @@ class NoFreeMemoryManager implements MemoryManager {
     }
 
     
-    @Override
-    public void release(Slice s) {
-    }
-
-    @Override
-    public void readByteBuffer(Slice s) {
-        keysMemoryAllocator.readByteBuffer(s);
-    }
     @Override
     public void readByteBuffer(NovaSlice s) {
         keysMemoryAllocator.readByteBuffer(s);
