@@ -26,7 +26,6 @@ class NovaSlice implements  Comparable<NovaSlice> {
     protected int length;
     protected long address;
 
-    protected ByteBuffer buffer;
 
     
     NovaSlice(int block, int offset, int len) {
@@ -36,14 +35,9 @@ class NovaSlice implements  Comparable<NovaSlice> {
     }
 
     // Used to duplicate the allocation state. Does not duplicate the buffer itself.
-    NovaSlice(NovaSlice otherSlice) {
-        copyFrom(otherSlice);
-    }
-
-    // Used by OffHeapList in "synchrobench" module, and for testings.
-    void duplicateBuffer() {
-        buffer = buffer.duplicate();
-    }
+//    NovaSlice(NovaSlice otherSlice) {
+//        copyFrom(otherSlice);
+//    }
 
     /* ------------------------------------------------------------------------------------
      * Allocation info and metadata setters
@@ -53,39 +47,31 @@ class NovaSlice implements  Comparable<NovaSlice> {
      * Updates the allocation object.
      * The buffer should be set later by the block allocator.
      */
-    void update(int blockID, int offset, int length) {
+    void update(int blockID, int offset, int length, long address) {
 //        assert headerSize <= length;
         this.blockID = blockID;
         this.offset = offset;
         this.length = length;
-        this.buffer = null;
+        this.address = address;
     }
     
-    void setAddress(long address) {
-    	this.address = address;
-    }
-
     // Copy the block allocation information from another block allocation.
-    void copyFrom(NovaSlice other) {
+    void copyFrom(NovaSlice other, long address) {
         if (other == this) {
             // No need to do anything if the input is this object
             return;
         }
         this.blockID = other.blockID;
         this.offset = other.offset;
-        this.buffer = other.buffer;
         this.length = other.length;
+        this.address = address;
     }
 
     // Set the internal buffer.
     // This method should be used only by the block memory allocator.
-    void setBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
-    }
 
-    void setLen(int len) {
-    	length=len;
-    }
+
+
     void setHeader(int version, int size) {
     	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;
     	int newVer= (version<<1 | 0) & 0xFFF;
@@ -109,6 +95,8 @@ class NovaSlice implements  Comparable<NovaSlice> {
         return length;
     }
 
+
+
     /* ------------------------------------------------------------------------------------
      * Metadata getters
      * ------------------------------------------------------------------------------------*/
@@ -130,34 +118,16 @@ class NovaSlice implements  Comparable<NovaSlice> {
 	  }
 
 
+//    long getMetadataAddress() {
+//        return ((DirectBuffer) buffer).address() + offset;
+//    }
 
     /*-------------- OakUnsafeDirectBuffer --------------*/
+    public int getOffset() {
+        return offset+headerSize;
+    }
+    
 
-//    @Override
-//    public ByteBuffer getByteBuffer() {
-//        return buffer;
-//    }
-//
-//    @Override
-//    public int getOffset() {
-//        return offset+headerSize;
-//    }
-//    
-//    public int getHeaderOffset() {
-//        return offset;
-//    }
-//
-//    @Override
-//    public int getLength() {
-//    	if(buffer == null) return this.length;
-//    	int header= (int) buffer.getLong(offset)>>24;
-//    	return header;
-//    }
-//
-//    @Override
-//    public long getAddress() {
-//        return ((DirectBuffer) buffer).address();
-//    }
 
     /*-------------- Comparable<Slice> --------------*/
 

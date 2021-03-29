@@ -6,22 +6,18 @@
 
 package com.yahoo.oak;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
+
 
 
 class NovaManager implements MemoryManager {
     static final int RELEASE_LIST_LIMIT = 1024;
     static final int MAX_THREADS = 32;
+    static final int HEADER_SIZE = 8;
     static final int INVALID_SLICE = -1;
     
     static final int IDENTRY = 0;
@@ -29,7 +25,6 @@ class NovaManager implements MemoryManager {
     static final int CACHE_PADDING = 16;
     static final int BLOCK_TAP = CACHE_PADDING*MAX_THREADS;
     
-    private final List<List<Slice>> OreleaseLists;
     private final List<List<NovaSlice>> NreleaseLists;
 
     private final AtomicInteger globalNovaNumber;
@@ -43,10 +38,6 @@ class NovaManager implements MemoryManager {
     private final List<NovaSlice> Slices;
 
     NovaManager(BlockMemoryAllocator allocator) {
-        this.OreleaseLists = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < ThreadIndexCalculator.MAX_THREADS; i++) {
-            this.OreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
-        }
         this.NreleaseLists = new CopyOnWriteArrayList<>();
         for (int i = 0; i < MAX_THREADS; i++) {
             this.NreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
@@ -100,32 +91,12 @@ class NovaManager implements MemoryManager {
         return allocator.allocated();
     }
 
-    @Override
-    public void allocate(Slice s, int size, Allocate allocate) {
-        boolean allocated = allocator.allocate(s, size, allocate);
-        assert allocated;
-        s.setVersion(globalNovaNumber.get());
-    }
     
     @Override
     public void allocate(NovaSlice s, int size) {
-        boolean allocated = allocator.allocate(s, size);
+        boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
         assert allocated;
         s.setHeader(globalNovaNumber.get(),size);
-    }
-
-    @Override
-    public void release(Slice s) {
-        int idx = 0;
-        List<Slice> myReleaseList = this.OreleaseLists.get(idx);
-        myReleaseList.add(new Slice(s));
-        if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
-            globalNovaNumber.incrementAndGet();
-            for (Slice allocToRelease : myReleaseList) {
-                allocator.free(allocToRelease);
-            }
-            myReleaseList.clear();
-        }
     }
     
     public void release(int block, int offset, int len, int idx) {
@@ -133,7 +104,7 @@ class NovaManager implements MemoryManager {
         List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
         myReleaseList.add(new NovaSlice(block,offset,len));
         
-        if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
+        if (myReleaseList.size() >= 1) {
         	
             ArrayList<Long> releasedSlices=new ArrayList<>();
         	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {
@@ -168,16 +139,6 @@ class NovaManager implements MemoryManager {
 	int i= idx%MAX_THREADS;
 	TAP[block*BLOCK_TAP+CACHE_PADDING*i+IDENTRY]=-1;
 }
-
-    @Override
-    public void readByteBuffer(Slice s) {
-        allocator.readByteBuffer(s);
-    }
-    
-    @Override 
-    public void readByteBuffer(NovaSlice s) {
-        allocator.readByteBuffer(s);
-    }
 
     public long getAdress(int blockID) {
     	return allocator.getAddress(blockID);

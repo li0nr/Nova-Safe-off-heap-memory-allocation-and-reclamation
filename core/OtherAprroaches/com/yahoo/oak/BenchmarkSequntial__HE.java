@@ -1,5 +1,4 @@
 package com.yahoo.oak;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -91,7 +90,7 @@ public class BenchmarkSequntial__HE {
     	}
     }
 
-    
+    //java -cp target/nova-0.0.1-SNAPSHOT.jar -server com.yahoo.oak.BenchmarkSequntial__HE  W 32 1000000
     public static void main(String[] args)throws java.io.IOException {
     	int lenght = 1000;
     	if(args[0]==null) {

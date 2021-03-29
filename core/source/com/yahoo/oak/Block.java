@@ -6,16 +6,12 @@
 
 package com.yahoo.oak;
 
-import sun.misc.Cleaner;
 
-import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class Block {
 
-    private final ByteBuffer buffer;
-
+	private int id;
     private final long address;
     private final int capacity;
     private final AtomicInteger allocated = new AtomicInteger(0);
@@ -25,37 +21,24 @@ class Block {
         assert capacity > 0;
         assert capacity <= Integer.MAX_VALUE; // This is exactly 2GB
         this.capacity = (int) capacity;
-//        this.id = NativeMemoryAllocator.INVALID_BLOCK_ID;
+        this.id = NativeMemoryAllocator.INVALID_BLOCK_ID;
         // Pay attention in allocateDirect the data is *zero'd out*
         // which has an overhead in clearing and you end up touching every page
-        this.buffer = ByteBuffer.allocateDirect(this.capacity);
         this.address = UnsafeUtils.unsafe.allocateMemory(this.capacity);
     }
-
+    
+    void setID(int id) {
+    	this.id = id;
+    }
 
     // Block manages its linear allocation. Thread safe.
-    // The returned buffer doesn't have all zero bytes.
-    boolean allocate(Slice s, int size) {
-        int now = allocated.getAndAdd(size);
-        if (now + size > this.capacity) {
-            allocated.getAndAdd(-size);
-            throw new OakOutOfMemoryException();
-        }
-        s.update(NativeMemoryAllocator.INVALID_BLOCK_ID, now, size);
-        readByteBuffer(s);
-        return true;
-    }
-    
-    
-    
     boolean allocate(NovaSlice s, int size) {
         int now = allocated.getAndAdd(size );
         if (now + size  > this.capacity) {
             allocated.getAndAdd(-size );
             throw new OakOutOfMemoryException();
         }
-        s.update(NativeMemoryAllocator.INVALID_BLOCK_ID, now, size);
-        readByteBuffer(s);
+        s.update(id , now, size, address);
         return true;
     }
     
@@ -74,41 +57,17 @@ class Block {
 
     // releasing the memory back to the OS, freeing the block, an opposite of allocation, not thread safe
     void clean() {
-        Field cleanerField = null;
-        try {
-            cleanerField = buffer.getClass().getDeclaredField("cleaner");
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        assert cleanerField != null;
-        cleanerField.setAccessible(true);
-        Cleaner cleaner = null;
-        try {
-            cleaner = (Cleaner) cleanerField.get(buffer);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        assert cleaner != null;
-        cleaner.clean();
-    }
-
-    void readByteBuffer(Slice s) {
-        s.setBuffer(buffer);
-    }
-    
-    
-    ByteBuffer readByteBuffer() {
-        return (buffer);
-    }
-    
-    void readByteBuffer(NovaSlice s) {
-        s.setBuffer(buffer);
+    	UnsafeUtils.unsafe.freeMemory(address);
     }
 
 
     // how many bytes a block may include, regardless allocated/free
     public int getCapacity() {
         return capacity;
+    }
+    
+    public long getAddress() {
+        return address;
     }
 
 }

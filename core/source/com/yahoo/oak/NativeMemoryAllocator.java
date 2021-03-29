@@ -7,6 +7,7 @@
 package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -22,16 +23,16 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     static final int BLOCK_SIZE =  1024* 1024; //*256
     private static final int REUSE_MAX_MULTIPLIER = 2;
     public static final int INVALID_BLOCK_ID = 0;
+    public static final int INVALID_ADDRESS = 0;
 
-    private static final int headerSize=8;
     // mapping IDs to blocks allocated solely to this Allocator
     private Block[] blocksArray;
     private static int  blockcount=0;
     private AtomicInteger curr_allocated = new AtomicInteger(0);
     
-    private long[] addressArray;
-    private long curr_address;
+
     private int curblockID=0;
+
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     /**
@@ -39,9 +40,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
      * They are sorted by the slice length, then by the block id, then by their offset.
      * See {@code Slice.compareTo(Slice)} for more information.
      */
-    private final ConcurrentSkipListSet<Slice> freeList = new ConcurrentSkipListSet<>();
-
-
     private final ConcurrentSkipListSet<NovaSlice> NovafreeList = new ConcurrentSkipListSet<>();
 
     
@@ -74,8 +72,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         int blockArraySize = ((int) (capacity / blocksProvider.blockSize())) + 1;
         blockcount= blockArraySize+1;
         // first entry of blocksArray is always empty
-   //     this.blocksArray = new Block[blockArraySize + 1];
-        this.addressArray= new long[blockArraySize + 1];
+        this.blocksArray = new Block[blockArraySize + 1];
         // initially allocate one single block from pool
         // this may lazy initialize the pool and take time if this is the first call for the pool
         allocateNewCurrentBlock();
@@ -85,36 +82,36 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     // Allocates ByteBuffer of the given size, either from freeList or (if it is still possible)
     // within current block bounds.
     // Otherwise, new block is allocated within Oak memory bounds. Thread safe.
-    @Override
-    public boolean allocate(Slice s, int size, MemoryManager.Allocate allocate) {
+   
+    public boolean allocate(NovaSlice s, int size) {
         // While the free list is not empty there can be a suitable free slice to reuse.
         // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
         // Then, we use freeList.higher(s) which returns a free slice with greater or equal length to the length of the
         // dummy with time complexity of O(log N), where N is the number of free slices.
-        while (!freeList.isEmpty()) {
-            s.update(0, 0, size);
-            Slice bestFit = freeList.higher(s);
+        while (!NovafreeList.isEmpty()) {
+            s.update(0, 0, size ,INVALID_ADDRESS );
+            NovaSlice bestFit = NovafreeList.higher(s);
             if (bestFit == null) {
                 break;
             }
             // If the best fit is more than REUSE_MAX_MULTIPLIER times as big than the desired length, than a new
             // buffer is allocated instead of reusing.
             // This means that currently buffers are not split, so there is some internal fragmentation.
-            if (bestFit.getAllocatedLength() > (REUSE_MAX_MULTIPLIER * size)) {
+            if (bestFit.getLength() > (REUSE_MAX_MULTIPLIER * size)) {
                 break;     // all remaining buffers are too big
             }
             // If multiple threads got the same bestFit only one can use it (the one which succeeds in removing it
             // from the free list).
             // The rest restart the while loop.
-            if (freeList.remove(bestFit)) {
+            if (NovafreeList.remove(bestFit)) {
                 if (stats != null) {
                     stats.reclaim(size);
                 }
-                s.copyFrom(bestFit);
-
+                s.copyFrom(bestFit,blocksArray[bestFit.blockID].getAddress());
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
-             //   readByteBuffer(s);
+                allocated.addAndGet(size);
+
                 return true;
             }
         }
@@ -133,7 +130,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                 }
                 // does allocation of new block brings us out of capacity?
                 if ((numberOfBlocks() + 1) * blocksProvider.blockSize() > capacity) {
-                    throw new OakOutOfMemoryException();
+                	throw new OakOutOfMemoryException();
                 } else {
                     // going to allocate additional block (big chunk of memory)
                     // need to be thread-safe, so not many blocks are allocated
@@ -147,79 +144,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
             }
         }
         allocated.addAndGet(size);
-        if (allocate == MemoryManager.Allocate.KEY) {
-            keysAllocated.incrementAndGet();
-        } else {
-            valuesAllocated.incrementAndGet();
-        }
-        return true;
-    }
-    
-    
-    
-    public boolean allocate(NovaSlice s, int size) {
-        // While the free list is not empty there can be a suitable free slice to reuse.
-        // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
-        // Then, we use freeList.higher(s) which returns a free slice with greater or equal length to the length of the
-        // dummy with time complexity of O(log N), where N is the number of free slices.
-        while (!NovafreeList.isEmpty()) {
-            s.update(0, 0, size+headerSize);
-            NovaSlice bestFit = NovafreeList.higher(s);
-            if (bestFit == null) {
-                break;
-            }
-            // If the best fit is more than REUSE_MAX_MULTIPLIER times as big than the desired length, than a new
-            // buffer is allocated instead of reusing.
-            // This means that currently buffers are not split, so there is some internal fragmentation.
-            if (bestFit.getLength() > (REUSE_MAX_MULTIPLIER * size)) {
-                break;     // all remaining buffers are too big
-            }
-            // If multiple threads got the same bestFit only one can use it (the one which succeeds in removing it
-            // from the free list).
-            // The rest restart the while loop.
-            if (NovafreeList.remove(bestFit)) {
-                if (stats != null) {
-                    stats.reclaim(size+headerSize);
-                }
-                s.copyFrom(bestFit);
-                s.setAddress(addressArray[s.blockID]);
-                // We read again the buffer so to get the per-thread buffer.
-                // TODO: This will be redundant once we eliminate the per-thread buffers.
-
-                allocated.addAndGet(size+headerSize);
-                return true;
-            }
-        }
-
-        boolean isAllocated = false;
-        // freeList is empty or there is no suitable slice
-        while (!isAllocated) {
-            try {
-                // The ByteBuffer inside this slice is the thread's ByteBuffer
-               // isAllocated = currentBlock.allocate(s, size+headerSize);
-                isAllocated = Blockallocate(s,size+headerSize);
-            } catch (OakOutOfMemoryException e) {
-                // there is no space in current block
-                // may be a buffer bigger than any block is requested?
-                if (size +headerSize> BLOCK_SIZE) {
-                    throw new OakOutOfMemoryException();
-                }
-                // does allocation of new block brings us out of capacity?
-                if ((numberOfBlocks() + 1) * BLOCK_SIZE> capacity) {
-                	throw new OakOutOfMemoryException();
-                } else {
-                    // going to allocate additional block (big chunk of memory)
-                    // need to be thread-safe, so not many blocks are allocated
-                    // locking is actually the most reasonable way of synchronization here
-                    synchronized (this) {
-                        if (curr_allocated.get() + size +headerSize> BLOCK_SIZE){
-                            allocateNewCurrentBlock();
-                        }
-                    }
-                }
-            }
-        }
-        allocated.addAndGet(size+headerSize);
         return true;
     }
 
@@ -227,26 +151,14 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     
     
     
-    public boolean Blockallocate(NovaSlice s, int size) {
-        int before = curr_allocated.getAndAdd(size);
-        if (before + size > BLOCK_SIZE) {
-        	curr_allocated.getAndAdd(-size);
-            throw new OakOutOfMemoryException();
-        }
-    	s.update(curblockID, before, size);
-    	s.setAddress(curr_address);
-    	return true;
-    }
     
-    
-    
-      public boolean allocate_otherApproaches(NovaSlice s, int size) {
+    public boolean allocate_otherApproaches(NovaSlice s, int size) {
         // While the free list is not empty there can be a suitable free slice to reuse.
         // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
         // Then, we use freeList.higher(s) which returns a free slice with greater or equal length to the length of the
         // dummy with time complexity of O(log N), where N is the number of free slices.
         while (!NovafreeList.isEmpty()) {
-            s.update(0, 0, size);
+            s.update(0, 0, size, INVALID_ADDRESS);
             NovaSlice bestFit = NovafreeList.higher(s);
             if (bestFit == null) {
                 break;
@@ -264,11 +176,9 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                 if (stats != null) {
                     stats.reclaim(size);
                 }
-                s.copyFrom(bestFit);
-
+                s.copyFrom(bestFit, bestFit.blockID);
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
-                readByteBuffer(s);
                 allocated.addAndGet(size);
                 return true;
             }
@@ -279,12 +189,12 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         while (!isAllocated) {
             try {
                 // The ByteBuffer inside this slice is the thread's ByteBuffer
-               // isAllocated = currentBlock.allocate(s, size+headerSize);
-                isAllocated = Blockallocate(s,size+headerSize);
+            	// isAllocated = currentBlock.allocate(s, size+headerSize);
+                isAllocated = currentBlock.allocate(s, size);
             } catch (OakOutOfMemoryException e) {
                 // there is no space in current block
                 // may be a buffer bigger than any block is requested?
-                if (size +headerSize> BLOCK_SIZE) {
+                if (size > BLOCK_SIZE) {
                     throw new OakOutOfMemoryException();
                 }
                 // does allocation of new block brings us out of capacity?
@@ -295,16 +205,18 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                     // need to be thread-safe, so not many blocks are allocated
                     // locking is actually the most reasonable way of synchronization here
                     synchronized (this) {
-                        if (curr_allocated.get() + size +headerSize> BLOCK_SIZE){
+                        if (curr_allocated.get() + size > BLOCK_SIZE){
                             allocateNewCurrentBlock();
                         }
                     }
                 }
             }
         }
-        allocated.addAndGet(size+headerSize);
+        allocated.addAndGet(size);
         return true;
     }
+
+
     
     
     
@@ -316,23 +228,12 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     // IMPORTANT: it is assumed free will get an allocation only initially allocated from this
     // Allocator!
     @Override
-    public void free(Slice s) {
-        int size = s.getAllocatedLength();
-        allocated.addAndGet(-size);
-        if (stats != null) {
-            stats.release(size);
-        }
-        freeList.add(new Slice(s));
-    }
-    
-    @Override
     public void free(NovaSlice s) {
     	int size = s.length;
         allocated.addAndGet(-size);
         if (stats != null) {
             stats.release(size);
         }
-        //NovafreeList.add(new NovaSlice(s));//FIXME check if we can remove the new
         NovafreeList.add(s);// FIXME i think this should do 
 
     }
@@ -353,8 +254,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         closed.set(true);
 
         for (int i = 1; i <= numberOfBlocks(); i++) {
-            UnsafeUtils.unsafe.freeMemory(addressArray[i]);
-
+            blocksProvider.returnBlock(b[i]);
         }
         // no need to do anything with the free list,
         // as all free list members were residing on one of the (already released) blocks
@@ -366,36 +266,17 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         return allocated.get();
     }
 
-    public int getFreeListLength() {
-        return freeList.size();
-    }
-
-
     @Override
     public boolean isClosed() {
         return closed.get();
     }
 
-    // When some buffer need to be read from a random block
-    @Override
-    public void readByteBuffer(Slice s) {
-        Block b = blocksArray[s.getAllocatedBlockID()];
-        b.readByteBuffer(s);
-    }
-    
+    // When some buffer need to be read from a random block 
     @Override
     public long getAddress(int blockid) {
-    	return addressArray[blockid];
-    }
-    @Override
-    public void readByteBuffer(NovaSlice s) {
-        Block b = blocksArray[s.getAllocatedBlockID()];
-        b.readByteBuffer(s);
-    }
-    public ByteBuffer readByteBuffer(int block) {//FIXME
-    	Block b = blocksArray[block];
-    	return b == null ? null : b.readByteBuffer();
-    }
+    	return blocksArray[blockid].getAddress();
+    }   
+
     
     @Override
     public int getBlocks() {
@@ -417,10 +298,9 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     private void allocateNewCurrentBlock() {
         Block b = blocksProvider.getBlock();
         int blockID = idGenerator.getAndIncrement();
-        curblockID = (int)blockID;
-        curr_address = UnsafeUtils.unsafe.allocateMemory(BLOCK_SIZE);
-        curr_allocated.set(0);
-    	addressArray[blockID]= curr_address;
+        this.blocksArray[blockID] = b;
+        b.setID(blockID);
+        this.currentBlock = b;
     }
 
     private long numberOfBlocks() {
@@ -429,6 +309,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
 
     private Stats stats = null;
 
+    
     public void collectStats() {
         stats = new Stats();
     }

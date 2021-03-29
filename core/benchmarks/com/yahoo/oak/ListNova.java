@@ -1,5 +1,6 @@
 package com.yahoo.oak;
 
+
 import java.util.Arrays;
 //import org.junit.Test;
 
@@ -63,14 +64,13 @@ public class ListNova implements ListInterface{
 			throw new IndexOutOfBoundsException();
 		}
 		ArrayOfFacades[index].AllocateSlice(8, threadidx);
-
 	}
+	
 	public boolean delete(int index, int threadidx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
 		return  ArrayOfFacades[index].Delete(threadidx);
-
 	}
 	
 	

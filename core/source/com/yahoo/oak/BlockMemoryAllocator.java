@@ -16,15 +16,11 @@ import java.nio.ByteBuffer;
  */
 interface BlockMemoryAllocator {
 
-    // Allocates a portion of a block of the given size, thread safe.
-    boolean allocate(Slice s, int size, MemoryManager.Allocate allocate);
-    
+    // Allocates a portion of a block of the given size, thread safe.    
     boolean allocate(NovaSlice s, int size);
 
     // Releases a portion of a block (makes it available for reuse) without other GC consideration.
-    // IMPORTANT: it is assumed free will get an allocation only initially allocated from this Allocator!
-    void free(Slice s);
-    
+    // IMPORTANT: it is assumed free will get an allocation only initially allocated from this Allocator!    
     void free(NovaSlice s);
 
 
@@ -34,15 +30,9 @@ interface BlockMemoryAllocator {
     // Returns the memory allocation of this OakMap (this Allocator)
     long allocated();
 
-    // Read the buffer from an allocation object that its parameters are set: blockID, offset and length
-    void readByteBuffer(Slice s);
-    
-    void readByteBuffer(NovaSlice s);
-    
+    // Read the buffer from an allocation object that its parameters are set: blockID, offset and length        
     long getAddress(int blockID);
-    
-    ByteBuffer readByteBuffer(int block);
-    
+        
     int getBlocks();
 
     // Check if this Allocator was already closed
