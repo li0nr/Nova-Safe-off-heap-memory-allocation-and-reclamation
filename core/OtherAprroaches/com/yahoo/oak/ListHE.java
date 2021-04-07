@@ -45,10 +45,16 @@ public class ListHE implements ListInterface{
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 			}
-		HE.get_protected(Slices[i], 1, idx);
-		long x= UnsafeUtils.unsafe.getLong(Slices[i].getAddress() + Slices[i].getAllocatedOffset());
+		long x;
+		HEslice access = HE.get_protected(Slices[idx], 1, idx);
+		if(access != null)
+			x  = UnsafeUtils.unsafe.getLong(Slices[i].getAddress() + Slices[i].getAllocatedOffset());	
+		else {
+			HE.clear(idx);
+			throw new DeletedEntry();
+		}		
 		HE.clear(idx);
-		return x;
+		return x;	
 
 		}
 	
@@ -160,7 +166,4 @@ class HEslice extends NovaSlice implements HazardEras_interface{
 	 public long getdelEra() {
 		 return deadEra;
 	 }
-	 
-	 
-	
 }
