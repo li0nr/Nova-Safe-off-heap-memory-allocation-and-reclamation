@@ -9,14 +9,11 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
@@ -24,7 +21,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-public class ListHEReadBenchmark {
+
+public class ListHESeq {
 
 	  
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
@@ -84,11 +82,25 @@ public class ListHEReadBenchmark {
     }
     
     
+    @Warmup(iterations = MYParam.warmups)
+    @Measurement(iterations = MYParam.iterations)
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(value = 0)
+    @Benchmark
+    public void WriteHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+        for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
+        		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
+        						  BenchmarkState.LIST_SIZE/ThreadState.threads
+        		&& i<BenchmarkState.LIST_SIZE; i++ ) {
+        	state.list.set(i, i*2,threadState.i);
+    	}
+    }
     
     
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(ListHEReadBenchmark.class.getSimpleName())
+                .include(ListHESeq.class.getSimpleName())
                 .forks(MYParam.forks)
                 .threads(4)
                 .build();
