@@ -27,9 +27,9 @@ public class HazardEras {
  * @author Andreia Correia
  */
 
-	private static final long NONE = 0;
+	private static final long NONE = -1;
 	private static final int  HE_MAX_THREADS = 32;
-	private static final int CLPAD = 16;
+	private static final int CLPAD = 33;
 	private static final int  HE_THRESHOLD_R = 0; 
 	private static final int RELEASE_LIST_LIMIT = 1024;
 
@@ -55,7 +55,7 @@ public class HazardEras {
             //he[it] = new std::atomic<uint64_t>[CLPAD*2]; // We allocate four cache lines to allow for many hps and without false sharing
     		//retiredList[it*CLPAD].reserve(maxThreads*maxHEs); java deals with this 
     		for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
-    			he[(it+ihe)*CLPAD]= (NONE);
+    			he[it*CLPAD + 16 + ihe]= (NONE);
     		}
     		retiredList[it*CLPAD] = new ArrayList<HazardEras_interface>();
            // static_assert(std::is_same<decltype(T::newEra), uint64_t>::value, "T::newEra must be uint64_t");
@@ -74,8 +74,8 @@ public class HazardEras {
      void clear(int tid) {
     	 for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
     		 UnsafeUtils.unsafe.fullFence();
-    		 he[(tid+ihe)*CLPAD]= 0;
-    		 }
+    			he[(tid)*CLPAD+16+ihe] = 0;
+    			}
     	 }
      
      
@@ -83,22 +83,22 @@ public class HazardEras {
     /**
      * Progress Condition: lock-free
      */
-     <T> T get_protected(T obj, int index, int tid) {
-    	 long prevEra = he[(tid+index-1)*CLPAD];
-		while (true) {
-		    T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
+     <T> T get_protected(T obj, int ihe, int tid) {
+    	 long prevEra = he[(tid)*CLPAD+16+ihe];
+    	 while (true) {
+    		 T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
 		    				//A load operation with this memory order performs an acquire operation,
 		    				//a store performs a release operation,
 		    				//and read-modify-write performs both an acquire operation and a release operation,
 		    				//plus a single total order exists in which all threads observe all modifications in the same order
-			UNSAFE.loadFence();
-		    long era = eraClock.get();
-			UNSAFE.loadFence();
+    		 UNSAFE.loadFence(); 
+    		 long era = eraClock.get();
+    		 UNSAFE.loadFence(); ////must be here this is aquvilent to the acquire 
 
-		    if (era == prevEra) return loadedOBJ ;
-		    UNSAFE.fullFence();
-		    he[(tid+index-1)*CLPAD] = era;
-            prevEra = era;
+    		 if (era == prevEra) return loadedOBJ ;
+    		 UNSAFE.fullFence(); 
+    		 he[((tid)*CLPAD+16+ihe)*CLPAD] = era; //TODO he must be volatile
+    		 prevEra = era;
 		}
     }
 
@@ -112,11 +112,11 @@ public class HazardEras {
         long currEra = eraClock.get();
 //        ptr->delEra = currEra;
         obj.setDeleteEra(currEra);
-        ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD];
+        ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD+ 16];
         rlist.add(obj);
         if (eraClock.get() == currEra) eraClock.getAndAdd(1);
-        releasecounter[mytid *CLPAD]++;
-        if(releasecounter[mytid *CLPAD] == RELEASE_LIST_LIMIT) {
+        releasecounter[mytid *CLPAD + 16]++;
+        if(releasecounter[mytid *CLPAD + 16] == RELEASE_LIST_LIMIT) {
             HazardEras_interface toDeleteObj;
             for (int iret = 0; iret < rlist.size();) {
             	toDeleteObj = (HazardEras_interface)rlist.get(iret);
@@ -127,7 +127,7 @@ public class HazardEras {
                 }
                 iret++;
             }
-            releasecounter[mytid *CLPAD]=0;
+            releasecounter[mytid *CLPAD+ 16]=0;
         }
 
     }
@@ -135,7 +135,7 @@ public class HazardEras {
 private    boolean  canDelete(HazardEras_interface obj,  int mytid) {
         for (int tid = 0; tid < maxThreads; tid++) {
             for (int ihe = 0; ihe < MAX_HES; ihe++) {
-                long era = (long)he[(tid+ihe)*CLPAD];
+                long era = he[tid*CLPAD + 16 + ihe]; //we want to garantue that the last updated he is seen
                 UNSAFE.loadFence();
                 if (era == NONE || era < obj.getnewEra() || era > obj.getdelEra()) continue;
                 return false;

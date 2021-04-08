@@ -96,20 +96,20 @@ public class ListNovaSeq {
     }
     
     
-    @Warmup(iterations = MYParam.warmups)
-    @Measurement(iterations = MYParam.iterations)
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Fork(value = 0)
-    @Benchmark
-    public void empty(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-        for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
-        		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
-        						  BenchmarkState.LIST_SIZE/ThreadState.threads
-        		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-    	}
-    }
-    
+//    @Warmup(iterations = MYParam.warmups)
+//    @Measurement(iterations = MYParam.iterations)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    @Fork(value = 0)
+//    @Benchmark
+//    public void empty(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+//        for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
+//        		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
+//        						  BenchmarkState.LIST_SIZE/ThreadState.threads
+//        		&& i<BenchmarkState.LIST_SIZE; i++ ) {
+//    	}
+//    }
+//    
     
     
     
