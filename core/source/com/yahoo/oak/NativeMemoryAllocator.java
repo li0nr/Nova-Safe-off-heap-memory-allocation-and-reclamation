@@ -176,7 +176,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                 if (stats != null) {
                     stats.reclaim(size);
                 }
-                s.copyFrom(bestFit, bestFit.blockID);
+                s.copyFrom(bestFit,blocksArray[bestFit.blockID].getAddress());
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
                 allocated.addAndGet(size);
@@ -205,7 +205,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                     // need to be thread-safe, so not many blocks are allocated
                     // locking is actually the most reasonable way of synchronization here
                     synchronized (this) {
-                        if (curr_allocated.get() + size > BLOCK_SIZE){
+                        if (currentBlock.allocated() + size > currentBlock.getCapacity()) {
                             allocateNewCurrentBlock();
                         }
                     }
