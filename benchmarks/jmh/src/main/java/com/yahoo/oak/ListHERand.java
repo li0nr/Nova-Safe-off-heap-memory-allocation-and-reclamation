@@ -100,7 +100,7 @@ public class ListHERand {
   
   public static void main(String[] args) throws RunnerException {
       Options opt = new OptionsBuilder()
-              .include(ListNovaRand.class.getSimpleName())
+              .include(ListHERand.class.getSimpleName())
               .forks(MYParam.forks)
               .threads(4)
               .build();

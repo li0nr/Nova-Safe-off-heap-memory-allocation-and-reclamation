@@ -97,7 +97,7 @@ public class HazardEras {
 
     		 if (era == prevEra) return loadedOBJ ;
     		 UNSAFE.fullFence(); 
-    		 he[((tid)*CLPAD+16+ihe)*CLPAD] = era; //TODO he must be volatile
+    		 he[tid*CLPAD+16+ihe] = era; //TODO he must be volatile
     		 prevEra = era;
 		}
     }

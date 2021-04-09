@@ -70,7 +70,7 @@ public class ReadWrite {
 		@BenchmarkMode(Mode.AverageTime)
 		@OutputTimeUnit(TimeUnit.MILLISECONDS)
 		@Group("HE")
-	    @GroupThreads(3)
+	    @GroupThreads(15)
 		@Fork(value = 0)
 		@Benchmark
 		public void HERead(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
@@ -108,7 +108,7 @@ public class ReadWrite {
 		@BenchmarkMode(Mode.AverageTime)
 		@OutputTimeUnit(TimeUnit.MILLISECONDS)
 		@Group("Nova")
-	    @GroupThreads(31)
+	    @GroupThreads(15)
 		@Fork(value = 0)
 		@Benchmark
 		public void NovaRead(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
@@ -149,7 +149,7 @@ public class ReadWrite {
 		@BenchmarkMode(Mode.AverageTime)
 		@OutputTimeUnit(TimeUnit.MILLISECONDS)
 		@Group("Un")
-	    @GroupThreads(31)
+	    @GroupThreads(15)
 		@Fork(value = 0)
 		@Benchmark
 		public void UnRead(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {

@@ -100,7 +100,7 @@ public class ListUnSeq {
     
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(ListHESeq.class.getSimpleName())
+                .include(ListUnSeq.class.getSimpleName())
                 .forks(MYParam.forks)
                 .threads(4)
                 .build();

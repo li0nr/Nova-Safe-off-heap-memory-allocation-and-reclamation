@@ -100,7 +100,7 @@ public class ListUnRand {
   
   public static void main(String[] args) throws RunnerException {
       Options opt = new OptionsBuilder()
-              .include(ListNovaRand.class.getSimpleName())
+              .include(ListUnRand.class.getSimpleName())
               .forks(MYParam.forks)
               .threads(4)
               .build();

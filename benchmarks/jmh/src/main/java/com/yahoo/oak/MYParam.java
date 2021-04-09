@@ -14,7 +14,8 @@ public class MYParam {
 	static final int thread24=24;
 	static final int thread32=32;
  
-	static final int G_LIST_SIZE = 1000000;
+	static final int G_LIST_SIZE = 10000000;
+	
 	static final int Limit = G_LIST_SIZE/4;
 	static final int range = 2500;
 	static final int forks = 0;
