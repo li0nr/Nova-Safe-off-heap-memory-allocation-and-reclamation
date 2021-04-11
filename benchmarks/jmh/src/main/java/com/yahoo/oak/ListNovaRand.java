@@ -68,19 +68,19 @@ public class ListNovaRand {
       
   }
   
-//  @Warmup(iterations = MYParam.warmups)
-//  @Measurement(iterations = MYParam.iterations)
-//  @BenchmarkMode(Mode.AverageTime)
-//  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//  @Fork(value = 0)
-//  @Benchmark
-//  public void ReadNova(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	  int i = 0;
-//	  while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
-//      	blackhole.consume(state.list.get(threadState.rand.nextInt(MYParam.G_LIST_SIZE),threadState.i));
-//      	i++;
-//  	}
-//  }
+  @Warmup(iterations = MYParam.warmups)
+  @Measurement(iterations = MYParam.iterations)
+  @BenchmarkMode(Mode.AverageTime)
+  @OutputTimeUnit(TimeUnit.MILLISECONDS)
+  @Fork(value = 0)
+  @Benchmark
+  public void ReadNova(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+	  int i = 0;
+	  while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
+      	blackhole.consume(state.list.get(threadState.rand.nextInt(MYParam.G_LIST_SIZE),threadState.i));
+      	i++;
+  	}
+  }
   
   @Warmup(iterations = MYParam.warmups)
   @Measurement(iterations = MYParam.iterations)

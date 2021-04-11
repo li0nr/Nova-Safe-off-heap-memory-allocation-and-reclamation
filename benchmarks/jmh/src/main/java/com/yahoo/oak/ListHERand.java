@@ -32,11 +32,11 @@ public class ListHERand {
   public static class BenchmarkState {
 
   	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-      private ListOffHeap list ;
+      private ListHE list ;
 
       @Setup
       public void setup() {
-      	list= new ListOffHeap();
+      	list= new ListHE();
       	for (int i=0; i <LIST_SIZE ; i++) {
       		list.add((long)i,0);
       	}

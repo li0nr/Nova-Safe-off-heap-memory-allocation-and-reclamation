@@ -3,7 +3,7 @@ package com.yahoo.oak;
 import org.junit.Test;
 
 
-	public class HeListTest {
+	public class ListHETest {
 		static final int  LIST_SIZE = 50;
 		static final int  MAGIC_NUM = 96;
 
