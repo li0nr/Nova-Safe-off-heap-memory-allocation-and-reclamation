@@ -2,8 +2,8 @@ import subprocess
 import os
 import time
 
-List = ["Nova"]
-threads = ["1", "2", "4", "8"]#,"20","24","28","32"]
+List = ["Un", "Nova", "HE"]
+threads = ["1", "2", "4", "8", "12", "16"]#,"20","24","28","32"]
 modes = ["Seq", "Rand"]
 operation = ["Write", "Read"]
 
