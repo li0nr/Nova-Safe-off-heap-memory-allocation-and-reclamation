@@ -67,44 +67,43 @@ public class ListHERand {
 
 
   
-  @Warmup(iterations = MYParam.warmups)
-  @Measurement(iterations = MYParam.iterations)
-  @BenchmarkMode(Mode.AverageTime)
-  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 0)
-  @Benchmark
-  public void ReadHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-	  int i = 0;
-	  while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
-      	blackhole.consume(state.list.get(threadState.rand.nextInt(MYParam.G_LIST_SIZE),threadState.i));
-      	i++;
-  	}
-  }
+	@Warmup(iterations = MYParam.warmups)
+	@Measurement(iterations = MYParam.iterations)
+	@BenchmarkMode(Mode.AverageTime)
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	@Fork(value = 0)
+	@Benchmark
+	public void ReadHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+		int i = 0;
+		while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
+			blackhole.consume(state.list.get(threadState.rand.nextInt(MYParam.G_LIST_SIZE),threadState.i));
+			i++;
+			}
+		}
   
-  @Warmup(iterations = MYParam.warmups)
-  @Measurement(iterations = MYParam.iterations)
-  @BenchmarkMode(Mode.AverageTime)
-  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 0)
-  @Benchmark
-  public void WriteHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-	  int i = 0;
-	  while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
-      	state.list.set(threadState.rand.nextInt(MYParam.G_LIST_SIZE), i*2,threadState.i);
-      	i++;
-  	}
-  }
+	@Warmup(iterations = MYParam.warmups)
+	@Measurement(iterations = MYParam.iterations)
+	@BenchmarkMode(Mode.AverageTime)
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	@Fork(value = 0)
+	@Benchmark
+	public void WriteHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+		int i = 0;
+		while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
+			blackhole.consume(state.list.set(threadState.rand.nextInt(MYParam.G_LIST_SIZE), i*2,threadState.i));
+			i++;
+			}
+		}
   
 
   
-  public static void main(String[] args) throws RunnerException {
-      Options opt = new OptionsBuilder()
-              .include(ListHERand.class.getSimpleName())
-              .forks(MYParam.forks)
-              .threads(4)
-              .build();
-
-      new Runner(opt).run();
-  }
- 
+	public static void main(String[] args) throws RunnerException {
+		Options opt = new OptionsBuilder()
+				.include(ListHERand.class.getSimpleName())
+				.forks(MYParam.forks)
+				.threads(4)
+				.build();
+		
+		new Runner(opt).run();
+		}
 }

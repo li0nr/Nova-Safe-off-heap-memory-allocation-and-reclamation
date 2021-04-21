@@ -91,7 +91,7 @@ public class ListUnSeq {
         		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
         						  BenchmarkState.LIST_SIZE/ThreadState.threads
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.list.set( i,2 *i,threadState.i);
+        	blackhole.consume(state.list.set( i,2 *i,threadState.i));
     	}
     }
     

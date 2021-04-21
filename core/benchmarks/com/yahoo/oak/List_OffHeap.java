@@ -26,7 +26,7 @@ public class List_OffHeap implements ListInterface{
 	public List_OffHeap(int capacity){
 		ArrayOff=new ByteBuffer[capacity];
 	}
-	public void add(Long e, int idx) {
+	public boolean add(Long e, int idx) {
 		if(size == ArrayOff.length) {
 			EnsureCap();
 		}
@@ -35,6 +35,7 @@ public class List_OffHeap implements ListInterface{
 			ArrayOff[size]= ByteBuffer.allocateDirect(Long.BYTES);
 		ArrayOff[size].putLong(e);
 		size++;
+		return true;
 	}
 	
 	public long get(int i,int idx) {
@@ -44,12 +45,15 @@ public class List_OffHeap implements ListInterface{
 			return ArrayOff[i].getLong(0);
 	}
 	
-	public void set(int index, long e,int idx) {
+	public boolean set(int index, long e,int idx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
 
-		 ArrayOff[index].putLong(0, e);
+		 if (ArrayOff[index].putLong(0, e)!= null)
+			 return true;
+		 else 
+			 return false;
 	}
 	
 	

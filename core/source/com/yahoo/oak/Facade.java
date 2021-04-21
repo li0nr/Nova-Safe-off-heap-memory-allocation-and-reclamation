@@ -119,7 +119,7 @@ public class Facade {
 	}
 	
 	
-	public void Write(long toWrite,int idx ) {//for now write doesnt take lambda for writing 
+	public Facade Write(long toWrite,int idx ) {//for now write doesnt take lambda for writing 
 
 		long facademeta = FacadeMetaData;
 		if(facademeta%2==DELETED) {
@@ -145,15 +145,11 @@ public class Facade {
 			}
 //		T ResultToReturn= caluclate(sliceLocated.s,f);
 		 UNSAFE.putLong(address+NovaManager.HEADER_SIZE+offset, toWrite);	
-
-
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
             novaManager.UnsetTap(block,idx);
             }
-
-		
-		
+		 return this;
 	}
 	
 	

@@ -90,7 +90,7 @@ public class ListNovaSeq {
         		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
         						  BenchmarkState.LIST_SIZE/ThreadState.threads
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	state.list.set(i, i*2,threadState.i);
+        	blackhole.consume(state.list.set(i, i*2,threadState.i));
     	}
     }
     
@@ -108,18 +108,16 @@ public class ListNovaSeq {
 //        		&& i<BenchmarkState.LIST_SIZE; i++ ) {
 //    	}
 //    }
-//    
     
     
     
     public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(ListNovaSeq.class.getSimpleName())
+    	Options opt = new OptionsBuilder()
+    			.include(ListNovaSeq.class.getSimpleName())
                 .forks(MYParam.forks)
                 .threads(4)
                 .build();
 
-        new Runner(opt).run();
+    	new Runner(opt).run();
     }
-
 }

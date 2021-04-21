@@ -27,7 +27,7 @@ public class List_HE implements ListInterface{
 
 	}
 
-	public void add(Long e,int idx) {
+	public boolean add(Long e,int idx) {
 		if(size == Slices.length) {
 			EnsureCap();//might be problematic 
 		}
@@ -38,6 +38,7 @@ public class List_HE implements ListInterface{
 		UnsafeUtils.unsafe.putLong(Slices[size].getAddress() + Slices[size].getAllocatedOffset(), e);
 	    HE.clear(idx);
 		size++;
+		return true;
 	}
 	
 	public long get(int i, int idx) {
@@ -57,19 +58,20 @@ public class List_HE implements ListInterface{
 		}
 	
 
-	public void set(int index, long e, int idx)  {
+	public boolean set(int index, long e, int idx)  {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
 		HEslice access = HE.get_protected(Slices[index], 0, idx);
-		if(access != null)
+		if(access != null) {
 			UnsafeUtils.unsafe.putLong(Slices[index].getAddress() + Slices[index].getAllocatedOffset(),e);
+		}
 		else {
 		    HE.clear(idx);
-			throw new DeletedEntry();
+		    return false;
 		}
 		HE.clear(idx);
-
+		return true;
 		}
 	
 	public void allocate(int index, int threadidx) {
@@ -136,10 +138,8 @@ public  static void main(String[] args)throws java.io.IOException {
 
 }
 
-class DeletedEntry extends RuntimeException {
-	
-	
-}
+class DeletedEntry extends RuntimeException {}
+
 class HEslice extends NovaSlice implements HazardEras_interface{
 	private long bornEra;
 	private long deadEra;

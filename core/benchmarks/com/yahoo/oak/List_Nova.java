@@ -32,7 +32,7 @@ public class List_Nova implements ListInterface{
 
 	}
 
-	public void add(Long e,int idx) {
+	public boolean add(Long e,int idx) {
 		if(size == ArrayOfFacades.length) {
 			EnsureCap();
 		}
@@ -42,6 +42,7 @@ public class List_Nova implements ListInterface{
 		ArrayOfFacades[size].AllocateSlice(Long.BYTES,idx);
 	    ArrayOfFacades[size].Write(e,idx);
 	    size++;
+	    return true;
 	}
 	
 	public long get(int i, int idx) {
@@ -51,12 +52,14 @@ public class List_Nova implements ListInterface{
 		return ArrayOfFacades[i].Read();
 	}
 	
-	public void set(int index, long e, int idx) {
+	public boolean set(int index, long e, int idx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
-
-		 ArrayOfFacades[index].Write(e,idx);
+		 if(ArrayOfFacades[index].Write(e,idx) != null)
+			 return true;
+		 else 
+			 return false;
 	}
 	
 	public void allocate(int index, int threadidx) {
