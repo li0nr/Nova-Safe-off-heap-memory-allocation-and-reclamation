@@ -103,7 +103,8 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
                 if (stats != null) {
                     stats.reclaim(size);
                 }
-                s.copyFrom(bestFit,blocksArray[bestFit.blockID].getAddress());
+                s.copyFrom(bestFit);
+                s.setAddress(blocksArray[bestFit.blockID].getAddress());
                 // We read again the buffer so to get the per-thread buffer.
                 // TODO: This will be redundant once we eliminate the per-thread buffers.
                 allocated.addAndGet(size);

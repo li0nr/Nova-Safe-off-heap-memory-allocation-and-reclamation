@@ -6,8 +6,6 @@
 
 package com.yahoo.oak;
 
-import java.nio.ByteBuffer;
-
 
 // Represents a portion of a bigger block which is part of the underlying managed memory.
 // It is allocated via block memory allocator, and can be de-allocated later
@@ -19,8 +17,6 @@ class NovaSlice implements  Comparable<NovaSlice> {
      * In future implementations, the header size should be part of the allocation and defined
      * by the allocator/memory-manager using the update() method.
      */
-	protected final static int headerSize=8;
-
     protected int blockID;
     protected int offset;
     protected int length;
@@ -35,9 +31,9 @@ class NovaSlice implements  Comparable<NovaSlice> {
     }
 
     // Used to duplicate the allocation state. Does not duplicate the buffer itself.
-//    NovaSlice(NovaSlice otherSlice) {
-//        copyFrom(otherSlice);
-//    }
+    NovaSlice(NovaSlice otherSlice) {
+        copyFrom(otherSlice);
+    }
 
     /* ------------------------------------------------------------------------------------
      * Allocation info and metadata setters
@@ -48,7 +44,6 @@ class NovaSlice implements  Comparable<NovaSlice> {
      * The buffer should be set later by the block allocator.
      */
     void update(int blockID, int offset, int length, long address) {
-//        assert headerSize <= length;
         this.blockID = blockID;
         this.offset = offset;
         this.length = length;
@@ -56,7 +51,7 @@ class NovaSlice implements  Comparable<NovaSlice> {
     }
     
     // Copy the block allocation information from another block allocation.
-    void copyFrom(NovaSlice other, long address) {
+    void copyFrom(NovaSlice other) {
         if (other == this) {
             // No need to do anything if the input is this object
             return;
@@ -64,24 +59,24 @@ class NovaSlice implements  Comparable<NovaSlice> {
         this.blockID = other.blockID;
         this.offset = other.offset;
         this.length = other.length;
-        this.address = address;
     }
 
-    // Set the internal buffer.
-    // This method should be used only by the block memory allocator.
-
+    void setAddress(long address) {
+    	this.address = address;
+	}
 
 
     void setHeader(int version, int size) {
-    	long header_slice= (size+headerSize) <<24 & 0xFFFFF000;
-    	int newVer= (version<<1 | 0) & 0xFFF;
-    	long header=header_slice | newVer ;
+    	long header_slice	= (size+NovaManager.HEADER_SIZE) <<24 & 0xFFFFF000;
+    	int  newVer			= (version<<1 | 0) & 0xFFF;
+    	long header			= header_slice | newVer ;
+    	
     	UnsafeUtils.unsafe.putLong(address+offset, header);
-    }
+	}
 
-//    /* ------------------------------------------------------------------------------------
-//     * Allocation info getters
-//     * ------------------------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------------
+     * Allocation info getters
+     * ------------------------------------------------------------------------------------*/
 
     int getAllocatedBlockID() {
         return blockID;
@@ -94,6 +89,10 @@ class NovaSlice implements  Comparable<NovaSlice> {
     int getLength() {
         return length;
     }
+	  
+    long getAddress() {
+    	return address;
+	}
 
 
 
@@ -101,32 +100,16 @@ class NovaSlice implements  Comparable<NovaSlice> {
      * Metadata getters
      * ------------------------------------------------------------------------------------*/
 
-//    boolean isValidVersion() {
-//    //    return version != EntrySet.INVALID_VERSION;
-//    }
-//
     long getVersion() {
     	return UnsafeUtils.unsafe.getLong(address+offset)& 0xFFFFFF;
-    }
-	  long getRef() {
-		  int ref=blockID;
-		  return ref<<20 | offset;
-	 }
-	  
-	  public long getAddress() {
-		  return address;
-	  }
-
-
-//    long getMetadataAddress() {
-//        return ((DirectBuffer) buffer).address() + offset;
-//    }
-
-    /*-------------- OakUnsafeDirectBuffer --------------*/
-    public int getOffset() {
-        return offset+headerSize;
-    }
+	}
     
+    long getRef() {
+    	int ref=blockID;
+    	return ref<<20 | offset;
+	}
+
+
 
 
     /*-------------- Comparable<Slice> --------------*/
