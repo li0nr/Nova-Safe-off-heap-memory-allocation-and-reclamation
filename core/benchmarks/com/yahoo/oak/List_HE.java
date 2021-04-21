@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.openjdk.jmh.runner.RunnerException;
 
-public class ListHE implements ListInterface{
+public class List_HE implements ListInterface{
 	
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
@@ -17,12 +17,12 @@ public class ListHE implements ListInterface{
 	private volatile HEslice[] Slices;
 
 	
-	public ListHE(){
+	public List_HE(){
 		Slices = new HEslice[DEFAULT_CAPACITY];
 
 	}
 	
-	public ListHE(int capacity){
+	public List_HE(int capacity){
 		Slices = new HEslice[capacity];
 
 	}
@@ -31,20 +31,18 @@ public class ListHE implements ListInterface{
 		if(size == Slices.length) {
 			EnsureCap();//might be problematic 
 		}
-
 		if(Slices[size]== null)
 			Slices[size]=new HEslice(HE.getEra());
-		allocator.allocate_otherApproaches(Slices[size], Long.BYTES);
-		//HE.get_protected(Slices[size], 1, idx); //needed? -- not measured for now!
+		HEslice access = HE.get_protected(Slices[size], 0, idx);
+		allocator.allocate(Slices[size], Long.BYTES);
 		UnsafeUtils.unsafe.putLong(Slices[size].getAddress() + Slices[size].getAllocatedOffset(), e);
-	    //HE.clear(1);
+	    HE.clear(idx);
 		size++;
 	}
 	
 	public long get(int i, int idx) {
-		if(i>= size || i<0) {
+		if(i>= size || i<0) 
 			throw new IndexOutOfBoundsException();
-			}
 		long x;
 		HEslice access = HE.get_protected(Slices[idx], 0, idx);
 		if(access != null)
@@ -113,7 +111,7 @@ public void close()  {
 public  static void main(String[] args)throws java.io.IOException {
 
 	
-	ListHE s = new ListHE();
+	List_HE s = new List_HE();
 	for(int i=0; i<100; i++) {
 		s.add((long)i,0);
 		}

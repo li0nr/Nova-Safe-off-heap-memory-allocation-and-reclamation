@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 class NovaManager implements MemoryManager {
     static final int RELEASE_LIST_LIMIT = 1024;
     static final int MAX_THREADS = 32;
-    static final int HEADER_SIZE = 8;
     static final int INVALID_SLICE = -1;
     
+    static final int HEADER_SIZE = Long.BYTES;
     static final int IDENTRY = 0;
     static final int REFENTRY = 1;
     static final int CACHE_PADDING = 16;
@@ -104,7 +104,7 @@ class NovaManager implements MemoryManager {
         List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
         myReleaseList.add(new NovaSlice(block,offset,len));
         
-        if (myReleaseList.size() >= 1) {
+        if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
         	
             ArrayList<Long> releasedSlices=new ArrayList<>();
         	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {

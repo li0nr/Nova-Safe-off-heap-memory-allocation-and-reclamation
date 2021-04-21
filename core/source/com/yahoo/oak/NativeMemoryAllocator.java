@@ -145,81 +145,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         }
         allocated.addAndGet(size);
         return true;
-    }
-
-    
-    
-    
-    
-    
-    public boolean allocate_otherApproaches(NovaSlice s, int size) {
-        // While the free list is not empty there can be a suitable free slice to reuse.
-        // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
-        // Then, we use freeList.higher(s) which returns a free slice with greater or equal length to the length of the
-        // dummy with time complexity of O(log N), where N is the number of free slices.
-        while (!NovafreeList.isEmpty()) {
-            s.update(0, 0, size, INVALID_ADDRESS);
-            NovaSlice bestFit = NovafreeList.higher(s);
-            if (bestFit == null) {
-                break;
-            }
-            // If the best fit is more than REUSE_MAX_MULTIPLIER times as big than the desired length, than a new
-            // buffer is allocated instead of reusing.
-            // This means that currently buffers are not split, so there is some internal fragmentation.
-            if (bestFit.getLength() > (REUSE_MAX_MULTIPLIER * size)) {
-                break;     // all remaining buffers are too big
-            }
-            // If multiple threads got the same bestFit only one can use it (the one which succeeds in removing it
-            // from the free list).
-            // The rest restart the while loop.
-            if (NovafreeList.remove(bestFit)) {
-                if (stats != null) {
-                    stats.reclaim(size);
-                }
-                s.copyFrom(bestFit,blocksArray[bestFit.blockID].getAddress());
-                // We read again the buffer so to get the per-thread buffer.
-                // TODO: This will be redundant once we eliminate the per-thread buffers.
-                allocated.addAndGet(size);
-                return true;
-            }
-        }
-
-        boolean isAllocated = false;
-        // freeList is empty or there is no suitable slice
-        while (!isAllocated) {
-            try {
-                // The ByteBuffer inside this slice is the thread's ByteBuffer
-            	// isAllocated = currentBlock.allocate(s, size+headerSize);
-                isAllocated = currentBlock.allocate(s, size);
-            } catch (OakOutOfMemoryException e) {
-                // there is no space in current block
-                // may be a buffer bigger than any block is requested?
-                if (size > BLOCK_SIZE) {
-                    throw new OakOutOfMemoryException();
-                }
-                // does allocation of new block brings us out of capacity?
-                if ((numberOfBlocks() + 1) * BLOCK_SIZE> capacity) {
-                	throw new OakOutOfMemoryException();
-                } else {
-                    // going to allocate additional block (big chunk of memory)
-                    // need to be thread-safe, so not many blocks are allocated
-                    // locking is actually the most reasonable way of synchronization here
-                    synchronized (this) {
-                        if (currentBlock.allocated() + size > currentBlock.getCapacity()) {
-                            allocateNewCurrentBlock();
-                        }
-                    }
-                }
-            }
-        }
-        allocated.addAndGet(size);
-        return true;
-    }
-
-
-    
-    
-    
+    }  
     
 
     // Releases memory (makes it available for reuse) without other GC consideration.
@@ -234,8 +160,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
         if (stats != null) {
             stats.release(size);
         }
-        NovafreeList.add(s);// FIXME i think this should do 
-
+        NovafreeList.add(s);
     }
 
     // Releases all memory allocated for this Oak (should be used as part of the Oak destruction)

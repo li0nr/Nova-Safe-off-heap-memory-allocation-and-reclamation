@@ -6,7 +6,7 @@ public class ListUnTest {
 	static final int  LIST_SIZE = 50;
 	static final int  MAGIC_NUM = 96;
 
-	ListOffHeap list = new ListOffHeap();
+	List_OffHeap list = new List_OffHeap();
 	
 	@Test
 	public void ListFill(){

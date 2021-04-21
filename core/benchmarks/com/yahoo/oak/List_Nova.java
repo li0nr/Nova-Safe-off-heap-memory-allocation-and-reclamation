@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 
 
-public class ListNova implements ListInterface{
+public class List_Nova implements ListInterface{
 
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
@@ -22,12 +22,12 @@ public class ListNova implements ListInterface{
 	
 
 	
-	public ListNova(){
+	public List_Nova(){
 		ArrayOfFacades=new Facade[DEFAULT_CAPACITY];
 
 	}
 	
-	public ListNova(int capacity){
+	public List_Nova(int capacity){
 		ArrayOfFacades=new Facade[capacity];
 
 	}
@@ -106,7 +106,7 @@ public void close()  {
 	
 
 public  static void main(String[] args)throws java.io.IOException {
-	ListNova s = new ListNova();
+	List_Nova s = new List_Nova();
 	for(int i=0; i<100; i++) {
 		s.add((long)i,0);
 		}

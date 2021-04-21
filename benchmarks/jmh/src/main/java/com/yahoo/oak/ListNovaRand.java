@@ -32,11 +32,11 @@ public class ListNovaRand {
   public static class BenchmarkState {
 
   	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-      private ListNova list ;
+      private List_Nova list ;
 
       @Setup
       public void setup() {
-      	list= new ListNova();
+      	list= new List_Nova();
       	for (int i=0; i <LIST_SIZE ; i++) {
       		list.add((long)i,0);
       	}

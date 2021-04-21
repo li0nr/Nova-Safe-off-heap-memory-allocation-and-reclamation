@@ -1,4 +1,4 @@
-package com.yahoo.oak;
+package com.yahoo.oak.benchmarks;
 
 import java.util.ArrayList;
 import java.util.List;

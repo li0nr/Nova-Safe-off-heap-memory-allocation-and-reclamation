@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.openjdk.jmh.runner.RunnerException;
 
 import sun.misc.Unsafe;
-import sun.nio.ch.DirectBuffer;
 
 public class Facade {
 
@@ -16,9 +15,7 @@ public class Facade {
 	static final int INVALID_VERSION=0;
 	static final int INVALID_HEADER=0;
 	static final int DELETED=1;
-	
-	static final int HeaderSize = Long.BYTES;
-	
+		
 	static final long FacadeMetaData_offset;
 	
 	static NovaManager novaManager;	
@@ -112,7 +109,7 @@ public class Facade {
 
 		//T R = f.apply(novaManager.getReadBuffer(sliceLocated.s));
 		
-		long R =UNSAFE.getLong(address+offset+HeaderSize);
+		long R =UNSAFE.getLong(address+offset+NovaManager.HEADER_SIZE);
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
@@ -147,7 +144,7 @@ public class Facade {
 			throw new IllegalArgumentException("slice was deleted");
 			}
 //		T ResultToReturn= caluclate(sliceLocated.s,f);
-		 UNSAFE.putLong(address+HeaderSize+offset, toWrite);	
+		 UNSAFE.putLong(address+NovaManager.HEADER_SIZE+offset, toWrite);	
 
 
 		 if(bench_Flags.TAP) {

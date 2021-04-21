@@ -7,7 +7,7 @@ public class ListNovaTest {
 	static final int  LIST_SIZE = 50;
 	static final int  MAGIC_NUM = 96;
 
-	ListNova list = new ListNova();
+	List_Nova list = new List_Nova();
 	
 	@Test
 	public void NovaListFill(){

@@ -1,6 +1,8 @@
 package com.yahoo.oak;
 import org.junit.Test;
 
+import com.yahoo.oak.benchmarks.BenchmarkRandom;
+
 public class bench_Flags {
 	static final boolean Fences	= true;
 	static final boolean TAP 	= true;

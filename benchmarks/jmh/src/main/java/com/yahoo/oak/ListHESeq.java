@@ -31,11 +31,11 @@ public class ListHESeq {
     public static class BenchmarkState {
 
     	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-        private ListHE list ;
+        private List_HE list ;
 
         @Setup
         public void setup() {
-        	list= new ListHE();
+        	list= new List_HE();
         	for (int i=0; i <LIST_SIZE ; i++) {
         		list.add((long)i,0);
         	}

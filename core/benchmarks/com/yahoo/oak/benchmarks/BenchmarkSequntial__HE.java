@@ -1,9 +1,10 @@
-package com.yahoo.oak;
-
-
+package com.yahoo.oak.benchmarks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
+import com.yahoo.oak.List_HE;
+import com.yahoo.oak.ListInterface;
 
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.lang.management.ManagementFactory;
 
 
 
-public class BenchmarkSequntial {
+public class BenchmarkSequntial__HE {
 		
 	static  int NUM_THREADS=1;
 	static  int LIST_SIZE=50_000_000;
@@ -22,7 +23,7 @@ public class BenchmarkSequntial {
 	static  int Section = 8;//128 cache line /16 nova number  
 	static 	int Limit = 0;
 
-    public BenchmarkSequntial(){    }
+    public BenchmarkSequntial__HE(){    }
 
     
 	public long ReadWriteGeneric(ListInterface list,String s,  FileWriter myWriter) throws InterruptedException, IOException{
@@ -57,74 +58,53 @@ public class BenchmarkSequntial {
   
 
     
-    public  void RunBenchmark(	String list, String mode, int lenght, int threads)throws java.io.IOException {
+    public  void RunBenchmark( String mode, int lenght, int threads)throws java.io.IOException {
         ArrayList<Long>	 Mean = new ArrayList<>();
         LIST_SIZE= lenght;
         NUM_THREADS=threads;
         Limit = LIST_SIZE/NUM_THREADS;
-        FileWriter myWriter = new FileWriter(list+"_"+mode+"_"+threads+".txt");
+        FileWriter myWriter = new FileWriter("HE"+"_"+mode+"_"+threads+".txt");
 		long Time=0;
 		try {
-	        if(list.equals("N")) {//nova 
-        		ListNova nova=new ListNova(LIST_SIZE);
+        		List_HE HE=new List_HE(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
-	    			nova.add((long)i,0);
+	    			HE.add((long)i,0);
 //		        System.out.println("finsished init\n");
 
 	        	for (int j=0; j<3 ; j++) {
 	        		Thread.sleep(1000);
-	        		Time=ReadWriteGeneric( nova,mode,myWriter);
+	        		Time=ReadWriteGeneric( HE,mode,myWriter);
 	        	}
 	        	for (int j=0; j<7 ; j++) {
 	        		Thread.sleep(1000);
-	        		Time=ReadWriteGeneric( nova,mode,myWriter);
+	        		Time=ReadWriteGeneric( HE,mode,myWriter);
 	                Mean.add(Time);
 	        	}
-                nova.close();
-	        }
-	        if(list.equals("U")) {//un-man
-        		ListOffHeap un=new ListOffHeap();
-	    		for (int i=0; i<LIST_SIZE; i++)
-	    			un.add((long)i,0);
-		        System.gc();
+	        	HE.close();
 
 
-	        	for (int j=0; j<3 ; j++) {
-	        		Thread.sleep(1000);
-	        		Time=ReadWriteGeneric( un,mode,myWriter);
-	        	}
-	        	for (int j=0; j<7 ; j++) {
-	        		Thread.sleep(1000);
-	        		Time=ReadWriteGeneric( un,mode,myWriter);
-	                Mean.add(Time);
-	        	}
-        	//	un.close();
-	        }
-	        myWriter.write(list+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
+	        myWriter.write("HE"+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
 	        									+" mode:"+mode+" thread num:"+threads+ "\n");
-	        System.out.println(list+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
+	        System.out.println("HE"+"Mean:"+bench_Math.Mean(Mean)+" SE:"+bench_Math.StandardError(Mean)
 	        									+" mode:"+mode+" thread num:"+threads+ "\n");
 	        myWriter.close();
-	        System.gc();
 		}catch(Exception e) {
     		e.printStackTrace();
     	}
     }
 
-    //java -cp target/nova-0.0.1-SNAPSHOT.jar -server com.yahoo.oak.BenchmarkSequntial N W 32 1000000
-
+    //java -cp target/nova-0.0.1-SNAPSHOT.jar -server com.yahoo.oak.BenchmarkSequntial__HE  W 32 1000000
     public static void main(String[] args)throws java.io.IOException {
     	int lenght = 1000;
     	if(args[0]==null) {
     		System.out.print("No args !\n");
     	}
-    	String List	=	args[0];
-    	String mode	=	args[1];
-    	int threads	= 	Integer.parseInt(args[2]);
-    	if(args.length == 4) 
-    		lenght 	= 	Integer.parseInt(args[3]);
-    	BenchmarkSequntial benchmark= new BenchmarkSequntial();
-    	benchmark.RunBenchmark(List, mode, lenght, threads);
+    	String mode	=	args[0];
+    	int threads	= 	Integer.parseInt(args[1]);
+    	if(args.length == 3) 
+    		lenght 	= 	Integer.parseInt(args[2]);
+    	BenchmarkSequntial__HE benchmark= new BenchmarkSequntial__HE();
+    	benchmark.RunBenchmark(mode, lenght, threads);
     	
     }
     

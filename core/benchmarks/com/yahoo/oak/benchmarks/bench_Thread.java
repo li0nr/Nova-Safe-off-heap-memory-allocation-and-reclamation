@@ -1,7 +1,9 @@
-package com.yahoo.oak;
+package com.yahoo.oak.benchmarks;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+
+import com.yahoo.oak.ListInterface;
 
 
 public class bench_Thread implements Runnable{

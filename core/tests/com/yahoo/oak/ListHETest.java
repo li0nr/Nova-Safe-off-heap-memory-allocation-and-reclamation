@@ -7,7 +7,7 @@ import org.junit.Test;
 		static final int  LIST_SIZE = 50;
 		static final int  MAGIC_NUM = 96;
 
-		ListHE list = new ListHE();
+		List_HE list = new List_HE();
 		
 		@Test
 		public void NovaListFill(){

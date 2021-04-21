@@ -35,15 +35,15 @@ public class ReadWrite {
 		public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
 		public static  int LIST_SIZE_2 = LIST_SIZE/2;
 		
-		private ListOffHeap listo ;
-		private ListNova    listn ;
-		private ListHE      listh ;
+		private List_OffHeap listo ;
+		private List_Nova    listn ;
+		private List_HE      listh ;
 
 		    @Setup
 		    public void setup() {
-		    	listo= new ListOffHeap();
-		    	listn= new ListNova();
-		    	listh= new ListHE();
+		    	listo= new List_OffHeap();
+		    	listn= new List_Nova();
+		    	listh= new List_HE();
 
 		    	for (int i=0; i <LIST_SIZE ; i++) {
 		    		listo.add((long)i,0);		    		

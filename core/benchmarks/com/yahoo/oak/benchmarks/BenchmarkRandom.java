@@ -1,10 +1,14 @@
-package com.yahoo.oak;
+package com.yahoo.oak.benchmarks;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+
+import com.yahoo.oak.ListInterface;
+import com.yahoo.oak.List_Nova;
+import com.yahoo.oak.List_OffHeap;
 
 
 
@@ -60,7 +64,7 @@ public class BenchmarkRandom {
 		long Time=0;
 		try {
 	        if(list.equals("N")) {//nova 
-        		ListNova nova=new ListNova(LIST_SIZE);
+        		List_Nova nova=new List_Nova(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			nova.add((long)i,0);
 
@@ -76,7 +80,7 @@ public class BenchmarkRandom {
                 nova.close();
 	        }
 	        if(list.equals("U")) {//un-man
-        		ListOffHeap un=new ListOffHeap(LIST_SIZE);
+        		List_OffHeap un=new List_OffHeap(LIST_SIZE);
 	    		for (int i=0; i<LIST_SIZE; i++)
 	    			un.add((long)i,0);
 
