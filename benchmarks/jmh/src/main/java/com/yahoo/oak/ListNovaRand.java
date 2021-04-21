@@ -27,47 +27,47 @@ public class ListNovaRand {
 	
 	  
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
+	
+	@State(Scope.Benchmark)
+	public static class BenchmarkState {
+		public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
+		private List_Nova list ;
 
-  @State(Scope.Benchmark)
-  public static class BenchmarkState {
+		@Setup
+		public void setup() {
+			list= new List_Nova();
+			for (int i=0; i <LIST_SIZE ; i++) {
+				list.add((long)i,0);
+				}
+			}
 
-  	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-      private List_Nova list ;
+		@TearDown
+		public void close() throws IOException {
+			list.close();
+			}
+		}
 
-      @Setup
-      public void setup() {
-      	list= new List_Nova();
-      	for (int i=0; i <LIST_SIZE ; i++) {
-      		list.add((long)i,0);
-      	}
-      }
-
-      @TearDown
-      public void close() throws IOException {
-      	list.close();
-      }
-
-  }
-
-  @State(Scope.Thread)
-  public static class ThreadState {
-  	static int threads = -1;
-  	Random rand = new Random();
-  	int i=-1;
-      @Setup
-      public void setup() {
-      	i=THREAD_INDEX.getAndAdd(1);
-      	if(threads <= i)
-      		threads = i +1;
-      }
-      @TearDown
-      public void tear() {
-      	THREAD_INDEX.set(0);
-      	System.out.println("\n Threads Num: "+ threads);
-      }
-      
-  }
+	@State(Scope.Thread)
+	public static class ThreadState {
+		static int threads = -1;
+		Random rand = new Random();
+		int i=-1;
+		
+		@Setup
+		public void setup() {
+			i=THREAD_INDEX.getAndAdd(1);
+			if(threads <= i)
+				threads = i +1;
+			}
+		
+		@TearDown
+		public void tear() {
+			THREAD_INDEX.set(0);
+			System.out.println("\n Threads Num: "+ threads);
+			}
+		}
   
+	
   @Warmup(iterations = MYParam.warmups)
   @Measurement(iterations = MYParam.iterations)
   @BenchmarkMode(Mode.AverageTime)

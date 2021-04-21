@@ -29,7 +29,6 @@ public class ListHESeq {
  
     @State(Scope.Benchmark)
     public static class BenchmarkState {
-
     	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
         private List_HE list ;
 
@@ -38,21 +37,20 @@ public class ListHESeq {
         	list= new List_HE();
         	for (int i=0; i <LIST_SIZE ; i++) {
         		list.add((long)i,0);
+        		}
         	}
-        }
-
         @TearDown
         public void close() throws IOException {
         	list.close();
+        	}
         }
-
-    }
 
     @State(Scope.Thread)
     public static class ThreadState {
     	static int threads = -1;
     	int i=-1;
-        @Setup
+    	
+    	@Setup
         public void setup() {
         	i=THREAD_INDEX.getAndAdd(1);
         	if(threads <= i)
