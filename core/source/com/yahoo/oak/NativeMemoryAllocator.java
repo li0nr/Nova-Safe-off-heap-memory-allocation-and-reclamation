@@ -24,10 +24,6 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
     // mapping IDs to blocks allocated solely to this Allocator
     private Block[] blocksArray;
     private static int  blockcount=0;
-    private AtomicInteger curr_allocated = new AtomicInteger(0);
-    
-
-    private int curblockID=0;
 
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 

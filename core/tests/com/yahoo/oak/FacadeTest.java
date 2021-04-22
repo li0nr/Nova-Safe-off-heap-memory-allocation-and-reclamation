@@ -129,7 +129,7 @@ public class FacadeTest {
         for (int i = 0; i < NUM_THREADS; i++) {
             threads.get(i).join();
         }
-	    Assert.assertEquals(NUM_THREADS*(10+8), novaManager.allocated());
+	    Assert.assertEquals(NUM_THREADS*(10+novaManager.HEADER_SIZE), novaManager.allocated());
 	}
 	
 	
