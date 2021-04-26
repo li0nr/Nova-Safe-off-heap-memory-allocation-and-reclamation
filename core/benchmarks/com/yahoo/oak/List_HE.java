@@ -41,13 +41,13 @@ public class List_HE implements ListInterface{
 		return true;
 	}
 	
-	public long get(int i, int idx) {
-		if(i>= size || i<0) 
+	public long get(int index, int idx) {
+		if(index >= size || index<0) 
 			throw new IndexOutOfBoundsException();
 		long x;
-		HEslice access = HE.get_protected(Slices[idx], 0, idx);
+		HEslice access = HE.get_protected(Slices[index], 0, idx);
 		if(access != null)
-			x  = UnsafeUtils.unsafe.getLong(Slices[i].getAddress() + Slices[i].getAllocatedOffset());	
+			x  = UnsafeUtils.unsafe.getLong(Slices[index].getAddress() + Slices[index].getAllocatedOffset());	
 		else {
 			HE.clear(idx);
 			throw new DeletedEntry();
@@ -87,7 +87,9 @@ public class List_HE implements ListInterface{
 		}
 		HEslice toDelete = Slices[index];
 		Slices[index]= null;
-		HE.retire(threadidx, toDelete);
+		if(toDelete != null)
+			HE.retire(threadidx, toDelete);
+		else return false;
 		return  true;
 
 	}
