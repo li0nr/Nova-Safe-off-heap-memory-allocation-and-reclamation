@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 
-class NovaManager implements MemoryManager {
+public class NovaManager implements MemoryManager {
     static final int RELEASE_LIST_LIMIT = 1024;
     static final int MAX_THREADS = 32;
     static final int INVALID_SLICE = -1;

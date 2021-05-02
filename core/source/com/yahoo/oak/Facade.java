@@ -3,6 +3,7 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import org.openjdk.jmh.runner.RunnerException;
 
@@ -154,7 +155,57 @@ public class Facade {
 	
 	
 	
+	public <T> Facade WriteFull (NovaSerializer<T> labda,int idx ) {//for now write doesnt take lambda for writing 
+
+		long facademeta = FacadeMetaData;
+		if(facademeta%2==DELETED) {
+			throw new IllegalArgumentException("cant locate slice");
+		}
+		
+		int block		= Extractblock	(facademeta);
+		int offset 		= ExtractOffset	(facademeta);
+		long facadeRef	= buildRef		(block,offset);
+		
+		if(bench_Flags.TAP) {
+			novaManager.setTap(block,facadeRef,idx);	
+			if(bench_Flags.Fences)UNSAFE.fullFence();
+		}
+		
+		long address = novaManager.getAdress(block);
+
+
+		
+		int version = ExtractVer_Del(facademeta);
+		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) {
+			novaManager.UnsetTap(block,idx);
+			throw new IllegalArgumentException("slice was deleted");
+			}
+//		T ResultToReturn= caluclate(sliceLocated.s,f);
+		labda.write(address+NovaManager.HEADER_SIZE+offset);
+		 //UNSAFE.putLong(address+NovaManager.HEADER_SIZE+offset, toWrite);	
+		 if(bench_Flags.TAP) {
+             if(bench_Flags.Fences)UNSAFE.storeFence();
+            novaManager.UnsetTap(block,idx);
+            }
+		 return this;
+	}
 	
+	
+	interface OffHeapLambdaWrite{  
+	    public void write(long address);  
+	    	    
+//		OffHeapLambdaWrite x = (myd) ->{
+//			for(int i=0; i<8; i++) {
+//				UNSAFE.putLong(myd + 4*i, 3);
+//			}
+//		};
+		
+	}  
+	
+	interface OffHeapLambdaRead <T>{  
+	    public T Read(long address);  
+		
+	}
 	
 //	public <T> T  caluclate(NovaSlice s ,FacadeReadTransformer<T> f) {
 //		 T transformation = f.apply(novaManager.getReadBuffer(s));

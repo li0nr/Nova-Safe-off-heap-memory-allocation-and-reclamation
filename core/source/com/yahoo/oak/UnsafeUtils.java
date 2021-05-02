@@ -10,7 +10,7 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Constructor;
 
-final class UnsafeUtils {
+public final class UnsafeUtils {
 
     static Unsafe unsafe;
 
@@ -37,5 +37,17 @@ final class UnsafeUtils {
      */
     static long intsToLong(int i1, int i2) {
         return (i1 & LONG_INT_MASK) | (((long) i2) << Integer.SIZE);
+    }
+    
+    public static void putInt(long address, int value) {
+    	unsafe.putInt(address, value);
+    }
+    
+    public static int getInt(long address) {
+    	return unsafe.getInt(address);
+    }
+    
+    public static void putLong(long address, int value) {
+    	unsafe.putLong(address, value);
     }
 }

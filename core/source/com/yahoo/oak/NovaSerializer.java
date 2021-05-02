@@ -9,13 +9,13 @@ package com.yahoo.oak;
 /**
  * An interface to be supported by keys and values provided for Oak's mapping
  */
-public interface OakSerializer<T> {
+public interface NovaSerializer<T> {
 
     // serializes the object
-    void serialize(T object, OakScopedWriteBuffer targetBuffer);
+    void serialize(T object, long target);
 
     // deserializes the given Oak buffer
-    T deserialize(OakScopedReadBuffer byteBuffer);
+    T deserialize(long source, int size);
 
     // returns the number of bytes needed for serializing the given object
     int calculateSize(T object);
