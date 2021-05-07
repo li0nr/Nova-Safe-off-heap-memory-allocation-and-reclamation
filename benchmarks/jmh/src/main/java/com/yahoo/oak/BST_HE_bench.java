@@ -22,22 +22,21 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 
-public class BST_Nova_bench {
+public class BST_HE_bench {
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 	 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
 
     	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-        private BST_Nova<Buffer,Buffer> BST ;
+        private BST_HE<Buffer,Buffer> BST ;
 
         @Setup
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	    final NovaManager novaManager = new NovaManager(allocator);
     	    
-    	    BST = new BST_Nova<Buffer,Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
-					, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, novaManager);
+    	    BST = new BST_HE<Buffer,Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
+					, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER,allocator);
         	for (int i=0; i <LIST_SIZE ; i++) {
         		Buffer k = new Buffer();
         		Buffer v = new Buffer();

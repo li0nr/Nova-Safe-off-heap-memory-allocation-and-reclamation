@@ -10,7 +10,7 @@ public class HarrisLinkedListNoMM <E>{
 	    final Node<NovaSlice> head;
 	    final Node<NovaSlice> tail;
 	    
-	    final OakComparator<E> Cmp;
+	    final NovaComparator<E> Cmp;
 	    final NovaSerializer<E> Srz;
 	    final NativeMemoryAllocator allocator;
 	    final static int MAXTHREADS = 32;
@@ -37,7 +37,7 @@ public class HarrisLinkedListNoMM <E>{
 	    }
 
 
-	    public HarrisLinkedListNoMM(NativeMemoryAllocator allocator,OakComparator<E> cmp,	NovaSerializer<E> srz) {
+	    public HarrisLinkedListNoMM(NativeMemoryAllocator allocator,NovaComparator<E> cmp,	NovaSerializer<E> srz) {
 	    	this.allocator = allocator;
 			Cmp = cmp; Srz = srz;
 	    	

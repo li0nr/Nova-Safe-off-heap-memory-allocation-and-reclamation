@@ -9,7 +9,7 @@ package com.yahoo.oak;
 
 import java.util.Comparator;
 
-public interface OakComparator<K> extends Comparator<K> {
+public interface NovaComparator<K> extends Comparator<K> {
     default int compare(K key1, K key2) {
         return compareKeys(key1, key2);
     }
@@ -17,9 +17,9 @@ public interface OakComparator<K> extends Comparator<K> {
     int compareKeys(K key1, K key2);
 
     
-    int compareSerializedKeys(Facade serializedKey1, Facade serializedKey2, int tidx);
+    int compareSerializedKeys(Facade<K> serializedKey1, Facade<K>  serializedKey2, int tidx);
     
-    int compareKeyAndSerializedKey(K key, Facade serializedKey, int tidx);
+    int compareKeyAndSerializedKey(K key, Facade<K>  serializedKey, int tidx);
     
     
     int compareKeyAndSerializedKey(K key, HEslice serializedKey, int tidx);

@@ -22,9 +22,9 @@ package com.yahoo.oak;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class BST_Nova<K , V> {
-	   final OakComparator<K> CmpK;
+	   final NovaComparator<K> CmpK;
 	   final NovaSerializer<K> SrzK;
-	   final OakComparator<V> CmpV;
+	   final NovaComparator<V> CmpV;
 	   final NovaSerializer<V> SrzV;
    //--------------------------------------------------------------------------------
    // Class: Node
@@ -111,12 +111,12 @@ public class BST_Nova<K , V> {
 
    final Node<K,V> root;
 
-   public BST_Nova(OakComparator<K> cK, OakComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV, NovaManager mng) {
+   public BST_Nova(NovaComparator<K> cK, NovaComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV, NovaManager mng) {
        // to avoid handling special case when <= 2 nodes,
        // create 2 dummy nodes, both contain key null
        // All real keys inside BST are required to be non-null
 	   Facade<K> dummyK  = new Facade<K>(mng);
-	   Facade<V> dummyV  = new Facade<V>(mng);
+	   Facade<V> dummyV  = new Facade<V>(mng); //setting up nova manager
 
 	   CmpK = cK; SrzK = sK;
 	   CmpV = cV; SrzV = sV;
@@ -136,25 +136,33 @@ public class BST_Nova<K , V> {
 
    /** PRECONDITION: k CANNOT BE NULL **/
    public final boolean containsKey(final K key, int tidx) {
-       if (key == null) throw new NullPointerException();
-       Node<K, V> l = root.left;
-       while (l.left != null) {
-           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, tidx) < 0) ? l.left : l.right;
-       }
-       return (l.key != null &&  CmpK.compareKeyAndSerializedKey(key, l.key, tidx) == 0) ? true : false;
+	   try {
+	       if (key == null) throw new NullPointerException();
+	       Node<K, V> l = root.left;
+	       while (l.left != null) {
+	           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, tidx) < 0) ? l.left : l.right;
+	       }
+	       return (l.key != null &&  CmpK.compareKeyAndSerializedKey(key, l.key, tidx) == 0) ? true : false;   
+	   }catch (Exception e) {
+		   return false; //Facade throws
+	   }
    }
 
    /** PRECONDITION: k CANNOT BE NULL **/
    public final V get(final K key, int tidx) {
-       if (key == null) throw new NullPointerException();
-       Node<K,V> l = root.left;
-       while (l.left != null) {
-           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, tidx) < 0) ? l.left : l.right;
-       }
-       V ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key,l.key, tidx) == 0) ? 
-    		   l.value.Read(SrzV): null;
-       return ret;
-       }
+	   try {
+	       if (key == null) throw new NullPointerException();
+	       Node<K,V> l = root.left;
+	       while (l.left != null) {
+	           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, tidx) < 0) ? l.left : l.right;
+	       }
+	       V ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key,l.key, tidx) == 0) ? 
+	    		   l.value.Read(SrzV): null;
+	       return ret;
+	   }catch (Exception e) {
+		   return null; //Facade throws	   
+		   }
+	   }
 
    // Insert key to dictionary, returns the previous value associated with the specified key,
    // or null if there was no mapping for the key
@@ -179,46 +187,50 @@ public class BST_Nova<K , V> {
 
        newNode = new Node<K,V>(k, v);
 
-       while (true) {
+       try {
+           while (true) {
 
-           /** SEARCH **/
-           p = root;
-           pinfo = p.info;
-           l = p.left;
-           while (l.left != null) {
-               p = l;
-               l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
-           }
-           pinfo = p.info;                             // read pinfo once instead of every iteration
-           if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
-                                                       // (just as if we'd read p's info field before the reference to l)
-           /** END SEARCH **/
-
-           if ( CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
-               return l.value.Read(SrzV);	// key already in the tree, no duplicate allowed
-           } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
-               help(pinfo);
-           } else {
-               newSibling = new Node<K,V>(l.key, l.value);
-               if (l.key == null ||  CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0)	// newinternal = max(ret.l.key, key);
-                   newInternal = new Node<K,V>(l.key, newNode, newSibling);
-               else
-                   newInternal = new Node<K,V>(k, newSibling, newNode);
-
-               final IInfo<K,V> newPInfo = new IInfo<K,V>(l, p, newInternal);
-
-               // try to IFlag parent
-               if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
-                   helpInsert(newPInfo);
-                   return null;
-               } else {
-                   // if fails, help the current operation
-                   // [CHECK]
-                   // need to get the latest p.info since CAS doesnt return current value
-                   help(p.info);
+               /** SEARCH **/
+               p = root;
+               pinfo = p.info;
+               l = p.left;
+               while (l.left != null) {
+                   p = l;
+                   l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
                }
-           }
-       }
+               pinfo = p.info;                             // read pinfo once instead of every iteration
+               if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
+                                                           // (just as if we'd read p's info field before the reference to l)
+               /** END SEARCH **/
+
+               if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
+                   return l.value.Read(SrzV);	// key already in the tree, no duplicate allowed
+               } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+                   help(pinfo);
+               } else {
+                   newSibling = new Node<K,V>(l.key, l.value);
+                   if (l.key == null ||  CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0)	// newinternal = max(ret.l.key, key);
+                       newInternal = new Node<K,V>(l.key, newNode, newSibling);
+                   else
+                       newInternal = new Node<K,V>(k, newSibling, newNode);
+
+                   final IInfo<K,V> newPInfo = new IInfo<K,V>(l, p, newInternal);
+
+                   // try to IFlag parent
+                   if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
+                       helpInsert(newPInfo);
+                       return null;
+                   } else {
+                       // if fails, help the current operation
+                       // [CHECK]
+                       // need to get the latest p.info since CAS doesnt return current value
+                       help(p.info);
+                   }
+               }
+           }   
+       }catch (Exception e) {
+		return null; // in case of facade throws
+	}
    }
 
    // Insert key to dictionary, return the previous value associated with the specified key,
@@ -245,54 +257,56 @@ public class BST_Nova<K , V> {
        
        newNode = new Node<K,V>(k, v);
        
-       while (true) {
+       try {
+           while (true) {
 
-           /** SEARCH **/
-           p = root;
-           pinfo = p.info;
-           l = p.left;
-           while (l.left != null) {
-               p = l;
-               l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
-           }
-           pinfo = p.info;                             // read pinfo once instead of every iteration
-           if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
-                                                       // (just as if we'd read p's info field before the reference to l)
-           /** END SEARCH **/
+               /** SEARCH **/
+               p = root;
+               pinfo = p.info;
+               l = p.left;
+               while (l.left != null) {
+                   p = l;
+                   l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
+               }
+               pinfo = p.info;                             // read pinfo once instead of every iteration
+               if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
+                                                           // (just as if we'd read p's info field before the reference to l)
+               /** END SEARCH **/
 
-           if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
-               help(pinfo);
-           } else {
-               if (key.equals(l.key)) {
-                   // key already in the tree, try to replace the old node with new node
-                   newPInfo = new IInfo<K,V>(l, p, newNode);
-                   result = l.value;
+               if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+                   help(pinfo);
                } else {
-                   // key is not in the tree, try to replace a leaf with a small subtree
-                   newSibling = new Node<K,V>(l.key, l.value);
-                   if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) // newinternal = max(ret.l.key, key);
-                   {
-                       newInternal = new Node<K,V>(l.key, newNode, newSibling);
+                   if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
+                       // key already in the tree, try to replace the old node with new node
+                       newPInfo = new IInfo<K,V>(l, p, newNode);
+                       result = l.value;
                    } else {
-                       newInternal = new Node<K,V>(k, newSibling, newNode);
+                       // key is not in the tree, try to replace a leaf with a small subtree
+                       newSibling = new Node<K,V>(l.key, l.value);
+                       if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) // newinternal = max(ret.l.key, key);
+                       {
+                           newInternal = new Node<K,V>(l.key, newNode, newSibling);
+                       } else {
+                           newInternal = new Node<K,V>(k, newSibling, newNode);
+                       }
+
+                       newPInfo = new IInfo<K,V>(l, p, newInternal);
+                       result = null;
                    }
 
-                   newPInfo = new IInfo<K,V>(l, p, newInternal);
-                   result = null;
-               }
-
-               // try to IFlag parent
-               if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
-                   helpInsert(newPInfo);
-                   if(result == null) return null;
-                   return (V)result.Read(SrzV);
-               } else {
-                   // if fails, help the current operation
-                   // need to get the latest p.info since CAS doesnt return current value
-                   help(p.info);
+                   // try to IFlag parent
+                   if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
+                       helpInsert(newPInfo);
+                       if(result == null) return null;
+                       return (V)result.Read(SrzV);
+                   } else {
+                       // if fails, help the current operation
+                       // need to get the latest p.info since CAS doesnt return current value
+                       help(p.info);
+                   }
                }
            }
-       }
+       }catch (Exception e) { return null;}   
    }
 
    // Delete key from dictionary, return the associated value when successful, null otherwise
@@ -306,48 +320,49 @@ public class BST_Nova<K , V> {
        Info<K,V> pinfo;
        Node<K,V> l;
        /** END SEARCH VARIABLES **/
-       
-       while (true) {
+       try {
+           while (true) {
 
-           /** SEARCH **/
-           gp = null;
-           gpinfo = null;
-           p = root;
-           pinfo = p.info;
-           l = p.left;
-           while (l.left != null) {
-               gp = p;
-               p = l;
-               l = (l.key == null ||  CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
-           }
-           // note: gp can be null here, because clearly the root.left.left == null
-           //       when the tree is empty. however, in this case, l.key will be null,
-           //       and the function will return null, so this does not pose a problem.
-           if (gp != null) {
-               gpinfo = gp.info;                               // - read gpinfo once instead of every iteration
-               if (p != gp.left && p != gp.right) continue;    //   then confirm the child link to p is valid
-               pinfo = p.info;                                 //   (just as if we'd read gp's info field before the reference to p)
-               if (l != p.left && l != p.right) continue;      // - do the same for pinfo and l
-           }
-           /** END SEARCH **/
-           
-           if (!key.equals(l.key)) return null;
-           if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
-               help(gpinfo);
-           } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
-               help(pinfo);
-           } else {
-               // try to DFlag grandparent
-               final DInfo<K,V> newGPInfo = new DInfo<K,V>(l, p, gp, pinfo);
-
-               if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
-                   if (helpDelete(newGPInfo)) return l.value.Read(SrzV);
+               /** SEARCH **/
+               gp = null;
+               gpinfo = null;
+               p = root;
+               pinfo = p.info;
+               l = p.left;
+               while (l.left != null) {
+                   gp = p;
+                   p = l;
+                   l = (l.key == null ||  CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
+               }
+               // note: gp can be null here, because clearly the root.left.left == null
+               //       when the tree is empty. however, in this case, l.key will be null,
+               //       and the function will return null, so this does not pose a problem.
+               if (gp != null) {
+                   gpinfo = gp.info;                               // - read gpinfo once instead of every iteration
+                   if (p != gp.left && p != gp.right) continue;    //   then confirm the child link to p is valid
+                   pinfo = p.info;                                 //   (just as if we'd read gp's info field before the reference to p)
+                   if (l != p.left && l != p.right) continue;      // - do the same for pinfo and l
+               }
+               /** END SEARCH **/
+               
+               if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) != 0) return null;
+               if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
+                   help(gpinfo);
+               } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+                   help(pinfo);
                } else {
-                   // if fails, help grandparent with its latest info value
-                   help(gp.info);
+                   // try to DFlag grandparent
+                   final DInfo<K,V> newGPInfo = new DInfo<K,V>(l, p, gp, pinfo);
+
+                   if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
+                       if (helpDelete(newGPInfo)) return l.value.Read(SrzV);
+                   } else {
+                       // if fails, help grandparent with its latest info value
+                       help(gp.info);
+                   }
                }
            }
-       }
+       }catch (Exception e) { return null;}
    }
 
 //--------------------------------------------------------------------------------
@@ -427,22 +442,28 @@ public class BST_Nova<K , V> {
 	    BST_Nova<Buffer,Buffer> BST = new BST_Nova<Buffer,Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
 	    											, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, novaManager);
 	    	    
-	    Buffer x =new Buffer(4);
+	    Buffer x =new Buffer();
 	    x.set(88);
 	    BST.put(x,x,0);
 	    BST.containsKey(x,0);
 
 		x.set(120);
 		BST.put(x,x,0);
-	    Buffer xy =new Buffer(4);
-	    Buffer z= new Buffer(128);
+	    BST.containsKey(x,0);
+	    Buffer xy =new Buffer();
+	    Buffer z= new Buffer();
 	    xy.set(110);
 	    BST.put(xy,xy,0);
-	    BST.containsKey(x,0);
+	    BST.containsKey(xy,0);
 	    BST.putIfAbsent(x, z,0);
 	    
 	    BST.containsKey(x,0);
+	   
+	    BST.remove(x, 0);
+	    BST.containsKey(x,0);
+	    BST.putIfAbsent(z, x,0);
 	    BST.containsKey(z,0);
+	    Buffer.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
 	    
   }
 }

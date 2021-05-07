@@ -37,7 +37,7 @@ public class HarrisLinkedListNova<E> {
     final Node<Facade> head;
     final Node<Facade> tail;
     
-    final OakComparator<E> Cmp;
+    final NovaComparator<E> Cmp;
     final NovaSerializer<E> Srz;
     final NovaManager nm;
     
@@ -66,7 +66,7 @@ public class HarrisLinkedListNova<E> {
     }
     
     
-    public HarrisLinkedListNova(NovaManager novaManager,OakComparator<E> cmp,	NovaSerializer<E> srz) {
+    public HarrisLinkedListNova(NovaManager novaManager,NovaComparator<E> cmp,	NovaSerializer<E> srz) {
     	Facades = new ArrayList<>();
 		for(int i=0; i<MAXTHREADS;i++)
 			Facades.add(new Facade<>());

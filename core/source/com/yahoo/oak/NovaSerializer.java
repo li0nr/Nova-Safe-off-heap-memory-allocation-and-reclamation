@@ -22,9 +22,9 @@ public interface NovaSerializer<T> {
     // deserializes the given Oak buffer    
     T deserialize(long source);
     
-    T deserialize(HEslice target, int size);
+    T deserialize(HEslice target);
 
-    T deserialize(NovaSlice target, int size);
+    T deserialize(NovaSlice target);
 
 
     // returns the number of bytes needed for serializing the given object

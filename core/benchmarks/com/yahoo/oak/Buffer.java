@@ -2,20 +2,18 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 
-import com.yahoo.oak.Facade;
-import com.yahoo.oak.NovaSerializer;
-import com.yahoo.oak.OakComparator;
-import com.yahoo.oak.UnsafeUtils;
-
 public class Buffer {
-	private final static int DATA_POS = 0;
-
     public final int capacity;
     public final ByteBuffer buffer;
 
     public Buffer(int capacity) {
         this.capacity = capacity;
         this.buffer = ByteBuffer.allocate(capacity);
+    }
+
+    public Buffer() {
+        this.capacity = 8;
+        this.buffer = ByteBuffer.allocate(capacity + Integer.BYTES);
     }
 
     public int calculateSerializedSize() {
@@ -42,12 +40,12 @@ public class Buffer {
         public Buffer deserialize(long target) {
         	if(target == 0) return null;
         	int offset = 0;
-        	int size = UnsafeUtils.getInt(target + offset); 
-        	offset +=4;
+        	int size = UnsafeUtils.getInt(target); 
+        	offset += Integer.BYTES;
         	Buffer ret = new Buffer(size);
             for (int i = 0; i < size/Integer.BYTES; i++) {
                 int data = UnsafeUtils.getInt(target + offset);       
-                ret.buffer.putInt(offset - 4, data);
+                ret.buffer.putInt(offset - Integer.BYTES, data);
                 offset += Integer.BYTES;
             }
             return ret;
@@ -58,22 +56,25 @@ public class Buffer {
 
         @Override
         public void serialize(Buffer object, HEslice target) {
+            UnsafeUtils.putInt(target.address, object.capacity);
             int offset = 0;
             for (int i = 0; i < object.capacity/Integer.BYTES; i++) {
                 int data = object.buffer.getInt(offset);
-                UnsafeUtils.putInt(target.address + target.offset, data);
+                UnsafeUtils.putInt(target.address + target.offset +offset + Integer.BYTES, data);
                 offset += Integer.BYTES;
             }
         }
         
         @Override
-        public Buffer deserialize(HEslice target, int size) {
+        public Buffer deserialize(HEslice target) {
         	if(target == null) return null;
+        	int offset = 0;
+        	int size = UnsafeUtils.getInt(target.address); 
+        	offset += Integer.BYTES;        	
         	Buffer ret = new Buffer(size);
-            int offset = 0;
             for (int i = 0; i < size/Integer.BYTES; i++) {
                 int data = UnsafeUtils.getInt(target.address +target.offset + offset);       
-                ret.buffer.putInt(offset, data);
+                ret.buffer.putInt(offset - Integer.BYTES, data);
                 offset += Integer.BYTES;
             }
             return ret;
@@ -91,13 +92,15 @@ public class Buffer {
         }
         
         @Override
-        public Buffer deserialize(NovaSlice target, int size) {
+        public Buffer deserialize(NovaSlice target) {
         	if(target == null) return null;
+        	int offset = 0;
+        	int size = UnsafeUtils.getInt(target.address); 
+        	offset += Integer.BYTES;        	
         	Buffer ret = new Buffer(size);
-            int offset = 0;
             for (int i = 0; i < size/Integer.BYTES; i++) {
                 int data = UnsafeUtils.getInt(target.address +target.offset + offset);       
-                ret.buffer.putInt(offset, data);
+                ret.buffer.putInt(offset - Integer.BYTES, data);
                 offset += Integer.BYTES;
             }
             return ret;
@@ -109,7 +112,7 @@ public class Buffer {
         }
     };
     
-    public static final OakComparator<Buffer> DEFAULT_COMPARATOR = new OakComparator<Buffer>() {
+    public static final NovaComparator<Buffer> DEFAULT_COMPARATOR = new NovaComparator<Buffer>() {
     @Override
     public int compareKeys(Buffer key1, Buffer key2) {
             final int minSize = Math.min(key1.capacity, key2.capacity);
@@ -129,7 +132,7 @@ public class Buffer {
         }
         
         
-        public int compareSerializedKeys(Facade key1, Facade key2, int tid) {
+        public int compareSerializedKeys(Facade<Buffer> key1, Facade<Buffer> key2, int tid) {
         	Buffer x = (Buffer)key1.Read(DEFAULT_SERIALIZER);
         	Buffer y = (Buffer)key2.Read(DEFAULT_SERIALIZER);
 
@@ -137,7 +140,7 @@ public class Buffer {
         }
         
         @Override
-        public int compareKeyAndSerializedKey(Buffer key1, Facade key2, int tid) {
+        public int compareKeyAndSerializedKey(Buffer  key1,  Facade<Buffer> key2, int tid) {
         	Buffer y = (Buffer)key2.Read(DEFAULT_SERIALIZER);
         	
             return compareKeys(key1, y);
@@ -147,7 +150,7 @@ public class Buffer {
 
         @Override
         public int compareKeyAndSerializedKey(Buffer key, HEslice serializedKey, int tidx) {
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey,serializedKey.length);
+        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey);
 
             return compareKeys(key, y);
         	
@@ -155,8 +158,8 @@ public class Buffer {
         
         @Override
         public int compareSerializedKeys(HEslice serializedKey1 , HEslice serializedKey2, int tidx) {
-        	Buffer x = DEFAULT_SERIALIZER.deserialize(serializedKey1,serializedKey1.length);
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey2,serializedKey2.length);
+        	Buffer x = DEFAULT_SERIALIZER.deserialize(serializedKey1);
+        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey2);
 
             return compareKeys(x, y);
         	
@@ -165,7 +168,7 @@ public class Buffer {
 
         @Override
         public int compareKeyAndSerializedKey(Buffer key, NovaSlice serializedKey, int tidx) {
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey,serializedKey.length);
+        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey);
 
             return compareKeys(key, y);
         	
@@ -173,8 +176,8 @@ public class Buffer {
         
         @Override
         public int compareSerializedKeys(NovaSlice serializedKey1 , NovaSlice serializedKey2, int tidx) {
-        	Buffer x = DEFAULT_SERIALIZER.deserialize(serializedKey1,serializedKey1.length);
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey2,serializedKey2.length);
+        	Buffer x = DEFAULT_SERIALIZER.deserialize(serializedKey1);
+        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey2);
 
             return compareKeys(x, y);
         	

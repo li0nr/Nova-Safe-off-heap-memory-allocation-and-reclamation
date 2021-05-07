@@ -24,16 +24,16 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class BST_HE<K , V> {
 	
-	   final OakComparator<K> CmpK;
+	   final NovaComparator<K> CmpK;
 	   final NovaSerializer<K> SrzK;
-	   final OakComparator<V> CmpV;
+	   final NovaComparator<V> CmpV;
 	   final NovaSerializer<V> SrzV;
 	   final HazardEras HE;
 
    //--------------------------------------------------------------------------------
    // Class: Node
    //--------------------------------------------------------------------------------
-   protected final static class Node<E extends Comparable<? super E>, V> {
+   protected final static class Node<E , V> {
        final HEslice key;
        final HEslice value;
        volatile Node<HEslice, HEslice> left;
@@ -114,7 +114,7 @@ public class BST_HE<K , V> {
 
    final Node<HEslice, HEslice> root;
 
-   public BST_HE(OakComparator<K> cK, OakComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV, NativeMemoryAllocator alloc) {
+   public BST_HE(NovaComparator<K> cK, NovaComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV, NativeMemoryAllocator alloc) {
        // to avoid handling special case when <= 2 nodes,
        // create 2 dummy nodes, both contain key null
        // All real keys inside BST are required to be non-null
@@ -141,7 +141,9 @@ public class BST_HE<K , V> {
            l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx)< 0) ? l.left : l.right;
        }
 	   HE.get_protected(l.key,0,idx);
-       return (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) ? true : false;
+       boolean ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) ? true : false;
+       HE.clear(idx);
+       return ret;
    }
 
    /** PRECONDITION: k CANNOT BE NULL **/
@@ -153,7 +155,8 @@ public class BST_HE<K , V> {
            l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx)< 0) ? l.left : l.right;
        }
 	   HE.get_protected(l.key,0,idx);
-       V ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key,l.key, idx) == 0) ? SrzV.deserialize(l.value, l.value.length) : null;
+       V ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key,l.key, idx) == 0) ? SrzV.deserialize(l.value) : null;
+       HE.clear(idx);
        return ret;
    }
 
@@ -193,7 +196,9 @@ public class BST_HE<K , V> {
     	   HE.get_protected(l.key,0,idx);
            if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
         	   HE.get_protected(l.value,0, idx);
-               return SrzV.deserialize(l.value,l.value.length);	// key already in the tree, no duplicate allowed
+               V ret = SrzV.deserialize(l.value);	// key already in the tree, no duplicate allowed
+               HE.clear(idx);
+               return ret;
            } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                help(pinfo);
            } else {
@@ -211,6 +216,7 @@ public class BST_HE<K , V> {
                // try to IFlag parent
                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                    helpInsert(newPInfo);
+                   HE.clear(idx);
                    return null;
                } else {
                    // if fails, help the current operation
@@ -285,7 +291,9 @@ public class BST_HE<K , V> {
                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                    helpInsert(newPInfo);
                    if(result == null) return null;
-                   return SrzV.deserialize(result, result.length);
+                   V ret = SrzV.deserialize(result);
+                   HE.clear(idx);
+                   return ret;
                } else {
                    // if fails, help the current operation
                    // need to get the latest p.info since CAS doesnt return current value
@@ -333,7 +341,10 @@ public class BST_HE<K , V> {
            /** END SEARCH **/
     	   HE.get_protected(l.key,0, idx);
 
-           if (l.key == null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) != 0) return null;
+           if (l.key == null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) != 0) {
+        	   HE.clear(idx);
+        	   return null;
+           }
            if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
                help(gpinfo);
            } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
@@ -343,7 +354,11 @@ public class BST_HE<K , V> {
                final DInfo<HEslice, HEslice> newGPInfo = new DInfo<HEslice, HEslice>(l, p, gp, pinfo);
 
                if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
-                   if (helpDelete(newGPInfo)) return SrzV.deserialize(l.value, l.value.length);
+                   if (helpDelete(newGPInfo)) {
+                	   V ret=SrzV.deserialize(l.value);
+                	   HE.clear(idx);
+                	   return ret;
+                   }
                } else {
                    // if fails, help grandparent with its latest info value
                    help(gp.info);
@@ -425,27 +440,41 @@ public class BST_HE<K , V> {
    
    public static void main(String[] args) {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	    final NovaManager novaManager = new NovaManager(allocator);
 	    
-	    BST_HE<Buffer,Buffer> BST = new BST_HE(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
-	    											, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, allocator);
+	    BST_HE<Buffer,Buffer> BST = 
+	    		new BST_HE<Buffer, Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
+	    				, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, allocator);
 	    	    
-	    Buffer x =new Buffer(4);
+	    Buffer x =new Buffer();
+	    Buffer z= new Buffer();
+
+
 	    x.set(88);
 	    BST.put(x,x,0);
 	    BST.containsKey(x,0);
 
 		x.set(120);
 		BST.put(x,x,0);
-	    Buffer xy =new Buffer(4);
-	    Buffer z= new Buffer(128);
-	    xy.set(110);
-	    BST.put(xy,xy,0);
 	    BST.containsKey(x,0);
+	    BST.containsKey(z,0);
+
+	    Buffer xy =new Buffer();
+	    xy.set(110);
+
+	    BST.put(xy,xy,0);
+	    BST.containsKey(z,0);
+
+	    BST.containsKey(xy,0);
 	    BST.putIfAbsent(x, z,0);
 	    
 	    BST.containsKey(x,0);
+	   
+	    BST.remove(x, 0);
+	    BST.containsKey(x,0);
 	    BST.containsKey(z,0);
+	    BST.putIfAbsent(z, x,0);
+	    BST.containsKey(z,0);
+	    Buffer.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
 	    
    }
 

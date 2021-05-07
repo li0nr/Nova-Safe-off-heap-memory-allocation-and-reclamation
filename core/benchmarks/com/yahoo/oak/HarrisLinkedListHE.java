@@ -36,7 +36,7 @@ public class HarrisLinkedListHE<E> {
     final Node<HEslice> head;
     final Node<HEslice> tail;
     
-    final OakComparator<E> Cmp;
+    final NovaComparator<E> Cmp;
     final NovaSerializer<E> Srz;
     final HazardEras HE;
     final NativeMemoryAllocator allocator;
@@ -67,7 +67,7 @@ public class HarrisLinkedListHE<E> {
 
     
     
-    public HarrisLinkedListHE(NativeMemoryAllocator allocator,OakComparator<E> cmp,	NovaSerializer<E> srz) {
+    public HarrisLinkedListHE(NativeMemoryAllocator allocator,NovaComparator<E> cmp,	NovaSerializer<E> srz) {
     	HE = new HazardEras(1, MAXTHREADS, allocator);
     	this.allocator = allocator;
 		Cmp = cmp; Srz = srz;
