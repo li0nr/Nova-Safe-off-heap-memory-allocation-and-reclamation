@@ -52,14 +52,10 @@ public class HazardEras {
 		eraClock = new AtomicLong(1);
 		he = new long[HE_MAX_THREADS*MAX_HES*CLPAD];
     	for(int it=0; it< HE_MAX_THREADS; it++) {
-            //he[it] = new std::atomic<uint64_t>[CLPAD*2]; // We allocate four cache lines to allow for many hps and without false sharing
-    		//retiredList[it*CLPAD].reserve(maxThreads*maxHEs); java deals with this 
     		for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
     			he[it*CLPAD + 16 + ihe]= (NONE);
     		}
     		retiredList[it*CLPAD] = new ArrayList<HazardEras_interface>();
-           // static_assert(std::is_same<decltype(T::newEra), uint64_t>::value, "T::newEra must be uint64_t");
-           // static_assert(std::is_same<decltype(T::delEra), uint64_t>::value, "T::delEra must be uint64_t");
     	}
     }
 
@@ -67,6 +63,12 @@ public class HazardEras {
         return eraClock.get();
         }
 
+    
+    public HEslice allocate(int size) {
+    	HEslice ret = new HEslice(getEra());
+    	allocator.allocate(ret, size);
+    	return ret;
+    }
 
     /**
      * Progress Condition: wait-free bounded (by maxHEs)
@@ -102,6 +104,13 @@ public class HazardEras {
 		}
     }
 
+
+     void protectEraRelease(int index, int other, int tid) {
+         long era = he[(tid)*CLPAD+16+other];
+         if (he[(tid)*CLPAD+16+index] == era) return;
+         he[(tid)*CLPAD+16+index] = era;
+		 UNSAFE.fullFence(); 
+     }
      
     /**
      * Retire an object (node)

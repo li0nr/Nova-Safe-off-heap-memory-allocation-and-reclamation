@@ -9,7 +9,7 @@ import org.openjdk.jmh.runner.RunnerException;
 
 import sun.misc.Unsafe;
 
-public class Facade {
+public class Facade <T> {
 
 	static final int INVALID_BLOCKID=0;
 	static final int INVALID_OFFSET=-1;
@@ -20,7 +20,6 @@ public class Facade {
 	static final long FacadeMetaData_offset;
 	
 	static NovaManager novaManager;	
-	
 	
 	static final Unsafe UNSAFE=UnsafeUtils.unsafe;
 	static {
@@ -36,6 +35,9 @@ public class Facade {
 	public Facade(NovaManager novaManager) {
 		FacadeMetaData= 1;
 		this.novaManager=novaManager;
+	}
+	public Facade() {
+		FacadeMetaData= 1;
 	}
 	
 	public boolean AllocateSlice(int size, int idx) {
@@ -153,9 +155,7 @@ public class Facade {
 		 return this;
 	}
 	
-	
-	
-	public <T> Facade WriteFull (NovaSerializer<T> labda,int idx ) {//for now write doesnt take lambda for writing 
+	public <T> Facade WriteFull (NovaSerializer<T> lambda, T obj, int idx ) {//for now write doesnt take lambda for writing 
 
 		long facademeta = FacadeMetaData;
 		if(facademeta%2==DELETED) {
@@ -180,9 +180,7 @@ public class Facade {
 			novaManager.UnsetTap(block,idx);
 			throw new IllegalArgumentException("slice was deleted");
 			}
-//		T ResultToReturn= caluclate(sliceLocated.s,f);
-		labda.write(address+NovaManager.HEADER_SIZE+offset);
-		 //UNSAFE.putLong(address+NovaManager.HEADER_SIZE+offset, toWrite);	
+		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
             novaManager.UnsetTap(block,idx);
@@ -191,33 +189,47 @@ public class Facade {
 	}
 	
 	
-	interface OffHeapLambdaWrite{  
-	    public void write(long address);  
-	    	    
-//		OffHeapLambdaWrite x = (myd) ->{
-//			for(int i=0; i<8; i++) {
-//				UNSAFE.putLong(myd + 4*i, 3);
-//			}
-//		};
+	public <T> T Read(NovaSerializer<T> lambda) {
+		long facademeta = FacadeMetaData;
 		
-	}  
-	
-	interface OffHeapLambdaRead <T>{  
-	    public T Read(long address);  
+		if(facademeta%2!=0)
+			throw new IllegalArgumentException("cant locate slice");
 		
-	}
-	
-//	public <T> T  caluclate(NovaSlice s ,FacadeReadTransformer<T> f) {
-//		 T transformation = f.apply(novaManager.getReadBuffer(s));
-//		 return transformation;
-//	}
-//	
-//	public <T> T  caluclate(NovaSlice s ,FacadeWriteTransformer<T> f) {
-//		 T transformation = f.apply(novaManager.getWriteBuffer(s));
-//		 return transformation;
-//	}
-	
+		int version	= ExtractVer_Del(facademeta);
+		int block 	= Extractblock	(facademeta);
+		int offset 	= ExtractOffset	(facademeta);
 
+		
+		long address = novaManager.getAdress(block);
+
+		//T R = f.apply(novaManager.getReadBuffer(sliceLocated.s));
+		
+		//long R =UNSAFE.getLong(address+offset+NovaManager.HEADER_SIZE);
+		long size = UNSAFE.getLong(address+offset)>>>24;//reads off heap meta
+
+		T obj = lambda.deserialize(address+offset+NovaManager.HEADER_SIZE);
+		
+		if(bench_Flags.Fences)UNSAFE.loadFence();
+		
+		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
+			throw new IllegalArgumentException("slice changed");
+		return obj;
+	}
+
+	
+	public Facade WriteFast(NovaSerializer<T> lambda, T obj, int idx ) {//for now write doesnt take lambda for writing 
+		long facademeta = FacadeMetaData;
+		
+		if(facademeta%2!=0)
+			throw new IllegalArgumentException("cant locate slice");
+		
+		int block 	= Extractblock	(facademeta);
+		int offset 	= ExtractOffset	(facademeta);
+		long address = novaManager.getAdress(block);
+		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
+
+		 return this;
+	}
 	
 	
 	private long buildRef(int block, int offset) {

@@ -13,9 +13,19 @@ public interface NovaSerializer<T> {
 
     // serializes the object
     void serialize(T object, long target);
+    
+    void serialize(T object, HEslice target );
+    
+    void serialize(T object, NovaSlice target );
 
-    // deserializes the given Oak buffer
-    T deserialize(long source, int size);
+
+    // deserializes the given Oak buffer    
+    T deserialize(long source);
+    
+    T deserialize(HEslice target, int size);
+
+    T deserialize(NovaSlice target, int size);
+
 
     // returns the number of bytes needed for serializing the given object
     int calculateSize(T object);

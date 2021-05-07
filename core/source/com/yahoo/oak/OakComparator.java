@@ -15,4 +15,22 @@ public interface OakComparator<K> extends Comparator<K> {
     }
 
     int compareKeys(K key1, K key2);
+
+    
+    int compareSerializedKeys(Facade serializedKey1, Facade serializedKey2, int tidx);
+    
+    int compareKeyAndSerializedKey(K key, Facade serializedKey, int tidx);
+    
+    
+    int compareKeyAndSerializedKey(K key, HEslice serializedKey, int tidx);
+    
+    int compareSerializedKeys(HEslice serializedKey1, HEslice serializedKey2, int tidx);
+    
+    
+    int compareKeyAndSerializedKey(K key, NovaSlice serializedKey, int tidx);
+    
+    int compareSerializedKeys(NovaSlice serializedKey1, NovaSlice serializedKey2, int tidx);
+
+
+
 }
