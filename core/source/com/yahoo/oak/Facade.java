@@ -232,6 +232,34 @@ public class Facade <T> {
 	}
 	
 	
+	 public <T>  int Read(T obj, NovaC<T> srZ) {
+		long facademeta = FacadeMetaData;
+		
+		if(facademeta%2!=0)
+			throw new IllegalArgumentException("cant locate slice");
+		
+		int version	= ExtractVer_Del(facademeta);
+		int block 	= Extractblock	(facademeta);
+		int offset 	= ExtractOffset	(facademeta);
+
+		
+		long address = novaManager.getAdress(block);
+
+		//T R = f.apply(novaManager.getReadBuffer(sliceLocated.s));
+		
+		//long R =UNSAFE.getLong(address+offset+NovaManager.HEADER_SIZE);
+		long size = UNSAFE.getLong(address+offset)>>>24;//reads off heap meta
+
+		int res = srZ.comp(address+offset+NovaManager.HEADER_SIZE, obj);
+		
+		if(bench_Flags.Fences)UNSAFE.loadFence();
+		
+		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
+			throw new IllegalArgumentException("slice changed");
+		return res;
+		
+	}
+	
 	private long buildRef(int block, int offset) {
 		long Ref=(block &0xFFFFF);
 		Ref=Ref<<20;

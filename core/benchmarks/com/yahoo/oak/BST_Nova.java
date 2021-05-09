@@ -26,6 +26,8 @@ public class BST_Nova<K , V> {
 	   final NovaSerializer<K> SrzK;
 	   final NovaComparator<V> CmpV;
 	   final NovaSerializer<V> SrzV;
+	   final NovaC<K> KCt;
+	   final NovaC<V> VCt;
    //--------------------------------------------------------------------------------
    // Class: Node
    //--------------------------------------------------------------------------------
@@ -111,7 +113,8 @@ public class BST_Nova<K , V> {
 
    final Node<K,V> root;
 
-   public BST_Nova(NovaComparator<K> cK, NovaComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV, NovaManager mng) {
+   public BST_Nova(NovaComparator<K> cK, NovaComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV,
+		   			NovaC<K> cKt, NovaC<V> cVt, NovaManager mng) {
        // to avoid handling special case when <= 2 nodes,
        // create 2 dummy nodes, both contain key null
        // All real keys inside BST are required to be non-null
@@ -120,6 +123,7 @@ public class BST_Nova<K , V> {
 
 	   CmpK = cK; SrzK = sK;
 	   CmpV = cV; SrzV = sV;
+	   KCt = cKt; VCt = cVt;
        root = new Node<K, V>(null, 
     		   new Node<K, V>(null, null), 
     		   new Node<K, V>(null, null));
@@ -154,9 +158,9 @@ public class BST_Nova<K , V> {
 	       if (key == null) throw new NullPointerException();
 	       Node<K,V> l = root.left;
 	       while (l.left != null) {
-	           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, tidx) < 0) ? l.left : l.right;
+	           l = (l.key == null || l.key.Read(key,KCt) < 0) ? l.left : l.right;
 	       }
-	       V ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key,l.key, tidx) == 0) ? 
+	       V ret = (l.key != null && l.key.Read(key,KCt) == 0) ? 
 	    		   l.value.Read(SrzV): null;
 	       return ret;
 	   }catch (Exception e) {
@@ -440,7 +444,8 @@ public class BST_Nova<K , V> {
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
 	    BST_Nova<Buffer,Buffer> BST = new BST_Nova<Buffer,Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
-	    											, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, novaManager);
+	    											, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, 
+	    											Buffer.DEFAULT_C, Buffer.DEFAULT_C, novaManager);
 	    	    
 	    Buffer x =new Buffer();
 	    x.set(88);

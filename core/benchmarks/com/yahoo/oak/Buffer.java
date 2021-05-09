@@ -56,7 +56,7 @@ public class Buffer {
 
         @Override
         public void serialize(Buffer object, HEslice target) {
-            UnsafeUtils.putInt(target.address, object.capacity);
+            UnsafeUtils.putInt(target.address +target.offset, object.capacity);
             int offset = 0;
             for (int i = 0; i < object.capacity/Integer.BYTES; i++) {
                 int data = object.buffer.getInt(offset);
@@ -112,6 +112,36 @@ public class Buffer {
         }
     };
     
+    
+    public static final NovaC<Buffer> DEFAULT_C = new NovaC<Buffer>() {
+		
+		@Override
+		public int compareKeys(Buffer key1, Buffer key2) {
+			return 0;
+		}
+		
+		@Override
+		public int comp(long address, Buffer obj) {
+        	if(address == 0 || obj == null) return -1;
+        	int offset = 0;
+        	
+        	int size = UnsafeUtils.getInt(address); 
+            final int minSize = Math.min(size, obj.capacity);
+
+        	offset += Integer.BYTES;        	
+            for (int i = 0; i < size/Integer.BYTES; i++) {
+                int i1 = UnsafeUtils.unsafe.getInt(address + Integer.BYTES);
+                int i2 = obj.buffer.getInt(offset);
+                int compare = Integer.compare(i1, i2);
+                if (compare != 0) {
+                    return compare;
+                }
+                offset += Integer.BYTES;
+            }
+            return Integer.compare(size, obj.capacity);
+		}
+	};
+    
     public static final NovaComparator<Buffer> DEFAULT_COMPARATOR = new NovaComparator<Buffer>() {
     @Override
     public int compareKeys(Buffer key1, Buffer key2) {
@@ -150,9 +180,19 @@ public class Buffer {
 
         @Override
         public int compareKeyAndSerializedKey(Buffer key, HEslice serializedKey, int tidx) {
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey);
-
-            return compareKeys(key, y);
+            final int minSize = Math.min(key.capacity, serializedKey.length);
+            
+            int offset = 0;
+            for (int i = 0; i < minSize/Integer.BYTES; i++) {
+                int i1 = key.buffer.getInt(offset);
+                int i2 = UnsafeUtils.unsafe.getInt(serializedKey.address+serializedKey.offset + Integer.BYTES);
+                int compare = Integer.compare(i1, i2);
+                if (compare != 0) {
+                    return compare;
+                }
+                offset += Integer.BYTES;
+            }
+            return Integer.compare(key.capacity, serializedKey.length);
         	
         }
         

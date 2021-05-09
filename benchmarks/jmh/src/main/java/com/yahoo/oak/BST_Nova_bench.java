@@ -37,7 +37,8 @@ public class BST_Nova_bench {
     	    final NovaManager novaManager = new NovaManager(allocator);
     	    
     	    BST = new BST_Nova<Buffer,Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
-					, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, novaManager);
+					, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER
+					, Buffer.DEFAULT_C, Buffer.DEFAULT_C,novaManager);
         	for (int i=0; i <LIST_SIZE ; i++) {
         		Buffer k = new Buffer();
         		Buffer v = new Buffer();

@@ -458,6 +458,7 @@ public class BST_HE<K , V> {
 	    BST.containsKey(x,0);
 	    BST.containsKey(z,0);
 
+	    BST.get(x, 0);
 	    Buffer xy =new Buffer();
 	    xy.set(110);
 
