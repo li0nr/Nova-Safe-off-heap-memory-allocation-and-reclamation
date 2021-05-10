@@ -29,17 +29,17 @@ public class BST_HE_bench {
     public static class BenchmarkState {
 
     	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-        private BST_HE<Buffer,Buffer> BST ;
+        private BST_HE<Buff,Buff> BST ;
 
         @Setup
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    BST = new BST_HE<Buffer,Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
-					, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER,allocator);
+    	    BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
+					, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,allocator);
         	for (int i=0; i <LIST_SIZE ; i++) {
-        		Buffer k = new Buffer();
-        		Buffer v = new Buffer();
+        		Buff k = new Buff();
+        		Buff v = new Buff();
         		k.set(i);
         		k.set(LIST_SIZE-i);
         		BST.put(k,v, 0);
@@ -75,14 +75,9 @@ public class BST_HE_bench {
     @Fork(value = 0)
     @Benchmark
     public void ReadNova(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-        for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
-        		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
-        						  BenchmarkState.LIST_SIZE/ThreadState.threads
-        		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-    		Buffer k = new Buffer(8);
-    		k.set(threadState.rand.nextInt(MYParam.G_LIST_SIZE));
+    		Buff k = new Buff(8);
+    		k.set(100);
         	blackhole.consume(state.BST.get(k,threadState.i));
-    	}
     }
     
 //    @Warmup(iterations = MYParam.warmups)

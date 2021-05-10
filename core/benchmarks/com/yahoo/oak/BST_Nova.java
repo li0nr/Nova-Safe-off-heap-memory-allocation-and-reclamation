@@ -443,11 +443,11 @@ public class BST_Nova<K , V> {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
-	    BST_Nova<Buffer,Buffer> BST = new BST_Nova<Buffer,Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
-	    											, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, 
-	    											Buffer.DEFAULT_C, Buffer.DEFAULT_C, novaManager);
+	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
+	    											, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    											Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
 	    	    
-	    Buffer x =new Buffer();
+	    Buff x =new Buff();
 	    x.set(88);
 	    BST.put(x,x,0);
 	    BST.containsKey(x,0);
@@ -455,8 +455,8 @@ public class BST_Nova<K , V> {
 		x.set(120);
 		BST.put(x,x,0);
 	    BST.containsKey(x,0);
-	    Buffer xy =new Buffer();
-	    Buffer z= new Buffer();
+	    Buff xy =new Buff();
+	    Buff z= new Buff();
 	    xy.set(110);
 	    BST.put(xy,xy,0);
 	    BST.containsKey(xy,0);
@@ -468,7 +468,7 @@ public class BST_Nova<K , V> {
 	    BST.containsKey(x,0);
 	    BST.putIfAbsent(z, x,0);
 	    BST.containsKey(z,0);
-	    Buffer.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
+	    Buff.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
 	    
   }
 }

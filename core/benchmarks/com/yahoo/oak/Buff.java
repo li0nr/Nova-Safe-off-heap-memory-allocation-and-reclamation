@@ -2,16 +2,16 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 
-public class Buffer {
+public class Buff {
     public final int capacity;
     public final ByteBuffer buffer;
 
-    public Buffer(int capacity) {
+    public Buff(int capacity) {
         this.capacity = capacity;
         this.buffer = ByteBuffer.allocate(capacity);
     }
 
-    public Buffer() {
+    public Buff() {
         this.capacity = 8;
         this.buffer = ByteBuffer.allocate(capacity + Integer.BYTES);
     }
@@ -24,9 +24,9 @@ public class Buffer {
     	buffer.putLong(x);
     	buffer.flip();
     }
-    public static final NovaSerializer<Buffer> DEFAULT_SERIALIZER = new NovaSerializer<Buffer>() {
+    public static final NovaSerializer<Buff> DEFAULT_SERIALIZER = new NovaSerializer<Buff>() {
         @Override
-        public void serialize(Buffer object, long target) {
+        public void serialize(Buff object, long target) {
             UnsafeUtils.putInt(target , object.capacity);
             int offset = 0;
             for (int i = 0; i < object.capacity/Integer.BYTES; i++) {
@@ -37,12 +37,12 @@ public class Buffer {
         }
         
         @Override
-        public Buffer deserialize(long target) {
+        public Buff deserialize(long target) {
         	if(target == 0) return null;
         	int offset = 0;
         	int size = UnsafeUtils.getInt(target); 
         	offset += Integer.BYTES;
-        	Buffer ret = new Buffer(size);
+        	Buff ret = new Buff(size);
             for (int i = 0; i < size/Integer.BYTES; i++) {
                 int data = UnsafeUtils.getInt(target + offset);       
                 ret.buffer.putInt(offset - Integer.BYTES, data);
@@ -55,7 +55,7 @@ public class Buffer {
         /*----------------------------------HE SLICE-----------------------------------------------*/
 
         @Override
-        public void serialize(Buffer object, HEslice target) {
+        public void serialize(Buff object, HEslice target) {
             UnsafeUtils.putInt(target.address +target.offset, object.capacity);
             int offset = 0;
             for (int i = 0; i < object.capacity/Integer.BYTES; i++) {
@@ -66,12 +66,12 @@ public class Buffer {
         }
         
         @Override
-        public Buffer deserialize(HEslice target) {
+        public Buff deserialize(HEslice target) {
         	if(target == null) return null;
         	int offset = 0;
         	int size = UnsafeUtils.getInt(target.address); 
         	offset += Integer.BYTES;        	
-        	Buffer ret = new Buffer(size);
+        	Buff ret = new Buff(size);
             for (int i = 0; i < size/Integer.BYTES; i++) {
                 int data = UnsafeUtils.getInt(target.address +target.offset + offset);       
                 ret.buffer.putInt(offset - Integer.BYTES, data);
@@ -82,7 +82,7 @@ public class Buffer {
         
         /*----------------------------------NOVA SLICE-----------------------------------------------*/
         @Override
-        public void serialize(Buffer object, NovaSlice target) {
+        public void serialize(Buff object, NovaSlice target) {
             int offset = 0;
             for (int i = 0; i < object.capacity/Integer.BYTES; i++) {
                 int data = object.buffer.getInt(offset);
@@ -92,12 +92,12 @@ public class Buffer {
         }
         
         @Override
-        public Buffer deserialize(NovaSlice target) {
+        public Buff deserialize(NovaSlice target) {
         	if(target == null) return null;
         	int offset = 0;
         	int size = UnsafeUtils.getInt(target.address); 
         	offset += Integer.BYTES;        	
-        	Buffer ret = new Buffer(size);
+        	Buff ret = new Buff(size);
             for (int i = 0; i < size/Integer.BYTES; i++) {
                 int data = UnsafeUtils.getInt(target.address +target.offset + offset);       
                 ret.buffer.putInt(offset - Integer.BYTES, data);
@@ -107,21 +107,21 @@ public class Buffer {
         }
         
         @Override
-        public int calculateSize(Buffer object) {
+        public int calculateSize(Buff object) {
         	return object.calculateSerializedSize()+Integer.BYTES;
         }
     };
     
     
-    public static final NovaC<Buffer> DEFAULT_C = new NovaC<Buffer>() {
+    public static final NovaC<Buff> DEFAULT_C = new NovaC<Buff>() {
 		
 		@Override
-		public int compareKeys(Buffer key1, Buffer key2) {
+		public int compareKeys(Buff key1, Buff key2) {
 			return 0;
 		}
 		
 		@Override
-		public int comp(long address, Buffer obj) {
+		public int comp(long address, Buff obj) {
         	if(address == 0 || obj == null) return -1;
         	int offset = 0;
         	
@@ -142,9 +142,9 @@ public class Buffer {
 		}
 	};
     
-    public static final NovaComparator<Buffer> DEFAULT_COMPARATOR = new NovaComparator<Buffer>() {
+    public static final NovaComparator<Buff> DEFAULT_COMPARATOR = new NovaComparator<Buff>() {
     @Override
-    public int compareKeys(Buffer key1, Buffer key2) {
+    public int compareKeys(Buff key1, Buff key2) {
             final int minSize = Math.min(key1.capacity, key2.capacity);
 
             int offset = 0;
@@ -162,16 +162,16 @@ public class Buffer {
         }
         
         
-        public int compareSerializedKeys(Facade<Buffer> key1, Facade<Buffer> key2, int tid) {
-        	Buffer x = (Buffer)key1.Read(DEFAULT_SERIALIZER);
-        	Buffer y = (Buffer)key2.Read(DEFAULT_SERIALIZER);
+        public int compareSerializedKeys(Facade<Buff> key1, Facade<Buff> key2, int tid) {
+        	Buff x = (Buff)key1.Read(DEFAULT_SERIALIZER);
+        	Buff y = (Buff)key2.Read(DEFAULT_SERIALIZER);
 
             return compareKeys(x, y);
         }
         
         @Override
-        public int compareKeyAndSerializedKey(Buffer  key1,  Facade<Buffer> key2, int tid) {
-        	Buffer y = (Buffer)key2.Read(DEFAULT_SERIALIZER);
+        public int compareKeyAndSerializedKey(Buff  key1,  Facade<Buff> key2, int tid) {
+        	Buff y = (Buff)key2.Read(DEFAULT_SERIALIZER);
         	
             return compareKeys(key1, y);
         }
@@ -179,7 +179,7 @@ public class Buffer {
         /*----------------------------------HE SLICE-----------------------------------------------*/
 
         @Override
-        public int compareKeyAndSerializedKey(Buffer key, HEslice serializedKey, int tidx) {
+        public int compareKeyAndSerializedKey(Buff key, HEslice serializedKey, int tidx) {
             final int minSize = Math.min(key.capacity, serializedKey.length);
             
             int offset = 0;
@@ -198,8 +198,8 @@ public class Buffer {
         
         @Override
         public int compareSerializedKeys(HEslice serializedKey1 , HEslice serializedKey2, int tidx) {
-        	Buffer x = DEFAULT_SERIALIZER.deserialize(serializedKey1);
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey2);
+        	Buff x = DEFAULT_SERIALIZER.deserialize(serializedKey1);
+        	Buff y = DEFAULT_SERIALIZER.deserialize(serializedKey2);
 
             return compareKeys(x, y);
         	
@@ -207,8 +207,8 @@ public class Buffer {
         /*----------------------------------NOVA SLICE-----------------------------------------------*/
 
         @Override
-        public int compareKeyAndSerializedKey(Buffer key, NovaSlice serializedKey, int tidx) {
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey);
+        public int compareKeyAndSerializedKey(Buff key, NovaSlice serializedKey, int tidx) {
+        	Buff y = DEFAULT_SERIALIZER.deserialize(serializedKey);
 
             return compareKeys(key, y);
         	
@@ -216,8 +216,8 @@ public class Buffer {
         
         @Override
         public int compareSerializedKeys(NovaSlice serializedKey1 , NovaSlice serializedKey2, int tidx) {
-        	Buffer x = DEFAULT_SERIALIZER.deserialize(serializedKey1);
-        	Buffer y = DEFAULT_SERIALIZER.deserialize(serializedKey2);
+        	Buff x = DEFAULT_SERIALIZER.deserialize(serializedKey1);
+        	Buff y = DEFAULT_SERIALIZER.deserialize(serializedKey2);
 
             return compareKeys(x, y);
         	

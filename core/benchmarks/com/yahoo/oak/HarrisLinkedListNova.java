@@ -234,14 +234,14 @@ public class HarrisLinkedListNova<E> {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
-	    Buffer x =new Buffer(4);
+	    Buff x =new Buff(4);
 	    x.set(88);
-	    HarrisLinkedListNova<Buffer> List = new HarrisLinkedListNova<>(novaManager, Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_SERIALIZER);
+	    HarrisLinkedListNova<Buff> List = new HarrisLinkedListNova<>(novaManager, Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_SERIALIZER);
 		List.add(x,0);
 		x.set(120);
 		List.add(x,0);
-	    Buffer xy =new Buffer(4);
-	    Buffer z= new Buffer(128);
+	    Buff xy =new Buff(4);
+	    Buff z= new Buff(128);
 	    xy.set(110);
 	    List.add(xy,0);
 	    List.contains(x,0);

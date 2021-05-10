@@ -36,6 +36,7 @@
               <sources>
                 <source>benchmarks</source>
                 <source>OtherAprroaches</source>                
+                <source>MemBenchmark</source>                                
               </sources>
             </configuration>
           </execution>

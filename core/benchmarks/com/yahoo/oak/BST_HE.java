@@ -1,5 +1,6 @@
 package com.yahoo.oak;
 
+import java.util.concurrent.atomic.AtomicReference;
 /**
 *  This is an implementation of the non-blocking, concurrent binary search tree of
 *  Faith Ellen, Panagiota Fatourou, Eric Ruppert and Franck van Breugel.
@@ -104,7 +105,6 @@ public class BST_HE<K , V> {
    }
 
    protected final static class Clean<E extends Comparable<? super E>, V> extends Info<E,V> {}
-
 //--------------------------------------------------------------------------------
 //DICTIONARY
 //--------------------------------------------------------------------------------
@@ -441,12 +441,12 @@ public class BST_HE<K , V> {
    public static void main(String[] args) {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    
-	    BST_HE<Buffer,Buffer> BST = 
-	    		new BST_HE<Buffer, Buffer>(Buffer.DEFAULT_COMPARATOR, Buffer.DEFAULT_COMPARATOR
-	    				, Buffer.DEFAULT_SERIALIZER, Buffer.DEFAULT_SERIALIZER, allocator);
+	    BST_HE<Buff,Buff> BST = 
+	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
+	    				, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, allocator);
 	    	    
-	    Buffer x =new Buffer();
-	    Buffer z= new Buffer();
+	    Buff x =new Buff();
+	    Buff z= new Buff();
 
 
 	    x.set(88);
@@ -459,7 +459,7 @@ public class BST_HE<K , V> {
 	    BST.containsKey(z,0);
 
 	    BST.get(x, 0);
-	    Buffer xy =new Buffer();
+	    Buff xy =new Buff();
 	    xy.set(110);
 
 	    BST.put(xy,xy,0);
@@ -475,7 +475,7 @@ public class BST_HE<K , V> {
 	    BST.containsKey(z,0);
 	    BST.putIfAbsent(z, x,0);
 	    BST.containsKey(z,0);
-	    Buffer.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
+	    Buff.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
 	    
    }
 
