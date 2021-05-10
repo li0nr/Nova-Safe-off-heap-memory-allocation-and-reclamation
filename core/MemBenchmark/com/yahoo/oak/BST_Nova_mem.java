@@ -7,13 +7,13 @@ import com.yahoo.oak.*;
 
 public class BST_Nova_mem {
     static private BST_Nova<Buff,Buff> BSTX ;
+    static final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 
     
 	public static class BenchmarkState {
     	public static  int LIST_SIZE = 20_000;
 
         static public void setup() {
-    	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager mng = new NovaManager(allocator);
     	    
     	    BSTX = new BST_Nova<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
@@ -31,6 +31,17 @@ public class BST_Nova_mem {
 	
 	 public static void main(String[] args){
 		BenchmarkState.setup();
+		final int M = 1024*1024;
+        long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes
+        long heapFreeSize = Runtime.getRuntime().freeMemory();
+
+        double usedHeapMemoryMB = (double) (heapSize - heapFreeSize) / M;
+        double usedOffHeapMemoryMB = (double) ( allocator.allocated()) / M;
+        
+        double heapOverhead = usedHeapMemoryMB / (usedHeapMemoryMB + usedOffHeapMemoryMB);
+        System.out.println("Observed OnHeap :"+ usedHeapMemoryMB);
+        System.out.println("Observed OffHeap :"+ usedOffHeapMemoryMB);
+
 	    ArrayList<Thread> threads = new ArrayList<>();
 	    Random rng = new Random();
 

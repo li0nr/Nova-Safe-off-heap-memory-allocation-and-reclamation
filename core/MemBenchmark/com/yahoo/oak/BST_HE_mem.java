@@ -9,13 +9,13 @@ import javax.swing.plaf.SliderUI;
 public class BST_HE_mem {
 	
 	static private BST_HE<Buff,Buff> BSTX ;
+    static final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 
 	    
 		public static class BenchmarkState {
 	    	public static  int LIST_SIZE = 20_000;
 
 	        static public void setup() {
-	    	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    	    
 	    	    BSTX = new BST_HE<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
 						, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,allocator);
@@ -32,6 +32,16 @@ public class BST_HE_mem {
 		
 		 public static void main(String[] args){
 			BenchmarkState.setup();
+			final int M = 1024*1024;
+	        long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes
+	        long heapFreeSize = Runtime.getRuntime().freeMemory();
+
+	        double usedHeapMemoryMB = (double) (heapSize - heapFreeSize) / M;
+	        double usedOffHeapMemoryMB = (double) ( allocator.allocated()) / M;
+	        
+	        double heapOverhead = usedHeapMemoryMB / (usedHeapMemoryMB + usedOffHeapMemoryMB);
+	        System.out.println("Observed OnHeap :"+ usedHeapMemoryMB);
+	        System.out.println("Observed OffHeap :"+ usedOffHeapMemoryMB);
 		    ArrayList<Thread> threads = new ArrayList<>();
 		    Random rng = new Random();
 
