@@ -32,15 +32,15 @@ public class BST_Nova<K , V> {
    // Class: Node
    //--------------------------------------------------------------------------------
    protected final static class Node<E , V> {
-       final Facade<E> key;
-       final Facade<V> value;
-       volatile Node<E,V>  left;
-       volatile Node<E,V>  right;
-       volatile Info<E,V> info;
+       final Facade key;
+       final Facade value;
+       volatile Node<Facade,Facade>  left;
+       volatile Node<Facade,Facade>  right;
+       volatile Info<Facade,Facade> info;
 
        /** FOR MANUAL CREATION OF NODES (only used directly by testbed) **/
-       Node(final Facade<E> key, final Facade<V> value,
-    		   	final Node<E,V> left, final Node<E,V>  right) {
+       Node(final Facade key, final Facade value,
+    		   	final Node left, final Node  right) {
            this.key = key;
            this.value = value;
            this.left = left;
@@ -49,12 +49,12 @@ public class BST_Nova<K , V> {
        }
 
        /** TO CREATE A LEAF NODE **/
-       Node(final Facade<E> key, final Facade<V> value) {
+       Node(final Facade key, final Facade value) {
            this(key, value, null, null);
        }
 
        /** TO CREATE AN INTERNAL NODE **/
-       Node(final Facade<E> key, final Node<E,V> left, final Node<E,V> right) {
+       Node(final Facade key, final Node<Facade,Facade> left, final Node<Facade,Facade> right) {
            this(key, null, left, right);
        }
    }
@@ -69,12 +69,13 @@ public class BST_Nova<K , V> {
    }
 
    protected final static class DInfo<E , V> extends Info<E,V> {
-       final Node<E,V> p;
-       final Node<E,V> l;
-       final Node<E,V> gp;
-       final Info<E,V> pinfo;
+       final Node<Facade,Facade> p;
+       final Node<Facade,Facade> l;
+       final Node<Facade,Facade> gp;
+       final Info<Facade,Facade> pinfo;
 
-       DInfo(final Node<E,V> leaf, final Node<E,V> parent, final Node<E,V> grandparent, final Info<E,V> pinfo) {
+       DInfo(final Node<Facade,Facade> leaf, final Node<Facade,Facade> parent,
+    		   final Node<Facade,Facade> grandparent, final Info<Facade,Facade> pinfo) {
            this.p = parent;
            this.l = leaf;
            this.gp = grandparent;
@@ -83,11 +84,12 @@ public class BST_Nova<K , V> {
    }
 
    protected final static class IInfo<E, V> extends Info<E,V> {
-       final Node<E,V> p;
-       final Node<E,V> l;
-       final Node<E,V> newInternal;
+       final Node<Facade,Facade> p;
+       final Node<Facade,Facade> l;
+       final Node<Facade,Facade> newInternal;
 
-       IInfo(final Node<E,V> leaf, final Node<E,V> parent, final Node<E,V> newInternal){
+       IInfo(final Node<Facade,Facade> leaf, final Node<Facade,Facade> parent,
+    		   final Node<Facade,Facade> newInternal){
            this.p = parent;
            this.l = leaf;
            this.newInternal = newInternal;
@@ -95,9 +97,9 @@ public class BST_Nova<K , V> {
    }
 
    protected final static class Mark<E , V> extends Info<E,V> {
-       final DInfo<E,V> dinfo;
+       final DInfo<Facade,Facade> dinfo;
 
-       Mark(final DInfo<E,V> dinfo) {
+       Mark(final DInfo<Facade,Facade> dinfo) {
            this.dinfo = dinfo;
        }
    }
@@ -111,7 +113,7 @@ public class BST_Nova<K , V> {
    private static final AtomicReferenceFieldUpdater<Node, Node> rightUpdater = AtomicReferenceFieldUpdater.newUpdater(Node.class, Node.class, "right");
    private static final AtomicReferenceFieldUpdater<Node, Info> infoUpdater = AtomicReferenceFieldUpdater.newUpdater(Node.class, Info.class, "info");
 
-   final Node<K,V> root;
+   final Node<Facade,Facade> root;
 
    public BST_Nova(NovaComparator<K> cK, NovaComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV,
 		   			NovaC<K> cKt, NovaC<V> cVt, NovaManager mng) {
@@ -124,9 +126,9 @@ public class BST_Nova<K , V> {
 	   CmpK = cK; SrzK = sK;
 	   CmpV = cV; SrzV = sV;
 	   KCt = cKt; VCt = cVt;
-       root = new Node<K, V>(null, 
-    		   new Node<K, V>(null, null), 
-    		   new Node<K, V>(null, null));
+       root = new Node<Facade, Facade>(null,
+    		   new Node<Facade, Facade>(null, null), 
+    		   new Node<Facade, Facade>(null, null));
        //       root = new Node<K,V>(null, new Node<K,V>(null, null), new Node<K,V>(null, null));
 
    }
@@ -142,7 +144,7 @@ public class BST_Nova<K , V> {
    public final boolean containsKey(final K key, int tidx) {
 	   try {
 	       if (key == null) throw new NullPointerException();
-	       Node<K, V> l = root.left;
+	       Node<Facade,Facade> l = root.left;
 	       while (l.left != null) {
 	           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, tidx) < 0) ? l.left : l.right;
 	       }
@@ -156,12 +158,12 @@ public class BST_Nova<K , V> {
    public final V get(final K key, int tidx) {
 	   try {
 	       if (key == null) throw new NullPointerException();
-	       Node<K,V> l = root.left;
+	       Node<Facade,Facade> l = root.left;
 	       while (l.left != null) {
 	           l = (l.key == null || l.key.Read(key,KCt) < 0) ? l.left : l.right;
 	       }
 	       V ret = (l.key != null && l.key.Read(key,KCt) == 0) ? 
-	    		   l.value.Read(SrzV): null;
+	    		   (V)l.value.Read(SrzV): null;
 	       return ret;
 	   }catch (Exception e) {
 		   return null; //Facade throws	   
@@ -172,13 +174,13 @@ public class BST_Nova<K , V> {
    // or null if there was no mapping for the key
    /** PRECONDITION: k CANNOT BE NULL **/
    public final V putIfAbsent(final K key, final V value, int idx){
-       Node<K, V> newInternal;
-       Node<K, V> newSibling, newNode;
+       Node<Facade,Facade> newInternal;
+       Node<Facade,Facade> newSibling, newNode;
 
        /** SEARCH VARIABLES **/
-       Node<K, V> p;
-       Info<K, V> pinfo;
-       Node<K, V>l;
+       Node<Facade,Facade> p;
+       Info<Facade,Facade> pinfo;
+       Node<Facade,Facade>l;
        /** END SEARCH VARIABLES **/
        
        Facade<K> k = new Facade<K>();
@@ -189,7 +191,7 @@ public class BST_Nova<K , V> {
        k.WriteFast(SrzK, key, idx);
        v.WriteFast(SrzV, value, idx);
 
-       newNode = new Node<K,V>(k, v);
+       newNode = new Node<Facade,Facade>(k, v);
 
        try {
            while (true) {
@@ -208,17 +210,17 @@ public class BST_Nova<K , V> {
                /** END SEARCH **/
 
                if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
-                   return l.value.Read(SrzV);	// key already in the tree, no duplicate allowed
+                   return (V)l.value.Read(SrzV);	// key already in the tree, no duplicate allowed
                } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                    help(pinfo);
                } else {
-                   newSibling = new Node<K,V>(l.key, l.value);
+                   newSibling = new Node<Facade,Facade>(l.key, l.value);
                    if (l.key == null ||  CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0)	// newinternal = max(ret.l.key, key);
-                       newInternal = new Node<K,V>(l.key, newNode, newSibling);
+                       newInternal = new Node<Facade,Facade>(l.key, newNode, newSibling);
                    else
-                       newInternal = new Node<K,V>(k, newSibling, newNode);
+                       newInternal = new Node<Facade,Facade>(k, newSibling, newNode);
 
-                   final IInfo<K,V> newPInfo = new IInfo<K,V>(l, p, newInternal);
+                   final IInfo<Facade,Facade> newPInfo = new IInfo<Facade,Facade>(l, p, newInternal);
 
                    // try to IFlag parent
                    if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
@@ -241,15 +243,15 @@ public class BST_Nova<K , V> {
    // or null if there was no mapping for the key
    /** PRECONDITION: k CANNOT BE NULL **/
    public final V put(final K key, final V value, int idx) {
-       Node<K,V> newInternal;
-       Node<K,V> newSibling, newNode;
-       IInfo<K,V> newPInfo;
+       Node<Facade,Facade> newInternal;
+       Node<Facade,Facade> newSibling, newNode;
+       IInfo<Facade,Facade> newPInfo;
        Facade<V> result;
 
        /** SEARCH VARIABLES **/
-       Node<K,V> p;
-       Info<K,V> pinfo;
-       Node<K,V> l;
+       Node<Facade,Facade> p;
+       Info<Facade,Facade> pinfo;
+       Node<Facade,Facade> l;
        /** END SEARCH VARIABLES **/
        Facade<K> k = new Facade<K>();
        Facade<V> v = new Facade<V>();
@@ -259,7 +261,7 @@ public class BST_Nova<K , V> {
        k.WriteFast(SrzK, key, idx);
        v.WriteFast(SrzV, value, idx);
        
-       newNode = new Node<K,V>(k, v);
+       newNode = new Node<Facade,Facade>(k, v);
        
        try {
            while (true) {
@@ -282,19 +284,19 @@ public class BST_Nova<K , V> {
                } else {
                    if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
                        // key already in the tree, try to replace the old node with new node
-                       newPInfo = new IInfo<K,V>(l, p, newNode);
+                       newPInfo = new IInfo<Facade,Facade>(l, p, newNode);
                        result = l.value;
                    } else {
                        // key is not in the tree, try to replace a leaf with a small subtree
-                       newSibling = new Node<K,V>(l.key, l.value);
+                       newSibling = new Node<Facade,Facade>(l.key, l.value);
                        if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) // newinternal = max(ret.l.key, key);
                        {
-                           newInternal = new Node<K,V>(l.key, newNode, newSibling);
+                           newInternal = new Node<Facade,Facade>(l.key, newNode, newSibling);
                        } else {
-                           newInternal = new Node<K,V>(k, newSibling, newNode);
+                           newInternal = new Node<Facade,Facade>(k, newSibling, newNode);
                        }
 
-                       newPInfo = new IInfo<K,V>(l, p, newInternal);
+                       newPInfo = new IInfo<Facade,Facade>(l, p, newInternal);
                        result = null;
                    }
 
@@ -318,11 +320,11 @@ public class BST_Nova<K , V> {
    public final V remove(final K key, int idx){
 
        /** SEARCH VARIABLES **/
-       Node<K,V> gp;
-       Info<K,V> gpinfo;
-       Node<K,V> p;
-       Info<K,V> pinfo;
-       Node<K,V> l;
+       Node<Facade,Facade> gp;
+       Info<Facade,Facade> gpinfo;
+       Node<Facade,Facade> p;
+       Info<Facade,Facade> pinfo;
+       Node<Facade,Facade> l;
        /** END SEARCH VARIABLES **/
        try {
            while (true) {
@@ -356,10 +358,10 @@ public class BST_Nova<K , V> {
                    help(pinfo);
                } else {
                    // try to DFlag grandparent
-                   final DInfo<K,V> newGPInfo = new DInfo<K,V>(l, p, gp, pinfo);
+                   final DInfo<Facade,Facade> newGPInfo = new DInfo<Facade,Facade>(l, p, gp, pinfo);
 
                    if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
-                       if (helpDelete(newGPInfo)) return l.value.Read(SrzV);
+                       if (helpDelete(newGPInfo)) return (V)l.value.Read(SrzV);
                    } else {
                        // if fails, help grandparent with its latest info value
                        help(gp.info);
@@ -375,18 +377,18 @@ public class BST_Nova<K , V> {
 //- helpDelete
 //--------------------------------------------------------------------------------
 
-   private void helpInsert(final IInfo<K,V> info){
+   private void helpInsert(final IInfo<Facade,Facade> info){
        (info.p.left == info.l ? leftUpdater : rightUpdater).compareAndSet(info.p, info.l, info.newInternal);
        infoUpdater.compareAndSet(info.p, info, new Clean());
    }
 
-   private boolean helpDelete(final DInfo<K,V> info){
+   private boolean helpDelete(final DInfo<Facade,Facade> info){
        final boolean result;
 
-       result = infoUpdater.compareAndSet(info.p, info.pinfo, new Mark<K,V>(info));
-       final Info<K,V> currentPInfo = info.p.info;
+       result = infoUpdater.compareAndSet(info.p, info.pinfo, new Mark<Facade,Facade>(info));
+       final Info<Facade,Facade> currentPInfo = info.p.info;
        // if  CAS succeed or somebody else already suceed helping, the helpMarked
-       if (result || (currentPInfo.getClass() == Mark.class && ((Mark<K,V>) currentPInfo).dinfo == info)) {
+       if (result || (currentPInfo.getClass() == Mark.class && ((Mark<Facade,Facade>) currentPInfo).dinfo == info)) {
            helpMarked(info);
            return true;
        } else {
@@ -396,14 +398,14 @@ public class BST_Nova<K , V> {
        }
    }
 
-   private void help(final Info<K,V> info) {
-       if (info.getClass() == IInfo.class)     helpInsert((IInfo<K,V>) info);
-       else if(info.getClass() == DInfo.class) helpDelete((DInfo<K,V>) info);
-       else if(info.getClass() == Mark.class)  helpMarked(((Mark<K,V>)info).dinfo);
+   private void help(final Info<Facade,Facade> info) {
+       if (info.getClass() == IInfo.class)     helpInsert((IInfo<Facade,Facade>) info);
+       else if(info.getClass() == DInfo.class) helpDelete((DInfo<Facade,Facade>) info);
+       else if(info.getClass() == Mark.class)  helpMarked(((Mark<Facade,Facade>)info).dinfo);
    }
 
-   private void helpMarked(final DInfo<K,V> info) {
-       final Node<K,V> other = (info.p.right == info.l) ? info.p.left : info.p.right;
+   private void helpMarked(final DInfo<Facade,Facade> info) {
+       final Node<Facade,Facade> other = (info.p.right == info.l) ? info.p.left : info.p.right;
        (info.gp.left == info.p ? leftUpdater : rightUpdater).compareAndSet(info.gp, info.p, other);
        infoUpdater.compareAndSet(info.gp, info, new Clean());
    }
