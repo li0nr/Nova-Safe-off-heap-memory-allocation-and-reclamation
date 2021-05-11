@@ -267,7 +267,7 @@ public class BST_HE<K , V> {
                help(pinfo);
            } else {
         	   HE.get_protected(l.key,0, idx);
-               if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
+               if (l.key == null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
                    // key already in the tree, try to replace the old node with new node
                    newPInfo = new IInfo<HEslice, HEslice>(l, p, newNode);
                    result = HE.get_protected(l.value,0, idx);
@@ -341,7 +341,7 @@ public class BST_HE<K , V> {
            /** END SEARCH **/
     	   HE.get_protected(l.key,0, idx);
 
-           if (l.key == null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) != 0) {
+           if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) != 0) {
         	   HE.clear(idx);
         	   return null;
            }

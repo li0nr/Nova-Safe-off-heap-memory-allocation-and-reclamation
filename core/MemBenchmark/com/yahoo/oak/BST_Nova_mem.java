@@ -11,7 +11,7 @@ public class BST_Nova_mem {
 
     
 	public static class BenchmarkState {
-    	public static  int LIST_SIZE = 20_000;
+    	public static  int LIST_SIZE = ParamBench.size;
 
         static public void setup() {
     	    final NovaManager mng = new NovaManager(allocator);
@@ -21,7 +21,7 @@ public class BST_Nova_mem {
         	for (int i=0; i <LIST_SIZE ; i++) {
         		Buff k = new Buff();
         		k.set(i);
-        		BSTX.put(k,k, 0);
+        		//BSTX.put(k,k, 0);
         	}
         }
     }
