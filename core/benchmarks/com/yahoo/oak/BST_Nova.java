@@ -224,7 +224,7 @@ public class BST_Nova<K , V> {
 
                    // try to IFlag parent
                    if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
-                       helpInsert(newPInfo);
+                      // helpInsert(newPInfo);
                        return null;
                    } else {
                        // if fails, help the current operation
@@ -262,7 +262,7 @@ public class BST_Nova<K , V> {
        v.WriteFast(SrzV, value, idx);
        
        newNode = new Node<Facade,Facade>(k, v);
-       
+
        try {
            while (true) {
 
@@ -298,17 +298,19 @@ public class BST_Nova<K , V> {
 
                        newPInfo = new IInfo<Facade,Facade>(l, p, newInternal);
                        result = null;
-                   }
 
                    // try to IFlag parent
                    if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                        helpInsert(newPInfo);
                        if(result == null) return null;
+                       //return null;
                        return (V)result.Read(SrzV);
                    } else {
                        // if fails, help the current operation
                        // need to get the latest p.info since CAS doesnt return current value
-                       help(p.info);
+                	   help(p.info);
+                       }
+                       return null;
                    }
                }
            }

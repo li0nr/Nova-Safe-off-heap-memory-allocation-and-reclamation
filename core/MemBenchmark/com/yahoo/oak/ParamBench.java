@@ -2,5 +2,5 @@ package com.yahoo.oak;
 
 public class ParamBench {
 
-	static final int size = 100;
+	static final int size = 10000;
 }

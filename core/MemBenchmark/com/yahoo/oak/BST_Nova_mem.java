@@ -21,7 +21,7 @@ public class BST_Nova_mem {
         	for (int i=0; i <LIST_SIZE ; i++) {
         		Buff k = new Buff();
         		k.set(i);
-        		//BSTX.put(k,k, 0);
+        		BSTX.put(k,k, 0);
         	}
         }
     }
@@ -31,6 +31,8 @@ public class BST_Nova_mem {
 	
 	 public static void main(String[] args){
 		BenchmarkState.setup();
+        System.gc();
+
 		final int M = 1024*1024;
         long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes
         long heapFreeSize = Runtime.getRuntime().freeMemory();

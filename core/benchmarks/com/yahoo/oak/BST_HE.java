@@ -279,13 +279,11 @@ public class BST_HE<K , V> {
                    {
                        newInternal = new Node<HEslice, HEslice>(l.key, newNode, newSibling);
                    } else {
-                       newInternal = new Node<HEslice, HEslice>(HE.allocate(SrzK.calculateSize(key)), newSibling, newNode);
-                       SrzK.serialize(key, newInternal.key);
+                       newInternal = new Node<HEslice, HEslice>(newNode.key, newSibling, newNode);
                    }
 
                    newPInfo = new IInfo<HEslice, HEslice>(l, p, newInternal);
                    result = null;
-               }
 
                // try to IFlag parent
                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
@@ -298,6 +296,8 @@ public class BST_HE<K , V> {
                    // if fails, help the current operation
                    // need to get the latest p.info since CAS doesnt return current value
                    help(p.info);
+            	   return null;
+                   }
                }
            }
        }
