@@ -3,7 +3,6 @@ package com.yahoo.oak;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import com.yahoo.oak.*;
 
 public class BST_Nova_mem {
     static private BST_Nova<Buff,Buff> BSTX ;
@@ -16,9 +15,13 @@ public class BST_Nova_mem {
         static public void setup() {
     	    final NovaManager mng = new NovaManager(allocator);
     	    
-    	    BSTX = new BST_Nova<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
-					, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C,Buff.DEFAULT_C,mng);
-        	for (int i=0; i <LIST_SIZE ; i++) {
+    	    ParamBench.PrintMem(allocator);
+            
+    	    BSTX = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,
+    	    								Buff.DEFAULT_C,Buff.DEFAULT_C,mng);
+        	
+    	    
+    	    for (int i=0; i <LIST_SIZE ; i++) {
         		Buff k = new Buff();
         		k.set(i);
         		BSTX.put(k,k, 0);
@@ -29,34 +32,29 @@ public class BST_Nova_mem {
 	
 
 	
-	 public static void main(String[] args){
+	 public static void main(String[] args) throws InterruptedException{
 		BenchmarkState.setup();
-        System.gc();
-
-		final int M = 1024*1024;
-        long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes
-        long heapFreeSize = Runtime.getRuntime().freeMemory();
-
-        double usedHeapMemoryMB = (double) (heapSize - heapFreeSize) / M;
-        double usedOffHeapMemoryMB = (double) ( allocator.allocated()) / M;
-        
-        double heapOverhead = usedHeapMemoryMB / (usedHeapMemoryMB + usedOffHeapMemoryMB);
-        System.out.println("Observed OnHeap :"+ usedHeapMemoryMB);
-        System.out.println("Observed OffHeap :"+ usedOffHeapMemoryMB);
+	    ParamBench.PrintMem(allocator);
+		System.gc();
+	    ParamBench.PrintMem(allocator);
 
 	    ArrayList<Thread> threads = new ArrayList<>();
-	    Random rng = new Random();
 
-		for (int i = 0; i < 1; i++) 
-			threads.add(new Thread(new writeThread(0,rng.nextLong())));
-			
-		for (int i = 0; i < 1; i++) 
-			threads.add(new Thread(new delThread(1,rng.nextLong())));
-			
+//	    Thread.sleep(600000);
 
-		for (Thread x : threads) {
-			x.start();
-		}
+//	    ArrayList<Thread> threads = new ArrayList<>();
+//	    Random rng = new Random();
+//
+//		for (int i = 0; i < 1; i++) 
+//			threads.add(new Thread(new writeThread(0,rng.nextLong())));
+//			
+//		for (int i = 0; i < 1; i++) 
+//			threads.add(new Thread(new delThread(1,rng.nextLong())));
+//			
+//
+//		for (Thread x : threads) {
+//			x.start();
+//		}
 	}
 	 
 	 

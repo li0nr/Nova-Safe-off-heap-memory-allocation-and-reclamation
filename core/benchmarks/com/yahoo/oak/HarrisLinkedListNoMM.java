@@ -10,7 +10,7 @@ public class HarrisLinkedListNoMM <E>{
 	    final Node<NovaSlice> head;
 	    final Node<NovaSlice> tail;
 	    
-	    final NovaComparator<E> Cmp;
+	    final NovaC<E> Cmp;
 	    final NovaSerializer<E> Srz;
 	    final NativeMemoryAllocator allocator;
 	    final static int MAXTHREADS = 32;
@@ -37,7 +37,7 @@ public class HarrisLinkedListNoMM <E>{
 	    }
 
 
-	    public HarrisLinkedListNoMM(NativeMemoryAllocator allocator,NovaComparator<E> cmp,	NovaSerializer<E> srz) {
+	    public HarrisLinkedListNoMM(NativeMemoryAllocator allocator,NovaC<E> cmp,	NovaSerializer<E> srz) {
 	    	this.allocator = allocator;
 			Cmp = cmp; Srz = srz;
 	    	
@@ -145,7 +145,7 @@ public class HarrisLinkedListNoMM <E>{
 	                    succ = curr.next.get(marked);
 	                }
 	        		
-	                if (curr == tail || Cmp.compareKeyAndSerializedKey(key,curr.key, tidx) <= 0) {
+	                if (curr == tail || Cmp.compareKeys(curr.key.address + curr.key.offset, key) <= 0) {
 	                    return new Window<NovaSlice>(pred, curr);
 	                }
 	                pred = curr;
@@ -175,29 +175,14 @@ public class HarrisLinkedListNoMM <E>{
 	        boolean[] marked = {false};
 	        Node<NovaSlice> curr = head.next.getReference();
 	        curr.next.get(marked);
-	        while (curr != tail && Cmp.compareKeyAndSerializedKey(key,curr.key ,tidx) > 0) {
+	        while (curr != tail && Cmp.compareKeys(curr.key.address + curr.key.offset, key) < 0) {
 	            curr = curr.next.getReference();
 	            curr.next.get(marked);
 	        }
-	        boolean flag = Cmp.compareKeyAndSerializedKey(key,curr.key,tidx)==0 && !marked[0];
+	        boolean flag = Cmp.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
 	        return flag;
 	    }
 	    
-	    public boolean computeIfPresent(E key, E newKey, int tidx) {
-	        boolean[] marked = {false};
-	        Node<NovaSlice> curr = head.next.getReference();
-	        curr.next.get(marked);
-	        while (curr != tail && Cmp.compareKeyAndSerializedKey(key,curr.key,tidx) > 0) {
-	            curr = curr.next.getReference();
-	            curr.next.get(marked);
-	        }
-	        if( Cmp.compareKeyAndSerializedKey(key,curr.key,tidx)==0 && !marked[0]) {
-	        	Srz.serialize(newKey, curr.key);
-	        	return true;
-	        	}
-	        else 
-	            return false;
-	        }
 	    
 		public static void main(String[] args) {
 		    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
@@ -205,7 +190,7 @@ public class HarrisLinkedListNoMM <E>{
 		    
 		    Buff x =new Buff(4);
 		    x.set(88);
-		    HarrisLinkedListNoMM<Buff> List = new HarrisLinkedListNoMM<>(allocator, Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_SERIALIZER);
+		    HarrisLinkedListNoMM<Buff> List = new HarrisLinkedListNoMM<>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 			List.add(x,0);
 			x.set(120);
 			List.add(x,0);
@@ -214,9 +199,8 @@ public class HarrisLinkedListNoMM <E>{
 		    xy.set(110);
 		    List.add(xy,0);
 		    List.contains(x,0);
-		    List.computeIfPresent(x, z,0);
 		    
-		    assert List.contains(x,0) == false;
+		    assert List.contains(x,0) == false; //removed putif apsent may effect this result
 		    assert List.contains(z,0) == true;
 
 		}

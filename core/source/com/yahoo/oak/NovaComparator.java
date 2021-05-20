@@ -17,19 +17,19 @@ public interface NovaComparator<K> extends Comparator<K> {
     int compareKeys(K key1, K key2);
 
     
-    int compareSerializedKeys(Facade<K> serializedKey1, Facade<K>  serializedKey2, int tidx);
-    
-    int compareKeyAndSerializedKey(K key, Facade<K>  serializedKey, int tidx);
-    
-    
-    int compareKeyAndSerializedKey(K key, HEslice serializedKey, int tidx);
-    
-    int compareSerializedKeys(HEslice serializedKey1, HEslice serializedKey2, int tidx);
-    
-    
-    int compareKeyAndSerializedKey(K key, NovaSlice serializedKey, int tidx);
-    
-    int compareSerializedKeys(NovaSlice serializedKey1, NovaSlice serializedKey2, int tidx);
+//    int compareSerializedKeys(Facade<K> serializedKey1, Facade<K>  serializedKey2, int tidx);
+//    
+//    int compareKeyAndSerializedKey(K key, Facade<K>  serializedKey, int tidx);
+//    
+//    
+//    int compareKeyAndSerializedKey(K key, HEslice serializedKey, int tidx);
+//    
+//    int compareSerializedKeys(HEslice serializedKey1, HEslice serializedKey2, int tidx);
+//    
+//    
+//    int compareKeyAndSerializedKey(K key, NovaSlice serializedKey, int tidx);
+//    
+//    int compareSerializedKeys(NovaSlice serializedKey1, NovaSlice serializedKey2, int tidx);
 
 
 

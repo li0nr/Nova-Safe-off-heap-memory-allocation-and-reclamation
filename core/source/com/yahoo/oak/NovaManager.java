@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.openjdk.jmh.infra.Blackhole;
+
 
 
 public class NovaManager implements MemoryManager {
@@ -60,10 +62,9 @@ public class NovaManager implements MemoryManager {
         }
         blockcount = allocator.getBlocks();
         
-        
-        TAP = new long[blockcount * MAX_THREADS * CACHE_PADDING];
+        TAP = new long[ MAX_THREADS * CACHE_PADDING];
         //block 0 is not used ?
-        for(int i=BLOCK_TAP; i<blockcount*MAX_THREADS*CACHE_PADDING; i+=CACHE_PADDING)
+        for(int i=BLOCK_TAP; i<MAX_THREADS*CACHE_PADDING; i+=CACHE_PADDING)
         	TAP[i+IDENTRY]=-1;
 
         
@@ -131,13 +132,13 @@ public class NovaManager implements MemoryManager {
 
   public  void setTap(int block,long ref,int idx) {
 	int i= idx%MAX_THREADS;
-	TAP[block*BLOCK_TAP+CACHE_PADDING*i+IDENTRY]=idx;
-	TAP[block*BLOCK_TAP+CACHE_PADDING*i+REFENTRY]=ref;
+	TAP[CACHE_PADDING*i+IDENTRY]=idx;
+	TAP[CACHE_PADDING*i+REFENTRY]=ref;
 }
     
   public  void UnsetTap(int block,int idx) {
 	int i= idx%MAX_THREADS;
-	TAP[block*BLOCK_TAP+CACHE_PADDING*i+IDENTRY]=-1;
+	TAP[CACHE_PADDING*i+IDENTRY]=-1;
 }
 
     public long getAdress(int blockID) {

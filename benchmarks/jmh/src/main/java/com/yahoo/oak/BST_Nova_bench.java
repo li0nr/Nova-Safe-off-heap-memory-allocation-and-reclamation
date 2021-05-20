@@ -36,8 +36,7 @@ public class BST_Nova_bench {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager novaManager = new NovaManager(allocator);
     	    
-    	    BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
-					, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    	    BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
         	for (int i=0; i <LIST_SIZE ; i++) {
         		Buff k = new Buff();

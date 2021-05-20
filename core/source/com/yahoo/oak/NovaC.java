@@ -9,7 +9,7 @@ public interface NovaC<K> extends Comparator<K> {
 
     int compareKeys(K key1, K key2);
 
-    int comp(long address, K obj);
+    int compareKeys(long address, K obj);
 
 
 

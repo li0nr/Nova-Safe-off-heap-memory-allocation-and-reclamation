@@ -17,8 +17,10 @@ public class BST_HE_mem {
 
 	        static public void setup() {
 	    	    
-	    	    BSTX = new BST_HE<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
-						, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,allocator);
+	    	    BSTX = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,
+	    	    		 Buff.DEFAULT_C,  Buff.DEFAULT_C, allocator);
+	    	    
+	    	    ParamBench.PrintMem(allocator);
 	        	for (int i=0; i <LIST_SIZE ; i++) {
 	        		Buff k = new Buff();
 	        		k.set(i);
@@ -30,33 +32,26 @@ public class BST_HE_mem {
 		
 
 		
-		 public static void main(String[] args){
+		 public static void main(String[] args) throws InterruptedException{
 			BenchmarkState.setup();
-	        System.gc();
+    	    ParamBench.PrintMem(allocator);
+			System.gc();
+    	    ParamBench.PrintMem(allocator);
 
-			final int M = 1024*1024;
-	        long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes
-	        long heapFreeSize = Runtime.getRuntime().freeMemory();
-
-	        double usedHeapMemoryMB = (double) (heapSize - heapFreeSize) / M;
-	        double usedOffHeapMemoryMB = (double) ( allocator.allocated()) / M;
-	        
-	        double heapOverhead = usedHeapMemoryMB / (usedHeapMemoryMB + usedOffHeapMemoryMB);
-	        System.out.println("Observed OnHeap :"+ usedHeapMemoryMB);
-	        System.out.println("Observed OffHeap :"+ usedOffHeapMemoryMB);
 		    ArrayList<Thread> threads = new ArrayList<>();
-		    Random rng = new Random();
+//		    Random rng = new Random();
+//		    Thread.sleep(60000);
 
-			for (int i = 0; i < 1; i++) 
-				threads.add(new Thread(new writeThread(0,rng.nextLong())));
-				
-			for (int i = 0; i < 1; i++) 
-				threads.add(new Thread(new delThread(1,rng.nextLong())));
-				
-
-			for (Thread x : threads) {
-				x.start();
-			}
+//			for (int i = 0; i < 1; i++) 
+//				threads.add(new Thread(new writeThread(0,rng.nextLong())));
+//				
+//			for (int i = 0; i < 1; i++) 
+//				threads.add(new Thread(new delThread(1,rng.nextLong())));
+//				
+//
+//			for (Thread x : threads) {
+//				x.start();
+//			}
 			
 		}
 		 

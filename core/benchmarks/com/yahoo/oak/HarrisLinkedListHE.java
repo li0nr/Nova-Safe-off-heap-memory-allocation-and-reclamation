@@ -36,7 +36,7 @@ public class HarrisLinkedListHE<E> {
     final Node<HEslice> head;
     final Node<HEslice> tail;
     
-    final NovaComparator<E> Cmp;
+    final NovaC<E> Cmp;
     final NovaSerializer<E> Srz;
     final HazardEras HE;
     final NativeMemoryAllocator allocator;
@@ -67,7 +67,7 @@ public class HarrisLinkedListHE<E> {
 
     
     
-    public HarrisLinkedListHE(NativeMemoryAllocator allocator,NovaComparator<E> cmp,	NovaSerializer<E> srz) {
+    public HarrisLinkedListHE(NativeMemoryAllocator allocator,NovaC<E> cmp,	NovaSerializer<E> srz) {
     	HE = new HazardEras(1, MAXTHREADS, allocator);
     	this.allocator = allocator;
 		Cmp = cmp; Srz = srz;
@@ -187,7 +187,7 @@ public class HarrisLinkedListHE<E> {
                     succ = curr.next.get(marked);
                 }
                 HE.get_protected(curr.key, 0, tidx);
-                if (curr == tail || Cmp.compareKeyAndSerializedKey(key,curr.key, tidx) <= 0) {
+                if (curr == tail || Cmp.compareKeys(curr.key.address + curr.key.offset, key) >= 0) {
                     return new Window<HEslice>(pred, curr);
                 }
                 pred = curr;
@@ -222,38 +222,18 @@ public class HarrisLinkedListHE<E> {
         Node<HEslice> curr = head.next.getReference();
         curr.next.get(marked);
         HE.get_protected(curr.key, 0, tidx);
-        while (curr != tail && Cmp.compareKeyAndSerializedKey(key,curr.key ,tidx) > 0) {
+        while (curr != tail && Cmp.compareKeys(curr.key.address + curr.key.offset, key) < 0) {
             //curr = HE.get_protected(curr.next.getReference(),01,tidx);
         	curr = curr.next.getReference();
             curr.next.get(marked);
             HE.get_protected(curr.key, 0, tidx);
         }
-        boolean flag = curr.key != null && Cmp.compareKeyAndSerializedKey(key,curr.key,tidx)==0 && !marked[0];
+        boolean flag = curr.key != null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0 && !marked[0];
         HE.clear(tidx);
         return flag;
     }
     
-    public boolean computeIfPresent(E key, E newKey, int tidx) {
-        boolean[] marked = {false};
-        //Node<HEslice> curr = HE.get_protected(head.next.getReference(),01,tidx);
-        Node<HEslice> curr = head.next.getReference();
-        curr.next.get(marked);
-        while (curr != tail && Cmp.compareKeyAndSerializedKey(key,curr.key,tidx) > 0) {
-            //curr = HE.get_protected(curr.next.getReference(),01,tidx);
-        	curr = curr.next.getReference();
-            curr.next.get(marked);
-            HE.get_protected(curr.key, 0, tidx);
-        }
-        if( Cmp.compareKeyAndSerializedKey(key,curr.key,tidx)==0 && !marked[0]) {
-        	Srz.serialize(newKey, curr.key);
-            HE.clear(tidx);
-        	return true;
-        	}
-        else {
-            HE.clear(tidx);
-            return false;
-            }
-        }
+
     
 	public static void main(String[] args) {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
@@ -261,7 +241,7 @@ public class HarrisLinkedListHE<E> {
 	    
 	    Buff x =new Buff(4);
 	    x.set(88);
-	    HarrisLinkedListHE<Buff> List = new HarrisLinkedListHE<>(allocator, Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_SERIALIZER);
+	    HarrisLinkedListHE<Buff> List = new HarrisLinkedListHE<>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 		List.add(x,0);
 		x.set(120);
 		List.add(x,0);
@@ -270,7 +250,6 @@ public class HarrisLinkedListHE<E> {
 	    xy.set(110);
 	    List.add(xy,0);
 	    List.contains(x,0);
-	    List.computeIfPresent(x, z,0);
 	    
 	    List.contains(x,0); //false;
 	    List.contains(z,0); //true;

@@ -35,8 +35,8 @@ public class BST_HE_bench {
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
-					, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,allocator);
+    	    BST = new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+										,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
         	for (int i=0; i <LIST_SIZE ; i++) {
         		Buff k = new Buff();
         		Buff v = new Buff();

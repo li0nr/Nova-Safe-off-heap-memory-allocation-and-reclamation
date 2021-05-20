@@ -37,7 +37,7 @@ public class HarrisLinkedListNova<E> {
     final Node<Facade> head;
     final Node<Facade> tail;
     
-    final NovaComparator<E> Cmp;
+    final NovaC<E> Cmp;
     final NovaSerializer<E> Srz;
     final NovaManager nm;
     
@@ -66,7 +66,7 @@ public class HarrisLinkedListNova<E> {
     }
     
     
-    public HarrisLinkedListNova(NovaManager novaManager,NovaComparator<E> cmp,	NovaSerializer<E> srz) {
+    public HarrisLinkedListNova(NovaManager novaManager,NovaC<E> cmp,	NovaSerializer<E> srz) {
     	Facades = new ArrayList<>();
 		for(int i=0; i<MAXTHREADS;i++)
 			Facades.add(new Facade<>());
@@ -178,7 +178,7 @@ public class HarrisLinkedListNova<E> {
                     succ = curr.next.get(marked);
                 }
 
-                if (curr == tail || Cmp.compareKeyAndSerializedKey(key,curr.key, tidx) <= 0) {
+                if (curr == tail || curr.key.Compare(key, Cmp) >= 0) { //we compare the offheap vs the key thus looking for >
                     return new Window<Facade>(pred, curr);
                 }
                 pred = curr;
@@ -208,22 +208,22 @@ public class HarrisLinkedListNova<E> {
         boolean[] marked = {false};
         Node<Facade> curr = head.next.getReference();
         curr.next.get(marked);
-        while (curr != tail && Cmp.compareKeyAndSerializedKey(key,curr.key ,tidx) > 0) {
+        while (curr != tail && curr.key.Compare(key, Cmp) < 0) {
             curr = curr.next.getReference();
             curr.next.get(marked);
         }
-        return Cmp.compareKeyAndSerializedKey(key,curr.key,tidx)==0 && !marked[0];
+        return curr.key.Compare(key, Cmp) ==0 && !marked[0];
     }
     
     public boolean computeIfPresent(E key, E newKey, int tidx) {
         boolean[] marked = {false};
         Node<Facade> curr = head.next.getReference();
         curr.next.get(marked);
-        while (curr != tail && Cmp.compareKeyAndSerializedKey(key,curr.key,tidx) > 0) {
+        while (curr != tail &&curr.key.Compare(key, Cmp) < 0) {
             curr = curr.next.getReference();
             curr.next.get(marked);
         }
-        if( Cmp.compareKeyAndSerializedKey(key,curr.key,tidx)==0 && !marked[0]) {
+        if( curr.key.Compare(key, Cmp) == 0 && !marked[0]) {
         	curr.key.WriteFull(Srz, newKey, 0);
         	return true;
         	}
@@ -236,7 +236,7 @@ public class HarrisLinkedListNova<E> {
 	    
 	    Buff x =new Buff(4);
 	    x.set(88);
-	    HarrisLinkedListNova<Buff> List = new HarrisLinkedListNova<>(novaManager, Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_SERIALIZER);
+	    HarrisLinkedListNova<Buff> List = new HarrisLinkedListNova<>(novaManager, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 		List.add(x,0);
 		x.set(120);
 		List.add(x,0);

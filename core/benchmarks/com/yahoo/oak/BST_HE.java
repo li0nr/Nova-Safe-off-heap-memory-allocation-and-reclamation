@@ -25,10 +25,10 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class BST_HE<K , V> {
 	
-	   final NovaComparator<K> CmpK;
 	   final NovaSerializer<K> SrzK;
-	   final NovaComparator<V> CmpV;
 	   final NovaSerializer<V> SrzV;
+	   final NovaC<K> KCt;
+	   final NovaC<V> VCt;
 	   final HazardEras HE;
 
    //--------------------------------------------------------------------------------
@@ -114,13 +114,13 @@ public class BST_HE<K , V> {
 
    final Node<HEslice, HEslice> root;
 
-   public BST_HE(NovaComparator<K> cK, NovaComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV, NativeMemoryAllocator alloc) {
+   public BST_HE(NovaSerializer<K> sK, NovaSerializer<V> sV,
+		   		 NovaC<K> cmpK , NovaC<V> cmpV, NativeMemoryAllocator alloc) {
        // to avoid handling special case when <= 2 nodes,
        // create 2 dummy nodes, both contain key null
        // All real keys inside BST are required to be non-null
-	   
-	   CmpK = cK; SrzK = sK;
-	   CmpV = cV; SrzV = sV;
+	   SrzK = sK; SrzV = sV;
+	   KCt = cmpK; VCt = cmpV;
 	   HE = new HazardEras(2, 32, alloc);
        root = new Node<HEslice, HEslice>(null, new Node<HEslice, HEslice>(null, null), new Node<HEslice, HEslice>(null, null));
    }
@@ -138,10 +138,10 @@ public class BST_HE<K , V> {
        Node<HEslice, HEslice> l = root.left;
        while (l.left != null) {
     	   HE.get_protected(l.key,0,idx);
-           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx)< 0) ? l.left : l.right;
+           l = (l.key == null || KCt.compareKeys(l.key.address + l.key.offset, key) > 0) ? l.left : l.right;
        }
 	   HE.get_protected(l.key,0,idx);
-       boolean ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) ? true : false;
+       boolean ret = (l.key != null && KCt.compareKeys(l.key.address + + l.key.offset, key) == 0) ? true : false;
        HE.clear(idx);
        return ret;
    }
@@ -152,10 +152,11 @@ public class BST_HE<K , V> {
        Node<HEslice, HEslice> l = root.left;
        while (l.left != null) {
     	   HE.get_protected(l.key,0,idx);
-           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx)< 0) ? l.left : l.right;
+           l = (l.key == null || KCt.compareKeys(l.key.address + l.key.offset, key) > 0) ? l.left : l.right;
        }
 	   HE.get_protected(l.key,0,idx);
-       V ret = (l.key != null && CmpK.compareKeyAndSerializedKey(key,l.key, idx) == 0) ? SrzV.deserialize(l.value) : null;
+       V ret = (l.key != null && KCt.compareKeys(l.key.address+ l.key.offset, key)  == 0) ? 
+    		   SrzV.deserialize(l.value.address + l.value.offset) : null;
        HE.clear(idx);
        return ret;
    }
@@ -175,8 +176,8 @@ public class BST_HE<K , V> {
 
        newNode = new Node<HEslice, HEslice>(HE.allocate(SrzK.calculateSize(key)),
 				   HE.allocate(SrzV.calculateSize(value)));
-       SrzK.serialize(key, newNode.key);
-       SrzV.serialize(value, newNode.value);
+       SrzK.serialize(key, newNode.key.address + newNode.key.offset);
+       SrzV.serialize(value, newNode.value.address + newNode.value.offset);
        
        while (true) {
 
@@ -187,16 +188,16 @@ public class BST_HE<K , V> {
            while (l.left != null) {
                p = l;
         	   HE.get_protected(l.key,0,idx);
-               l = (l.key == null || CmpK.compareKeyAndSerializedKey(key,l.key, idx)< 0) ? l.left : l.right;
+               l = (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) > 0) ? l.left : l.right;
            }
            pinfo = p.info;                             // read pinfo once instead of every iteration
            if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
                                                        // (just as if we'd read p's info field before the reference to l)
            /** END SEARCH **/
     	   HE.get_protected(l.key,0,idx);
-           if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
+           if (l.key != null && KCt.compareKeys(l.key.address+l.key.offset, key)  == 0) {
         	   HE.get_protected(l.value,0, idx);
-               V ret = SrzV.deserialize(l.value);	// key already in the tree, no duplicate allowed
+               V ret = SrzV.deserialize(l.value.address + l.value.offset);	// key already in the tree, no duplicate allowed
                HE.clear(idx);
                return ret;
            } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
@@ -204,11 +205,11 @@ public class BST_HE<K , V> {
            } else {
         	   HE.get_protected(l.key,0,idx);
                newSibling = new Node<HEslice, HEslice>(l.key, l.value);
-               if (l.key == null ||  CmpK.compareKeyAndSerializedKey(key,l.key, idx)< 0)	// newinternal = max(ret.l.key, key);
+               if (l.key == null ||  KCt.compareKeys(l.key.address+l.key.offset, key) > 0)	// newinternal = max(ret.l.key, key);
                    newInternal = new Node<HEslice, HEslice>(l.key, newNode, newSibling);
                else {
                    newInternal = new Node<HEslice, HEslice>(HE.allocate(SrzK.calculateSize(key)), newSibling, newNode);
-                   SrzK.serialize(key, newInternal.key);
+                   SrzK.serialize(key, newInternal.key.address +newInternal.key.offset );
                }
 
                final IInfo<HEslice, HEslice> newPInfo = new IInfo<HEslice, HEslice>(l, p, newInternal);
@@ -244,8 +245,8 @@ public class BST_HE<K , V> {
        /** END SEARCH VARIABLES **/
        newNode = new Node<HEslice, HEslice>(HE.allocate(SrzK.calculateSize(key)),
     		   							   HE.allocate(SrzV.calculateSize(value)));
-       SrzK.serialize(key, newNode.key);
-       SrzV.serialize(value, newNode.value);
+       SrzK.serialize(key,   newNode.key.address   +newNode.key.offset);
+       SrzV.serialize(value, newNode.value.address + newNode.value.offset);
        
        while (true) {
 
@@ -256,7 +257,7 @@ public class BST_HE<K , V> {
            while (l.left != null) {
                p = l;
         	   HE.get_protected(l.key,0,idx);
-               l = (l.key == null || CmpK.compareKeyAndSerializedKey(key,l.key, idx)< 0) ? l.left : l.right;
+               l = (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) > 0) ? l.left : l.right;
            }
            pinfo = p.info;                             // read pinfo once instead of every iteration
            if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
@@ -267,7 +268,7 @@ public class BST_HE<K , V> {
                help(pinfo);
            } else {
         	   HE.get_protected(l.key,0, idx);
-               if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
+               if (l.key != null && KCt.compareKeys(l.key.address+l.key.offset, key)  == 0) {
                    // key already in the tree, try to replace the old node with new node
                    newPInfo = new IInfo<HEslice, HEslice>(l, p, newNode);
                    result = HE.get_protected(l.value,0, idx);
@@ -275,21 +276,22 @@ public class BST_HE<K , V> {
                    // key is not in the tree, try to replace a leaf with a small subtree
                    newSibling = new Node<HEslice, HEslice>(l.key, l.value);
             	   HE.get_protected(l.key,0, idx);
-                   if (l.key == null ||  CmpK.compareKeyAndSerializedKey(key,l.key, idx) < 0) // newinternal = max(ret.l.key, key);
-                   {
-                       newInternal = new Node<HEslice, HEslice>(l.key, newNode, newSibling);
-                   } else {
-                       newInternal = new Node<HEslice, HEslice>(newNode.key, newSibling, newNode);
-                   }
+                   if (l.key == null ||  KCt.compareKeys(l.key.address+l.key.offset, key) > 0) // newinternal = max(ret.l.key, key);
+                	   {
+                	   newInternal = new Node<HEslice, HEslice>(l.key, newNode, newSibling);
+                	   } else {
+                		   newInternal = new Node<HEslice, HEslice>(newNode.key, newSibling, newNode);
+                		   }
 
                    newPInfo = new IInfo<HEslice, HEslice>(l, p, newInternal);
                    result = null;
-
+                   }
+               
                // try to IFlag parent
                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                    helpInsert(newPInfo);
                    if(result == null) return null;
-                   V ret = SrzV.deserialize(result);
+                   V ret = SrzV.deserialize(result.address+ result.offset);
                    HE.clear(idx);
                    return ret;
                } else {
@@ -301,7 +303,6 @@ public class BST_HE<K , V> {
                }
            }
        }
-   }
 
    // Delete key from dictionary, return the associated value when successful, null otherwise
    /** PRECONDITION: k CANNOT BE NULL **/
@@ -327,7 +328,7 @@ public class BST_HE<K , V> {
                gp = p;
                p = l;
         	   HE.get_protected(l.key,0, idx);
-               l = (l.key == null || CmpK.compareKeyAndSerializedKey(key,l.key, idx)< 0) ? l.left : l.right;
+               l = (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) > 0) ? l.left : l.right;
            }
            // note: gp can be null here, because clearly the root.left.left == null
            //       when the tree is empty. however, in this case, l.key will be null,
@@ -341,7 +342,7 @@ public class BST_HE<K , V> {
            /** END SEARCH **/
     	   HE.get_protected(l.key,0, idx);
 
-           if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) != 0) {
+           if (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) != 0) {
         	   HE.clear(idx);
         	   return null;
            }
@@ -355,7 +356,7 @@ public class BST_HE<K , V> {
 
                if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
                    if (helpDelete(newGPInfo)) {
-                	   V ret=SrzV.deserialize(l.value);
+                	   V ret=SrzV.deserialize(l.value.address + l.value.offset);
                 	   HE.clear(idx);
                 	   return ret;
                    }
@@ -435,48 +436,6 @@ public class BST_HE<K , V> {
        if (node == null) return 0;
        if (node.left == null && node.key != null) return 1;
        return sequentialSize(node.left) + sequentialSize(node.right);
-   }
-   
-   
-   public static void main(String[] args) {
-	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	    
-	    BST_HE<Buff,Buff> BST = 
-	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
-	    				, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, allocator);
-	    	    
-	    Buff x =new Buff();
-	    Buff z= new Buff();
-
-
-	    x.set(88);
-	    BST.put(x,x,0);
-	    BST.containsKey(x,0);
-
-		x.set(120);
-		BST.put(x,x,0);
-	    BST.containsKey(x,0);
-	    BST.containsKey(z,0);
-
-	    BST.get(x, 0);
-	    Buff xy =new Buff();
-	    xy.set(110);
-
-	    BST.put(xy,xy,0);
-	    BST.containsKey(z,0);
-
-	    BST.containsKey(xy,0);
-	    BST.putIfAbsent(x, z,0);
-	    
-	    BST.containsKey(x,0);
-	   
-	    BST.remove(x, 0);
-	    BST.containsKey(x,0);
-	    BST.containsKey(z,0);
-	    BST.putIfAbsent(z, x,0);
-	    BST.containsKey(z,0);
-	    Buff.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
-	    
    }
 
 }

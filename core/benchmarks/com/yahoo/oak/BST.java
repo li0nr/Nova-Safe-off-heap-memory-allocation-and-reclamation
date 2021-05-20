@@ -389,4 +389,30 @@ public class BST<K extends Comparable<? super K>, V> {
        return sequentialSize(node.left) + sequentialSize(node.right);
    }
 
+   
+   public static void main(String[] args){
+	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	    final NovaManager novaManager = new NovaManager(allocator);
+	    
+	    BST<Integer,Integer> BST = new BST<Integer,Integer>();
+	    	    
+	    BST.put(88,88);
+	    BST.containsKey(88);
+
+		BST.put(120,120);
+	    BST.containsKey(120);
+
+	    BST.put(110,110);
+	    BST.containsKey(110);
+	    BST.putIfAbsent(110,0);
+	    
+	    BST.containsKey(110);
+	   
+	    BST.remove(110);
+	    BST.containsKey(110);
+	    BST.putIfAbsent(0,110);
+	    BST.containsKey(0);
+	    //Buff.DEFAULT_COMPARATOR.compare(110,BST.get(0));
+	    
+ }
 }

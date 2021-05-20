@@ -22,9 +22,7 @@ package com.yahoo.oak;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class BST_Nova<K , V> {
-	   final NovaComparator<K> CmpK;
 	   final NovaSerializer<K> SrzK;
-	   final NovaComparator<V> CmpV;
 	   final NovaSerializer<V> SrzV;
 	   final NovaC<K> KCt;
 	   final NovaC<V> VCt;
@@ -115,7 +113,7 @@ public class BST_Nova<K , V> {
 
    final Node<Facade,Facade> root;
 
-   public BST_Nova(NovaComparator<K> cK, NovaComparator<V> cV, NovaSerializer<K> sK, NovaSerializer<V> sV,
+   public BST_Nova(  NovaSerializer<K> sK, NovaSerializer<V> sV,
 		   			NovaC<K> cKt, NovaC<V> cVt, NovaManager mng) {
        // to avoid handling special case when <= 2 nodes,
        // create 2 dummy nodes, both contain key null
@@ -123,8 +121,7 @@ public class BST_Nova<K , V> {
 	   Facade<K> dummyK  = new Facade<K>(mng);
 	   Facade<V> dummyV  = new Facade<V>(mng); //setting up nova manager
 
-	   CmpK = cK; SrzK = sK;
-	   CmpV = cV; SrzV = sV;
+	   SrzK = sK; SrzV = sV;
 	   KCt = cKt; VCt = cVt;
        root = new Node<Facade, Facade>(null,
     		   new Node<Facade, Facade>(null, null), 
@@ -146,9 +143,9 @@ public class BST_Nova<K , V> {
 	       if (key == null) throw new NullPointerException();
 	       Node<Facade,Facade> l = root.left;
 	       while (l.left != null) {
-	           l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, tidx) < 0) ? l.left : l.right;
+	           l = (l.key == null || l.key.Compare(key,KCt) > 0) ? l.left : l.right;
 	       }
-	       return (l.key != null &&  CmpK.compareKeyAndSerializedKey(key, l.key, tidx) == 0) ? true : false;   
+	       return (l.key != null &&  l.key.Compare(key,KCt) == 0) ? true : false;   
 	   }catch (Exception e) {
 		   return false; //Facade throws
 	   }
@@ -160,9 +157,9 @@ public class BST_Nova<K , V> {
 	       if (key == null) throw new NullPointerException();
 	       Node<Facade,Facade> l = root.left;
 	       while (l.left != null) {
-	           l = (l.key == null || l.key.Read(key,KCt) < 0) ? l.left : l.right;
+	           l = (l.key == null || l.key.Compare(key,KCt) > 0) ? l.left : l.right;
 	       }
-	       V ret = (l.key != null && l.key.Read(key,KCt) == 0) ? 
+	       V ret = (l.key != null && l.key.Compare(key,KCt) == 0) ? 
 	    		   (V)l.value.Read(SrzV): null;
 	       return ret;
 	   }catch (Exception e) {
@@ -202,20 +199,20 @@ public class BST_Nova<K , V> {
                l = p.left;
                while (l.left != null) {
                    p = l;
-                   l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
+                   l = (l.key == null || l.key.Compare(key,KCt) > 0) ? l.left : l.right;
                }
                pinfo = p.info;                             // read pinfo once instead of every iteration
                if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
                                                            // (just as if we'd read p's info field before the reference to l)
                /** END SEARCH **/
 
-               if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
+               if (l.key != null && l.key.Compare(key,KCt) == 0) {
                    return (V)l.value.Read(SrzV);	// key already in the tree, no duplicate allowed
                } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                    help(pinfo);
                } else {
                    newSibling = new Node<Facade,Facade>(l.key, l.value);
-                   if (l.key == null ||  CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0)	// newinternal = max(ret.l.key, key);
+                   if (l.key == null ||  l.key.Compare(key,KCt) > 0)	// newinternal = max(ret.l.key, key);
                        newInternal = new Node<Facade,Facade>(l.key, newNode, newSibling);
                    else
                        newInternal = new Node<Facade,Facade>(k, newSibling, newNode);
@@ -224,7 +221,7 @@ public class BST_Nova<K , V> {
 
                    // try to IFlag parent
                    if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
-                      // helpInsert(newPInfo);
+                       helpInsert(newPInfo);
                        return null;
                    } else {
                        // if fails, help the current operation
@@ -272,7 +269,7 @@ public class BST_Nova<K , V> {
                l = p.left;
                while (l.left != null) {
                    p = l;
-                   l = (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
+                   l = (l.key == null || l.key.Compare(key,KCt) > 0) ? l.left : l.right;
                }
                pinfo = p.info;                             // read pinfo once instead of every iteration
                if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
@@ -282,14 +279,14 @@ public class BST_Nova<K , V> {
                if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                    help(pinfo);
                } else {
-                   if (l.key != null && CmpK.compareKeyAndSerializedKey(key, l.key, idx) == 0) {
+                   if (l.key != null && l.key.Compare(key,KCt) == 0) {
                        // key already in the tree, try to replace the old node with new node
                        newPInfo = new IInfo<Facade,Facade>(l, p, newNode);
                        result = l.value;
                    } else {
                        // key is not in the tree, try to replace a leaf with a small subtree
                        newSibling = new Node<Facade,Facade>(l.key, l.value);
-                       if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) // newinternal = max(ret.l.key, key);
+                       if (l.key == null || l.key.Compare(key,KCt) > 0) // newinternal = max(ret.l.key, key);
                        {
                            newInternal = new Node<Facade,Facade>(l.key, newNode, newSibling);
                        } else {
@@ -340,7 +337,7 @@ public class BST_Nova<K , V> {
                while (l.left != null) {
                    gp = p;
                    p = l;
-                   l = (l.key == null ||  CmpK.compareKeyAndSerializedKey(key, l.key, idx) < 0) ? l.left : l.right;
+                   l = (l.key == null || l.key.Compare(key,KCt) > 0 ) ? l.left : l.right;
                }
                // note: gp can be null here, because clearly the root.left.left == null
                //       when the tree is empty. however, in this case, l.key will be null,
@@ -353,7 +350,7 @@ public class BST_Nova<K , V> {
                }
                /** END SEARCH **/
                
-               if (l.key == null || CmpK.compareKeyAndSerializedKey(key, l.key, idx) != 0) return null;
+               if (l.key == null || l.key.Compare(key,KCt) != 0) return null;
                if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
                    help(gpinfo);
                } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
@@ -442,37 +439,4 @@ public class BST_Nova<K , V> {
        if (node.left == null && node.key != null) return 1;
        return sequentialSize(node.left) + sequentialSize(node.right);
    }
-   
-   public static void main(String[] args){
-	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	    final NovaManager novaManager = new NovaManager(allocator);
-	    
-	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_COMPARATOR, Buff.DEFAULT_COMPARATOR
-	    											, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
-	    											Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
-	    	    
-	    Buff x =new Buff();
-	    x.set(88);
-	    BST.put(x,x,0);
-	    BST.containsKey(x,0);
-
-		x.set(120);
-		BST.put(x,x,0);
-	    BST.containsKey(x,0);
-	    Buff xy =new Buff();
-	    Buff z= new Buff();
-	    xy.set(110);
-	    BST.put(xy,xy,0);
-	    BST.containsKey(xy,0);
-	    BST.putIfAbsent(x, z,0);
-	    
-	    BST.containsKey(x,0);
-	   
-	    BST.remove(x, 0);
-	    BST.containsKey(x,0);
-	    BST.putIfAbsent(z, x,0);
-	    BST.containsKey(z,0);
-	    Buff.DEFAULT_COMPARATOR.compare(x,BST.get(z, 0));
-	    
-  }
 }
