@@ -16,6 +16,9 @@ public class MYParam {
  
 	static final int G_LIST_SIZE = 50_000;
 	
+	static final int BST_SIZE = 10_000;
+
+	
 	static final int Limit = G_LIST_SIZE/4;
 	static final int range = 2500;
 	static final int forks = 0;

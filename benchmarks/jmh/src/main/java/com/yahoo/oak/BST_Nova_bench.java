@@ -28,7 +28,7 @@ public class BST_Nova_bench {
     @State(Scope.Benchmark)
     public static class BenchmarkState {
 
-    	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
+    	public static  int LIST_SIZE = MYParam.BST_SIZE;
         private BST_Nova<Buff,Buff> BST ;
 
         @Setup
@@ -52,6 +52,7 @@ public class BST_Nova_bench {
 	public static class ThreadState {
 		static int threads = -1;
 		Random rand = new Random();
+		Buff buff = new Buff();
 		int i=-1;
 		
 		@Setup
@@ -75,11 +76,14 @@ public class BST_Nova_bench {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
     @Benchmark
-    public void ReadNova(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-    		Buff k = new Buff(8);
-    		k.set(100);
-        	blackhole.consume(state.BST.get(k,threadState.i));
-    }
+    public void Read(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+    	int i =0;
+    	while(i < MYParam.BST_SIZE/threadState.threads ){
+    		i++;
+    		threadState.buff.set(threadState.rand.nextInt(MYParam.BST_SIZE));
+    		blackhole.consume(state.BST.get(threadState.buff,threadState.i));
+    		}   
+    	}
     
 //    @Warmup(iterations = MYParam.warmups)
 //    @Measurement(iterations = MYParam.iterations)
