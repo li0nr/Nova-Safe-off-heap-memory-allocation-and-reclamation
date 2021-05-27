@@ -53,7 +53,7 @@ public class HazardEras {
 		he = new long[HE_MAX_THREADS*MAX_HES*CLPAD];
     	for(int it=0; it< HE_MAX_THREADS; it++) {
     		for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
-    			he[it*CLPAD + 16 + ihe]= (NONE);
+    			he[it*CLPAD + 16 + ihe]= (1);
     		}
     		retiredList[it*CLPAD] = new ArrayList<HazardEras_interface>();
     	}

@@ -78,12 +78,9 @@ public class BST_Nova_bench {
     @Benchmark
     public void Read(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
     	int i =0;
-    	while(i < MYParam.BST_SIZE/threadState.threads ){
-    		i++;
-    		threadState.buff.set(threadState.rand.nextInt(MYParam.BST_SIZE));
-    		blackhole.consume(state.BST.get(threadState.buff,threadState.i));
-    		}   
-    	}
+    	threadState.buff.set(10);
+    	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
+        }
     
 //    @Warmup(iterations = MYParam.warmups)
 //    @Measurement(iterations = MYParam.iterations)
@@ -123,7 +120,7 @@ public class BST_Nova_bench {
     	Options opt = new OptionsBuilder()
     			.include(BST_Nova_bench.class.getSimpleName())
                 .forks(MYParam.forks)
-                .threads(4)
+                .threads(1)
                 .build();
 
     	new Runner(opt).run();
