@@ -1,4 +1,4 @@
-package com.yahoo.oak;
+package com.yahoo.oak.Naive;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -21,29 +21,32 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import com.yahoo.oak.List_Nova;
+import com.yahoo.oak.MYParam;
 
-public class ListHESeq {
+public class ListNovaSeq {
 
 	  
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  
     @State(Scope.Benchmark)
     public static class BenchmarkState {
+
     	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-        private List_HE list ;
+        private List_Nova list ;
 
         @Setup
         public void setup() {
-        	list= new List_HE();
+        	list= new List_Nova();
         	for (int i=0; i <LIST_SIZE ; i++) {
         		list.add((long)i,0);
-        		}
         	}
+        }
         @TearDown
         public void close() throws IOException {
         	list.close();
-        	}
         }
+    }
 
     @State(Scope.Thread)
     public static class ThreadState {
@@ -61,8 +64,8 @@ public class ListHESeq {
         	THREAD_INDEX.set(0);
         	System.out.println("\n Threads Num: "+ threads);
         }
-        
     }
+    
     
     @Warmup(iterations = MYParam.warmups)
     @Measurement(iterations = MYParam.iterations)
@@ -70,7 +73,7 @@ public class ListHESeq {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
     @Benchmark
-    public void ReadHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+    public void ReadNova(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
         for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
         		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
         						  BenchmarkState.LIST_SIZE/ThreadState.threads
@@ -79,14 +82,13 @@ public class ListHESeq {
     	}
     }
     
-    
     @Warmup(iterations = MYParam.warmups)
     @Measurement(iterations = MYParam.iterations)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
     @Benchmark
-    public void WriteHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+    public void WriteNova(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
         for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
         		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
         						  BenchmarkState.LIST_SIZE/ThreadState.threads
@@ -96,14 +98,29 @@ public class ListHESeq {
     }
     
     
+//    @Warmup(iterations = MYParam.warmups)
+//    @Measurement(iterations = MYParam.iterations)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    @Fork(value = 0)
+//    @Benchmark
+//    public void empty(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+//        for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
+//        		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
+//        						  BenchmarkState.LIST_SIZE/ThreadState.threads
+//        		&& i<BenchmarkState.LIST_SIZE; i++ ) {
+//    	}
+//    }
+    
+    
+    
     public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(ListHESeq.class.getSimpleName())
+    	Options opt = new OptionsBuilder()
+    			.include(ListNovaSeq.class.getSimpleName())
                 .forks(MYParam.forks)
                 .threads(4)
                 .build();
 
-        new Runner(opt).run();
+    	new Runner(opt).run();
     }
-
 }

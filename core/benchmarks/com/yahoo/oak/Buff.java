@@ -25,7 +25,23 @@ public class Buff {
 	}
 	
 	public void set(int x) {
-		buffer.putInt(0,x);
+		int i = 0;
+		while(i <capacity/Integer.BYTES) {
+			i++;
+			buffer.putInt(i,x);
+		}
+		this.DebugPrint();
+
+	}
+	
+	
+	public void DebugPrint() {
+		int i = 0;
+		while(i <capacity/Integer.BYTES) {
+			i++;
+			buffer.getInt(i);
+			System.out.print(buffer.getInt(i)+ "**");
+		}
 	}
 	
 	public int compare(Buff o) {
@@ -49,7 +65,7 @@ public class Buff {
 			long targetPos = output;
 			UnsafeUtils.putInt(targetPos, object.capacity);
 			targetPos += Integer.BYTES;
-
+			object.DebugPrint();
 			int offset = 0;
 			for (int i = 0; i < object.capacity / Integer.BYTES; i++) {
 				int data = object.buffer.getInt(offset);
@@ -97,7 +113,7 @@ public class Buff {
 			final int minSize = Math.min(size, obj.capacity);
 
 			address = address + Integer.BYTES;
-			for (int i = 0; i < size / Integer.BYTES; i++) {
+			for (int i = 0; i < minSize / Integer.BYTES; i++) {
 				int i1 = UnsafeUtils.unsafe.getInt(address + offset);
 				int i2 = obj.buffer.getInt(offset);
 				int compare = Integer.compare(i1, i2);

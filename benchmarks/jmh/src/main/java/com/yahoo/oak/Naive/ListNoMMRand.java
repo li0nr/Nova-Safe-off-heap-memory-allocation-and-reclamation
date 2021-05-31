@@ -1,4 +1,4 @@
-package com.yahoo.oak;
+package com.yahoo.oak.Naive;
 
 import java.io.IOException;
 import java.util.Random;
@@ -22,8 +22,11 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import com.yahoo.oak.List_NoMM;
+import com.yahoo.oak.MYParam;
 
-public class ListHERand {
+public class ListNoMMRand {
+
 	
 	  
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
@@ -31,11 +34,11 @@ public class ListHERand {
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 		public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-		private List_HE list ;
+		private List_NoMM list ;
 	
 		@Setup
 		public void setup() {
-			list= new List_HE();
+			list= new List_NoMM();
 			for (int i=0; i <LIST_SIZE ; i++) {
 				list.add((long)i,0);
 				}
@@ -99,7 +102,7 @@ public class ListHERand {
   
 	public static void main(String[] args) throws RunnerException {
 		Options opt = new OptionsBuilder()
-				.include(ListHERand.class.getSimpleName())
+				.include(ListNoMMRand.class.getSimpleName())
 				.forks(MYParam.forks)
 				.threads(4)
 				.build();

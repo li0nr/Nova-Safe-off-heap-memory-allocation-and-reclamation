@@ -136,10 +136,11 @@ public class HarrisLinkedListNova<E> {
             // because attemptMark() returns true if the node
             // is already marked, which is not the desired effect, so we 
             // must use compareAndSet() instead.
-            if (!curr.next.compareAndSet(succ, succ, false, true)) {
+            if (!curr.next.compareAndSet(succ, succ, false, true)) {//mark
                 continue;
             }
             pred.next.compareAndSet(curr, succ, false, false);
+            curr.key.Delete(tidx);
             return true;
         }
     }
@@ -174,6 +175,7 @@ public class HarrisLinkedListNova<E> {
                     if (!pred.next.compareAndSet(curr, succ, false, false)) {
                         continue retry;
                     }
+                    curr.key.Delete(tidx);
                     curr = succ;
                     succ = curr.next.get(marked);
                 }

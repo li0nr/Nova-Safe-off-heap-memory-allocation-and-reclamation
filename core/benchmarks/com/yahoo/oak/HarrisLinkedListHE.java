@@ -186,8 +186,8 @@ public class HarrisLinkedListHE<E> {
                     //succ = HE.get_protected(curr.next.get(marked),0,tidx);
                     succ = curr.next.get(marked);
                 }
-                HE.get_protected(curr.key, 0, tidx);
-                if (curr == tail || Cmp.compareKeys(curr.key.address + curr.key.offset, key) >= 0) {
+                HEslice access = HE.get_protected(curr.key, 0, tidx);
+                if (curr == tail || Cmp.compareKeys(access.address + access.offset, key) >= 0) {
                     return new Window<HEslice>(pred, curr);
                 }
                 pred = curr;
@@ -221,14 +221,14 @@ public class HarrisLinkedListHE<E> {
         //Node<HEslice> curr = HE.get_protected(head.next.getReference(),01,tidx);
         Node<HEslice> curr = head.next.getReference();
         curr.next.get(marked);
-        HE.get_protected(curr.key, 0, tidx);
-        while (curr != tail && Cmp.compareKeys(curr.key.address + curr.key.offset, key) < 0) {
+        HEslice access = HE.get_protected(curr.key, 0, tidx);
+        while (curr != tail && Cmp.compareKeys(access.address + access.offset, key) < 0) {
             //curr = HE.get_protected(curr.next.getReference(),01,tidx);
         	curr = curr.next.getReference();
             curr.next.get(marked);
-            HE.get_protected(curr.key, 0, tidx);
+            access = HE.get_protected(curr.key, 0, tidx);
         }
-        boolean flag = curr.key != null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0 && !marked[0];
+        boolean flag = curr.key != null && Cmp.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
         HE.clear(tidx);
         return flag;
     }

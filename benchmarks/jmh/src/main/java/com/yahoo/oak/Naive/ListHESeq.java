@@ -1,4 +1,4 @@
-package com.yahoo.oak;
+package com.yahoo.oak.Naive;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -21,36 +21,38 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-public class ListUnSeq {
+import com.yahoo.oak.List_HE;
+import com.yahoo.oak.MYParam;
+
+public class ListHESeq {
 
 	  
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  
     @State(Scope.Benchmark)
     public static class BenchmarkState {
-
     	public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-        private List_OffHeap list ;
+        private List_HE list ;
+
         @Setup
         public void setup() {
-        	list= new List_OffHeap();
+        	list= new List_HE();
         	for (int i=0; i <LIST_SIZE ; i++) {
         		list.add((long)i,0);
+        		}
         	}
-        }
-
         @TearDown
         public void close() throws IOException {
         	list.close();
+        	}
         }
-
-    }
 
     @State(Scope.Thread)
     public static class ThreadState {
     	static int threads = -1;
     	int i=-1;
-        @Setup
+    	
+    	@Setup
         public void setup() {
         	i=THREAD_INDEX.getAndAdd(1);
         	if(threads <= i)
@@ -70,7 +72,7 @@ public class ListUnSeq {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
     @Benchmark
-    public void ReadUn(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+    public void ReadHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
         for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
         		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
         						  BenchmarkState.LIST_SIZE/ThreadState.threads
@@ -86,20 +88,19 @@ public class ListUnSeq {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
     @Benchmark
-    public void WriteUn(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+    public void WriteHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
         for(int i = threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads; 
         		i < threadState.i*BenchmarkState.LIST_SIZE/ThreadState.threads +
         						  BenchmarkState.LIST_SIZE/ThreadState.threads
         		&& i<BenchmarkState.LIST_SIZE; i++ ) {
-        	blackhole.consume(state.list.set( i,2 *i,threadState.i));
+        	blackhole.consume(state.list.set(i, i*2,threadState.i));
     	}
     }
     
     
-    
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(ListUnSeq.class.getSimpleName())
+                .include(ListHESeq.class.getSimpleName())
                 .forks(MYParam.forks)
                 .threads(4)
                 .build();

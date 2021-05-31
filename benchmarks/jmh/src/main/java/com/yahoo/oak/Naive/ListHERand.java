@@ -1,4 +1,4 @@
-package com.yahoo.oak;
+package com.yahoo.oak.Naive;
 
 import java.io.IOException;
 import java.util.Random;
@@ -22,20 +22,23 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import com.yahoo.oak.List_HE;
+import com.yahoo.oak.MYParam;
 
-public class ListUnRand {
+
+public class ListHERand {
 	
 	  
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
-
+	
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 		public static  int LIST_SIZE = MYParam.G_LIST_SIZE;
-		private List_OffHeap list ;
-
+		private List_HE list ;
+	
 		@Setup
 		public void setup() {
-			list= new List_OffHeap();
+			list= new List_HE();
 			for (int i=0; i <LIST_SIZE ; i++) {
 				list.add((long)i,0);
 				}
@@ -45,49 +48,49 @@ public class ListUnRand {
 			list.close();
 			}
 		}
-
+	
 	@State(Scope.Thread)
 	public static class ThreadState {
 		static int threads = -1;
 		Random rand = new Random();
 		int i=-1;
-  	
+  
 		@Setup
 		public void setup() {
 			i=THREAD_INDEX.getAndAdd(1);
 			if(threads <= i)
 				threads = i +1;
-			}
+		  }
 		@TearDown
 		public void tear() {
 			THREAD_INDEX.set(0);
 			System.out.println("\n Threads Num: "+ threads);
-			}
-		}
+		}  
+	  }
+
+
   
-	
 	@Warmup(iterations = MYParam.warmups)
 	@Measurement(iterations = MYParam.iterations)
 	@BenchmarkMode(Mode.AverageTime)
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	@Fork(value = 0)
 	@Benchmark
-	public void ReadUn(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+	public void ReadHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
 		int i = 0;
 		while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
 			blackhole.consume(state.list.get(threadState.rand.nextInt(MYParam.G_LIST_SIZE),threadState.i));
 			i++;
 			}
 		}
-	  
-	 
+  
 	@Warmup(iterations = MYParam.warmups)
 	@Measurement(iterations = MYParam.iterations)
 	@BenchmarkMode(Mode.AverageTime)
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	@Fork(value = 0)
 	@Benchmark
-	public void WriteUn(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+	public void WriteHE(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
 		int i = 0;
 		while(i < MYParam.G_LIST_SIZE/ThreadState.threads) {
 			blackhole.consume(state.list.set(threadState.rand.nextInt(MYParam.G_LIST_SIZE), i*2,threadState.i));
@@ -96,12 +99,14 @@ public class ListUnRand {
 		}
   
 
+  
 	public static void main(String[] args) throws RunnerException {
 		Options opt = new OptionsBuilder()
-				.include(ListUnRand.class.getSimpleName())
+				.include(ListHERand.class.getSimpleName())
 				.forks(MYParam.forks)
 				.threads(4)
 				.build();
+		
 		new Runner(opt).run();
-	}
+		}
 }
