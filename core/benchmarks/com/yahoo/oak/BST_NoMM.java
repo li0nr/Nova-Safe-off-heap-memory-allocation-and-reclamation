@@ -302,7 +302,7 @@ public class BST_NoMM<K , V> {
 
    // Delete key from dictionary, return the associated value when successful, null otherwise
    /** PRECONDITION: k CANNOT BE NULL **/
-   public final V remove(final K key, int idx){
+   public final boolean remove(final K key, int idx){
 
        /** SEARCH VARIABLES **/
        Node<NovaSlice, NovaSlice> gp;
@@ -337,7 +337,7 @@ public class BST_NoMM<K , V> {
            /** END SEARCH **/
 
            if (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) != 0) {
-        	   return null;
+        	   return false;
            }
            if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
                help(gpinfo);
@@ -349,8 +349,7 @@ public class BST_NoMM<K , V> {
 
                if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
                    if (helpDelete(newGPInfo)) {
-                	   V ret=SrzV.deserialize(l.value.address + l.value.offset);
-                	   return ret;
+                	   return true;
                    }
                } else {
                    // if fails, help grandparent with its latest info value
@@ -396,7 +395,9 @@ public class BST_NoMM<K , V> {
    private void helpMarked(final DInfo<NovaSlice, NovaSlice> info) {
        final Node<NovaSlice, NovaSlice> other = (info.p.right == info.l) ? info.p.left : info.p.right;
        (info.gp.left == info.p ? leftUpdater : rightUpdater).compareAndSet(info.gp, info.p, other);
-       alloc.free(info.p.key);
+       alloc.free(info.l.key);
+       alloc.free(info.l.value);
+       if(info.p.key != null ) alloc.free(info.p.key);
        infoUpdater.compareAndSet(info.gp, info, new Clean());
    }
 

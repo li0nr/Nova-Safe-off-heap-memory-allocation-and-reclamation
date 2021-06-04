@@ -151,7 +151,7 @@ public class BST_noMM_RD {
     
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
-    			.include(BST_Nova_RD.class.getSimpleName())
+    			.include(BST_noMM_RD.class.getSimpleName())
                 .forks(MYParam.forks)
                 .threads(1)
                 .build();
