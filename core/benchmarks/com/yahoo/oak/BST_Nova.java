@@ -341,8 +341,6 @@ public class BST_Nova<K , V> {
                     p = l;
                     l = (l.key == null || l.key.Compare(key,KCt) > 0 ) ? l.left : l.right;
                 }
-                this.Print();
-
                 // note: gp can be null here, because clearly the root.left.left == null
                 //       when the tree is empty. however, in this case, l.key will be null,
                 //       and the function will return null, so this does not pose a problem.
