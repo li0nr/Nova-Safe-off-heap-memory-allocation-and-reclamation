@@ -297,6 +297,7 @@ public class BST_Nova<K , V> {
 
                         newPInfo = new IInfo<Facade,Facade>(l, p, newInternal);
                         result = null;
+                    }
 
                     // try to IFlag parent
                     if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
@@ -312,7 +313,6 @@ public class BST_Nova<K , V> {
                         return null;
                     }
                 }
-            }
         }catch (Exception e) { return null;}   
     }
 

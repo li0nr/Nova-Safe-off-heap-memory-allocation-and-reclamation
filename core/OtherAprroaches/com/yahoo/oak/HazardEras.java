@@ -150,9 +150,9 @@ public class HazardEras {
         obj.setDeleteEra(currEra);
         ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD+ 16];
         rlist.add(obj);
-        if (eraClock.get() == currEra) eraClock.getAndAdd(1);
         releasecounter[mytid *CLPAD + 16]++;
         if(releasecounter[mytid *CLPAD + 16] == RELEASE_LIST_LIMIT) {
+            if (eraClock.get() == currEra) eraClock.getAndAdd(1);
             HazardEras_interface toDeleteObj;
             for (int iret = 0; iret < rlist.size();) {
             	toDeleteObj = (HazardEras_interface)rlist.get(iret);

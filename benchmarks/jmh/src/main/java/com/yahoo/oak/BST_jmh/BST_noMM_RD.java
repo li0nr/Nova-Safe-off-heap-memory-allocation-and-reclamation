@@ -9,6 +9,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -43,15 +44,19 @@ public class BST_noMM_RD {
     	    
     	    BST = new BST_NoMM<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 										,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
+        }
+        
+        @Setup(Level.Iteration)
+        public void fillTree() {
         	for (int i=0; i <size ; i++) {
         		Buff k = new Buff();
         		Buff v = new Buff();
         		k.set(i);
         		v.set(size-i);
         		BST.put(k,v, 0);
+        		}
         	}
         }
-    }
 
 	@State(Scope.Thread)
 	public static class ThreadState {

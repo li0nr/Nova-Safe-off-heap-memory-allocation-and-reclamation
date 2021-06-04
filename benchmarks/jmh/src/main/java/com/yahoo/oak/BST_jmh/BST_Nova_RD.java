@@ -9,6 +9,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Group;
 import org.openjdk.jmh.annotations.GroupThreads;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -45,13 +46,16 @@ public class BST_Nova_RD {
     	    
     	    BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
+        }
+        
+        @Setup(Level.Iteration)
+        public void fillTree() {
         	for (int i=0; i <size ; i++) {
         		Buff k = new Buff();
         		Buff v = new Buff();
         		k.set(i);
         		v.set(size-i);
         		BST.put(k,v, 0);
-        		BST.Print();
         	}
         }
     }
@@ -104,7 +108,7 @@ public class BST_Nova_RD {
     public void ReadBulk_Rand(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
     	int i = 0;
     	while( i < BenchmarkState.size/ThreadState.threads) {
-    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+    		threadState.buff.set(i);
         	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
         	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
         	i++;

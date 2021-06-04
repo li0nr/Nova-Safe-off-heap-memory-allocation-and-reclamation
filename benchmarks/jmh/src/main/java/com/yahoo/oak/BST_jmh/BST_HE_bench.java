@@ -94,7 +94,7 @@ public class BST_HE_bench {
     @Benchmark
     public void ReadBulk_Serial(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
     	int i = 0;
-    	while( i < BenchmarkState.size) {
+    	while( i < BenchmarkState.size/ThreadState.threads) {
     		threadState.buff.set(i);
         	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
         	i++;
@@ -109,7 +109,7 @@ public class BST_HE_bench {
     @Benchmark
     public void ReadBulk_Rand(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
     	int i = 0;
-    	while( i < BenchmarkState.size) {
+    	while( i < BenchmarkState.size/ThreadState.threads) {
     		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
         	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
         	i++;
