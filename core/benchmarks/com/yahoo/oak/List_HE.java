@@ -4,7 +4,12 @@ import java.util.Arrays;
 
 import org.openjdk.jmh.runner.RunnerException;
 
+import com.yahoo.oak.HazardEras.HEslice;
+
 public class List_HE implements ListInterface{
+	
+	class DeletedEntry extends RuntimeException {}
+
 	
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
@@ -32,9 +37,7 @@ public class List_HE implements ListInterface{
 			EnsureCap();//might be problematic 
 		}
 		if(Slices[size]== null)
-			Slices[size]=new HEslice(HE.getEra());
-		HEslice access = HE.get_protected(Slices[size], 0, idx);
-		allocator.allocate(Slices[size], Long.BYTES);
+			Slices[size] = HE.allocate(Long.BYTES);
 		UnsafeUtils.unsafe.putLong(Slices[size].getAddress() + Slices[size].getAllocatedOffset(), e);
 	    HE.clear(idx);
 		size++;
@@ -138,32 +141,4 @@ public  static void main(String[] args)throws java.io.IOException {
 	}
 
 
-}
-
-class DeletedEntry extends RuntimeException {}
-
-class HEslice extends NovaSlice implements HazardEras_interface{
-	private long bornEra;
-	private long deadEra;
-	
-	HEslice(long Era){
-		super(0,0,0);
-		bornEra = Era;
-	}
-	
-	 public void setDeleteEra(long Era){
-		 deadEra = Era;
-	 }
-	 
-	 public void setEra(long Era) {
-		 bornEra = Era;
-	 }
-
-	 public long getnewEra() {
-		 return bornEra;
-	 }
-	 
-	 public long getdelEra() {
-		 return deadEra;
-	 }
 }

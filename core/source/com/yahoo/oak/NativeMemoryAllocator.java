@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-class NativeMemoryAllocator implements BlockMemoryAllocator {
+public class NativeMemoryAllocator implements BlockMemoryAllocator {
 
     // When allocating n bytes and there are buffers in the free list, only free buffers of size <= n *
     // REUSE_MAX_MULTIPLIER will be recycled
@@ -54,7 +54,7 @@ class NativeMemoryAllocator implements BlockMemoryAllocator {
 
     // constructor
     // input param: memory capacity given to this Oak. Uses default BlocksPool
-    NativeMemoryAllocator(long capacity) {
+    public NativeMemoryAllocator(long capacity) {
         this(capacity, BlocksPool.getInstance());
     }
 

@@ -46,6 +46,33 @@ public class HazardEras {
     
 	static final Unsafe UNSAFE=UnsafeUtils.unsafe;
 	
+	
+	class HEslice extends NovaSlice implements HazardEras_interface{
+		private long bornEra;
+		private long deadEra;
+		
+		HEslice(long Era){
+			super(0,0,0);
+			bornEra = Era;
+		}
+		
+		 public void setDeleteEra(long Era){
+			 deadEra = Era;
+		 }
+		 
+		 public void setEra(long Era) {
+			 bornEra = Era;
+		 }
+
+		 public long getnewEra() {
+			 return bornEra;
+		 }
+		 
+		 public long getdelEra() {
+			 return deadEra;
+		 }
+	}
+		 
 	HazardEras(int maxHEs, int maxThreads, NativeMemoryAllocator alloc) {
 		allocator = alloc;
 		MAX_HES = maxHEs;
@@ -55,7 +82,7 @@ public class HazardEras {
     		for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
     			he[it*CLPAD + 16 + ihe]= (1);
     		}
-    		retiredList[it*CLPAD] = new ArrayList<HazardEras_interface>();
+    		retiredList[it*CLPAD+16] = new ArrayList<HazardEras_interface>();
     	}
     }
 
@@ -152,5 +179,20 @@ private    boolean  canDelete(HazardEras_interface obj,  int mytid) {
         }
         return true;
     }
+
+
+
+	void ForceCleanUp() {
+		for(int i =0 ; i < HE_MAX_THREADS; i++) {
+	        ArrayList<HazardEras_interface> rlist = retiredList[i*CLPAD+ 16];
+            HazardEras_interface toDeleteObj;
+	        for (int iret = 0; iret < rlist.size(); ) {
+            	toDeleteObj = (HazardEras_interface)rlist.get(iret);
+            	allocator.free((NovaSlice)toDeleteObj);
+                iret++;
+            }
+
+		}
+	}
 
 }

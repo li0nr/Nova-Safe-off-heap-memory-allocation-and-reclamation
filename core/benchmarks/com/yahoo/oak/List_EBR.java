@@ -2,6 +2,8 @@ package com.yahoo.oak;
 
 import java.util.Arrays;
 
+import org.openjdk.jmh.runner.RunnerException;
+
 public class List_EBR implements ListInterface{
 	
 	private static final int DEFAULT_CAPACITY=10;
@@ -47,7 +49,7 @@ public class List_EBR implements ListInterface{
 			x= UnsafeUtils.unsafe.getLong(Slices[index].getAddress() + Slices[index].getAllocatedOffset());	
 		else {
 			EBR.clear(idx);
-			throw new DeletedEntry();
+			throw new RuntimeException("not found");
 		}		
 		EBR.clear(idx);
 		return x;	

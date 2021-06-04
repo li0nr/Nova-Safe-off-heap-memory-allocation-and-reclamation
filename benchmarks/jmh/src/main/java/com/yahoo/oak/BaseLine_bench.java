@@ -13,13 +13,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import com.yahoo.oak.Buff;
-import com.yahoo.oak.Facade;
-import com.yahoo.oak.HazardEras;
-import com.yahoo.oak.MYParam;
-import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.NovaManager;
-import com.yahoo.oak.NovaSlice;
 
 public class BaseLine_bench {
     static int iter = 1;
@@ -58,68 +51,52 @@ public class BaseLine_bench {
         	}
         }
     
-//    @Benchmark
-//    public void ReadSlice(Blackhole blackhole,BenchmarkState state) {
-//    	int i = 0;
-//    	while(i<iter) {
-//    	blackhole.consume(Buff.DEFAULT_C.compareKeys(state.Slice.address+state.Slice.offset, state.v));
-//    	i++;
-//    	}
-//    }
-//    
-//    @Benchmark
-//    public void ReadNova(Blackhole blackhole,BenchmarkState state) {
-//    	int i = 0;
-//    	while(i<iter) {
-//    	blackhole.consume(state.nu.Compare(state.v, Buff.DEFAULT_C));
-//    	i++;
-//    	}
-//    }
-//    
-//    @Benchmark
-//    public void WriteNova(Blackhole blackhole,BenchmarkState state) {
-//    	int i = 0;
-//    	while(i<iter) {
-//    	blackhole.consume(state.nu.WriteFull(Buff.DEFAULT_SERIALIZER, state.v, 0));
-//    	i++;
-//    	}
-//    }
-//    
-//    @Benchmark
-//    public void WriteSlice(Blackhole blackhole,BenchmarkState state) {
-//    	int i = 0;
-//    	while(i<iter) {
-//    		Buff.DEFAULT_SERIALIZER.serialize(state.v, state.Slice.address+state.Slice.offset);
-//    		i++;
-//    	}
-//    }
-//    
-//    @Benchmark
-//    public void HEprt(Blackhole blackhole,BenchmarkState state) {
-//    	int i = 0;
-//    	while(i<iter) {
-//        	blackhole.consume(state.HE.get_protected(state.Slice, 0, 0));
-//        	i++;
-//    	}
-//    }
-    
-    Facade array(BenchmarkState s) {
-    	return s.F2[16];
+    @Benchmark
+    public void ReadSlice(Blackhole blackhole,BenchmarkState state) {
+    	int i = 0;
+    	while(i<iter) {
+    	blackhole.consume(Buff.DEFAULT_C.compareKeys(state.Slice.address+state.Slice.offset, state.v));
+    	i++;
+    	}
     }
     
-    Facade arrayList(BenchmarkState s) {
-    	return s.F.get(0);
+    @Benchmark
+    public void ReadNova(Blackhole blackhole,BenchmarkState state) {
+    	int i = 0;
+    	while(i<iter) {
+    	blackhole.consume(state.nu.Compare(state.v, Buff.DEFAULT_C));
+    	i++;
+    	}
     }
     
-  @Benchmark
-  public void getList(Blackhole blackhole,BenchmarkState state) {
-	  blackhole.consume(arrayList(state));
-  }
-  
-  @Benchmark
-  public void getArray(Blackhole blackhole,BenchmarkState state) {
-	  blackhole.consume(array(state));
-	  }
+    @Benchmark
+    public void WriteNova(Blackhole blackhole,BenchmarkState state) {
+    	int i = 0;
+    	while(i<iter) {
+    	blackhole.consume(state.nu.WriteFull(Buff.DEFAULT_SERIALIZER, state.v, 0));
+    	i++;
+    	}
+    }
+    
+    @Benchmark
+    public void WriteSlice(Blackhole blackhole,BenchmarkState state) {
+    	int i = 0;
+    	while(i<iter) {
+    		Buff.DEFAULT_SERIALIZER.serialize(state.v, state.Slice.address+state.Slice.offset);
+    		i++;
+    	}
+    }
+    
+    @Benchmark
+    public void HEprt(Blackhole blackhole,BenchmarkState state) {
+    	int i = 0;
+    	while(i<iter) {
+        	blackhole.consume(state.HE.get_protected(state.Slice, 0, 0));
+        	i++;
+    	}
+    }
+    
+
   
   @Benchmark
   public void Empty(Blackhole blackhole,BenchmarkState state) {

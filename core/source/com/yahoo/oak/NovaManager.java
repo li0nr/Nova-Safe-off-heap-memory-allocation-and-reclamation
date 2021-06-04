@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.openjdk.jmh.infra.Blackhole;
-
-
 
 public class NovaManager implements MemoryManager {
     static final int RELEASE_LIST_LIMIT = 1024;
@@ -39,23 +36,11 @@ public class NovaManager implements MemoryManager {
 //    private final List<NovaWriteBuffer> WriteBuffers;
     private final List<NovaSlice> Slices;
 
-    NovaManager(BlockMemoryAllocator allocator) {
+    public NovaManager(BlockMemoryAllocator allocator) {
         this.NreleaseLists = new CopyOnWriteArrayList<>();
         for (int i = 0; i < MAX_THREADS; i++) {
             this.NreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
         }
-        //initialized once to be always used!
-        /***************************************************/
-//        NovaSlice s=new NovaSlice(0,-1,0);
-//        this.ReadBuffers = new CopyOnWriteArrayList<>();
-//        for (int i = 0; i < MAX_THREADS; i++) {
-//            this.ReadBuffers.add(new NovaReadBuffer(s));
-//        }
-//        this.WriteBuffers = new CopyOnWriteArrayList<>();
-//        for (int i = 0; i < MAX_THREADS; i++) {
-//            this.WriteBuffers.add(new NovaWriteBuffer(s));
-//        }
-        /***************************************************/
         this.Slices = new ArrayList<>();
         for (int i = 0; i < MAX_THREADS; i++) {
             this.Slices.add(new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE));
@@ -71,6 +56,7 @@ public class NovaManager implements MemoryManager {
         globalNovaNumber = new AtomicInteger(1);
         this.allocator = allocator;
     }
+    
 
     @Override
     public void close() {
@@ -145,23 +131,6 @@ public class NovaManager implements MemoryManager {
     	return allocator.getAddress(blockID);
     }
 
-    /***************************************************/
-//    public NovaReadBuffer getReadBuffer(NovaSlice s) {
-//    	int idx = threadIndexCalculator.getIndex();
-//    	NovaReadBuffer buff= ReadBuffers.get(idx);
-//    	buff.adjustSlice(s,this);
-//    	return buff;
-//    
-//    }
-//    
-//    public NovaWriteBuffer getWriteBuffer(NovaSlice s) {
-//    	int idx = threadIndexCalculator.getIndex();
-//    	NovaWriteBuffer buff= WriteBuffers.get(idx);
-//    	buff.adjustSlice(s,this);
-//    	return buff;
-//    
-//    }
-    /***************************************************/
 
     
     public NovaSlice getSlice(int size,int ThreadIdx) {
@@ -174,6 +143,14 @@ public class NovaManager implements MemoryManager {
 
     public int  getNovaEra() {
         return globalNovaNumber.get();
+    }
+    
+    public void ForceCleanUp() {//UNSAFE reclimation for deubg
+    	for(List<NovaSlice> a : NreleaseLists) {
+    		for(NovaSlice x : a) {
+    			allocator.free(x);
+    		}
+    	}
     }
     
     private  boolean containsRef(int block,long ref) {

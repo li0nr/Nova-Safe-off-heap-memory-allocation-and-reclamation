@@ -20,7 +20,7 @@ public class List_NoMM implements ListInterface{
 	}
 	
 	public List_NoMM(int capacity){
-		Slices = new HEslice[capacity];
+		Slices = new NovaSlice[capacity];
 
 	}
 

@@ -27,10 +27,10 @@ public class Buff {
 	public void set(int x) {
 		int i = 0;
 		while(i <capacity/Integer.BYTES) {
-			i++;
 			buffer.putInt(i,x);
+			i++;
 		}
-		this.DebugPrint();
+		//this.DebugPrint();
 
 	}
 	
@@ -38,9 +38,9 @@ public class Buff {
 	public void DebugPrint() {
 		int i = 0;
 		while(i <capacity/Integer.BYTES) {
-			i++;
 			buffer.getInt(i);
 			System.out.print(buffer.getInt(i)+ "**");
+			i++;
 		}
 	}
 	
@@ -65,7 +65,6 @@ public class Buff {
 			long targetPos = output;
 			UnsafeUtils.putInt(targetPos, object.capacity);
 			targetPos += Integer.BYTES;
-			object.DebugPrint();
 			int offset = 0;
 			for (int i = 0; i < object.capacity / Integer.BYTES; i++) {
 				int data = object.buffer.getInt(offset);
@@ -123,6 +122,16 @@ public class Buff {
 				offset += Integer.BYTES;
 			}
 			return Integer.compare(size, obj.capacity);
+		}
+		
+		@Override
+		public void Print(long address) {
+			int size = UnsafeUtils.getInt(address);
+			System.out.print("(");
+			for (int i = 0; i < size / Integer.BYTES; i++) {
+				System.out.print(UnsafeUtils.unsafe.getInt(address + i+1 *Integer.BYTES));
+			}
+			System.out.print(")--");
 		}
 	};
 

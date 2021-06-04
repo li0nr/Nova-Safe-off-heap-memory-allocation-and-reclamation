@@ -81,4 +81,62 @@ public class BST_Test {
 	    x.compare(BST.get(z, 0));
 		    
 	  }
+	
+	@Test
+	public void BST_Fill_check() {
+		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	    final NovaManager novaManager = new NovaManager(allocator);
+	    
+
+	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
+	    
+	    BST_HE<Buff,Buff> BST_HE = 
+	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
+	    int i = 0;
+	    Buff k = new Buff();
+	    while(i < 100) {
+	    	k.set(i);
+	    	i++;
+		    BST.put(k, k, 0);
+		    BST_HE.put(k, k, 0);
+	    }
+	}
+	
+	@Test
+	public void BST_Fill_delete() {
+		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	    final NovaManager novaManager = new NovaManager(allocator);
+	    
+
+	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
+	    
+	    BST_HE<Buff,Buff> BST_HE = 
+	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
+	    int i = 0;
+	    Buff k = new Buff();
+	    while(i < 200) {
+	    	k.set(i);
+	    	i++;
+	    	BST.put(k, k, 0);
+		    BST_HE.put(k, k, 0);
+	    }
+	    i = 0;
+	    while(i < 200) {
+	    	k.set(i);
+	    	i++;
+		    assert BST.remove( k, 0) == true;
+		    assert BST_HE.remove( k, 0) == true;
+
+	    }
+	    BST_HE.HE.ForceCleanUp();
+	    novaManager.ForceCleanUp();
+	    assert allocator.allocated() == 0;
+	    
+	}
+	
+	
 }

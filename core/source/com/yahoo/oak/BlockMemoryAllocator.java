@@ -6,7 +6,6 @@
 
 package com.yahoo.oak;
 
-import java.nio.ByteBuffer;
 /**
  * This is an interface to be implemented as an alternative to OakNativeMemoryAllocator.
  * Its purpose is to allocate new buffers (DirectByteBuffer) which will be delivered as a Slice object.

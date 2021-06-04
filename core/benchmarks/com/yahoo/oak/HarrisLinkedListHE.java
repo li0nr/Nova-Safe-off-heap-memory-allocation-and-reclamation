@@ -2,6 +2,8 @@ package com.yahoo.oak;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+import com.yahoo.oak.HazardEras.HEslice;
+
 /**
  * <h1>HarrisAMRLinkedList</h1>
  * Harris's Linked List with AtomicMarkableReference.

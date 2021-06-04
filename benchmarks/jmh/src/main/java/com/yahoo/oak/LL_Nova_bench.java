@@ -22,6 +22,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 
+
 public class LL_Nova_bench {
 		final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 		 
@@ -82,7 +83,7 @@ public class LL_Nova_bench {
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(BST_Nova_bench.class.getSimpleName())
+	    			.include(LL_Nova_bench.class.getSimpleName())
 	                .forks(MYParam.forks)
 	                .threads(1)
 	                .build();

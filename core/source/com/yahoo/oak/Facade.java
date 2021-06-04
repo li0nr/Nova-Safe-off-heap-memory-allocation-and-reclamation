@@ -1,12 +1,6 @@
 package com.yahoo.oak;
 
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-
-import org.openjdk.jmh.runner.RunnerException;
-
 import sun.misc.Unsafe;
 
 public class Facade <T> {
@@ -258,21 +252,28 @@ public class Facade <T> {
 			throw new IllegalArgumentException("slice changed");
 		return res;	
 	}
+	 
+	 public void Print(NovaC<T> srZ) {
+		long facademeta = FacadeMetaData;
+		
+		
+		int version	= ExtractVer_Del(facademeta);
+		int block 	= Extractblock	(facademeta);
+		int offset 	= ExtractOffset	(facademeta);
+		
+		long address = novaManager.getAdress(block);
+		long size = UNSAFE.getLong(address+offset)>>>24;//reads off heap meta
+
+		srZ.Print(address+offset+NovaManager.HEADER_SIZE);
+	 
+}
+	 
 	
 	private long buildRef(int block, int offset) {
 		long Ref=(block &0xFFFFF);
 		Ref=Ref<<20;
 		Ref=Ref|(offset&0xFFFFF);
 		return Ref;
-	}
-	
-	private int ExtractDel(long toExtract) {
-		int del=(int) (toExtract)&0x1;
-		return del;
-	}
-	private int ExtractVer(long toExtract) {
-		int del=(int) (toExtract>>1)&0x7FFFFF;
-		return del;
 	}
 	private int ExtractVer_Del(long toExtract) {
 		int del=(int) (toExtract)&0x7FFFFF;
