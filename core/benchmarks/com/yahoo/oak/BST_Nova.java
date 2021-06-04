@@ -365,7 +365,7 @@ public class BST_Nova<K , V> {
 
                     if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
                         if (helpDelete(newGPInfo, idx))  {
-                     	   this.Print(); return true;
+                        	return true;
                         }
                     } else {
                         // if fails, help grandparent with its latest info value

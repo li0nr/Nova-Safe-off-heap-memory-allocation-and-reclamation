@@ -113,7 +113,7 @@ public class BST_Nova_bench {
     public void ReadBulk_Rand(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
     	int i = 0;
     	while( i < BenchmarkState.size) {
-    		threadState.buff.set(threadState.rand.nextInt(MYParam.G_LIST_SIZE));
+    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
         	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
         	i++;
     	}

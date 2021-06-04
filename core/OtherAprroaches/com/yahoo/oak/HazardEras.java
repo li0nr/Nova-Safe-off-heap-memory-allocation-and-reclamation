@@ -181,7 +181,7 @@ private    boolean  canDelete(HazardEras_interface obj,  int mytid) {
     }
 
 
-
+	//DEBUG
 	void ForceCleanUp() {
 		for(int i =0 ; i < HE_MAX_THREADS; i++) {
 	        ArrayList<HazardEras_interface> rlist = retiredList[i*CLPAD+ 16];

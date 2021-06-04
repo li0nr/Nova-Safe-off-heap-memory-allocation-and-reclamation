@@ -117,7 +117,7 @@ public class BST_Nova_RD {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Group("ReadDelete")
-    @GroupThreads(1)
+    @GroupThreads(7)
     @Fork(value = 0)
     @Benchmark
     public void readParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
@@ -134,7 +134,7 @@ public class BST_Nova_RD {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Group("ReadDelete")
-    @GroupThreads(7)
+    @GroupThreads(1)
     @Fork(value = 0)
     @Benchmark
     public void deleteParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
