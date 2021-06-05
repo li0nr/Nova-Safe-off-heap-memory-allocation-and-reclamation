@@ -29,7 +29,7 @@ import com.yahoo.oak.Buff;
 import com.yahoo.oak.MYParam;
 import com.yahoo.oak.NativeMemoryAllocator;
 
-public class BST_noMM_RD {
+public class BST_NoMM_RD {
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 
 	@State(Scope.Benchmark)
@@ -112,7 +112,7 @@ public class BST_noMM_RD {
         	i++;
     	}
 	}
-    
+     
     
     @Warmup(iterations = MYParam.warmups)
     @Measurement(iterations = MYParam.iterations)
@@ -151,7 +151,7 @@ public class BST_noMM_RD {
     
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
-    			.include(BST_noMM_RD.class.getSimpleName())
+    			.include(BST_NoMM_RD.class.getSimpleName())
                 .forks(MYParam.forks)
                 .threads(1)
                 .build();

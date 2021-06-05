@@ -29,6 +29,8 @@ import com.yahoo.oak.Buff;
 import com.yahoo.oak.MYParam;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.BST_jmh.BST_NoMM_RD.BenchmarkState;
+import com.yahoo.oak.BST_jmh.BST_NoMM_RD.ThreadState;
 
 public class BST_Nova_RD {
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
@@ -55,7 +57,9 @@ public class BST_Nova_RD {
         		Buff v = new Buff();
         		k.set(i);
         		v.set(size-i);
-        		BST.put(k,v, 0);
+        		if(BST.put(k,v, 0) == null)
+        			System.out.println("new \n");
+
         	}
         }
     }
@@ -108,13 +112,13 @@ public class BST_Nova_RD {
     public void ReadBulk_Rand(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
     	int i = 0;
     	while( i < BenchmarkState.size/ThreadState.threads) {
-    		threadState.buff.set(i);
+    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
         	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
         	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
         	i++;
     	}
 	}
-    
+       
     
     @Warmup(iterations = MYParam.warmups)
     @Measurement(iterations = MYParam.iterations)

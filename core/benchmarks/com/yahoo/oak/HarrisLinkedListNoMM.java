@@ -182,26 +182,4 @@ public class HarrisLinkedListNoMM <E>{
 	        boolean flag = Cmp.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
 	        return flag;
 	    }
-	    
-	    
-		public static void main(String[] args) {
-		    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-		    final NovaManager novaManager = new NovaManager(allocator);
-		    
-		    Buff x =new Buff(4);
-		    x.set(88);
-		    HarrisLinkedListNoMM<Buff> List = new HarrisLinkedListNoMM<>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
-			List.add(x,0);
-			x.set(120);
-			List.add(x,0);
-		    Buff xy =new Buff(4);
-		    Buff z= new Buff(128);
-		    xy.set(110);
-		    List.add(xy,0);
-		    List.contains(x,0);
-		    
-		    assert List.contains(x,0) == false; //removed putif apsent may effect this result
-		    assert List.contains(z,0) == true;
-
-		}
 }

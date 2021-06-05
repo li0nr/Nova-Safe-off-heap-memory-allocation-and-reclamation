@@ -99,7 +99,7 @@ public class HarrisLinkedListHE<E> {
             // On Harris paper, pred is named left_node and curr is right_node
             final Node<HEslice> pred = window.pred;
             final Node<HEslice> curr = window.curr;
-            if (curr.key == key) { 
+            if (curr.key!= null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
             	HE.clear(tidx);
                 return false;
             } else {
@@ -129,7 +129,7 @@ public class HarrisLinkedListHE<E> {
             // variable is named "right_node".            
             final Node<HEslice> pred = window.pred;
             final Node<HEslice> curr = window.curr;
-            if (curr.key != key) {
+            if ( Cmp.compareKeys(curr.key.address + curr.key.offset, key) != 0) {
             	HE.clear(tidx);
                 return false;
             } 
@@ -142,10 +142,11 @@ public class HarrisLinkedListHE<E> {
             if (!curr.next.compareAndSet(succ, succ, false, true)) {
                 continue;
             }
-            if(pred.next.compareAndSet(curr, succ, false, false)) 
+            if(pred.next.compareAndSet(curr, succ, false, false)) {
+            	HE.clear(tidx);
             	HE.retire(tidx, curr.key);
-        	HE.clear(tidx);
-            return true;	
+                return true;	
+            }
         }
     }
 
@@ -235,27 +236,5 @@ public class HarrisLinkedListHE<E> {
         return flag;
     }
     
-
-    
-	public static void main(String[] args) {
-	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	    final NovaManager novaManager = new NovaManager(allocator);
-	    
-	    Buff x =new Buff(4);
-	    x.set(88);
-	    HarrisLinkedListHE<Buff> List = new HarrisLinkedListHE<>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
-		List.add(x,0);
-		x.set(120);
-		List.add(x,0);
-	    Buff xy =new Buff(4);
-	    Buff z= new Buff(128);
-	    xy.set(110);
-	    List.add(xy,0);
-	    List.contains(x,0);
-	    
-	    List.contains(x,0); //false;
-	    List.contains(z,0); //true;
-
-	}
 	
 }

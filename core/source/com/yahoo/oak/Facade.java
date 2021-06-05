@@ -182,6 +182,7 @@ public class Facade <T> {
 		 return this;
 	}
 	
+
 	
 	public <T> T Read(NovaSerializer<T> lambda) {
 		long facademeta = FacadeMetaData;
@@ -224,6 +225,20 @@ public class Facade <T> {
 
 		 return this;
 	}
+	
+	public boolean AllocateWrite_Private(NovaSerializer<T> lambda, int size, T obj, int idx) {
+		
+		NovaSlice 	newslice = novaManager.getSlice(size,idx);
+		int offset=	newslice.getAllocatedOffset();
+		int block =	newslice.getAllocatedBlockID();
+		int version=  (int)newslice.getVersion();
+		long address = novaManager.getAdress(block);
+		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
+		
+        FacadeMetaData = combine(block,offset,version);
+        return true; 
+	}
+	
 	
 	
 	 public <T>  int Compare(T obj, NovaC<T> srZ) {

@@ -42,7 +42,6 @@ public class HarrisLinkedListNova<E> {
     final NovaManager nm;
     
     final static int MAXTHREADS = 32;
-    final ArrayList<Facade> Facades;
     
     static class Node<E> {
         final Facade key;
@@ -66,14 +65,9 @@ public class HarrisLinkedListNova<E> {
     }
     
     
-    public HarrisLinkedListNova(NovaManager novaManager,NovaC<E> cmp,	NovaSerializer<E> srz) {
-    	Facades = new ArrayList<>();
-		for(int i=0; i<MAXTHREADS;i++)
-			Facades.add(new Facade<>());
-		Facade x= new Facade<>(novaManager);
-		
+    public HarrisLinkedListNova(NovaManager novaManager,NovaC<E> cmp,	NovaSerializer<E> srz) {	
 		nm = novaManager; Cmp = cmp; Srz = srz;
-    	
+    	Facade setFacade = new Facade<>(novaManager);
         tail = new Node<>(null);
         head = new Node<>(null);
         head.next.set(tail, false);
@@ -91,15 +85,14 @@ public class HarrisLinkedListNova<E> {
      */
     public boolean add(E key, int tidx) {
 		Facade newF = new Facade();
-		newF.AllocateSlice(Srz.calculateSize(key),0);
-		newF.WriteFull(Srz,key, 0);
+		newF.AllocateWrite_Private(Srz,Srz.calculateSize(key),key,0);
         final Node<Facade> newNode = new Node<>(newF);
         while (true) {
             final Window<Facade> window = find(key, tidx);
             // On Harris paper, pred is named left_node and curr is right_node
             final Node<Facade> pred = window.pred;
             final Node<Facade> curr = window.curr;
-            if (curr.key == key) { 
+            if (curr.key!= null && curr.key.Compare(key, Cmp) == 0) { 
                 return false;
             } else {
                 newNode.next.set(curr, false);
@@ -127,7 +120,7 @@ public class HarrisLinkedListNova<E> {
             // variable is named "right_node".            
             final Node<Facade> pred = window.pred;
             final Node<Facade> curr = window.curr;
-            if (curr.key != key) {
+            if (curr.key.Compare(key, Cmp) != 0) {
                 return false;
             } 
             final Node<Facade> succ = curr.next.getReference();
@@ -214,23 +207,10 @@ public class HarrisLinkedListNova<E> {
             curr = curr.next.getReference();
             curr.next.get(marked);
         }
-        return curr.key.Compare(key, Cmp) ==0 && !marked[0];
+        return curr.key == null ? false : curr.key.Compare(key, Cmp) == 0 && !marked[0];
     }
     
-    public boolean computeIfPresent(E key, E newKey, int tidx) {
-        boolean[] marked = {false};
-        Node<Facade> curr = head.next.getReference();
-        curr.next.get(marked);
-        while (curr != tail &&curr.key.Compare(key, Cmp) < 0) {
-            curr = curr.next.getReference();
-            curr.next.get(marked);
-        }
-        if( curr.key.Compare(key, Cmp) == 0 && !marked[0]) {
-        	curr.key.WriteFull(Srz, newKey, 0);
-        	return true;
-        	}
-        else return false;
-        }
+    
     
 	public static void main(String[] args) {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
@@ -247,7 +227,6 @@ public class HarrisLinkedListNova<E> {
 	    xy.set(110);
 	    List.add(xy,0);
 	    List.contains(x,0);
-	    List.computeIfPresent(x, z,0);
 	    
 	    assert List.contains(x,0) == false;
 	    assert List.contains(z,0) == true;

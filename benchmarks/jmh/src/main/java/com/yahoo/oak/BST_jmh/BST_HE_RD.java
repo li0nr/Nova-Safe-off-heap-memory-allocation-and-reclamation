@@ -28,6 +28,8 @@ import com.yahoo.oak.BST_HE;
 import com.yahoo.oak.Buff;
 import com.yahoo.oak.MYParam;
 import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.BST_jmh.BST_NoMM_RD.BenchmarkState;
+import com.yahoo.oak.BST_jmh.BST_NoMM_RD.ThreadState;
 
 
 public class BST_HE_RD {
@@ -106,13 +108,13 @@ public class BST_HE_RD {
 	    public void ReadBulk_Rand(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
 	    	int i = 0;
 	    	while( i < BenchmarkState.size/ThreadState.threads) {
-	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+ 	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
 	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
 	        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
 	        	i++;
 	    	}
 		}
-	    
+    
 	    
 	    @Warmup(iterations = MYParam.warmups)
 	    @Measurement(iterations = MYParam.iterations)

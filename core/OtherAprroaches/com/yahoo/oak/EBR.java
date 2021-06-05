@@ -72,11 +72,11 @@ public class EBR <T extends EBR_interface>{
 	}
 	
 	void empty(int tid){
-
+		
 		long minEpoch = Long.MAX_VALUE;
 		for (int i = 0; i<EBR_MAX_THREADS; i++){
 			long res = reservations[i*CLPAD +16];
-//			UnsafeUtils.unsafe.fullFence();
+			UnsafeUtils.unsafe.loadFence();
 			if(res<minEpoch){
 				minEpoch = res;
 			}
