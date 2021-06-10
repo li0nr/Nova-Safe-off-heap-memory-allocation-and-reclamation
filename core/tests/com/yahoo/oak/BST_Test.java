@@ -23,14 +23,13 @@ public class BST_Test {
 
 		x.set(120);
 		BST.put(x,x,0);
-	    BST.containsKey(x,0);	    BST.Print();
+	    BST.containsKey(x,0);
 	    Buff xy =new Buff();
 	    Buff z= new Buff();
 	    xy.set(110);
 	    BST.put(xy,xy,0);
 	    assert BST.containsKey(xy,0) == true && xy.get() == 110;
 	    
-	    BST.Print();
 	    BST.containsKey(x,0);
 	   
 	    BST.remove(x, 0);

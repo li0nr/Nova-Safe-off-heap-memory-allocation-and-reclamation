@@ -233,7 +233,7 @@ public class BST<K extends Comparable<? super K>, V> {
            if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                help(pinfo);
            } else {
-               if (key.compareTo(l.key) == 0) {
+               if (l.key!= null && key.compareTo(l.key) == 0) {
                    // key already in the tree, try to replace the old node with new node
                    newPInfo = new IInfo<K, V>(l, p, newNode);
                    result = l.value;
