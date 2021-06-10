@@ -54,6 +54,7 @@ public class HazardEras {
 		HEslice(long Era){
 			super(0,0,0);
 			bornEra = Era;
+			deadEra = -1;
 		}
 		
 		 public void setDeleteEra(long Era){

@@ -4,6 +4,12 @@ import java.util.Arrays;
 
 import org.openjdk.jmh.runner.RunnerException;
 
+import com.yahoo.oak.EBR;
+import com.yahoo.oak.EBR_interface;
+import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaSlice;
+import com.yahoo.oak.UnsafeUtils;
+
 public class List_EBR implements ListInterface{
 	
 	private static final int DEFAULT_CAPACITY=10;

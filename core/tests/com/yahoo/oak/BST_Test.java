@@ -1,5 +1,7 @@
 package com.yahoo.oak;
 
+import java.util.concurrent.ConcurrentSkipListMap;
+
 import org.junit.Test;
 
 public class BST_Test {
@@ -21,21 +23,18 @@ public class BST_Test {
 
 		x.set(120);
 		BST.put(x,x,0);
-	    BST.containsKey(x,0);
+	    BST.containsKey(x,0);	    BST.Print();
 	    Buff xy =new Buff();
 	    Buff z= new Buff();
 	    xy.set(110);
 	    BST.put(xy,xy,0);
 	    assert BST.containsKey(xy,0) == true && xy.get() == 110;
-	    BST.putIfAbsent(x, z,0);
 	    
+	    BST.Print();
 	    BST.containsKey(x,0);
 	   
 	    BST.remove(x, 0);
-	    BST.containsKey(x,0);
-	    BST.putIfAbsent(z, x,0);
-	    assert BST.containsKey(z,0) == true && z.get() == 0;
-	    assert x.compare(BST.get(z, 0)) == 0;
+	    assert BST.containsKey(x,0) == false;
 		    
 	  }
 	
@@ -69,7 +68,6 @@ public class BST_Test {
 	    BST.containsKey(z,0);
 
 	    BST.containsKey(xy,0);
-	    BST.putIfAbsent(x, z,0);
 	    
 	    BST.containsKey(x,0);
 	   
@@ -78,12 +76,50 @@ public class BST_Test {
 	    BST.containsKey(z,0);
 	    BST.put(z, x,0);
 	    BST.containsKey(z,0);
-	    x.compare(BST.get(z, 0));
+	    x.compareTo(BST.get(z, 0));
+		    
+	  }
+	
+	
+	@Test
+	public void BST_GC_CoverTest() {
+
+	    BST<Buff,Buff> BST = 
+	    		new BST<Buff, Buff>();
+	    	    
+	    for(int i =0; i < 20; i++) {
+		    Buff x =new Buff();
+		    x.set(i);
+		    BST.put(x, x);
+		    assert BST.get(x).compareTo(x) == 0;
+		    assert BST.containsKey(x) == true;
+	    }
+	    Buff x = new Buff();
+	    for(int i =0; i < 20; i++) {
+	    	x.set(i);
+		    assert BST.containsKey(x) == true;
+	    }
+	    for(int i = 10; i < 20; i++) {
+	    	x.set(i);
+		    assert BST.remove(x) == true;
+	    }
+	    for(int i = 10; i < 20; i++) {
+	    	x.set(i);
+		    assert BST.containsKey(x) == false;
+	    }
+	    for(int i = 0; i < 10; i++) {
+	    	x.set(i);
+		    assert BST.containsKey(x) == true;
+	    }
+
+
 		    
 	  }
 	
 	@Test
 	public void BST_Fill_check() {
+		
+    
 		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    

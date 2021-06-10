@@ -4,6 +4,10 @@ package com.yahoo.oak;
 import java.util.Arrays;
 //import org.junit.Test;
 
+import com.yahoo.oak.Facade;
+import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaManager;
+
 
 
 public class List_Nova implements ListInterface{

@@ -16,7 +16,7 @@ public class BSTParam {
  
 	public static final int G_LIST_SIZE = 50_000;
 	
-	static final int BST_SIZE = 10;
+	static final int BST_SIZE = 1000;
 	static final int LL_SIZE = 10000;
 	
 	public static final int Limit = G_LIST_SIZE/4;

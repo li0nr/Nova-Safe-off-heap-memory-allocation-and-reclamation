@@ -172,7 +172,7 @@ public class BST<K extends Comparable<? super K>, V> {
                                                        // (just as if we'd read p's info field before the reference to l)
            /** END SEARCH **/
 
-           if (key.equals(l.key)) {
+           if (key.compareTo(l.key) == 0) {
                return l.value;	// key already in the tree, no duplicate allowed
            } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                help(pinfo);
@@ -233,7 +233,7 @@ public class BST<K extends Comparable<? super K>, V> {
            if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                help(pinfo);
            } else {
-               if (key.equals(l.key)) {
+               if (key.compareTo(l.key) == 0) {
                    // key already in the tree, try to replace the old node with new node
                    newPInfo = new IInfo<K, V>(l, p, newNode);
                    result = l.value;
@@ -266,7 +266,7 @@ public class BST<K extends Comparable<? super K>, V> {
 
    // Delete key from dictionary, return the associated value when successful, null otherwise
    /** PRECONDITION: k CANNOT BE NULL **/
-   public final V remove(final K key){
+   public final boolean remove(final K key){
 
        /** SEARCH VARIABLES **/
        Node<K,V> gp;
@@ -300,7 +300,7 @@ public class BST<K extends Comparable<? super K>, V> {
            }
            /** END SEARCH **/
            
-           if (!key.equals(l.key)) return null;
+           if (key.compareTo(l.key) != 0 ) return false;
            if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
                help(gpinfo);
            } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
@@ -310,7 +310,7 @@ public class BST<K extends Comparable<? super K>, V> {
                final DInfo<K,V> newGPInfo = new DInfo<K,V>(l, p, gp, pinfo);
 
                if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
-                   if (helpDelete(newGPInfo)) return l.value;
+                   if (helpDelete(newGPInfo)) return true;
                } else {
                    // if fails, help grandparent with its latest info value
                    help(gp.info);
@@ -393,6 +393,15 @@ public class BST<K extends Comparable<? super K>, V> {
    public static void main(String[] args){
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager novaManager = new NovaManager(allocator);
+	    
+	    BST<Buff,Buff> BuffTree = new BST<>();
+	    Buff node = new Buff();
+	    node.set(10);
+	    
+	    BuffTree.put(node, node);
+	    
+	    node.set(20);
+	    BuffTree.put(node, node);
 	    
 	    BST<Integer,Integer> BST = new BST<Integer,Integer>();
 	    	    

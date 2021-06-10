@@ -37,17 +37,18 @@ public class BST_NoMM_RD {
 
 		public static  int size = BSTParam.BST_SIZE;
         private BST_NoMM<Buff,Buff> BST ;
+	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 
         @Setup
         public void setup() {
-    	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	    
-    	    BST = new BST_NoMM<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
-										,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
+
         }
         
         @Setup(Level.Iteration)
         public void fillTree() {
+    	    
+    	    BST = new BST_NoMM<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+										,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
         	for (int i=0; i <size ; i++) {
         		Buff k = new Buff();
         		Buff v = new Buff();
@@ -55,6 +56,7 @@ public class BST_NoMM_RD {
         		v.set(size-i);
         		BST.put(k,v, 0);
         		}
+    	    System.gc();
         	}
         }
 
@@ -81,21 +83,21 @@ public class BST_NoMM_RD {
 		}
     
     
-    @Warmup(iterations = MYParam.warmups)
-    @Measurement(iterations = MYParam.iterations)
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Fork(value = 0)
-    @Benchmark
-    public void ReadBulk_Serial(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-    	int i = 0;
-    	while( i < BenchmarkState.size/ThreadState.threads) {
-    		threadState.buff.set(i);
-        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
-        	i++;
-    	}
-	}
+//    @Warmup(iterations = MYParam.warmups)
+//    @Measurement(iterations = MYParam.iterations)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    @Fork(value = 0)
+//    @Benchmark
+//    public void ReadBulk_Serial(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+//    	int i = 0;
+//    	while( i < BenchmarkState.size/ThreadState.threads) {
+//    		threadState.buff.set(i);
+//        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
+//        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
+//        	i++;
+//    	}
+//	}
     
     @Warmup(iterations = MYParam.warmups)
     @Measurement(iterations = MYParam.iterations)
@@ -108,45 +110,45 @@ public class BST_NoMM_RD {
     	while( i < BenchmarkState.size/ThreadState.threads) {
     		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
         	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
+        	if(i%10 == 0) blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
         	i++;
     	}
 	}
      
     
-    @Warmup(iterations = MYParam.warmups)
-    @Measurement(iterations = MYParam.iterations)
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Group("ReadDelete")
-    @GroupThreads(1)
-    @Fork(value = 0)
-    @Benchmark
-    public void readParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-    	int i = 0;
-    	while( i <BenchmarkState.size/ThreadState.threads) {
-    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-        	i++;
-    	}
-	}
-    
-    @Warmup(iterations = MYParam.warmups)
-    @Measurement(iterations = MYParam.iterations)
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Group("ReadDelete")
-    @GroupThreads(7)
-    @Fork(value = 0)
-    @Benchmark
-    public void deleteParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-    	int i = 0;
-    	while( i < BenchmarkState.size/ThreadState.threads) {
-    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
-        	i++;
-    	}
-	}
+//    @Warmup(iterations = MYParam.warmups)
+//    @Measurement(iterations = MYParam.iterations)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    @Group("ReadDelete")
+//    @GroupThreads(1)
+//    @Fork(value = 0)
+//    @Benchmark
+//    public void readParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+//    	int i = 0;
+//    	while( i <BenchmarkState.size/ThreadState.threads) {
+//    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+//        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
+//        	i++;
+//    	}
+//	}
+//    
+//    @Warmup(iterations = MYParam.warmups)
+//    @Measurement(iterations = MYParam.iterations)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    @Group("ReadDelete")
+//    @GroupThreads(7)
+//    @Fork(value = 0)
+//    @Benchmark
+//    public void deleteParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+//    	int i = 0;
+//    	while( i < BenchmarkState.size/ThreadState.threads) {
+//    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+//        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
+//        	i++;
+//    	}
+//	}
     
     
     public static void main(String[] args) throws RunnerException {

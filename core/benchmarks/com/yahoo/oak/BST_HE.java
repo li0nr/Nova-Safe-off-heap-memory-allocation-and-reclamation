@@ -21,8 +21,6 @@ package com.yahoo.oak;
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-
-import com.yahoo.oak.BST_Nova.Node;
 import com.yahoo.oak.HazardEras.HEslice;
 
 public class BST_HE<K , V> {
@@ -167,74 +165,6 @@ public class BST_HE<K , V> {
      		   SrzV.deserialize(l.value.address + l.value.offset) : null;
         HE.clear(idx);
         return ret;
-    }
-
-    // Insert key to dictionary, returns the previous value associated with the specified key,
-    // or null if there was no mapping for the key
-    /** PRECONDITION: k CANNOT BE NULL **/
-    public final V putIfAbsent(final K key, final V value, int idx){
-        Node<HEslice, HEslice> newInternal;
-        Node<HEslice, HEslice> newSibling, newNode;
-
-        /** SEARCH VARIABLES **/
-        Node<HEslice, HEslice> p;
-        Info<HEslice, HEslice> pinfo;
-        Node<HEslice, HEslice> l;
-        /** END SEARCH VARIABLES **/
-
-        newNode = new Node<HEslice, HEslice>(HE.allocate(SrzK.calculateSize(key)),
- 				   HE.allocate(SrzV.calculateSize(value)));
-        SrzK.serialize(key, newNode.key.address + newNode.key.offset);
-        SrzV.serialize(value, newNode.value.address + newNode.value.offset);
-        
-        while (true) {
-
-            /** SEARCH **/
-            p = root;
-            pinfo = p.info;
-            l = p.left;
-            while (l.left != null) {
-                p = l;
-         	   HE.get_protected(l.key,0,idx);
-                l = (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) > 0) ? l.left : l.right;
-            }
-            pinfo = p.info;                             // read pinfo once instead of every iteration
-            if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
-                                                        // (just as if we'd read p's info field before the reference to l)
-            /** END SEARCH **/
-     	   HE.get_protected(l.key,0,idx);
-            if (l.key != null && KCt.compareKeys(l.key.address+l.key.offset, key)  == 0) {
-         	   HE.get_protected(l.value,0, idx);
-                V ret = SrzV.deserialize(l.value.address + l.value.offset);	// key already in the tree, no duplicate allowed
-                HE.clear(idx);
-                return ret;
-            } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
-                help(pinfo, idx);
-            } else {
-         	   HE.get_protected(l.key,0,idx);
-                newSibling = new Node<HEslice, HEslice>(l.key, l.value);
-                if (l.key == null ||  KCt.compareKeys(l.key.address+l.key.offset, key) > 0)	// newinternal = max(ret.l.key, key);
-                    newInternal = new Node<HEslice, HEslice>(l.key, newNode, newSibling);
-                else {
-                    newInternal = new Node<HEslice, HEslice>(HE.allocate(SrzK.calculateSize(key)), newSibling, newNode);
-                    SrzK.serialize(key, newInternal.key.address +newInternal.key.offset );
-                }
-
-                final IInfo<HEslice, HEslice> newPInfo = new IInfo<HEslice, HEslice>(l, p, newInternal);
-
-                // try to IFlag parent
-                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
-                    helpInsert(newPInfo);
-                    HE.clear(idx);
-                    return null;
-                } else {
-                    // if fails, help the current operation
-                    // [CHECK]
-                    // need to get the latest p.info since CAS doesnt return current value
-                    help(p.info, idx);
-                }
-            }
-        }
     }
 
     // Insert key to dictionary, return the previous value associated with the specified key,

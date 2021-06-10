@@ -2,6 +2,10 @@ package com.yahoo.oak;
 
 import java.util.Arrays;
 
+import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaSlice;
+import com.yahoo.oak.UnsafeUtils;
+
 public class List_NoMM implements ListInterface{
 	
 	private static final int DEFAULT_CAPACITY=10;

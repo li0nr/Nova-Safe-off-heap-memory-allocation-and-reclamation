@@ -2,7 +2,7 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 
-public class Buff {
+public class Buff  implements Comparable<Buff>{
 	public final int capacity;
 	public final ByteBuffer buffer;
 
@@ -44,7 +44,8 @@ public class Buff {
 		}
 	}
 	
-	public int compare(Buff o) {
+	@Override
+	public int compareTo(Buff o) {
 		final int minSize = Math.min(this.capacity, o.capacity);
 		int offset = 0;
 		for (int i = 0; i < minSize / Integer.BYTES; i++) { 
@@ -56,8 +57,29 @@ public class Buff {
 			offset +=	  Integer.BYTES;
 			}
 		return Integer.compare(this.capacity, o.capacity);
-		
 	}
+	
+	public Buff Copy(Buff o) {
+		Buff toRet = new Buff(o.capacity);
+		for (int i = 0; i < o.capacity; i++) {
+			toRet.buffer.putInt(i,o.buffer.getInt(i));
+		}
+		return toRet;
+	}
+	
+    public boolean equals(Buff o) {
+		final int minSize = Math.min(this.capacity, o.capacity);
+		int offset = 0;
+		for (int i = 0; i < minSize / Integer.BYTES; i++) { 
+			int i1 = this.buffer.getInt(offset); 
+			int i2 = o.buffer.getInt(offset);
+			int compare= Integer.compare(i1, i2); 
+			if (compare != 0) 
+				return false;  
+			offset +=	  Integer.BYTES;
+			}
+		return Integer.compare(this.capacity, o.capacity) == 0 ? true :false ;
+    }
 
 	public static final NovaSerializer<Buff> DEFAULT_SERIALIZER = new NovaSerializer<Buff>() {
 		@Override
@@ -134,86 +156,5 @@ public class Buff {
 			System.out.print(")--");
 		}
 	};
-
-	/*
-	 * public static final NovaComparator<Buff> DEFAULT_COMPARATOR = new
-	 * NovaComparator<Buff>() {
-	 * 
-	 * @Override public int compareKeys(Buff key1, Buff key2) { final int minSize =
-	 * Math.min(key1.capacity, key2.capacity);
-	 * 
-	 * int offset = 0; for (int i = 0; i < minSize / Integer.BYTES; i++) { int i1 =
-	 * key1.buffer.getInt(offset); int i2 = key2.buffer.getInt(offset); int compare
-	 * = Integer.compare(i1, i2); if (compare != 0) { return compare; } offset +=
-	 * Integer.BYTES; }
-	 * 
-	 * return Integer.compare(key1.capacity, key2.capacity); }
-	 * 
-	 * public int compareSerializedKeys(Facade<Buff> key1, Facade<Buff> key2, int
-	 * tid) { Buff x = (Buff) key1.Read(DEFAULT_SERIALIZER); Buff y = (Buff)
-	 * key2.Read(DEFAULT_SERIALIZER);
-	 * 
-	 * return compareKeys(x, y); }
-	 * 
-	 * @Override public int compareKeyAndSerializedKey(Buff key1, Facade<Buff> key2,
-	 * int tid) { Buff y = (Buff) key2.Read(DEFAULT_SERIALIZER);
-	 * 
-	 * return compareKeys(key1, y); }
-	 * 
-	 * ----------------------------------HE
-	 * SLICE-----------------------------------------------
-	 * 
-	 * @Override public int compareKeyAndSerializedKey(Buff key, HEslice
-	 * serializedKey, int tidx) { final int minSize = Math.min(key.capacity,
-	 * serializedKey.length);
-	 * 
-	 * int offset = 0; for (int i = 0; i < minSize / Integer.BYTES; i++) { int i1 =
-	 * key.buffer.getInt(offset); int i2 =
-	 * UnsafeUtils.unsafe.getInt(serializedKey.address + serializedKey.offset +
-	 * Integer.BYTES); int compare = Integer.compare(i1, i2); if (compare != 0) {
-	 * return compare; } offset += Integer.BYTES; } return
-	 * Integer.compare(key.capacity, serializedKey.length);
-	 * 
-	 * }
-	 * 
-	 * };
-	 */
-	
-	
-	
-	/*
-	 * ----------------------------------HE
-	 * SLICE-----------------------------------------------
-	 * 
-	 * 
-	 * @Override public void serialize(Buff object, HEslice target) {
-	 * UnsafeUtils.putInt(target.address +target.offset, object.capacity); int
-	 * offset = 0; for (int i = 0; i < object.capacity/Integer.BYTES; i++) { int
-	 * data = object.buffer.getInt(offset); UnsafeUtils.putInt(target.address +
-	 * target.offset +offset + Integer.BYTES, data); offset += Integer.BYTES; } }
-	 * 
-	 * @Override public Buff deserialize(HEslice target) { if(target == null) return
-	 * null; int offset = 0; int size = UnsafeUtils.getInt(target.address); offset
-	 * += Integer.BYTES; Buff ret = new Buff(size); for (int i = 0; i <
-	 * size/Integer.BYTES; i++) { int data = UnsafeUtils.getInt(target.address
-	 * +target.offset + offset); ret.buffer.putInt(offset - Integer.BYTES, data);
-	 * offset += Integer.BYTES; } return ret; }
-	 * 
-	 * 
-	 * ----------------------------------NOVA
-	 * SLICE-----------------------------------------------
-	 * 
-	 * @Override public void serialize(Buff object, NovaSlice target) { int offset =
-	 * 0; for (int i = 0; i < object.capacity/Integer.BYTES; i++) { int data =
-	 * object.buffer.getInt(offset); UnsafeUtils.putInt(target.address + offset,
-	 * data); offset += Integer.BYTES; } }
-	 * 
-	 * @Override public Buff deserialize(NovaSlice target) { if(target == null)
-	 * return null; int offset = 0; int size = UnsafeUtils.getInt(target.address);
-	 * offset += Integer.BYTES; Buff ret = new Buff(size); for (int i = 0; i <
-	 * size/Integer.BYTES; i++) { int data = UnsafeUtils.getInt(target.address
-	 * +target.offset + offset); ret.buffer.putInt(offset - Integer.BYTES, data);
-	 * offset += Integer.BYTES; } return ret; }
-	 */
 
 }

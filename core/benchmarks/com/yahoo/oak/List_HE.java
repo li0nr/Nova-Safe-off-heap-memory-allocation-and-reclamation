@@ -4,6 +4,9 @@ import java.util.Arrays;
 
 import org.openjdk.jmh.runner.RunnerException;
 
+import com.yahoo.oak.HazardEras;
+import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.HazardEras.HEslice;
 
 public class List_HE implements ListInterface{
