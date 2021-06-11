@@ -13,13 +13,10 @@ public class BSTParam {
 	static final int thread20=20;
 	static final int thread24=24;
 	static final int thread32=32;
- 
-	public static final int G_LIST_SIZE = 50_000;
+ 	
+	public static final int BST_SIZE = 10;
 	
-	static final int BST_SIZE = 1000;
-	static final int LL_SIZE = 10000;
-	
-	public static final int Limit = G_LIST_SIZE/4;
+	public static final int Limit = BST_SIZE/4;
 	public static final int range = 2500;
 	public static final int forks = 0;
 }

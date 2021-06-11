@@ -3,6 +3,8 @@ package com.yahoo.oak;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.yahoo.oak.HazardEras.HEslice;
+
 import sun.misc.Unsafe;
 
 public class EBR <T extends EBR_interface>{
@@ -20,6 +22,24 @@ public class EBR <T extends EBR_interface>{
     private final ArrayList<T>[] retiredList= new ArrayList[EBR_MAX_THREADS*CLPAD];//CLPAD is for cache padding
     private final NativeMemoryAllocator allocator;
     	
+    
+	public class EBRslice extends NovaSlice implements EBR_interface{
+		private long epoch;
+		
+		EBRslice(){
+			super(0,0,0);
+			epoch = -1;
+			}
+		
+		 public void setEpoch(long Era) {
+			 epoch = Era;
+		 }
+		 
+		 public long geteEpoch(){
+			 return epoch;
+		 }
+	}
+	
 
 	EBR( int maxThreads, NativeMemoryAllocator alloc) {
 		//EBR_MAX_THREADS = maxThreads;
@@ -32,6 +52,12 @@ public class EBR <T extends EBR_interface>{
     	}
 	}
 	
+    public EBRslice allocate(int size) {
+    	EBRslice ret = new EBRslice();
+    	allocator.allocate(ret, size);
+    	return ret;
+    }
+    
 	void start_op(int tid){
 		long e = eraClock.get();
 		reservations[tid*CLPAD+16] = e;

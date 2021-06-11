@@ -49,13 +49,11 @@ public class Facade_Nova <T,K> {
 		int block 	= Extractblock(metadata);
 		int offset	= ExtractOffset(metadata);
 		
-		//ByteBuffer Block=novaManager.readByteBuffer(block);
 		long address = novaManager.getAdress(block);
 
 		
 		long OffHeapMetaData= UNSAFE.getLong(address+offset);//reads off heap meta
 		
-		//if(off heap deleted || version is correct )//removed this
 		
 		long len=OffHeapMetaData>>>24; //get the lenght 
 		long version = ExtractVer_Del(metadata); //get the version in the facade including delete

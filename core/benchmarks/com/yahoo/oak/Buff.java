@@ -27,11 +27,10 @@ public class Buff  implements Comparable<Buff>{
 	public void set(int x) {
 		int i = 0;
 		while(i <capacity/Integer.BYTES) {
-			buffer.putInt(i,x);
+			buffer.putInt(i*Integer.BYTES,x+i);
 			i++;
 		}
 		//this.DebugPrint();
-
 	}
 	
 	

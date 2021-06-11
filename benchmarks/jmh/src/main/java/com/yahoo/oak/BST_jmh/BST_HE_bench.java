@@ -23,10 +23,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.BST_HE;
 import com.yahoo.oak.Buff;
-import com.yahoo.oak.MYParam;
 import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.BST_jmh.BST_NoMM_bench.ThreadState;
-import com.yahoo.oak.BST_jmh.BST_Nova_bench.BenchmarkState;
+
 
 public class BST_HE_bench {
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
@@ -76,8 +74,8 @@ public class BST_HE_bench {
 		}
     
     
-    @Warmup(iterations = MYParam.warmups)
-    @Measurement(iterations = MYParam.iterations)
+    @Warmup(iterations = BSTParam.warmups)
+    @Measurement(iterations = BSTParam.iterations)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
@@ -86,8 +84,8 @@ public class BST_HE_bench {
     	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
 	}
     
-    @Warmup(iterations = MYParam.warmups)
-    @Measurement(iterations = MYParam.iterations)
+    @Warmup(iterations = BSTParam.warmups)
+    @Measurement(iterations = BSTParam.iterations)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
@@ -101,8 +99,8 @@ public class BST_HE_bench {
     	}
 	}
     
-    @Warmup(iterations = MYParam.warmups)
-    @Measurement(iterations = MYParam.iterations)
+    @Warmup(iterations = BSTParam.warmups)
+    @Measurement(iterations = BSTParam.iterations)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
@@ -121,7 +119,7 @@ public class BST_HE_bench {
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
     			.include(BST_HE_bench.class.getSimpleName())
-                .forks(MYParam.forks)
+                .forks(BSTParam.forks)
                 .threads(4)
                 .build();
 

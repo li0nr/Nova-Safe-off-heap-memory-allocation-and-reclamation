@@ -15,21 +15,21 @@ public class List_EBR implements ListInterface{
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final EBR<EBRslice> EBR = new EBR(32, allocator);
+    final EBR<EBRslice_n> EBR = new EBR(32, allocator);
 	
 
 
 	private int size=0;
-	private volatile EBRslice[] Slices;
+	private volatile EBRslice_n[] Slices;
 
 	
 	public List_EBR(){
-		Slices = new EBRslice[DEFAULT_CAPACITY];
+		Slices = new EBRslice_n[DEFAULT_CAPACITY];
 
 	}
 	
 	public List_EBR(int capacity){
-		Slices = new EBRslice[capacity];
+		Slices = new EBRslice_n[capacity];
 
 	}
 
@@ -38,7 +38,7 @@ public class List_EBR implements ListInterface{
 			EnsureCap();//might be problematic 
 		}
 		if(Slices[size]== null)
-			Slices[size]=new EBRslice(EBR.getEpoch());
+			Slices[size]=new EBRslice_n(EBR.getEpoch());
 		allocator.allocate(Slices[size], Long.BYTES);
 		UnsafeUtils.unsafe.putLong(Slices[size].getAddress() + Slices[size].getAllocatedOffset(), e);
 	    EBR.clear(idx);
@@ -90,7 +90,7 @@ public class List_EBR implements ListInterface{
 			throw new IndexOutOfBoundsException();
 		}
 		EBR.start_op(threadidx);
-		EBRslice toDelete = Slices[index];
+		EBRslice_n toDelete = Slices[index];
 		Slices[index]= null;
 		if(toDelete != null)
 			EBR.retire(toDelete , threadidx);
@@ -149,10 +149,10 @@ public  static void main(String[] args)throws java.io.IOException {
 
 }
 
-class EBRslice extends NovaSlice implements EBR_interface{
+class EBRslice_n extends NovaSlice implements EBR_interface{
 	private long bornEra;
 	
-	EBRslice(long Era){
+	EBRslice_n(long Era){
 		super(0,0,0);
 		bornEra = Era;
 	}

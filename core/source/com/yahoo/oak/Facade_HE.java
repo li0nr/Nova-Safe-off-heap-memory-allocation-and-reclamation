@@ -7,16 +7,7 @@ import sun.misc.Unsafe;
 
 public class Facade_HE <T,K> {
 
-	static final int INVALID_BLOCKID=0;
-	static final int INVALID_OFFSET=-1;
-	static final int INVALID_VERSION=0;
-	static final int INVALID_HEADER=0;
-	static final int DELETED=1;
-			
-	
 	static final Unsafe UNSAFE=UnsafeUtils.unsafe;
-	
-	static NovaManager novaManager;
 	static HazardEras  _HazardEras;
 
 	public Facade_HE(NativeMemoryAllocator allocator) {
