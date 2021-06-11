@@ -31,7 +31,7 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.RNG;
 import com.yahoo.oak.BST_jmh.BSTParam;
 
-public class BST_NoMM_RD {
+public class BST_bench_NoMM {
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 
 	@State(Scope.Benchmark)
@@ -250,7 +250,7 @@ public class BST_NoMM_RD {
     
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
-    			.include(BST_NoMM_RD.class.getSimpleName())
+    			.include(BST_bench_NoMM.class.getSimpleName())
                 .forks(BSTParam.forks)
                 .threads(1)
                 .build();

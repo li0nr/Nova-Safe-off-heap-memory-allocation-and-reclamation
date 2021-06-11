@@ -36,18 +36,16 @@ import com.yahoo.oak.BST_jmh.main.BST_bench_Nova.ThreadState;
 
 
 
-public class BST_HE_RD {
+public class BST_bench_HE {
 	
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 
-    	public static  int Range = 1024*1024*2;
     	public static  int size  = BSTParam.BST_SIZE;
         private BST_HE<Buff,Buff> BST ;
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -80,8 +78,8 @@ public class BST_HE_RD {
 
     	    BST = new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
-        	for (int i=0; i <size ; i++) {
-        		int keyval = rand.nextInt(Range);
+        	for (int i=0; i <0.75 *size ; i++) {
+        		int keyval = rand.nextInt(size);
         		Buff k = new Buff();
         		Buff v = new Buff();
         		k.set(keyval);
@@ -161,7 +159,7 @@ public class BST_HE_RD {
   	      	blackhole.consume(state.BST.put(threadState.buff,threadState.buff,threadState.i));
   		}
   		i++;
-      	}
+  		}
   	}
   
   @Warmup(iterations = BSTParam.warmups)
@@ -317,7 +315,7 @@ public class BST_HE_RD {
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(BST_HE_RD.class.getSimpleName())
+	    			.include(BST_bench_HE.class.getSimpleName())
 	                .forks(BSTParam.forks)
 	                .threads(1)
 	                .build();

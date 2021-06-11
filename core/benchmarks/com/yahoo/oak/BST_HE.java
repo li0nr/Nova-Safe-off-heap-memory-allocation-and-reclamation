@@ -136,12 +136,10 @@ public class BST_HE<K , V> {
     public final boolean containsKey(final K key, int idx) {
         if (key == null) throw new NullPointerException();
         HEslice access;
-        int i = 0;
         Node<HEslice, HEslice> l = root.left;
         while (l.left != null) {
      	   access = HE.get_protected(l.key,0,idx);
             l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
-            i ++;
         }
  	   access = HE.get_protected(l.key,0,idx);
         boolean ret = (l.key != null && KCt.compareKeys(access.address + access.offset, key) == 0) ? true : false;
@@ -153,12 +151,10 @@ public class BST_HE<K , V> {
     public final V get(final K key, int idx) {
         if (key == null) throw new NullPointerException();
         HEslice access;
-        int i = 0;
         Node<HEslice, HEslice> l = root.left;
         while (l.left != null) {
      	   access = HE.get_protected(l.key,0,idx);
             l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
-            i ++;
         }
         access = HE.get_protected(l.key,0,idx);
         V ret = (l.key != null && KCt.compareKeys(access.address+ access.offset, key)  == 0) ? 
