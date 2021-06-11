@@ -40,7 +40,6 @@ public class BST_bench_Nova {
     public static class BenchmarkState {
 
     	public static  int size = BSTParam.BST_SIZE;
-    	public static  int Range = 1024*1024*2;
         private BST_Nova<Buff,Buff> BST ;
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager novaManager = new NovaManager(allocator);
@@ -76,13 +75,14 @@ public class BST_bench_Nova {
 
     	    BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
-        	for (int i=0; i <size ; i++) {
-        		int keyval = rand.nextInt(Range);
+        	for (int i=0; i <0.75 *size ; i++) {
+        		int keyval = rand.nextInt(size);
         		Buff k = new Buff();
         		Buff v = new Buff();
         		k.set(keyval);
         		v.set(size - keyval);
-        		BST.put(k,v, 0);
+        		if(BST.put(k,v, 0) != null)
+        			i--;
         		}
         	}
     }

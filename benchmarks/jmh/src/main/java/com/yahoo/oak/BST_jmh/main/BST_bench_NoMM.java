@@ -37,7 +37,6 @@ public class BST_bench_NoMM {
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 
-    	public static  int Range = 1024*1024*2;
     	public static  int size  = BSTParam.BST_SIZE;
         private BST_NoMM<Buff,Buff> BST ;
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
@@ -74,15 +73,15 @@ public class BST_bench_NoMM {
 
     	    BST = new BST_NoMM<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
-        	for (int i=0; i <size ; i++) {
-        		int keyval = rand.nextInt(Range);
+        	for (int i=0; i <0.75 *size ; i++) {
+        		int keyval = rand.nextInt(size);
         		Buff k = new Buff();
         		Buff v = new Buff();
         		k.set(keyval);
         		v.set(size - keyval);
-        		BST.put(k,v, 0);
+        		if(BST.put(k,v, 0) != null)
+        			i--;
         		}
-        	System.gc();
         	}
     }
 

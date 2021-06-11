@@ -41,7 +41,7 @@ public class RNG {
         drng.addNumber(3, 100);
 
         int[] hist = new int[3];
-        int testCount = 100;
+        int testCount = 10000;
 
         HashMap<Integer, Double> test = new HashMap<>();
 

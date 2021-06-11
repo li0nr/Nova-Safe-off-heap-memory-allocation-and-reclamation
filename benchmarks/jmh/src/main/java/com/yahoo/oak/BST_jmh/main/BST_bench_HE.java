@@ -84,10 +84,10 @@ public class BST_bench_HE {
         		Buff v = new Buff();
         		k.set(keyval);
         		v.set(size - keyval);
-        		BST.put(k,v, 0);
+        		if(BST.put(k,v, 0) != null)
+        			i--;
         		}
-        	System.gc();
-        	}
+        }
     }
 
 	@State(Scope.Thread)
