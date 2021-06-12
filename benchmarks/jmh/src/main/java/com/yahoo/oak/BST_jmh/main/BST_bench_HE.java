@@ -91,14 +91,19 @@ public class BST_bench_HE {
         		if(BST.put(k,v, 0) != null)
         			i--;
         		}
+			System.out.println("\n after fill BST size: "+ BST.size());
+
         }
         @TearDown(Level.Iteration)
         public void printStats() {
     		ParamBench.PrintMem(allocator);
 
-			System.out.println("\n gets Num iter : "+ BST.get_count);
-			System.out.println("\n dels Num iter : "+ BST.del_count);
-			System.out.println("\n puts Num iter : "+ BST.put_count);
+//			System.out.println("\n gets Num iter : "+ BST.get_count);
+//			System.out.println("\n dels Num iter : "+ BST.del_count);
+//			System.out.println("\n puts Num iter : "+ BST.put_count);
+			
+			System.out.println("\n BST size: "+ BST.size());
+
 
         }
     }
