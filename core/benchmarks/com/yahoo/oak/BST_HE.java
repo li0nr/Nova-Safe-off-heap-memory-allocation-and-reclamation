@@ -30,6 +30,10 @@ public class BST_HE<K , V> {
 	   final NovaC<K> KCt;
 	   final NovaC<V> VCt;
 	   final HazardEras HE;
+	   
+	   public int del_count = 0;
+	   public int put_count = 0;
+	   public int get_count = 0;
 
    //--------------------------------------------------------------------------------
    // Class: Node
@@ -134,6 +138,7 @@ public class BST_HE<K , V> {
 
     /** PRECONDITION: k CANNOT BE NULL **/
     public final boolean containsKey(final K key, int idx) {
+    	get_count ++;
         if (key == null) throw new NullPointerException();
         HEslice access;
         Node<HEslice, HEslice> l = root.left;
@@ -149,6 +154,8 @@ public class BST_HE<K , V> {
 
     /** PRECONDITION: k CANNOT BE NULL **/
     public final V get(final K key, int idx) {
+    	get_count ++;
+
         if (key == null) throw new NullPointerException();
         HEslice access;
         Node<HEslice, HEslice> l = root.left;
@@ -167,6 +174,8 @@ public class BST_HE<K , V> {
     // or null if there was no mapping for the key
     /** PRECONDITION: k CANNOT BE NULL **/
     public final V put(final K key, final V value, int idx) {
+    	put_count ++;
+    	
         Node<HEslice, HEslice> newInternal;
         Node<HEslice, HEslice> newSibling, newNode;
         IInfo<HEslice, HEslice> newPInfo;
@@ -243,7 +252,8 @@ public class BST_HE<K , V> {
     // Delete key from dictionary, return the associated value when successful, null otherwise
     /** PRECONDITION: k CANNOT BE NULL **/
     public final boolean remove(final K key, int idx){
-
+    	del_count++;
+    	
         /** SEARCH VARIABLES **/
         Node<HEslice, HEslice> gp;
         Info<HEslice, HEslice> gpinfo;

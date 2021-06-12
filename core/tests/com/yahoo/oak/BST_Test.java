@@ -1,7 +1,5 @@
 package com.yahoo.oak;
 
-import java.util.concurrent.ConcurrentSkipListMap;
-
 import org.junit.Test;
 
 public class BST_Test {
@@ -45,37 +43,25 @@ public class BST_Test {
 	    BST_HE<Buff,Buff> BST = 
 	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
-	    	    
+
 	    Buff x =new Buff();
-	    Buff z= new Buff();
-
-
 	    x.set(88);
 	    BST.put(x,x,0);
-	    BST.containsKey(x,0);
+	    assert BST.containsKey(x,0) == true && x.get() == 88;
 
 		x.set(120);
 		BST.put(x,x,0);
 	    BST.containsKey(x,0);
-	    BST.containsKey(z,0);
-
-	    BST.get(x, 0);
 	    Buff xy =new Buff();
+	    Buff z= new Buff();
 	    xy.set(110);
-
 	    BST.put(xy,xy,0);
-	    BST.containsKey(z,0);
-
-	    BST.containsKey(xy,0);
+	    assert BST.containsKey(xy,0) == true && xy.get() == 110;
 	    
 	    BST.containsKey(x,0);
 	   
 	    BST.remove(x, 0);
-	    BST.containsKey(x,0);
-	    BST.containsKey(z,0);
-	    BST.put(z, x,0);
-	    BST.containsKey(z,0);
-	    x.compareTo(BST.get(z, 0));
+	    assert BST.containsKey(x,0) == false;
 		    
 	  }
 	

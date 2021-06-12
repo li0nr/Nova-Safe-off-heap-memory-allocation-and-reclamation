@@ -85,6 +85,14 @@ public class BST_bench_Nova {
         			i--;
         		}
         	}
+        @TearDown(Level.Iteration)
+        public void printStats() {
+			System.out.println("\n gets Num iter : "+ BST.get_count);
+			System.out.println("\n dels Num iter : "+ BST.del_count);
+			System.out.println("\n puts Num iter : "+ BST.put_count);
+
+        }
+        
     }
 
 	@State(Scope.Thread)

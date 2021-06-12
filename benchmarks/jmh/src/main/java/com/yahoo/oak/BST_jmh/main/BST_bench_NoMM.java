@@ -24,7 +24,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import com.yahoo.oak.BST_HE;
 import com.yahoo.oak.BST_NoMM;
 import com.yahoo.oak.Buff;
 import com.yahoo.oak.NativeMemoryAllocator;
@@ -83,6 +82,14 @@ public class BST_bench_NoMM {
         			i--;
         		}
         	}
+        
+        @TearDown(Level.Iteration)
+        public void printStats() {
+			System.out.println("\n gets Num iter : "+ BST.get_count);
+			System.out.println("\n dels Num iter : "+ BST.del_count);
+			System.out.println("\n puts Num iter : "+ BST.put_count);
+
+        }
     }
 
 	@State(Scope.Thread)

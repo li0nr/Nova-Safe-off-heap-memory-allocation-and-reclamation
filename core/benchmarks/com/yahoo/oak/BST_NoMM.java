@@ -29,6 +29,10 @@ public class BST_NoMM<K , V> {
 	   final NovaC<K> KCt;
 	   final NovaC<V> VCt;
 	   final NativeMemoryAllocator alloc;
+	   
+	   public int del_count = 0;
+	   public int put_count = 0;
+	   public int get_count = 0;
 
    //--------------------------------------------------------------------------------
    // Class: Node
@@ -133,6 +137,8 @@ public class BST_NoMM<K , V> {
 
    /** PRECONDITION: k CANNOT BE NULL **/
    public final boolean containsKey(final K key, int idx) {
+	   get_count ++;
+	   
        if (key == null) throw new NullPointerException();
        Node<NovaSlice, NovaSlice> l = root.left;
        while (l.left != null) {
@@ -144,6 +150,8 @@ public class BST_NoMM<K , V> {
 
    /** PRECONDITION: k CANNOT BE NULL **/
    public final V get(final K key, int idx) {
+	   get_count ++;
+
        if (key == null) throw new NullPointerException();
        NovaSlice access;
        int i = 0;
@@ -161,6 +169,8 @@ public class BST_NoMM<K , V> {
    // or null if there was no mapping for the key
    /** PRECONDITION: k CANNOT BE NULL **/
    public final V put(final K key, final V value, int idx) {
+	   put_count ++;
+
        Node<NovaSlice, NovaSlice> newInternal;
        Node<NovaSlice, NovaSlice> newSibling, newNode;
        IInfo<NovaSlice, NovaSlice> newPInfo;
@@ -235,6 +245,7 @@ public class BST_NoMM<K , V> {
    // Delete key from dictionary, return the associated value when successful, null otherwise
    /** PRECONDITION: k CANNOT BE NULL **/
    public final boolean remove(final K key, int idx){
+	   del_count++;
 
        /** SEARCH VARIABLES **/
        Node<NovaSlice, NovaSlice> gp;

@@ -28,6 +28,10 @@ public class BST_Nova<K , V> {
 	   final NovaC<K> KCt;
 	   final NovaC<V> VCt;
 	   
+	   public int del_count = 0;
+	   public int put_count = 0;
+	   public int get_count = 0;
+	   
 	   static final long Facade_long_offset_key;
 	   static final long Facade_long_offset_value;
 	   static final long Illegal_facade = 1;
@@ -154,20 +158,23 @@ public class BST_Nova<K , V> {
 
     /** PRECONDITION: k CANNOT BE NULL **/
     public final boolean containsKey(final K key, int tidx) {
- 	   try {
- 	       if (key == null) throw new NullPointerException();
- 	       Node l = root.left;
- 	       while (l.left != null) {
- 	           l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
- 	       }
- 	       return (l.key != Illegal_facade&&  Facade_Nova.Compare(key, KCt, l.key) == 0) ? true : false;   
- 	   }catch (Exception e) {
- 		   return false; //Facade throws
- 	   }
-    }
+    	get_count ++;
+    	try {
+    		if (key == null) throw new NullPointerException();
+    		Node l = root.left;
+    		while (l.left != null) {
+    			l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
+    			}
+    		return (l.key != Illegal_facade&&  Facade_Nova.Compare(key, KCt, l.key) == 0) ? true : false;   
+    		}catch (Exception e) {
+    			return false; //Facade throws
+    			}
+    	}
 
     /** PRECONDITION: k CANNOT BE NULL **/
     public final V get(final K key, int tidx) {
+    	get_count ++;
+
  	   try {
  	       if (key == null) throw new NullPointerException();
  	       Node l = root.left;
@@ -186,6 +193,8 @@ public class BST_Nova<K , V> {
     // or null if there was no mapping for the key
     /** PRECONDITION: k CANNOT BE NULL **/
     public final V put(final K key, final V value, int idx) {
+    	put_count++;
+    	
         Node newInternal;
         Node newSibling, newNode;
         IInfo newPInfo;
@@ -265,7 +274,7 @@ public class BST_Nova<K , V> {
     // Delete key from dictionary, return the associated value when successful, null otherwise
     /** PRECONDITION: k CANNOT BE NULL **/
     public final boolean remove(final K key, int idx){
-
+    	del_count ++;
         /** SEARCH VARIABLES **/
         Node gp;
         Info gpinfo;

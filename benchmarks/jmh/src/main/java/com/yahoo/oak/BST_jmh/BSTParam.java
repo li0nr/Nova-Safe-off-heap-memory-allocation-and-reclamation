@@ -14,7 +14,7 @@ public class BSTParam {
 	static final int thread24=24;
 	static final int thread32=32;
  	
-	public static final int BST_SIZE = 10;
+	public static final int BST_SIZE = 10000;
 	
 	public static final int Limit = BST_SIZE/4;
 	public static final int range = 2500;
