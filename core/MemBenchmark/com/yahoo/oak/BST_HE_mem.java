@@ -14,7 +14,12 @@ public class BST_HE_mem {
 	    
 		public static class BenchmarkState {
 	    	public static  int LIST_SIZE = ParamBench.size;
-
+	    	public static int success_del =0;
+	    	public static int failed_del =0;
+	    	
+	    	public static int success_put =0;
+	    	public static int failed_put =0;
+	    	
 	        static public void setup() {
 	    	    
 	    	    BSTX = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,
@@ -80,8 +85,11 @@ public class BST_HE_mem {
 	    	@Override
 			public void run() {
 	    		while (true) {
-	        		iB.set(random.nextInt(1000));
-	        		BSTX.remove(iB, idx);
+	        		iB.set(random.nextInt(BenchmarkState.LIST_SIZE));
+	        		if(BSTX.remove(iB, idx))
+	        			BenchmarkState.success_del++;
+	        		else 
+	        			BenchmarkState.failed_del++;
 	    		}
 	    	}
 	    }
@@ -96,8 +104,12 @@ public class BST_HE_mem {
 	    	@Override
 			public void run() {
 	    		while(true) {
-	        		iB.set(random.nextInt(1000));
-	        		BSTX.put(iB,iB, idx);	
+	        		iB.set(random.nextInt(BenchmarkState.LIST_SIZE));
+	        		if(BSTX.put(iB,iB, idx) == null)
+	        			BenchmarkState.success_put++;
+	        		else 
+	        			BenchmarkState.failed_put++;
+
 	    		}
 	    	}
 	    }

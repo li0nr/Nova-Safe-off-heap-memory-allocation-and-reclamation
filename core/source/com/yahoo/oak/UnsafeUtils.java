@@ -12,7 +12,7 @@ import java.lang.reflect.Constructor;
 
 public final class UnsafeUtils {
 
-    static Unsafe unsafe;
+    public static Unsafe unsafe;
 
     // static constructor - access and create a new instance of Unsafe
     static {

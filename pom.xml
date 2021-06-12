@@ -7,6 +7,7 @@
     <modules>
         <module>core</module>
         <module>benchmarks/jmh</module>
+        <module>benchmarks/synchro</module>
     </modules>
         <name>Nova root</name>
 
