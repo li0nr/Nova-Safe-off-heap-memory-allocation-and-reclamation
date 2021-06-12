@@ -30,6 +30,7 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.RNG;
 import com.yahoo.oak.BST_jmh.BSTParam;
+import com.yahoo.oak.ParamBench;
 
 
 
@@ -41,8 +42,8 @@ public class BST_bench_Nova {
 
     	public static  int size = BSTParam.BST_SIZE;
         private BST_Nova<Buff,Buff> BST ;
-	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	    final NovaManager novaManager = new NovaManager(allocator);
+	    public static NativeMemoryAllocator allocator ;
+	    public static NovaManager novaManager ; 
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -72,7 +73,11 @@ public class BST_bench_Nova {
         @Setup(Level.Iteration)
         public void fillTree() {
     		Random rand = new Random(208);
+    		if(allocator != null)
+    			ParamBench.PrintMem(allocator);
 
+    		allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    		NovaManager novaManager = new NovaManager(allocator);
     	    BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
         	for (int i=0; i <0.75 *size ; i++) {
@@ -84,9 +89,12 @@ public class BST_bench_Nova {
         		if(BST.put(k,v, 0) != null)
         			i--;
         		}
+        	BST.put_count = 0;
         	}
         @TearDown(Level.Iteration)
         public void printStats() {
+        	ParamBench.PrintMem(allocator);
+
 			System.out.println("\n gets Num iter : "+ BST.get_count);
 			System.out.println("\n dels Num iter : "+ BST.del_count);
 			System.out.println("\n puts Num iter : "+ BST.put_count);

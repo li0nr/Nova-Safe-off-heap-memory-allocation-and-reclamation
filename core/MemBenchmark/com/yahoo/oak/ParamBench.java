@@ -5,7 +5,7 @@ public class ParamBench {
 	static final int size = 100000;
 	
 	
-	static void PrintMem(NativeMemoryAllocator allocator) {
+	public static void PrintMem(NativeMemoryAllocator allocator) {
 		final int M = 1024*1024;
         long heapSize = Runtime.getRuntime().totalMemory(); // Get current size of heap in bytes
         long heapFreeSize = Runtime.getRuntime().freeMemory();
@@ -14,7 +14,7 @@ public class ParamBench {
         double usedOffHeapMemoryMB = (double) ( allocator.allocated()) / M;
         
         double heapOverhead = usedHeapMemoryMB / (usedHeapMemoryMB + usedOffHeapMemoryMB);
-        System.out.println("Observed OnHeap :"+ usedHeapMemoryMB);
-        System.out.println("Observed OffHeap :"+ usedOffHeapMemoryMB);
+        System.out.println("\n Observed OnHeap :"+ usedHeapMemoryMB);
+        System.out.println("\n Observed OffHeap :"+ usedOffHeapMemoryMB);
 	}
 }

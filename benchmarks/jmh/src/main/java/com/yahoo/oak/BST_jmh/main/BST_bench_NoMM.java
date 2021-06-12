@@ -27,6 +27,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import com.yahoo.oak.BST_NoMM;
 import com.yahoo.oak.Buff;
 import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
 import com.yahoo.oak.BST_jmh.BSTParam;
 
@@ -38,7 +39,7 @@ public class BST_bench_NoMM {
 
     	public static  int size  = BSTParam.BST_SIZE;
         private BST_NoMM<Buff,Buff> BST ;
-	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	    public static NativeMemoryAllocator allocator;
 
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
@@ -69,7 +70,10 @@ public class BST_bench_NoMM {
         @Setup(Level.Iteration)
         public void fillTree() {
     		Random rand = new Random(208);
-
+    		if(allocator != null)
+    			ParamBench.PrintMem(allocator);
+    		
+    		allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    BST = new BST_NoMM<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
         	for (int i=0; i <0.75 *size ; i++) {
@@ -85,6 +89,8 @@ public class BST_bench_NoMM {
         
         @TearDown(Level.Iteration)
         public void printStats() {
+        	ParamBench.PrintMem(allocator);
+        	
 			System.out.println("\n gets Num iter : "+ BST.get_count);
 			System.out.println("\n dels Num iter : "+ BST.del_count);
 			System.out.println("\n puts Num iter : "+ BST.put_count);
