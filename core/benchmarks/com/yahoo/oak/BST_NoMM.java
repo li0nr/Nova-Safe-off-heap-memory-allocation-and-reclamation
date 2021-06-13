@@ -22,6 +22,8 @@ package com.yahoo.oak;
 */
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
+import com.yahoo.oak.HazardEras.HEslice;
+
 public class BST_NoMM<K , V> {
 	
 	   final NovaSerializer<K> SrzK;
@@ -210,8 +212,11 @@ public class BST_NoMM<K , V> {
            } else {
                if (l.key != null && KCt.compareKeys(l.key.address+l.key.offset, key)  == 0) {
                    // key already in the tree, try to replace the old node with new node
-                   newPInfo = new IInfo<NovaSlice, NovaSlice>(l, p, newNode);
                    result = l.value;
+                   V ret = SrzV.deserialize(result.address+ result.offset);
+                   alloc.free(newNode.key);
+                   alloc.free(newNode.value);
+                   return ret;
                } else {
                    // key is not in the tree, try to replace a leaf with a small subtree
                    newSibling = new Node<NovaSlice, NovaSlice>(l.key, l.value);
@@ -219,7 +224,10 @@ public class BST_NoMM<K , V> {
                 	   {
                 	   newInternal = new Node<NovaSlice, NovaSlice>(l.key, newNode, newSibling);
                 	   } else {
-                		   newInternal = new Node<NovaSlice, NovaSlice>(newNode.key, newSibling, newNode);
+                	       NovaSlice tmp = new NovaSlice(0, 0, 0);
+                	       alloc.allocate(tmp, SrzK.calculateSize(key));
+                	       SrzK.serialize(key,   tmp.address   +tmp.offset);
+                		   newInternal = new Node<NovaSlice, NovaSlice>(tmp, newSibling, newNode);
                 		   }
 
                    newPInfo = new IInfo<NovaSlice, NovaSlice>(l, p, newInternal);
@@ -229,14 +237,12 @@ public class BST_NoMM<K , V> {
                // try to IFlag parent
                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                    helpInsert(newPInfo);
-                   if(result == null) return null;
-                   V ret = SrzV.deserialize(result.address+ result.offset);
-                   return ret;
+                   return null;
                } else {
                    // if fails, help the current operation
                    // need to get the latest p.info since CAS doesnt return current value
+                   alloc.free(newInternal.key);
                    help(p.info);
-            	   return null;
                    }
                }
            }

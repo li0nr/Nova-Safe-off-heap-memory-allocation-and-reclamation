@@ -113,19 +113,24 @@ public class HazardEras {
     /**
      * Progress Condition: lock-free
      */
-     <T> T get_protected(T obj, int ihe, int tid) {
+     
+     HEslice get_protected(HEslice obj, int ihe, int tid) {
     	 long prevEra = he[(tid)*CLPAD+16+ihe];
     	 while (true) {
-    		 T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
+    		 //T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
 		    				//A load operation with this memory order performs an acquire operation,
 		    				//a store performs a release operation,
 		    				//and read-modify-write performs both an acquire operation and a release operation,
 		    				//plus a single total order exists in which all threads observe all modifications in the same order
+    		 if(obj == null) return null;
+    		 if(obj.deadEra != -1)
+    				throw new IllegalArgumentException("slice was deleted");
+
     		 UNSAFE.loadFence(); 
     		 long era = eraClock.get();
     		 UNSAFE.loadFence(); ////must be here this is aquvilent to the acquire 
 
-    		 if (era == prevEra) return loadedOBJ ;
+    		 if (era == prevEra) return obj ;
     		 UNSAFE.fullFence(); 
     		 he[tid*CLPAD+16+ihe] = era; //TODO he must be volatile
     		 prevEra = era;
@@ -168,6 +173,10 @@ public class HazardEras {
         }
 
     }
+      
+      void fastFree(NovaSlice s) {
+    	  allocator.free(s);
+      }
 
 private    boolean  canDelete(HazardEras_interface obj,  int mytid) {
         for (int tid = 0; tid < maxThreads; tid++) {

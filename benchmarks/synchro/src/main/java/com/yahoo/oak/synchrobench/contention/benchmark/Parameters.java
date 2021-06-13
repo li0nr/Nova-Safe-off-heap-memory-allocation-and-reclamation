@@ -36,7 +36,7 @@ public class Parameters {
 
     public static boolean confZeroCopy = false;
 
-    public static KeyDist confKeyDistribution = KeyDist.RANDOM;
+    public static KeyDist confKeyDistribution = KeyDist.INCREASING;
 
     public static String confBenchClassName = "com.yahoo.oak.BST_Nova_Synch";
 

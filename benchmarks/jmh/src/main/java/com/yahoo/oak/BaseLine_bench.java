@@ -13,6 +13,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import com.yahoo.oak.HazardEras.HEslice;
+
 
 public class BaseLine_bench {
     static int iter = 1;
@@ -23,6 +25,8 @@ public class BaseLine_bench {
     	Buff v;
     	Facade nu;
     	NovaSlice Slice;
+    	HEslice HESlice;
+
     	HazardEras HE;
 	    ArrayList<Facade> F;
 	    Facade[] F2;
@@ -91,7 +95,7 @@ public class BaseLine_bench {
     public void HEprt(Blackhole blackhole,BenchmarkState state) {
     	int i = 0;
     	while(i<iter) {
-        	blackhole.consume(state.HE.get_protected(state.Slice, 0, 0));
+        	blackhole.consume(state.HE.get_protected(state.HESlice, 0, 0));//will not wokr
         	i++;
     	}
     }

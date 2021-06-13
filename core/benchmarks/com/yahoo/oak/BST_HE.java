@@ -142,14 +142,18 @@ public class BST_HE<K , V> {
         if (key == null) throw new NullPointerException();
         HEslice access;
         Node<HEslice, HEslice> l = root.left;
-        while (l.left != null) {
-     	   access = HE.get_protected(l.key,0,idx);
-            l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
-        }
- 	   access = HE.get_protected(l.key,0,idx);
-        boolean ret = (l.key != null && KCt.compareKeys(access.address + access.offset, key) == 0) ? true : false;
-        HE.clear(idx);
-        return ret;
+    	Retry: while (true){
+    		try {	
+    			while (l.left != null) {
+    				access = HE.get_protected(l.key,0,idx);
+    				l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
+    			}
+    			access = HE.get_protected(l.key,0,idx);
+    			boolean ret = (l.key != null && KCt.compareKeys(access.address + access.offset, key) == 0) ? true : false;
+    			HE.clear(idx);
+    			return ret;
+    			}catch (Exception e) { continue Retry; }
+    		}
     }
 
     /** PRECONDITION: k CANNOT BE NULL **/
@@ -159,16 +163,22 @@ public class BST_HE<K , V> {
         if (key == null) throw new NullPointerException();
         HEslice access;
         Node<HEslice, HEslice> l = root.left;
-        while (l.left != null) {
-     	   access = HE.get_protected(l.key,0,idx);
-            l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
-        }
-        access = HE.get_protected(l.key,0,idx);
-        V ret = (l.key != null && KCt.compareKeys(access.address+ access.offset, key)  == 0) ? 
-     		   SrzV.deserialize(l.value.address + l.value.offset) : null;
-        HE.clear(idx);
-        return ret;
-    }
+    	Retry: while (true){
+    		try {	
+	        while (l.left != null) {
+	     	   access = HE.get_protected(l.key,0,idx);
+	            l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
+	        }
+	        access = HE.get_protected(l.key,0,idx);
+	        V ret = (l.key != null && KCt.compareKeys(access.address+ access.offset, key)  == 0) ? 
+	     		   SrzV.deserialize(l.value.address + l.value.offset) : null;
+	        HE.clear(idx);
+	        return ret;
+			}catch (Exception e) {
+	    		continue Retry; //Facade throws
+	    		}
+	    	}
+	    }
 
     // Insert key to dictionary, return the previous value associated with the specified key,
     // or null if there was no mapping for the key
@@ -190,17 +200,19 @@ public class BST_HE<K , V> {
      		   							   HE.allocate(SrzV.calculateSize(value)));
         SrzK.serialize(key,   newNode.key.address   +newNode.key.offset);
         SrzV.serialize(value, newNode.value.address + newNode.value.offset);
-        
-        while (true) {
 
+        HEslice access;
+       Redo:
+        while (true) {
+        	try {
             /** SEARCH **/
             p = root;
             pinfo = p.info;
             l = p.left;
             while (l.left != null) {
                 p = l;
-         	   HE.get_protected(l.key,0,idx);
-                l = (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) > 0) ? l.left : l.right;
+                access = HE.get_protected(l.key,0,idx);
+                l = (access == null || KCt.compareKeys(access.address+access.offset, key) > 0) ? l.left : l.right;
             }
             pinfo = p.info;                             // read pinfo once instead of every iteration
             if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
@@ -210,24 +222,33 @@ public class BST_HE<K , V> {
             if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
                 help(pinfo, idx);
             } else {
-         	   HE.get_protected(l.key,0, idx);
-                if (l.key != null && KCt.compareKeys(l.key.address+l.key.offset, key)  == 0) {
+         	   access = HE.get_protected(l.key,0, idx);
+                if (access != null && KCt.compareKeys(access.address+access.offset, key)  == 0) {
                     // key already in the tree, try to replace the old node with new node
-                    newPInfo = new IInfo<HEslice, HEslice>(l, p, newNode);
-                    result = HE.get_protected(l.value,0, idx);
+                	result = HE.get_protected(l.value,0, idx);
+                	V objret = SrzV.deserialize(result.address+ result.offset);
+                	HE.fastFree(newNode.key);
+                	HE.fastFree(newNode.value);
+                	return objret;
+                	
                 } else {
                     // key is not in the tree, try to replace a leaf with a small subtree
                     newSibling = new Node<HEslice, HEslice>(l.key, l.value);
-             	   HE.get_protected(l.key,0, idx);
-                    if (l.key == null ||  KCt.compareKeys(l.key.address+l.key.offset, key) > 0) // newinternal = max(ret.l.key, key);
+                    access = HE.get_protected(l.key,0, idx);
+                    if (access == null ||  KCt.compareKeys(access.address+access.offset, key) > 0) // newinternal = max(ret.l.key, key);
                  	   {
-                 	   newInternal = new Node<HEslice, HEslice>(l.key, newNode, newSibling);
+                    	HEslice tmp = null;
+                        if(access != null) {
+                            tmp = HE.allocate(SrzK.calculateSize(key));
+                        	SrzK.serialize(access.address+access.offset,   tmp.address   +tmp.offset);
+
+                        }
+                        newInternal = new Node<HEslice, HEslice>(tmp, newNode, newSibling);
                  	   } else {
                            HEslice tmp = HE.allocate(SrzK.calculateSize(key));
                            SrzK.serialize(key,   tmp.address   +tmp.offset);
                  		   newInternal = new Node<HEslice, HEslice>(tmp, newSibling, newNode);
                  		   }
-
                     newPInfo = new IInfo<HEslice, HEslice>(l, p, newInternal);
                     result = null;
                     }
@@ -235,19 +256,18 @@ public class BST_HE<K , V> {
                 // try to IFlag parent
                 if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                     helpInsert(newPInfo);
-                    if(result == null) return null;
-                    V ret = SrzV.deserialize(result.address+ result.offset);
-                    HE.clear(idx);
-                    return ret;
+                    return null;
                 } else {
                     // if fails, help the current operation
                     // need to get the latest p.info since CAS doesnt return current value
-                    help(p.info, idx);
-             	   return null;
+                    HE.fastFree(newInternal.key);
+                	help(p.info, idx);
+                    return null;
                     }
                 }
-            }
+            }catch (Exception e) { continue Redo;}
         }
+    }
 
     // Delete key from dictionary, return the associated value when successful, null otherwise
     /** PRECONDITION: k CANNOT BE NULL **/
@@ -261,9 +281,10 @@ public class BST_HE<K , V> {
         Info<HEslice, HEslice> pinfo;
         Node<HEslice, HEslice> l;
         /** END SEARCH VARIABLES **/
-        
+        HEslice access;
+        Redo:
         while (true) {
-
+        	try {
             /** SEARCH **/
             gp = null;
             gpinfo = null;
@@ -273,8 +294,8 @@ public class BST_HE<K , V> {
             while (l.left != null) {
                 gp = p;
                 p = l;
-         	   HE.get_protected(l.key,0, idx);
-                l = (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) > 0) ? l.left : l.right;
+                access = HE.get_protected(l.key,0, idx);
+                l = (access == null || KCt.compareKeys(access.address+access.offset, key) > 0) ? l.left : l.right;
             }
             // note: gp can be null here, because clearly the root.left.left == null
             //       when the tree is empty. however, in this case, l.key will be null,
@@ -286,9 +307,9 @@ public class BST_HE<K , V> {
                 if (l != p.left && l != p.right) continue;      // - do the same for pinfo and l
             }
             /** END SEARCH **/
-     	   HE.get_protected(l.key,0, idx);
+     	   access = HE.get_protected(l.key,0, idx);
 
-            if (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) != 0) {
+            if (access == null || KCt.compareKeys(access.address+access.offset, key) != 0) {
          	   HE.clear(idx);
          	   return false;
             }
@@ -307,11 +328,11 @@ public class BST_HE<K , V> {
                 } else {
                     // if fails, help grandparent with its latest info value
                     help(gp.info, idx);
+                    }
                 }
-            }
-        }
+            }catch (Exception e) { continue Redo;}
+        	}
     }
-
  //--------------------------------------------------------------------------------
  //PRIVATE METHODS
  //- helpInsert

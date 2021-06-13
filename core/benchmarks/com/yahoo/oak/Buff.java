@@ -93,6 +93,19 @@ public class Buff  implements Comparable<Buff>{
 				offset += Integer.BYTES;
 			}
 		}
+		
+		@Override
+		public void serialize(long source, long output) {
+			long targetPos = output;
+			int capacity = UnsafeUtils.getInt( source);
+			UnsafeUtils.putInt(targetPos, capacity);
+			targetPos += Integer.BYTES;
+			int offset = 0;
+			for (int i = 0; i < capacity / Integer.BYTES; i++) {
+				UnsafeUtils.putInt(targetPos + offset, UnsafeUtils.getInt( source +offset));
+				offset += Integer.BYTES;
+			}
+		}
 
 		@Override
 		public Buff deserialize(long input) {

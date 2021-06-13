@@ -40,12 +40,20 @@ public class ThreadLoop implements Runnable {
     /**
      * The counters of the thread successful operations
      */
-    long numAdd = 0;
-    long numRemove = 0;
+
     long numAddAll = 0;
     long numRemoveAll = 0;
     long numSize = 0;
+    
+    long numRemove = 0;
+    long numSucRemove = 0;
+    
     long numContains = 0;
+    long numSucContains = 0;
+
+    long numAdd = 0;
+    long numSuccAdd = 0;
+
     /**
      * The counter of the false-returning operations
      */
@@ -62,6 +70,8 @@ public class ThreadLoop implements Runnable {
      * The random number
      */
     Random rand = new Random();
+    
+    Buff key = new Buff(Parameters.confKeySize);
 
     /**
      * The distribution of methods as an array of percentiles
@@ -90,59 +100,49 @@ public class ThreadLoop implements Runnable {
 
     public void run() {
 
-        boolean change = Parameters.confChange;
-        int scanLength = 10000;
-
-
-        Buff key = new Buff(Parameters.confKeySize);
 
         // for the key distribution INCREASING we want to continue the increasing integers sequence,
         // started in the initial filling of the map
         // for the key distribution RANDOM the below value will be overwritten anyway
-        int newInt = Parameters.confSize;
+        int newInt = 0; //start deleting from 0
+        //int newInt = Parameters.confSize;
 
         while (!stop) {
             newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
-            key.buffer.putInt(0, newInt);
+        	key.set(newInt);
 
             int coin = rand.nextInt(1000);
-            if (coin < cdf[1]) { // -u
-            	Buff newKey = new Buff(Parameters.confKeySize);
-            	Buff newVal = new Buff(Parameters.confValSize);
-                newKey.buffer.putInt(0, newInt);
-                newVal.buffer.putInt(0, newInt);
-                if (!change) {
-                    bench.put(newKey, newVal,myThreadNum);
-                    numAdd++;
-                } else { 
-                        failures++;
-                    }
-                }
-            if (coin < cdf[2]) { // -s
-                if (!change) {
-                    numSize++;
-                } else {
-                    Buff newKey = new Buff(Parameters.confKeySize);
-                    Buff newVal = new Buff(Parameters.confValSize);
-                    newKey.buffer.putInt(0, newInt);
-                    newVal.buffer.putInt(0, newInt);
-                    numSize++;
-                }
-            } else {
-                if (!change) {
-                    if (bench.get(key,0) != null) {
-                        numContains++;
-                    } else {
-                        failures++;
-                    }
-                } 
+            if(coin < cdf[0]) { //-a deleting is good?
+        		numRemove++;
+            	if(bench.remove(key, myThreadNum)) {
+            		numSucRemove++;
+            	}
+            	else {
+            		failures++;
+            	}
+            }
+            else if (coin < cdf[1]) { // -u writing is better than deleting?
+            	numAdd++;
+            	if(bench.put(key, key, myThreadNum) == null) {
+            		numSuccAdd++;
+            	}
+            	else failures++;
+            		
             }
 
+            else if (coin < cdf[2]) { // -s reading is the best ever
+            	numContains++;
+            	if(bench.containsKey(key, myThreadNum)) {
+            		numSucContains++;
+            	}
+            	else {
+            		failures++;
+            	}
+            }
             total++;
 
-            assert total == failures + numContains + numSize + numRemove
-                    + numAdd + numRemoveAll + numAddAll;
+            assert total == failures + numContains + + numRemove + numAdd ;
         }
     }
 

@@ -159,35 +159,36 @@ public class BST_Nova<K , V> {
     /** PRECONDITION: k CANNOT BE NULL **/
     public final boolean containsKey(final K key, int tidx) {
     	get_count ++;
-    	try {
-    		if (key == null) throw new NullPointerException();
-    		Node l = root.left;
-    		while (l.left != null) {
-    			l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
-    			}
-    		return (l.key != Illegal_facade&&  Facade_Nova.Compare(key, KCt, l.key) == 0) ? true : false;   
-    		}catch (Exception e) {
-    			return false; //Facade throws
-    			}
+    	if (key == null) throw new NullPointerException();
+    	Node l = root.left;
+    	Retry: while (true){
+    		try {
+    	while (l.left != null) {
+    		l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
+    		}
+    	return (l.key != Illegal_facade&&  Facade_Nova.Compare(key, KCt, l.key) == 0) ? true : false;   
+    	}catch (Exception e) { continue Retry; }
     	}
+    }
 
     /** PRECONDITION: k CANNOT BE NULL **/
     public final V get(final K key, int tidx) {
     	get_count ++;
-
- 	   try {
- 	       if (key == null) throw new NullPointerException();
- 	       Node l = root.left;
- 	       while (l.left != null) {
- 	           l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
- 	       }
- 	       V ret = (l.key != Illegal_facade&& Facade_Nova.Compare(key, KCt, l.key) == 0) ? 
- 	    		   (V)Facade_Nova.Read(SrzV, l.value): null;
- 	       return ret;
- 	   }catch (Exception e) {
- 		   return null; //Facade throws	   
- 		   }
- 	   }
+    	if (key == null) throw new NullPointerException();
+    	Node l = root.left;
+    	Retry: while (true){
+    		try {			
+    		while (l.left != null) {
+    			l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
+    			}
+    		V ret = (l.key != Illegal_facade&& Facade_Nova.Compare(key, KCt, l.key) == 0) ? 
+    				(V)Facade_Nova.Read(SrzV, l.value): null;
+    				return ret;	   
+			}catch (Exception e) {
+    		continue Retry; //Facade throws
+    		}
+    	}
+    }
 
     // Insert key to dictionary, return the previous value associated with the specified key,
     // or null if there was no mapping for the key
@@ -212,63 +213,69 @@ public class BST_Nova<K , V> {
         Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_value,
         		Illegal_facade, SrzV.calculateSize(value), idx),idx);
         		
-        try {
-            while (true) {
+       Redo:
+    	   while (true) {
+    		   try {
+        	/** SEARCH **/
+            p = root;
+            pinfo = p.info;
+            l = p.left;
+            while (l.left != null) {
+                p = l;
+                l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
+            }
+            pinfo = p.info;                             // read pinfo once instead of every iteration
+            if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
+                                                        // (just as if we'd read p's info field before the reference to l)
+            /** END SEARCH **/
 
-                /** SEARCH **/
-                p = root;
-                pinfo = p.info;
-                l = p.left;
-                while (l.left != null) {
-                    p = l;
-                    l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
-                }
-                pinfo = p.info;                             // read pinfo once instead of every iteration
-                if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
-                                                            // (just as if we'd read p's info field before the reference to l)
-                /** END SEARCH **/
-
-                if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
-                    help(pinfo, idx);
-                } else {
-                    if (l.key != Illegal_facade && Facade_Nova.Compare(key, KCt, l.key) == 0) {
-                        // key already in the tree, try to replace the old node with new node
-                        newPInfo = new IInfo(l, p, newNode);
-                        result = l.value;
-                    } else {
-                        // key is not in the tree, try to replace a leaf with a small subtree
-                        newSibling = new Node(l.key, l.value);
-                        if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) // newinternal = max(ret.l.key, key);
-                        {
-                            newInternal = new Node(l.key, newNode, newSibling);
+            if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+                help(pinfo, idx);
+            } else {
+            	if (l.key != Illegal_facade && Facade_Nova.Compare(key, KCt, l.key) == 0) {
+            		// key already in the tree, cant continue
+        			result = l.value;
+                    V  objret = (V)Facade_Nova.Read(SrzV, l.value);
+                    Facade_Nova.DeletePrivate(idx, newNode.key );
+                    Facade_Nova.DeletePrivate(idx, newNode.value);
+                    return objret;
+                    }
+            	else {
+            		// key is not in the tree, try to replace a leaf with a small subtree
+                    newSibling = new Node(l.key, l.value);
+                    if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) // newinternal = max(ret.l.key, key);
+                    {
+                    	newInternal = new Node(Illegal_facade, newNode, newSibling);
+                    	if(l.key != Illegal_facade)
+                    		Facade_Nova.
+                    	WriteFastFromOffheap(SrzK,l.key,
+                    			Facade_Nova.
+                    			AllocateSlice(newInternal, Facade_long_offset_key, Illegal_facade, SrzK.calculateSize(key), idx),
+                    			idx);
                         } else {
-                            newInternal = new Node(Illegal_facade,newSibling,newNode);
-                            		Facade_Nova.
-                            		WriteFast(SrzK, key,
-                            				Facade_Nova.
-                            				AllocateSlice(newInternal, Facade_long_offset_key, Illegal_facade, SrzK.calculateSize(key), idx),
-                            				idx);
-                        }
-
-                        newPInfo = new IInfo(l, p, newInternal);
-                        result = Illegal_facade;
+                        	newInternal = new Node(Illegal_facade,newSibling,newNode);
+                        	Facade_Nova.
+                        	WriteFast(SrzK, key,
+                        			Facade_Nova.
+                        			AllocateSlice(newInternal, Facade_long_offset_key, Illegal_facade, SrzK.calculateSize(key), idx),
+                        			idx);
+                        	}
+                    newPInfo = new IInfo(l, p, newInternal);
+                    result = Illegal_facade;
                     }
-
-                    // try to IFlag parent
-                    if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
-                        helpInsert(newPInfo);
-                        if(result == Illegal_facade) return null;
-                        //return null;
-                        return (V)Facade_Nova.Read(SrzV, l.value);
-                    } else {
-                        // if fails, help the current operation
-                        // need to get the latest p.info since CAS doesnt return current value
-                 	   help(p.info, idx);
-                        }
-                        return null;
-                    }
+            	// try to IFlag parent
+                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
+                	helpInsert(newPInfo);
+                	return null;
+                }else {
+                	// if fails, help the current operation
+                	// need to get the latest p.info since CAS doesnt return current value
+                	Facade_Nova.Delete(idx, newInternal.key, newInternal, Facade_long_offset_key );
+                	help(p.info, idx);
+                	}
                 }
-        }catch (Exception e) { return null;}   
+            }catch (Exception e) { continue Redo;}   
+    	   }
     }
 
     // Delete key from dictionary, return the associated value when successful, null otherwise
@@ -282,51 +289,51 @@ public class BST_Nova<K , V> {
         Info pinfo;
         Node l;
         /** END SEARCH VARIABLES **/
-        try {
-            while (true) {
+        Redo:
+        while (true) {
+        	try {
+        	/** SEARCH **/
+            gp = null;
+            gpinfo = null;
+            p = root;
+            pinfo = p.info;
+            l = p.left;
+            while (l.left != null) {
+                gp = p;
+                p = l;
+                l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0 ) ? l.left : l.right;
+            }
+            // note: gp can be null here, because clearly the root.left.left == null
+            //       when the tree is empty. however, in this case, l.key will be null,
+            //       and the function will return null, so this does not pose a problem.
+            if (gp != null) {
+                gpinfo = gp.info;                               // - read gpinfo once instead of every iteration
+                if (p != gp.left && p != gp.right) continue;    //   then confirm the child link to p is valid
+                pinfo = p.info;                                 //   (just as if we'd read gp's info field before the reference to p)
+                if (l != p.left && l != p.right) continue;      // - do the same for pinfo and l
+            }
+            /** END SEARCH **/
+            
+            if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key)  != 0) return false;
+            if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
+                help(gpinfo, idx);
+            } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+                help(pinfo, idx);
+            } else {
+                // try to DFlag grandparent
+                final DInfo newGPInfo = new DInfo(l, p, gp, pinfo);
 
-                /** SEARCH **/
-                gp = null;
-                gpinfo = null;
-                p = root;
-                pinfo = p.info;
-                l = p.left;
-                while (l.left != null) {
-                    gp = p;
-                    p = l;
-                    l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0 ) ? l.left : l.right;
-                }
-                // note: gp can be null here, because clearly the root.left.left == null
-                //       when the tree is empty. however, in this case, l.key will be null,
-                //       and the function will return null, so this does not pose a problem.
-                if (gp != null) {
-                    gpinfo = gp.info;                               // - read gpinfo once instead of every iteration
-                    if (p != gp.left && p != gp.right) continue;    //   then confirm the child link to p is valid
-                    pinfo = p.info;                                 //   (just as if we'd read gp's info field before the reference to p)
-                    if (l != p.left && l != p.right) continue;      // - do the same for pinfo and l
-                }
-                /** END SEARCH **/
-                
-                if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key)  != 0) return false;
-                if (!(gpinfo == null || gpinfo.getClass() == Clean.class)) {
-                    help(gpinfo, idx);
-                } else if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
-                    help(pinfo, idx);
-                } else {
-                    // try to DFlag grandparent
-                    final DInfo newGPInfo = new DInfo(l, p, gp, pinfo);
-
-                    if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
-                        if (helpDelete(newGPInfo, idx))  {
-                        	return true;
-                        }
-                    } else {
-                        // if fails, help grandparent with its latest info value
-                        help(gp.info, idx);
+                if (infoUpdater.compareAndSet(gp, gpinfo, newGPInfo)) {
+                    if (helpDelete(newGPInfo, idx))  {
+                    	return true;
                     }
+                } else {
+                    // if fails, help grandparent with its latest info value
+                    help(gp.info, idx);
                 }
             }
-        }catch (Exception e) { return false;}
+            }catch (Exception e) { continue Redo;}
+        }
     }
 
  //--------------------------------------------------------------------------------
@@ -367,7 +374,6 @@ public class BST_Nova<K , V> {
         (info.gp.left == info.p ? leftUpdater : rightUpdater).compareAndSet(info.gp, info.p, other);
         Facade_Nova.Delete(idx, info.l.key, info.l, Facade_long_offset_key );
         Facade_Nova.Delete(idx, info.l.value, info.l, Facade_long_offset_value );
-        Facade_Nova.Delete(idx, info.l.key, info.l, Facade_long_offset_key );
         if(info.p.key != Illegal_facade ) Facade_Nova.Delete(idx, info.p.key, info.p, Facade_long_offset_key );
         infoUpdater.compareAndSet(info.gp, info, new Clean());
     }

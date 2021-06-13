@@ -2,15 +2,14 @@ package com.yahoo.oak;
 
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 
-public class BST_Nova_Synch implements CompositionalBST<Buff, Buff>{
+public class BST_HE_Synch implements CompositionalBST<Buff, Buff>{
 	
 	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	NovaManager novaManager = new NovaManager(allocator);
-	BST_Nova<Buff,Buff>BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
-			, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
+	BST_HE<Buff,Buff>BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
 	
 	
-	public BST_Nova_Synch(){
+	public BST_HE_Synch(){
 		
 	}
 	public boolean containsKey(final Buff key, int tidx) {
@@ -30,10 +29,8 @@ public class BST_Nova_Synch implements CompositionalBST<Buff, Buff>{
     }
     
     public void clear() {
-    	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	novaManager = new NovaManager(allocator);
-    	BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
-    			, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
+    	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    	BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
     }
-    
 }

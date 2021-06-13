@@ -62,10 +62,16 @@ public class Test {
      */
     private long numAdd = 0;
     private long numRemove = 0;
+    private long numContains = 0;
+    
+    private long numSucAdd = 0;
+    private long numSucRemove = 0;
+    private long numSucContains = 0;
+
+    
     private long numAddAll = 0;
     private long numRemoveAll = 0;
     private long numSize = 0;
-    private long numContains = 0;
     /**
      * The total number of failed operations for all threads
      */
@@ -116,7 +122,7 @@ public class Test {
             key.buffer.putInt(0, v);
             Buff val = new Buff(Parameters.confValSize);
             val.buffer.putInt(0, v);
-            if (BST.put(key, val,0) != null) {
+            if (BST.put(key, val,0) == null) {
                 i--;
             }
             // counts all the putIfAbsent operations, not only the successful ones
@@ -251,7 +257,7 @@ public class Test {
     public void clear() {
         switch (benchType) {
             case OAKMAP:
-            //	BST.clear();
+            	BST.clear();
                 break;
         }
     }
@@ -511,13 +517,19 @@ public class Test {
                 case OAKMAP:
                     numAdd += threadLoopsBST[threadNum].numAdd;
                     numRemove += threadLoopsBST[threadNum].numRemove;
-                    numAddAll += threadLoopsBST[threadNum].numAddAll;
-                    numRemoveAll += threadLoopsBST[threadNum].numRemoveAll;
-                    numSize += threadLoopsBST[threadNum].numSize;
                     numContains += threadLoopsBST[threadNum].numContains;
+
+                    
+                    numSucAdd += threadLoopsBST[threadNum].numSuccAdd;
+                    numSucRemove += threadLoopsBST[threadNum].numSucRemove;
+                    numSucContains += threadLoopsBST[threadNum].numSucContains;
+
+//                    numAddAll += threadLoopsBST[threadNum].numAddAll;
+//                    numRemoveAll += threadLoopsBST[threadNum].numRemoveAll;
+//                    numSize += threadLoopsBST[threadNum].numSize;
                     failures += threadLoopsBST[threadNum].failures;
                     total += threadLoopsBST[threadNum].total;
-                    aborts += threadLoopsBST[threadNum].aborts;
+//                    aborts += threadLoopsBST[threadNum].aborts;
                     break;
             }
         }
@@ -526,9 +538,9 @@ public class Test {
         printLine('-');
         System.out.println("Benchmark statistics");
         printLine('-');
-        System.out.println("  Average traversal length: \t"
-                + (double) nodesTraversed / (double) getCount);
-        System.out.println("  Struct Modifications:     \t" + structMods);
+        //System.out.println("  Average traversal length: \t"
+          //      + (double) nodesTraversed / (double) getCount);
+        //System.out.println("  Struct Modifications:     \t" + structMods);
         System.out.println("  Throughput (ops/s):       \t" + throughput[currentIteration]);
         System.out.println("  Elapsed time (s):         \t" + elapsedTime);
         System.out.println("  Operations:               \t" + total
@@ -540,26 +552,37 @@ public class Test {
                         + formatDouble(((double) (numAdd + numRemove
                         + numAddAll + numRemoveAll) * 100)
                         / (double) total) + " %)");
-        System.out.println("    |--add successful:     \t" + numAdd + "\t( "
+        System.out.println("    |--add all:     	\t" + numAdd + "\t( "
                 + formatDouble(((double) numAdd / (double) total) * 100)
                 + " %)");
-        System.out.println("    |--remove succ.:       \t" + numRemove + "\t( "
+        System.out.println("    |--remove all.:       \t" + numRemove + "\t( "
                 + formatDouble(((double) numRemove / (double) total) * 100)
                 + " %)");
-        System.out.println("    |--addAll succ.:       \t" + numAddAll + "\t( "
-                + formatDouble(((double) numAddAll / (double) total) * 100)
-                + " %)");
-        System.out.println("    |--removeAll succ.:    \t" + numRemoveAll
-                + "\t( "
-                + formatDouble(((double) numRemoveAll / (double) total) * 100)
-                + " %)");
-        System.out.println("    size successful:       \t" + numSize + "\t( "
-                + formatDouble(((double) numSize / (double) total) * 100)
-                + " %)");
-        System.out.println("    contains succ.:        \t" + numContains
+//        System.out.println("    |--addAll succ.:       \t" + numAddAll + "\t( "
+//                + formatDouble(((double) numAddAll / (double) total) * 100)
+//                + " %)");
+//        System.out.println("    |--removeAll succ.:    \t" + numRemoveAll
+//                + "\t( "
+//                + formatDouble(((double) numRemoveAll / (double) total) * 100)
+//                + " %)");
+//        System.out.println("    size successful:       \t" + numSize + "\t( "
+//                + formatDouble(((double) numSize / (double) total) * 100)
+//                + " %)");
+        System.out.println("    contains all:        \t" + numContains
                 + "\t( "
                 + formatDouble(((double) numContains / (double) total) * 100)
                 + " %)");
+        System.out.println("    **contains succ.:        \t" + numSucContains
+                + "\t( "
+                + formatDouble(((double) numSucContains / (double) total) * 100)
+                + " %)");
+        System.out.println("    **add succ.:	     \t" + numSucAdd+ "\t( "
+                + formatDouble(((double) numSucAdd / (double) total) * 100)
+                + " %)");
+        System.out.println("    **remove succ.:       \t" + numSucRemove + "\t( "
+                + formatDouble(((double) numSucRemove / (double) total) * 100)
+                + " %)");
+
         System.out.println("    unsuccessful ops:      \t" + failures + "\t( "
                 + formatDouble(((double) failures / (double) total) * 100)
                 + " %)");

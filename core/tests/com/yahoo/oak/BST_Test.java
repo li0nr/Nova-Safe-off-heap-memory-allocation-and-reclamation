@@ -1,5 +1,8 @@
 package com.yahoo.oak;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.junit.Test;
 
 public class BST_Test {
@@ -139,6 +142,15 @@ public class BST_Test {
 	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
 	    int i = 0;
 	    Buff k = new Buff();
+	    k.set(0);
+    	BST.put(k, k, 0);
+    	BST.put(k, k, 0);
+    	BST.remove( k, 0);
+    	BST.remove( k, 0);
+
+
+	    novaManager.ForceCleanUp();
+
 	    while(i < 200) {
 	    	k.set(i);
 	    	i++;
@@ -158,6 +170,46 @@ public class BST_Test {
 	    assert allocator.allocated() == 0;
 	    
 	}
+	
+	@Test
+	public void BST_Nova_stress() {
+		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	    final NovaManager novaManager = new NovaManager(allocator);
+	    
+
+	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
+	    	    
+	    int i = 0;
+	    ArrayList<Integer> list = new ArrayList<>();
+	    Buff key = new Buff();
+	    key.set(0);
+    	BST.put(key,key,0);
+    	BST.put(key,key,0);
+
+	    Random x = new Random();
+	    while (i < 10000) {
+	    	int z  =x.nextInt(20000);
+	    	list.add(z);
+	    	key.set(z);
+	    	BST.put(key,key,0);
+	    	i++;
+	    }
+	    
+	    while (i < 5000) {
+	    	int z  =x.nextInt(20000);
+	    	if(list.contains(z))
+	    		list.remove((Integer)z);
+	    	key.set(z);
+	    	assert BST.remove(key ,0) == true;
+	    	i++;
+	    }
+	    
+	    for( Integer t : list) {
+	    	assert BST.containsKey(key, 0);
+	    }
+		    
+	  }
 	
 	
 }

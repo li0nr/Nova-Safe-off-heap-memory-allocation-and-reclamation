@@ -14,6 +14,8 @@ public interface NovaSerializer<T> {
     // serializes the object
     void serialize(T object, long target);
 
+    void serialize(long source , long target); //off heap seri
+
     // deserializes the given Oak buffer    
     T deserialize(long source);
 

@@ -49,7 +49,7 @@ public class NovaManager implements MemoryManager {
         
         TAP = new long[ MAX_THREADS * CACHE_PADDING];
         //block 0 is not used ?
-        for(int i=BLOCK_TAP; i<MAX_THREADS*CACHE_PADDING; i+=CACHE_PADDING)
+        for(int i=0 ; i < MAX_THREADS*CACHE_PADDING; i+=CACHE_PADDING)
         	TAP[i+IDENTRY]=-1;
 
         
@@ -87,22 +87,21 @@ public class NovaManager implements MemoryManager {
     }
     
     public void release(int block, int offset, int len, int idx) {
-    	
         List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
         myReleaseList.add(new NovaSlice(block,offset,len));
         
         if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
         	
-            ArrayList<Long> releasedSlices=new ArrayList<>();
-        	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {
+            ArrayList<Long> HostageSlices=new ArrayList<>();
+            for (int i = 0; i < CACHE_PADDING*MAX_THREADS; i= i +CACHE_PADDING ) {
         		if(TAP[i+IDENTRY] != -1)
-        			releasedSlices.add(TAP[i+REFENTRY]);
-        	}
+        			HostageSlices.add(TAP[i+REFENTRY]);
+        		}
         	globalNovaNumber.incrementAndGet();
         	Iterator<NovaSlice> itr=myReleaseList.iterator();
         	while(itr.hasNext()) {
         		NovaSlice tmp=itr.next();
-        		if(!releasedSlices.contains(tmp.getRef())) {
+        		if(!HostageSlices.contains(tmp.getRef())) {
         			allocator.free(tmp);
         			itr.remove();
         		}
@@ -151,13 +150,6 @@ public class NovaManager implements MemoryManager {
     			allocator.free(x);
     		}
     	}
-    }
-    
-    private  boolean containsRef(int block,long ref) {
-    	for(int i=block*BLOCK_TAP; i<block*BLOCK_TAP+BLOCK_TAP; i+=CACHE_PADDING) {
-    		if(TAP[i+IDENTRY]!=-1 && TAP[i+REFENTRY] == ref) return true;
-    	}
-    	return false;
     }
     
 }

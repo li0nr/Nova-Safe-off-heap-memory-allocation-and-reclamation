@@ -16,6 +16,6 @@ public interface CompositionalBST<K, V> {
     
     public  boolean remove(final K key, int idx);
     
-   // public void clear ();
+    public void clear ();
 
 }

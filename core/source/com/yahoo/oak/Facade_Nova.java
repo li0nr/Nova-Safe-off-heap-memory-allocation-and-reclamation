@@ -72,6 +72,24 @@ public class Facade_Nova <T,K> {
 		 return true; 
 	}
 
+	static public <K> boolean DeletePrivate(int idx, long metadata) {
+		
+		if(metadata %2 != 0) 
+			return false;
+		int block 	= Extractblock(metadata);
+		int offset	= ExtractOffset(metadata);
+		
+		long address = novaManager.getAdress(block);
+
+		
+		long OffHeapMetaData= UNSAFE.getLong(address+offset);//reads off heap meta
+
+		long len=OffHeapMetaData>>>24; 
+		 
+		 novaManager.release(block,offset,(int)len,idx); 
+		 return true; 
+	}
+	
 	static public <T> long WriteFull (NovaSerializer<T> lambda, T obj, long facade_meta ,int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2==DELETED) {
@@ -140,6 +158,25 @@ public class Facade_Nova <T,K> {
 		 return facade_meta;
 	}
 	
+	static public <T>long WriteFastFromOffheap(NovaSerializer<T> lambda, long source_meta, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
+
+		if(facade_meta%2!=0 || source_meta%2 != 0)
+			throw new IllegalArgumentException("cant locate slice");
+		
+		int block 	= Extractblock	(facade_meta);
+		int offset 	= ExtractOffset	(facade_meta);
+		long address = novaManager.getAdress(block);
+		
+		int block2 	= Extractblock	(source_meta);
+		int offset2 	= ExtractOffset	(source_meta);
+		long address2 = novaManager.getAdress(block2);
+		
+		lambda.serialize(address2+NovaManager.HEADER_SIZE+offset2,
+				address+NovaManager.HEADER_SIZE+offset);
+
+		 return facade_meta;
+	}
+	
 	
 	 static public <T> int Compare(T obj, NovaC<T> srZ, long metadata) {
 		
@@ -157,6 +194,7 @@ public class Facade_Nova <T,K> {
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
+		int x = (int)(UNSAFE.getLong(address+offset)&0xFFFFFF);
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
 			throw new IllegalArgumentException("slice changed");
 		return res;	
