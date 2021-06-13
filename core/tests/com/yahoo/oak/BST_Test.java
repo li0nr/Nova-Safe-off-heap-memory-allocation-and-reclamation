@@ -148,20 +148,23 @@ public class BST_Test {
     	BST.remove( k, 0);
     	BST.remove( k, 0);
 
+    	BST_HE.put(k, k, 0);
+    	BST_HE.put(k, k, 0);
+    	BST_HE.remove( k, 0);
+    	BST_HE.remove( k, 0);
 
-	    novaManager.ForceCleanUp();
 
-	    while(i < 200) {
+	    while(i < 1) {
 	    	k.set(i);
 	    	i++;
-	    	BST.put(k, k, 0);
-		    BST_HE.put(k, k, 0);
+	    	assert BST.put(k, k, 0) == null;
+		    assert BST_HE.put(k, k, 0) == null;
 	    }
 	    i = 0;
-	    while(i < 200) {
+	    while(i < 1) {
 	    	k.set(i);
 	    	i++;
-		    assert BST.remove( k, 0) == true;
+	    	assert BST.remove( k, 0) == true;
 		    assert BST_HE.remove( k, 0) == true;
 
 	    }
