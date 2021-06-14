@@ -28,6 +28,10 @@ public class BST_HE_Synch implements CompositionalBST<Buff, Buff>{
     	return BST.remove(key, idx);
     }
     
+    public long allocated() {
+    	return allocator.allocated();
+    }
+    
     public void clear() {
     	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER

@@ -34,9 +34,8 @@ public class Parameters {
     static boolean confChange = false;
     public static boolean confStreamIteration = false;
 
-    public static boolean confZeroCopy = false;
 
-    public static KeyDist confKeyDistribution = KeyDist.INCREASING;
+    public static KeyDist confKeyDistribution = KeyDist.RANDOM;
 
     public static String confBenchClassName = "com.yahoo.oak.BST_Nova_Synch";
 

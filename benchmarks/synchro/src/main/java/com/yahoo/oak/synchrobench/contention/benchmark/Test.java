@@ -201,7 +201,7 @@ public class Test {
 
         float allocated = Float.NaN;
         try {
-            //allocated = ( BST).allocated();
+        	allocated = ( BST).allocated();
         } catch (ClassCastException ignored) {
             System.out.println("Cannot fetch off-heap stats for non-Oak maps.");
         }
@@ -352,9 +352,6 @@ public class Test {
                     case "-si":
                         Parameters.confStreamIteration = true;
                         break;
-                    case "--buffer":
-                        Parameters.confZeroCopy = true;
-                        break;
                     case "--inc":
                         Parameters.confKeyDistribution = Parameters.KeyDist.INCREASING;
                         break;
@@ -499,9 +496,6 @@ public class Test {
                 + " Bytes\n"
                 + "  Change:                \t"
                 + Parameters.confChange
-                + "\n"
-                + "  Buffer view:            \t"
-                + Parameters.confZeroCopy
                 + "\n"
                 + "  Benchmark:               \t"
                 + Parameters.confBenchClassName;

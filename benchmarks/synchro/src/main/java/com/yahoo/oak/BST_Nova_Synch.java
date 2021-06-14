@@ -29,6 +29,10 @@ public class BST_Nova_Synch implements CompositionalBST<Buff, Buff>{
     	return BST.remove(key, idx);
     }
     
+    public long allocated() {
+    	return allocator.allocated();
+    }
+    
     public void clear() {
     	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	novaManager = new NovaManager(allocator);
