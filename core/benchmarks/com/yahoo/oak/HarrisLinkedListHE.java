@@ -101,6 +101,7 @@ public class HarrisLinkedListHE<E> {
             final Node<HEslice> curr = window.curr;
             if (curr.key!= null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
             	HE.clear(tidx);
+            	HE.retire(tidx, access);
                 return false;
             } else {
                 newNode.next.set(curr, false);

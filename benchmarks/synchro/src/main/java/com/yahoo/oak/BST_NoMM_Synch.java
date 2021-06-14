@@ -33,7 +33,7 @@ public class BST_NoMM_Synch implements CompositionalBST<Buff, Buff>{
     }
     
     public void clear() {
-    	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	BST = new BST_NoMM<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
     			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
     }

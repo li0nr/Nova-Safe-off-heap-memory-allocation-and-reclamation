@@ -113,6 +113,7 @@ public class HarrisLinkedListNova<E> {
             final Node pred = window.pred;
             final Node curr = window.curr;
             if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Cmp, curr.key) == 0) { 
+            	Facade_Nova.DeletePrivate(idx,newNode.key);
                 return false;
             } else {
                 newNode.next.set(curr, false);

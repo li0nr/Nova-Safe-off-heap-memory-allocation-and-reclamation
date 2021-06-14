@@ -66,7 +66,8 @@ public class HarrisLinkedListNoMM <E>{
 	            // On Harris paper, pred is named left_node and curr is right_node
 	            final Node<NovaSlice> pred = window.pred;
 	            final Node<NovaSlice> curr = window.curr;
-	            if (curr.key == key) { 
+	            if (Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
+	            	allocator.free(access);
 	                return false;
 	            } else {
 	                newNode.next.set(curr, false);

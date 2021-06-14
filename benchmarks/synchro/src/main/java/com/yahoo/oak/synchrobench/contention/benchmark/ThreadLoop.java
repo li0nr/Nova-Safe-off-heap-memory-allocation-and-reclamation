@@ -113,25 +113,25 @@ public class ThreadLoop implements Runnable {
         	key.set(newInt);
 
             int coin = rand.nextInt(1000);
-            if(coin < cdf[0]) { //-a deleting is good?
-        		numRemove++;
-            	if(bench.remove(key, myThreadNum)) {
-            		numSucRemove++;
-            	}
-            	else {
-            		failures++;
-            	}
-            }
-            else if (coin < cdf[1]) { // -u writing is better than deleting?
-            	numAdd++;
-            	if(bench.put(key, key, myThreadNum) == null) {
-            		numSuccAdd++;
-            	}
-            	else failures++;
-            		
-            }
+//            if(coin < cdf[0]) { //-a deleting is good?
+//        		numRemove++;
+//            	if(bench.remove(key, myThreadNum)) {
+//            		numSucRemove++;
+//            	}
+//            	else {
+//            		failures++;
+//            	}
+//            }
+//            else if (coin < cdf[1]) { // -u writing is better than deleting?
+//            	numAdd++;
+//            	if(bench.put(key, key, myThreadNum) == null) {
+//            		numSuccAdd++;
+//            	}
+//            	else failures++;
+//            		
+//            }
 
-            else if (coin < cdf[2]) { // -s reading is the best ever
+            if (coin < cdf[2]) { // -s reading is the best ever
             	numContains++;
             	if(bench.containsKey(key, myThreadNum)) {
             		numSucContains++;

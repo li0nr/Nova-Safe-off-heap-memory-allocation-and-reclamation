@@ -191,8 +191,8 @@ public class BST_Test {
     	BST.put(key,key,0);
 
 	    Random x = new Random();
-	    while (i < 10000) {
-	    	int z  =x.nextInt(20000);
+	    while (i < 50000) {
+	    	int z  =x.nextInt(10000);
 	    	list.add(z);
 	    	key.set(z);
 	    	BST.put(key,key,0);
