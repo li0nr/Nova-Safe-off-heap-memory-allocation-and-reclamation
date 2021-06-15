@@ -37,4 +37,7 @@ public class BST_NoMM_Synch implements CompositionalBST<Buff, Buff>{
     	BST = new BST_NoMM<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
     			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
     }
+    public void print() {
+    	//BST.Print();
+    }
 }

@@ -160,13 +160,16 @@ public class BST_Nova<K , V> {
     public final boolean containsKey(final K key, int tidx) {
     	get_count ++;
     	if (key == null) throw new NullPointerException();
-    	Node l = root.left;
     	Retry: while (true){
+        	Node l = root.left;
     		try {
     	while (l.left != null) {
     		l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
     		}
-    	return (l.key != Illegal_facade&&  Facade_Nova.Compare(key, KCt, l.key) == 0) ? true : false;   
+    	//return (l.key != Illegal_facade&&  Facade_Nova.Compare(key, KCt, l.key) == 0) ? true : false;
+    	if(l.key != Illegal_facade&&  Facade_Nova.Compare(key, KCt, l.key) == 0)
+    		return true;
+    	else return false;
     	}catch (Exception e) { continue Retry; }
     	}
     }
@@ -175,9 +178,9 @@ public class BST_Nova<K , V> {
     public final V get(final K key, int tidx) {
     	get_count ++;
     	if (key == null) throw new NullPointerException();
-    	Node l = root.left;
     	Retry: while (true){
     		try {			
+    	    	Node l = root.left;
     		while (l.left != null) {
     			l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
     			}

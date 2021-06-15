@@ -141,9 +141,9 @@ public class BST_HE<K , V> {
     	get_count ++;
         if (key == null) throw new NullPointerException();
         HEslice access;
-        Node<HEslice, HEslice> l = root.left;
     	Retry: while (true){
     		try {	
+    	        Node<HEslice, HEslice> l = root.left;
     			while (l.left != null) {
     				access = HE.get_protected(l.key,0,idx);
     				l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
@@ -162,8 +162,8 @@ public class BST_HE<K , V> {
 
         if (key == null) throw new NullPointerException();
         HEslice access;
-        Node<HEslice, HEslice> l = root.left;
     	Retry: while (true){
+            Node<HEslice, HEslice> l = root.left;
     		try {	
 	        while (l.left != null) {
 	     	   access = HE.get_protected(l.key,0,idx);

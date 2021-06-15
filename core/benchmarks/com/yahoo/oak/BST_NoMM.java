@@ -222,7 +222,13 @@ public class BST_NoMM<K , V> {
                    newSibling = new Node<NovaSlice, NovaSlice>(l.key, l.value);
                    if (l.key == null ||  KCt.compareKeys(l.key.address+l.key.offset, key) > 0) // newinternal = max(ret.l.key, key);
                 	   {
-                	   newInternal = new Node<NovaSlice, NovaSlice>(l.key, newNode, newSibling);
+                       if(l.key != null) {
+                    	   NovaSlice tmp = new NovaSlice(0, 0, 0);
+                    	   alloc.allocate(tmp, SrzK.calculateSize(key));
+                    	   SrzK.serialize(l.key.address+l.key.offset, tmp.address+tmp.offset);
+                       }                           
+                   	   newInternal = new Node<NovaSlice, NovaSlice>(l.key, newNode, newSibling);
+                   	   
                 	   } else {
                 	       NovaSlice tmp = new NovaSlice(0, 0, 0);
                 	       alloc.allocate(tmp, SrzK.calculateSize(key));

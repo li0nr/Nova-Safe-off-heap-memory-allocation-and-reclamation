@@ -6,6 +6,7 @@
 
 package com.yahoo.oak.synchrobench.contention.benchmark;
 
+import com.yahoo.oak.BST;
 import com.yahoo.oak.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 
@@ -110,28 +111,28 @@ public class ThreadLoop implements Runnable {
         while (!stop) {
             newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
+        	key = new Buff();
         	key.set(newInt);
 
             int coin = rand.nextInt(1000);
-//            if(coin < cdf[0]) { //-a deleting is good?
-//        		numRemove++;
-//            	if(bench.remove(key, myThreadNum)) {
-//            		numSucRemove++;
-//            	}
-//            	else {
-//            		failures++;
-//            	}
-//            }
-//            else if (coin < cdf[1]) { // -u writing is better than deleting?
-//            	numAdd++;
-//            	if(bench.put(key, key, myThreadNum) == null) {
-//            		numSuccAdd++;
-//            	}
-//            	else failures++;
-//            		
-//            }
-
-            if (coin < cdf[2]) { // -s reading is the best ever
+            if(coin < cdf[0]) { //-a deleting is good?
+        		numRemove++;
+            	if(bench.remove(key, myThreadNum)) {
+            		numSucRemove++;
+            	}
+            	else {
+            		failures++;
+            	}
+            }
+            else if (coin < cdf[1]) { // -u writing is better than deleting?
+            	numAdd++;
+            	if(bench.put(key, key, myThreadNum) == null) {
+            		numSuccAdd++;
+            	}
+            	else failures++;
+            		
+            }
+            else if (coin < cdf[2]) { // -s reading is the best ever
             	numContains++;
             	if(bench.containsKey(key, myThreadNum)) {
             		numSucContains++;

@@ -124,10 +124,12 @@ public class Test {
             val.buffer.putInt(0, v);
             if (BST.put(key, val,0) == null) {
                 i--;
-            }
+            }   
+           
             // counts all the putIfAbsent operations, not only the successful ones
             operations++;
         }
+        
         return operations;
     }
 
@@ -647,6 +649,9 @@ public class Test {
                     threadLoopsBST[threadNum].failures = 0;
                     threadLoopsBST[threadNum].total = 0;
                     threadLoopsBST[threadNum].aborts = 0;
+                    threadLoopsBST[threadNum].numSuccAdd = 0;
+                    threadLoopsBST[threadNum].numSucContains = 0;
+                    threadLoopsBST[threadNum].numSucRemove = 0;
 
                     break;
             }
@@ -668,7 +673,11 @@ public class Test {
         numCommits = 0;
         numStarts = 0;
         numAborts = 0;
-
+        
+        numSucAdd=0;
+        numSucContains=0;
+        numSucRemove=0;
+        
         numCommitsReadOnly = 0;
         numCommitsElastic = 0;
         numCommitsUpdate = 0;

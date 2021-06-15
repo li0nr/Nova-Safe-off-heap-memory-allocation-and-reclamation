@@ -19,5 +19,6 @@ public interface CompositionalBST<K, V> {
     public long allocated();
     
     public void clear ();
-
+    
+    public void print();
 }

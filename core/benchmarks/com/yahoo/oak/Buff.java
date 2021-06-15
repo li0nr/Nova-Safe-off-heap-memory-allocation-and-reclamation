@@ -57,14 +57,7 @@ public class Buff  implements Comparable<Buff>{
 			}
 		return Integer.compare(this.capacity, o.capacity);
 	}
-	
-	public Buff Copy(Buff o) {
-		Buff toRet = new Buff(o.capacity);
-		for (int i = 0; i < o.capacity; i++) {
-			toRet.buffer.putInt(i,o.buffer.getInt(i));
-		}
-		return toRet;
-	}
+
 	
     public boolean equals(Buff o) {
 		final int minSize = Math.min(this.capacity, o.capacity);
@@ -99,8 +92,7 @@ public class Buff  implements Comparable<Buff>{
 			long targetPos = output;
 			int capacity = UnsafeUtils.getInt( source);
 			UnsafeUtils.putInt(targetPos, capacity);
-			targetPos += Integer.BYTES;
-			int offset = 0;
+			int offset = 4;
 			for (int i = 0; i < capacity / Integer.BYTES; i++) {
 				UnsafeUtils.putInt(targetPos + offset, UnsafeUtils.getInt( source +offset));
 				offset += Integer.BYTES;
@@ -157,7 +149,7 @@ public class Buff  implements Comparable<Buff>{
 			}
 			return Integer.compare(size, obj.capacity);
 		}
-		
+
 		@Override
 		public void Print(long address) {
 			int size = UnsafeUtils.getInt(address);

@@ -37,4 +37,8 @@ public class BST_HE_Synch implements CompositionalBST<Buff, Buff>{
     	BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
     			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
     }
+    
+    public void print() {
+    	BST.Print();
+    }
 }
