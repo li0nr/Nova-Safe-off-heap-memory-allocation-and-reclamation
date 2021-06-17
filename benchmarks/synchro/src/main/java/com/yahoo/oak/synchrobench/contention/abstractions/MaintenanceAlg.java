@@ -4,7 +4,7 @@
  * Please see LICENSE file in the project root for terms.
  */
 
-package com.yahoo.oak.BST.synchrobench.contention.abstractions;
+package com.yahoo.oak.synchrobench.contention.abstractions;
 
 /**
  * Compositional map interface

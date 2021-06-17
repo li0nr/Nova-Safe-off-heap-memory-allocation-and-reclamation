@@ -4,7 +4,7 @@
  * Please see LICENSE file in the project root for terms.
  */
 
-package com.yahoo.oak.LL.synchrobench.contention.benchmark;
+package com.yahoo.oak.synchrobench.contention.benchmark;
 
 import java.util.Formatter;
 import java.util.HashMap;

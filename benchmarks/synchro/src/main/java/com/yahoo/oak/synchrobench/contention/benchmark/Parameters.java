@@ -4,7 +4,7 @@
  * Please see LICENSE file in the project root for terms.
  */
 
-package com.yahoo.oak.BST.synchrobench.contention.benchmark;
+package com.yahoo.oak.synchrobench.contention.benchmark;
 
 /**
  * Parameters of the Java version of the
@@ -36,7 +36,7 @@ public class Parameters {
     public static boolean confStreamIteration = false;
 
 
-    public static KeyDist confKeyDistribution = KeyDist.INCREASING;
+    public static KeyDist confKeyDistribution = KeyDist.RANDOM;
 
     public static String confBenchClassName = "com.yahoo.oak.BST_Nova_Synch";
 

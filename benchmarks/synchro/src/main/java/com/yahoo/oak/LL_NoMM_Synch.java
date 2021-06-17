@@ -1,15 +1,15 @@
-package com.yahoo.oak.LL;
+package com.yahoo.oak;
 
-import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.synchrobench.contention.abstractions.Compositional;
+import com.yahoo.oak.LL.HarrisLinkedListNoMM;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
-public class LL_HE_Synch implements Compositional<Buff>{
+public class LL_NoMM_Synch implements CompositionalLL<Buff>{
 	
 	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	HarrisLinkedListHE<Buff> LL = new HarrisLinkedListHE<Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+	HarrisLinkedListNoMM<Buff> LL = new HarrisLinkedListNoMM<Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
-	public LL_HE_Synch(){
+	public LL_NoMM_Synch(){
 		
 	}
 	public boolean containsKey(final Buff key, int tidx) {
@@ -30,10 +30,10 @@ public class LL_HE_Synch implements Compositional<Buff>{
     
     public void clear() {
     	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	LL = new HarrisLinkedListHE<Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+    	LL = new HarrisLinkedListNoMM<Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     }
     
     public void print() {
-    	//LL.Print();
+    	LL.Print();
     }
 }

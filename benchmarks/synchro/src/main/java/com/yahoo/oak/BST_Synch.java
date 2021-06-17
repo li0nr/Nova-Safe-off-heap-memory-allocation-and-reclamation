@@ -1,7 +1,8 @@
-package com.yahoo.oak.BST;
+package com.yahoo.oak;
 
-import com.yahoo.oak.BST.synchrobench.contention.abstractions.CompositionalBST;
+import com.yahoo.oak.BST.BST;
 import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 
 public class BST_Synch implements CompositionalBST<Buff, Buff>{
 	

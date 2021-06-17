@@ -86,7 +86,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	            // variable is named "right_node".            
 	            final Node<E> pred = window.pred;
 	            final Node<E> curr = window.curr;
-	            if (curr.key.compareTo(key) != 0) {
+	            if (curr.key == null || curr.key.compareTo(key) != 0) {
 	                return false;
 	            } 
 	            final Node<E> succ = curr.next.getReference();

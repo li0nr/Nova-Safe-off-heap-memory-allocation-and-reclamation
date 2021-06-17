@@ -2,6 +2,7 @@ package com.yahoo.oak.LL;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaS;
@@ -70,7 +71,7 @@ public class HarrisLinkedListNoMM <E>{
 	            // On Harris paper, pred is named left_node and curr is right_node
 	            final Node<NovaSlice> pred = window.pred;
 	            final Node<NovaSlice> curr = window.curr;
-	            if (Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
+	            if (curr.key != null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
 	            	allocator.free(access);
 	                return false;
 	            } else {
@@ -99,7 +100,7 @@ public class HarrisLinkedListNoMM <E>{
 	            // variable is named "right_node".            
 	            final Node<NovaSlice> pred = window.pred;
 	            final Node<NovaSlice> curr = window.curr;
-	            if (curr.key != key) {
+	            if (curr.key == null || Cmp.compareKeys(curr.key.address + curr.key.offset, key) != 0) {
 	                return false;
 	            } 
 	            final Node<NovaSlice> succ = curr.next.getReference();
@@ -150,7 +151,7 @@ public class HarrisLinkedListNoMM <E>{
 	                    succ = curr.next.get(marked);
 	                }
 	        		
-	                if (curr == tail || Cmp.compareKeys(curr.key.address + curr.key.offset, key) <= 0) {
+	                if (curr == tail || Cmp.compareKeys(curr.key.address + curr.key.offset, key) >= 0) {
 	                    return new Window<NovaSlice>(pred, curr);
 	                }
 	                pred = curr;
@@ -186,5 +187,14 @@ public class HarrisLinkedListNoMM <E>{
 	        }
 	        boolean flag = Cmp.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
 	        return flag;
+	    }
+	    
+	    public void Print() {
+	    	Node<NovaSlice> curr = head.next.getReference();
+	        while (curr != tail ) {
+	        	Cmp.Print(curr.key.address+curr.key.offset);
+	        	System.out.print("-->");
+	        	curr = curr.next.getReference();
+	        }
 	    }
 }

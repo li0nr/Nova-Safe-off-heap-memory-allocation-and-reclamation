@@ -4,11 +4,12 @@
  * Please see LICENSE file in the project root for terms.
  */
 
-package com.yahoo.oak.LL.synchrobench.contention.benchmark;
+package com.yahoo.oak.synchrobench.contention.benchmark;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.synchrobench.contention.abstractions.Compositional;
-import com.yahoo.oak.LL.synchrobench.contention.abstractions.MaintenanceAlg;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
+import com.yahoo.oak.synchrobench.contention.abstractions.MaintenanceAlg;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -25,7 +26,8 @@ import java.util.Random;
 public class Test {
 
     public enum Type {
-        OAKMAP
+        BST,
+        LL
     }
 
     /**
@@ -35,7 +37,9 @@ public class Test {
     /**
      * The array of runnable thread codes
      */
-    private ThreadLoop[] threadLoopsBST;
+    private ThreadLoop[] threadLoops_BST;
+    private ThreadLoopLL[] threadLoops_LL;
+
     /**
      * The observed duration of the benchmark
      */
@@ -84,7 +88,8 @@ public class Test {
      * The instance of the benchmark
      */
     private Type benchType = null;
-    private Compositional<Buff> bench = null;
+    private CompositionalBST<Buff, Buff> BST = null;
+    private CompositionalLL<Buff> LL = null;
     /**
      * The benchmark methods
      */
@@ -105,7 +110,7 @@ public class Test {
     };
 
     public long fill(final int range, final long size) {
-        if (benchType != Type.OAKMAP) {
+        if (benchType != Type.LL && benchType != Type.BST) {
             System.err.println("Wrong benchmark type");
             System.exit(0);
         }
@@ -117,17 +122,31 @@ public class Test {
         for (long i = size; i > 0; ) {
             v = (Parameters.confKeyDistribution == Parameters.KeyDist.INCREASING)
                     ? v + 1 : localRand.nextInt(range);
-
             Buff key = new Buff(Parameters.confKeySize);
             key.buffer.putInt(0, v);
-            if (bench.put(key,0) == true) {
-                i--;
-            }   
-           
+
+            
+			switch(benchType) {
+			case BST:
+	            Buff val = new Buff(Parameters.confValSize);
+	            val.buffer.putInt(0, v);
+	            if (BST.put(key, val,0) == null) {
+	                i--;
+	            }   
+	            break;
+			case LL:
+	            if (LL.put(key,0) == true) {
+	                i--;
+	            } 
+				break;
+			default:
+				System.err.println("Wrong benchmark type");
+				System.exit(0);
+				
+			}           
             // counts all the putIfAbsent operations, not only the successful ones
             operations++;
         }
-        
         return operations;
     }
 
@@ -138,15 +157,18 @@ public class Test {
     @SuppressWarnings("unchecked")
     public void instanciateAbstraction(String benchName) {
         try {
-            Class<Compositional<Buff>> benchClass = (Class<Compositional<Buff>>) Class
+            Class<CompositionalBST<Buff, Buff>> benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
                     .forName(benchName);
-            Constructor<Compositional<Buff>> c = benchClass
+            Constructor<CompositionalBST<Buff, Buff>> c = benchClass
                     .getDeclaredConstructor();
             methods = benchClass.getDeclaredMethods();
 
-            if (Compositional.class.isAssignableFrom(benchClass)) {
-                bench = (Compositional<Buff>) c.newInstance();
-                benchType = Type.OAKMAP;
+            if (CompositionalBST.class.isAssignableFrom(benchClass)) {
+                BST = (CompositionalBST<Buff, Buff>) c.newInstance();
+                benchType = Type.BST;
+            } else if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
+            	LL = (CompositionalLL<Buff>) c.newInstance();
+    			benchType = Type.LL;
             }
 
         } catch (Exception e) {
@@ -163,12 +185,20 @@ public class Test {
      */
     private void initThreads() throws InterruptedException {
         switch (benchType) {
-            case OAKMAP:
-            	threadLoopsBST = new ThreadLoop[Parameters.confNumThreads];
+            case BST:
+            	threadLoops_BST = new ThreadLoop[Parameters.confNumThreads];
                 threads = new Thread[Parameters.confNumThreads];
                 for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
-                	threadLoopsBST[threadNum] = new ThreadLoop(threadNum, bench, methods);
-                    threads[threadNum] = new Thread(threadLoopsBST[threadNum]);
+                	threadLoops_BST[threadNum] = new ThreadLoop(threadNum, BST, methods);
+                    threads[threadNum] = new Thread(threadLoops_BST[threadNum]);
+                }
+                break;
+            case LL:
+            	threadLoops_LL = new ThreadLoopLL[Parameters.confNumThreads];
+                threads = new Thread[Parameters.confNumThreads];
+                for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
+                	threadLoops_LL[threadNum] = new ThreadLoopLL(threadNum, LL, methods);
+                    threads[threadNum] = new Thread(threadLoops_LL[threadNum]);
                 }
                 break;
         }
@@ -201,7 +231,15 @@ public class Test {
 
         float allocated = Float.NaN;
         try {
-        	allocated = ( bench).allocated();
+        	switch (benchType) {
+			case BST:
+	        	allocated = ( BST).allocated();
+				break;
+			case LL:
+	        	allocated = ( LL).allocated();
+			default:
+				break;
+			}
         } catch (ClassCastException ignored) {
             System.out.println("Cannot fetch off-heap stats for non-Oak maps.");
         }
@@ -236,15 +274,23 @@ public class Test {
         try {
             Thread.sleep(milliseconds);
         } finally {
-            switch (benchType) {
-                case OAKMAP:
-                    for (ThreadLoop threadLoop : threadLoopsBST) {
-                        threadLoop.stopThread();
-                    }
-                    break;
-            }
-        }
+        	switch (benchType) {
+			case BST:
+        		for (ThreadLoop threadLoop : threadLoops_BST) {
+        			threadLoop.stopThread();
+        			}
+				break;
+			case LL:
+        		for (ThreadLoopLL threadLoop : threadLoops_LL) {
+        			threadLoop.stopThread();
+        			}
+				break;
 
+			default:
+				break;
+			}
+
+        		}
         for (Thread thread : threads) {
             thread.join();
         }
@@ -256,9 +302,11 @@ public class Test {
 
     public void clear() {
         switch (benchType) {
-            case OAKMAP:
-            	bench.clear();
+            case BST:
+            	BST.clear();
                 break;
+            case LL:
+            	LL.clear();
         }
     }
 
@@ -302,9 +350,9 @@ public class Test {
             }
             test.execute(Parameters.confNumMilliseconds, false);
 
-            if (test.bench instanceof MaintenanceAlg) {
-                ((MaintenanceAlg) test.bench).stopMaintenance();
-                test.structMods += ((MaintenanceAlg) test.bench)
+            if (test.BST instanceof MaintenanceAlg) {
+                ((MaintenanceAlg) test.BST).stopMaintenance();
+                test.structMods += ((MaintenanceAlg) test.BST)
                         .getStructMods();
             }
 
@@ -507,25 +555,40 @@ public class Test {
      */
     private void printBasicStats() {
         for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
-            switch (benchType) {
-                case OAKMAP:
-                    numAdd += threadLoopsBST[threadNum].numAdd;
-                    numRemove += threadLoopsBST[threadNum].numRemove;
-                    numContains += threadLoopsBST[threadNum].numContains;
+        	switch (benchType) {
+			case BST:
+	        	numAdd += threadLoops_BST[threadNum].numAdd;
+	            numRemove += threadLoops_BST[threadNum].numRemove;
+	            numContains += threadLoops_BST[threadNum].numContains;
 
-                    
-                    numSucAdd += threadLoopsBST[threadNum].numSuccAdd;
-                    numSucRemove += threadLoopsBST[threadNum].numSucRemove;
-                    numSucContains += threadLoopsBST[threadNum].numSucContains;
+	            
+	            numSucAdd += threadLoops_BST[threadNum].numSuccAdd;
+	            numSucRemove += threadLoops_BST[threadNum].numSucRemove;
+	            numSucContains += threadLoops_BST[threadNum].numSucContains;
 
-//                    numAddAll += threadLoopsBST[threadNum].numAddAll;
-//                    numRemoveAll += threadLoopsBST[threadNum].numRemoveAll;
-//                    numSize += threadLoopsBST[threadNum].numSize;
-                    failures += threadLoopsBST[threadNum].failures;
-                    total += threadLoopsBST[threadNum].total;
-//                    aborts += threadLoopsBST[threadNum].aborts;
-                    break;
-            }
+//	                    numAddAll += threadLoops_BST[threadNum].numAddAll;
+//	                    numRemoveAll += threadLoops_BST[threadNum].numRemoveAll;
+//	                    numSize += threadLoops_BST[threadNum].numSize;
+	            failures += threadLoops_BST[threadNum].failures;
+	            total += threadLoops_BST[threadNum].total;
+//	                    aborts += threadLoops_BST[threadNum].aborts;
+				break;
+			case LL:
+	        	numAdd += threadLoops_LL[threadNum].numAdd;
+	            numRemove += threadLoops_LL[threadNum].numRemove;
+	            numContains += threadLoops_LL[threadNum].numContains;
+
+	            numSucAdd += threadLoops_LL[threadNum].numSuccAdd;
+	            numSucRemove += threadLoops_LL[threadNum].numSucRemove;
+	            numSucContains += threadLoops_LL[threadNum].numSucContains;
+
+	            failures += threadLoops_LL[threadNum].failures;
+	            total += threadLoops_LL[threadNum].total;
+				break;
+
+			default:
+				break;
+			}
         }
         throughput[currentIteration] = ((double) total / elapsedTime);
         //totalSize[currentIteration] = oakBench.size();
@@ -580,24 +643,6 @@ public class Test {
         System.out.println("    unsuccessful ops:      \t" + failures + "\t( "
                 + formatDouble(((double) failures / (double) total) * 100)
                 + " %)");
-        switch (benchType) {
-            case OAKMAP:
-                System.out.println("  Final size:              \t" + totalSize[currentIteration]);
-                if (Parameters.confNumWriteAlls == 0) {
-                    System.out.println("  Expected size:           \t" + (Parameters.confSize + numAdd - numRemove));
-                }
-                break;
-        }
-
-        switch (benchType) {
-            case OAKMAP:
-                if (bench instanceof MaintenanceAlg) {
-                    System.out.println("  #nodes (inc. deleted): \t"
-                            + ((MaintenanceAlg) bench).numNodes());
-                }
-                break;
-        }
-
     }
 
     /**
@@ -636,24 +681,39 @@ public class Test {
     public void resetStats() {
 
         for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
-            switch (benchType) {
-                case OAKMAP:
-                	threadLoopsBST[threadNum].numAdd = 0;
-                    threadLoopsBST[threadNum].numRemove = 0;
-                    threadLoopsBST[threadNum].numAddAll = 0;
-                    threadLoopsBST[threadNum].numRemoveAll = 0;
-                    threadLoopsBST[threadNum].numSize = 0;
-                    threadLoopsBST[threadNum].numContains = 0;
-                    threadLoopsBST[threadNum].failures = 0;
-                    threadLoopsBST[threadNum].total = 0;
-                    threadLoopsBST[threadNum].aborts = 0;
-                    threadLoopsBST[threadNum].numSuccAdd = 0;
-                    threadLoopsBST[threadNum].numSucContains = 0;
-                    threadLoopsBST[threadNum].numSucRemove = 0;
+        	switch (benchType) {
+			case BST:
+	        	threadLoops_BST[threadNum].numAdd = 0;
+	            threadLoops_BST[threadNum].numRemove = 0;
+	            threadLoops_BST[threadNum].numAddAll = 0;
+	            threadLoops_BST[threadNum].numRemoveAll = 0;
+	            threadLoops_BST[threadNum].numSize = 0;
+	            threadLoops_BST[threadNum].numContains = 0;
+	            threadLoops_BST[threadNum].failures = 0;
+	            threadLoops_BST[threadNum].total = 0;
+	            threadLoops_BST[threadNum].aborts = 0;
+	            threadLoops_BST[threadNum].numSuccAdd = 0;
+	            threadLoops_BST[threadNum].numSucContains = 0;
+	            threadLoops_BST[threadNum].numSucRemove = 0;
+				break;
+			case LL:
+	        	threadLoops_LL[threadNum].numAdd = 0;
+	        	threadLoops_LL[threadNum].numRemove = 0;
+	        	threadLoops_LL[threadNum].numAddAll = 0;
+	            threadLoops_LL[threadNum].numRemoveAll = 0;
+	            threadLoops_LL[threadNum].numSize = 0;
+	            threadLoops_LL[threadNum].numContains = 0;
+	            threadLoops_LL[threadNum].failures = 0;
+	            threadLoops_LL[threadNum].total = 0;
+	            threadLoops_LL[threadNum].aborts = 0;
+	            threadLoops_LL[threadNum].numSuccAdd = 0;
+	            threadLoops_LL[threadNum].numSucContains = 0;
+	            threadLoops_LL[threadNum].numSucRemove = 0;
+				break;
 
-                    break;
-            }
-
+			default:
+				break;
+			}
         }
         numAdd = 0;
         numRemove = 0;

@@ -1,9 +1,10 @@
-package com.yahoo.oak.LL;
+package com.yahoo.oak;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.synchrobench.contention.abstractions.Compositional;
+import com.yahoo.oak.LL.HarrisLinkedList;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
-public class LL_Synch implements Compositional<Buff>{
+public class LL_Synch implements CompositionalLL<Buff>{
 
 	HarrisLinkedList<Buff> LL = new HarrisLinkedList<Buff>(Buff.CC);
 	

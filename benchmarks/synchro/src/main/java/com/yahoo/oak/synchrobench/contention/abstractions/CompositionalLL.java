@@ -4,15 +4,13 @@
  * Please see LICENSE file in the project root for terms.
  */
 
-package com.yahoo.oak.BST.synchrobench.contention.abstractions;
+package com.yahoo.oak.synchrobench.contention.abstractions;
 
-public interface CompositionalBST<K, V> {
+public interface CompositionalLL<K> {
 
 	boolean containsKey(final K key, int tidx);
-	
-    public  V get(final K key, int tidx);
-    
-    public  V put(final K key, final V value, int idx);
+	    
+    public  boolean put(final K key, int idx);
     
     public  boolean remove(final K key, int idx);
     

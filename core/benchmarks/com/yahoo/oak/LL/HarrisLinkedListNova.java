@@ -113,22 +113,24 @@ public class HarrisLinkedListNova<E> {
         Node newNode = new Node(Illegal_nu);
         Facade_Nova.WriteFast(Srz, key, Facade_Nova.AllocateSlice(newNode, key_offset, 
         		Illegal_nu, Srz.calculateSize(key), idx),idx);
-
-        while (true) {
-            final Window<Facade> window = find(key, idx);
-            // On Harris paper, pred is named left_node and curr is right_node
-            final Node pred = window.pred;
-            final Node curr = window.curr;
-            if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Cmp, curr.key) == 0) { 
-            	Facade_Nova.DeletePrivate(idx,newNode.key);
-                return false;
-            } else {
-                newNode.next.set(curr, false);
-                if (pred.next.compareAndSet(curr, newNode, false, false)) {
-                    return true;
+        CmpFail: while(true)
+        try{
+        	while (true) {
+                final Window<Facade> window = find(key, idx);
+                // On Harris paper, pred is named left_node and curr is right_node
+                final Node pred = window.pred;
+                final Node curr = window.curr;
+                if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Cmp, curr.key) == 0) { 
+                	Facade_Nova.DeletePrivate(idx,newNode.key);
+                    return false;
+                } else {
+                    newNode.next.set(curr, false);
+                    if (pred.next.compareAndSet(curr, newNode, false, false)) {
+                        return true;
+                    }
                 }
-            }
-        }       
+            }  
+        }catch(Exception e) {continue CmpFail;}
     }
 
     
@@ -142,28 +144,31 @@ public class HarrisLinkedListNova<E> {
      * @return
      */
     public boolean remove(E key, int tidx) {
-        while (true) {
-            final Window<Facade> window = find(key, tidx);
-            // On Harris's paper, "pred" is named "left_node" and the "curr"
-            // variable is named "right_node".            
-            final Node pred = window.pred;
-            final Node curr = window.curr;
-            if (Facade_Nova.Compare(key, Cmp, curr.key) != 0) {
-                return false;
-            } 
-            final Node succ = curr.next.getReference();
-            // In "The Art of Multiprocessor Programming - 1st edition", 
-            // the code shown has attemptMark() but we can't use it, 
-            // because attemptMark() returns true if the node
-            // is already marked, which is not the desired effect, so we 
-            // must use compareAndSet() instead.
-            if (!curr.next.compareAndSet(succ, succ, false, true)) {//mark
-                continue;
+        CmpFail: while(true)
+    	try {
+            while (true) {
+                final Window<Facade> window = find(key, tidx);
+                // On Harris's paper, "pred" is named "left_node" and the "curr"
+                // variable is named "right_node".            
+                final Node pred = window.pred;
+                final Node curr = window.curr;
+                if (curr.key == Illegal_nu || Facade_Nova.Compare(key, Cmp, curr.key) != 0) {
+                    return false;
+                } 
+                final Node succ = curr.next.getReference();
+                // In "The Art of Multiprocessor Programming - 1st edition", 
+                // the code shown has attemptMark() but we can't use it, 
+                // because attemptMark() returns true if the node
+                // is already marked, which is not the desired effect, so we 
+                // must use compareAndSet() instead.
+                if (!curr.next.compareAndSet(succ, succ, false, true)) {//mark
+                    continue;
+                }
+                pred.next.compareAndSet(curr, succ, false, false);
+                Facade_Nova.Delete(tidx, curr.key, curr, key_offset);
+                return true;
             }
-            pred.next.compareAndSet(curr, succ, false, false);
-            Facade_Nova.Delete(tidx, curr.key, curr, key_offset);
-            return true;
-        }
+    	}catch(Exception e) {continue CmpFail;}
     }
 
     
@@ -185,29 +190,31 @@ public class HarrisLinkedListNova<E> {
         if (head.next.getReference() == tail) {
             return new Window<Facade>(head, tail);
         }
-        
-        retry: 
-        while (true) {
-            pred = head;
-            curr = pred.next.getReference();
-            while (true) {
-                succ = curr.next.get(marked);
-                while (marked[0]) {
-                    if (!pred.next.compareAndSet(curr, succ, false, false)) {
-                        continue retry;
-                    }
-                    Facade_Nova.Delete(tidx, curr.key, curr, key_offset);
-                    curr = succ;
-                    succ = curr.next.get(marked);
-                }
-
-                if (curr == tail || Facade_Nova.Compare(key, Cmp, curr.key) >= 0) { //we compare the offheap vs the key thus looking for >
-                    return new Window<Facade>(pred, curr);
-                }
-                pred = curr;
-                curr = succ;
-            }
-        }
+        CmpFail: while(true)
+        	try {
+        		retry: 
+        			while (true) {
+        				pred = head;
+	                    curr = pred.next.getReference();
+	                    while (true) {
+	                        succ = curr.next.get(marked);
+	                        while (marked[0]) {
+	                            if (!pred.next.compareAndSet(curr, succ, false, false)) {
+	                                continue retry;
+	                            }
+	                            Facade_Nova.Delete(tidx, curr.key, curr, key_offset);
+	                            curr = succ;
+	                            succ = curr.next.get(marked);
+	                        }
+	
+	                        if (curr == tail || Facade_Nova.Compare(key, Cmp, curr.key) >= 0) { //we compare the offheap vs the key thus looking for >
+	                            return new Window<Facade>(pred, curr);
+	                        }
+	                        pred = curr;
+	                        curr = succ;
+	                    }
+        			}
+        }catch (Exception e) {continue CmpFail;}
     }
 
 
@@ -229,16 +236,28 @@ public class HarrisLinkedListNova<E> {
      */
     public boolean contains(E key, int tidx) {
         boolean[] marked = {false};
-        Node curr = head.next.getReference();
-        curr.next.get(marked);
-        while (curr != tail && Facade_Nova.Compare(key, Cmp, curr.key) < 0) {
-            curr = curr.next.getReference();
-            curr.next.get(marked);
-        }
-        return curr.key == Illegal_nu ? false : Facade_Nova.Compare(key, Cmp, curr.key) == 0 && !marked[0];
+        CmpFail: while(true)
+        	try {
+                Node curr = head.next.getReference();
+                curr.next.get(marked);
+                while (curr != tail && Facade_Nova.Compare(key, Cmp, curr.key) < 0) {
+                    curr = curr.next.getReference();
+                    curr.next.get(marked);
+                }
+                return curr.key == Illegal_nu ? false : Facade_Nova.Compare(key, Cmp, curr.key) == 0 && !marked[0];
+        	}catch (Exception e) {continue CmpFail;}
     }
     
-    
+
+    public void Print() {
+        Node curr = head.next.getReference();
+        while (curr != tail ) {
+ 	       Facade_Nova.Print(Cmp, curr.key);
+ 	       System.out.print("-->");
+           curr = curr.next.getReference();
+
+        }
+    }
     
 	public static void main(String[] args) {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
@@ -248,14 +267,20 @@ public class HarrisLinkedListNova<E> {
 	    x.set(88);
 	    HarrisLinkedListNova<Buff> List = new HarrisLinkedListNova<>(novaManager, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 		List.add(x,0);
+		List.remove(x, 0);
+		List.add(x,0);
 		x.set(120);
 		List.add(x,0);
+
+
 	    Buff xy =new Buff(4);
 	    Buff z= new Buff(128);
 	    xy.set(110);
 	    List.add(xy,0);
 	    List.contains(x,0);
 	    
+	    
+	    List.Print();
 	    assert List.contains(x,0) == false;
 	    assert List.contains(z,0) == true;
 

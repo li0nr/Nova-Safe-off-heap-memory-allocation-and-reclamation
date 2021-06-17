@@ -4,10 +4,10 @@
  * Please see LICENSE file in the project root for terms.
  */
 
-package com.yahoo.oak.LL.synchrobench.contention.benchmark;
+package com.yahoo.oak.synchrobench.contention.benchmark;
 
-import com.yahoo.oak.LL.synchrobench.contention.abstractions.Compositional;
 import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 
 import java.lang.reflect.Method;
 import java.util.Random;
@@ -23,7 +23,7 @@ public class ThreadLoop implements Runnable {
     /**
      * The instance of the running benchmark
      */
-	Compositional<Buff> bench;
+	CompositionalBST<Buff, Buff> bench;
     /**
      * The stop flag, indicating whether the loop is over
      */
@@ -83,7 +83,7 @@ public class ThreadLoop implements Runnable {
     int[] cdf = new int[3];
 
     public ThreadLoop(short myThreadNum,
-                         Compositional<Buff> bench, Method[] methods) {
+                         CompositionalBST<Buff, Buff> bench, Method[] methods) {
         this.myThreadNum = myThreadNum;
         this.bench = bench;
         this.methods = methods;
@@ -125,7 +125,7 @@ public class ThreadLoop implements Runnable {
             }
             else if (coin < cdf[1]) { // -u writing is better than deleting?
             	numAdd++;
-            	if(bench.put(key, myThreadNum) == true) {
+            	if(bench.put(key, key, myThreadNum) == null) {
             		numSuccAdd++;
             	}
             	else failures++;

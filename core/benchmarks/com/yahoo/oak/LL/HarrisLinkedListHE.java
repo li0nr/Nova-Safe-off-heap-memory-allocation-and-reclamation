@@ -96,8 +96,9 @@ public class HarrisLinkedListHE<E> {
     public boolean add(E key, int tidx) {
     	HEslice access  = HE.allocate( Srz.calculateSize(key));
 		Srz.serialize(key, access.address+access.offset);
-		
 		final Node<HEslice> newNode = new Node<>(access);
+        CmpFail: while(true)
+        try{
         while (true) {
             final Window<HEslice> window = find(key, tidx);
             // On Harris paper, pred is named left_node and curr is right_node
@@ -115,7 +116,8 @@ public class HarrisLinkedListHE<E> {
                 }
             }
         }       
-    }
+    }catch(Exception e) {continue CmpFail;}
+}
 
     
     /**
@@ -128,13 +130,15 @@ public class HarrisLinkedListHE<E> {
      * @return
      */
     public boolean remove(E key, int tidx) {
+        CmpFail: while(true)
+    	try {
         while (true) {
             final Window<HEslice> window = find(key, tidx);
             // On Harris's paper, "pred" is named "left_node" and the "curr"
             // variable is named "right_node".            
             final Node<HEslice> pred = window.pred;
             final Node<HEslice> curr = window.curr;
-            if ( Cmp.compareKeys(curr.key.address + curr.key.offset, key) != 0) {
+            if ( curr.key == null ||Cmp.compareKeys(curr.key.address + curr.key.offset, key) != 0) {
             	HE.clear(tidx);
                 return false;
             } 
@@ -153,7 +157,8 @@ public class HarrisLinkedListHE<E> {
                 return true;	
             }
         }
-    }
+	}catch(Exception e) {continue CmpFail;}
+}
 
     
     /**
@@ -174,7 +179,8 @@ public class HarrisLinkedListHE<E> {
         if (head.next.getReference() == tail) {
             return new Window<HEslice>(head, tail);
         }
-        
+        CmpFail: while(true)
+        	try {
         retry: 
         while (true) {
             pred = head;
@@ -205,7 +211,10 @@ public class HarrisLinkedListHE<E> {
                 //HE.protectEraRelease(1, 0, tidx);
             }
         }
-    }
+    }catch (Exception e) {continue CmpFail;}
+}
+        
+        
 
 
     
@@ -226,6 +235,8 @@ public class HarrisLinkedListHE<E> {
      */
     public boolean contains(E key, int tidx) {
         boolean[] marked = {false};
+        CmpFail: while(true)
+        	try {
         //Node<HEslice> curr = HE.get_protected(head.next.getReference(),01,tidx);
         Node<HEslice> curr = head.next.getReference();
         curr.next.get(marked);
@@ -239,7 +250,8 @@ public class HarrisLinkedListHE<E> {
         boolean flag = curr.key != null && Cmp.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
         HE.clear(tidx);
         return flag;
-    }
+	}catch (Exception e) {continue CmpFail;}
+}
     
 	public HazardEras getHE() {
 		return HE;
