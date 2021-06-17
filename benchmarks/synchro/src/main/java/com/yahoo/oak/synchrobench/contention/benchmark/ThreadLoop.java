@@ -110,7 +110,6 @@ public class ThreadLoop implements Runnable {
         while (!stop) {
             newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
-        	key = new Buff();
         	key.set(newInt);
 
             int coin = rand.nextInt(1000);

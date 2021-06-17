@@ -55,8 +55,7 @@ declare -A scenarios=(
 
 # Oak vs JavaSkipList
 benchClassPrefix="com.yahoo.oak"
-benchs="LL_HE_Synch BST_HE_Synch BST_NoMM_Synch BST_Nova_Synch BST_Synch"
-# LL_HE_Synch LL_NoMM_Synch  LL_Nova_Synch LL_Synch"
+benchs="LL_HE_Synch LL_NoMM_Synch  LL_Nova_Synch LL_Synch BST_HE_Synch BST_NoMM_Synch BST_Nova_Synch BST_Synch"
 
 
 summary="${output}/summary.csv"
