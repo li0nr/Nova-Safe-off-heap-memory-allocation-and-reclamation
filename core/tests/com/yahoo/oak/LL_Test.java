@@ -63,8 +63,25 @@ public class LL_Test {
 	
 	@Test
 	public void LL_GC() {
-	    HarrisLinkedList<Buff> List = new HarrisLinkedList<>();
-	    
+	    HarrisLinkedList<Buff> List = new HarrisLinkedList<>(Buff.CC);
+	    Buff x =new Buff(4);
+	    x.set(88);
+		List.add(x,0);
+		assert List.contains(x, 0) == true;
+		x.set(120);
+		List.add(x,0);
+		assert List.contains(x, 0) == true;
+
+	    Buff xy =new Buff(4);
+	    Buff z= new Buff(128);
+	    xy.set(110);
+	    List.add(xy,0);
+	    List.contains(x,0);
+		assert List.contains(x, 0) == true;
+	    assert List.remove(x,0) == true;
+
+	    assert List.contains(x,0) == false; 
+	    assert List.contains(z,0) == false;
 
 	}
 	

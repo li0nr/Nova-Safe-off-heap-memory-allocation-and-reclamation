@@ -171,7 +171,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	            curr = curr.next.getReference();
 	            curr.next.get(marked);
 	        }
-	        boolean flag = curr.key.compareTo(key) == 0 && !marked[0];
+	        boolean flag = curr.key!= null && curr.key.compareTo(key) == 0 && !marked[0];
 	        return flag;
 	    }
 }
