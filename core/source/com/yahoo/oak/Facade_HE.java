@@ -26,7 +26,7 @@ public class Facade_HE <T,K> {
 	
 		
 	
-	static public <T> T Read(NovaSerializer<T> lambda, HEslice slice, int tidx) {
+	static public <T> T Read(NovaS<T> lambda, HEslice slice, int tidx) {
 	
 		if(slice.getdelEra() == -1)
 			throw new IllegalArgumentException("slice deleted");
@@ -43,7 +43,7 @@ public class Facade_HE <T,K> {
 	}
 
 	
-	static public <T> HEslice Write(NovaSerializer<T> lambda, T obj, HEslice slice, int tidx ) {
+	static public <T> HEslice Write(NovaS<T> lambda, T obj, HEslice slice, int tidx ) {
 		if(slice.getdelEra() == -1)
 			throw new IllegalArgumentException("slice deleted");
 		
@@ -59,7 +59,7 @@ public class Facade_HE <T,K> {
 	}
 	
 	
-	static public <T> HEslice WriteFast(NovaSerializer<T> lambda, T obj, HEslice slice, int tidx ) {
+	static public <T> HEslice WriteFast(NovaS<T> lambda, T obj, HEslice slice, int tidx ) {
 		if(slice.getdelEra() == -1)
 			throw new IllegalArgumentException("slice deleted");
 		

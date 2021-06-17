@@ -25,16 +25,16 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import com.yahoo.oak.BST_HE;
-import com.yahoo.oak.BST_Nova;
-import com.yahoo.oak.Buff;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
+import com.yahoo.oak.BST.BST_HE;
+import com.yahoo.oak.BST.BST_Nova;
 import com.yahoo.oak.BST_jmh.BSTParam;
 import com.yahoo.oak.BST_jmh.main.BST_bench_Nova.BenchmarkState;
 import com.yahoo.oak.BST_jmh.main.BST_bench_Nova.ThreadState;
+import com.yahoo.oak.Buff.Buff;
 
 
 

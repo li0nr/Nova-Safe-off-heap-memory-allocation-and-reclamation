@@ -9,7 +9,7 @@ package com.yahoo.oak;
 
 // Represents a portion of a bigger block which is part of the underlying managed memory.
 // It is allocated via block memory allocator, and can be de-allocated later
-class NovaSlice implements  Comparable<NovaSlice> {
+public class NovaSlice implements  Comparable<NovaSlice> {
 
     /**
      * An allocated slice might have reserved space for meta-data, i.e., a header.
@@ -18,13 +18,13 @@ class NovaSlice implements  Comparable<NovaSlice> {
      * by the allocator/memory-manager using the update() method.
      */
     protected int blockID;
-    protected int offset;
+    public int offset;
     protected int length;
-    protected long address;
+    public long address;
 
 
     
-    NovaSlice(int block, int offset, int len) {
+    public NovaSlice(int block, int offset, int len) {
         blockID=block;
         this.offset=offset;
         this.length= len;

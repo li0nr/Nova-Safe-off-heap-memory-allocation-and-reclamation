@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
+import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.Buff.Buff;
+
 public class BST_Nova_mem {
     static private BST_Nova<Buff,Buff> BSTX ;
     static final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
@@ -60,11 +63,11 @@ public class BST_Nova_mem {
 	 
 	 public static class bench_Thread implements Runnable{
 		 Random random;
-		 public com.yahoo.oak.Buff iB;
+		 public com.yahoo.oak.Buff.Buff iB;
 		 public int idx;
 		    
 		 bench_Thread(int index, long seed) {
-			 iB = new com.yahoo.oak.Buff();
+			 iB = new com.yahoo.oak.Buff.Buff();
 			 idx=index;
 			 random = new Random(seed);
 			 }

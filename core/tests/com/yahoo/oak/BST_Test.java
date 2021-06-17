@@ -5,6 +5,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import com.yahoo.oak.BST.BST;
+import com.yahoo.oak.BST.BST_HE;
+import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.Buff.Buff;
+
 public class BST_Test {
 
 	
@@ -73,12 +78,14 @@ public class BST_Test {
 	public void BST_GC_CoverTest() {
 
 	    BST<Buff,Buff> BST = 
-	    		new BST<Buff, Buff>();
+	    		new BST<Buff, Buff>(Buff.CC,Buff.CC);
 	    	    
 	    for(int i =0; i < 20; i++) {
 		    Buff x =new Buff();
+		    Buff v = new Buff();
+		    v.set(i);
 		    x.set(i);
-		    BST.put(x, x);
+		    BST.put(x, v);
 		    assert BST.get(x).compareTo(x) == 0;
 		    assert BST.containsKey(x) == true;
 	    }
@@ -168,7 +175,7 @@ public class BST_Test {
 		    assert BST_HE.remove( k, 0) == true;
 
 	    }
-	    BST_HE.HE.ForceCleanUp();
+	    BST_HE.getHE().ForceCleanUp();
 	    novaManager.ForceCleanUp();
 	    assert allocator.allocated() == 0;
 	    

@@ -47,7 +47,7 @@ public class HazardEras {
 	static final Unsafe UNSAFE=UnsafeUtils.unsafe;
 	
 	
-	class HEslice extends NovaSlice implements HazardEras_interface{
+	public class HEslice extends NovaSlice implements HazardEras_interface{
 		private long bornEra;
 		private long deadEra;
 		
@@ -74,7 +74,7 @@ public class HazardEras {
 		 }
 	}
 		 
-	HazardEras(int maxHEs, int maxThreads, NativeMemoryAllocator alloc) {
+	public HazardEras(int maxHEs, int maxThreads, NativeMemoryAllocator alloc) {
 		allocator = alloc;
 		MAX_HES = maxHEs;
 		eraClock = new AtomicLong(1);
@@ -101,7 +101,7 @@ public class HazardEras {
     /**
      * Progress Condition: wait-free bounded (by maxHEs)
      */
-     void clear(int tid) {
+     public void clear(int tid) {
     	 for( int ihe= 0; ihe < MAX_HES ; ihe ++) {
     		 UnsafeUtils.unsafe.fullFence();
     			he[(tid)*CLPAD+16+ihe] = 0;
@@ -114,7 +114,7 @@ public class HazardEras {
      * Progress Condition: lock-free
      */
      
-     HEslice get_protected(HEslice obj, int ihe, int tid) {
+     public HEslice get_protected(HEslice obj, int ihe, int tid) {
     	 long prevEra = he[(tid)*CLPAD+16+ihe];
     	 while (true) {
     		 //T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
@@ -149,7 +149,7 @@ public class HazardEras {
      * Progress Condition: wait-free bounded
      *
      */
-      <T> void retire(int mytid, HazardEras_interface obj) {
+      public <T> void retire(int mytid, HazardEras_interface obj) {
         long currEra = eraClock.get();
 //        ptr->delEra = currEra;
         obj.setDeleteEra(currEra);
@@ -173,7 +173,7 @@ public class HazardEras {
 
     }
       
-      void fastFree(NovaSlice s) {
+      public void fastFree(NovaSlice s) {
     	  allocator.free(s);
       }
 

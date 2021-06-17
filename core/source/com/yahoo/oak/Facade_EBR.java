@@ -21,7 +21,7 @@ public class Facade_EBR <T,K> {
 		_EBR.retire(slice, idx);
 	}
 	
-	static public <T> T Read(NovaSerializer<T> lambda, EBRslice slice, int tidx) {
+	static public <T> T Read(NovaS<T> lambda, EBRslice slice, int tidx) {
 	
 		if(slice.geteEpoch() != -1)
 			throw new IllegalArgumentException("slice deleted");
@@ -39,7 +39,7 @@ public class Facade_EBR <T,K> {
 	}
 
 	
-	static public <T> EBRslice Write(NovaSerializer<T> lambda, T obj, EBRslice slice, int tidx ) {
+	static public <T> EBRslice Write(NovaS<T> lambda, T obj, EBRslice slice, int tidx ) {
 		if(slice.geteEpoch() != -1)
 			throw new IllegalArgumentException("slice deleted");
 		
@@ -56,7 +56,7 @@ public class Facade_EBR <T,K> {
 	}
 	
 	
-	static public <T> EBRslice WriteFast(NovaSerializer<T> lambda, T obj, EBRslice slice, int tidx ) {
+	static public <T> EBRslice WriteFast(NovaS<T> lambda, T obj, EBRslice slice, int tidx ) {
 		if(slice.geteEpoch() != -1)
 			throw new IllegalArgumentException("slice deleted");
 		

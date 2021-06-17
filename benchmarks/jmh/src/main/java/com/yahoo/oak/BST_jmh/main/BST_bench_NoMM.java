@@ -25,12 +25,12 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import com.yahoo.oak.BST_NoMM;
-import com.yahoo.oak.Buff;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
+import com.yahoo.oak.BST.BST_NoMM;
 import com.yahoo.oak.BST_jmh.BSTParam;
+import com.yahoo.oak.Buff.Buff;
 
 public class BST_bench_NoMM {
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);

@@ -2,6 +2,11 @@ package com.yahoo.oak;
 
 import org.junit.Test;
 
+import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.LL.HarrisLinkedList;
+import com.yahoo.oak.LL.HarrisLinkedListHE;
+import com.yahoo.oak.LL.HarrisLinkedListNova;
+
 public class LL_Test {
 	
 	@Test
@@ -87,7 +92,7 @@ public class LL_Test {
 		    assert List_HE.remove( k, 0) == true;
 
 	    }
-	    List_HE.HE.ForceCleanUp();
+	    List_HE.getHE().ForceCleanUp();
 	    novaManager.ForceCleanUp();
 	    assert allocator.allocated() == 0;
 	}

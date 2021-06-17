@@ -4,6 +4,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import com.yahoo.oak.Buff.Buff;
+
 public class Buff_Test {
 	
 	@Test

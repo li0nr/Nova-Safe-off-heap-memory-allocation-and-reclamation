@@ -90,7 +90,7 @@ public class Facade_Nova <T,K> {
 		 return true; 
 	}
 	
-	static public <T> long WriteFull (NovaSerializer<T> lambda, T obj, long facade_meta ,int idx ) {//for now write doesnt take lambda for writing 
+	static public <T> long WriteFull (NovaS<T> lambda, T obj, long facade_meta ,int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2==DELETED) {
 			throw new IllegalArgumentException("cant locate slice");
@@ -123,7 +123,7 @@ public class Facade_Nova <T,K> {
 	}
 	
 	
-	static public <T> T Read(NovaSerializer<T> lambda, long metadata) {
+	static public <T> T Read(NovaS<T> lambda, long metadata) {
 	
 		if(metadata%2!=0)
 			throw new IllegalArgumentException("cant locate slice");
@@ -145,7 +145,7 @@ public class Facade_Nova <T,K> {
 	}
 
 	
-	static public <T>long WriteFast(NovaSerializer<T> lambda, T obj, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
+	static public <T>long WriteFast(NovaS<T> lambda, T obj, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2!=0)
 			throw new IllegalArgumentException("cant locate slice");
@@ -158,7 +158,7 @@ public class Facade_Nova <T,K> {
 		 return facade_meta;
 	}
 	
-	static public <T>long WriteFastFromOffheap(NovaSerializer<T> lambda, long source_meta, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
+	static public <T>long WriteFastFromOffheap(NovaS<T> lambda, long source_meta, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2!=0 || source_meta%2 != 0)
 			throw new IllegalArgumentException("cant locate slice");

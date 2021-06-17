@@ -5,6 +5,9 @@ import java.util.Random;
 
 import javax.swing.plaf.SliderUI;
 
+import com.yahoo.oak.BST.BST_HE;
+import com.yahoo.oak.Buff.Buff;
+
 
 public class BST_HE_mem {
 	
@@ -63,11 +66,11 @@ public class BST_HE_mem {
 		 
 		 public static class bench_Thread implements Runnable{
 			 Random random;
-			 public com.yahoo.oak.Buff iB;
+			 public com.yahoo.oak.Buff.Buff iB;
 			 public int idx;
 			    
 			 bench_Thread(int index, long seed) {
-				 iB = new com.yahoo.oak.Buff();
+				 iB = new com.yahoo.oak.Buff.Buff();
 				 idx=index;
 				 random = new Random(seed);
 				 }

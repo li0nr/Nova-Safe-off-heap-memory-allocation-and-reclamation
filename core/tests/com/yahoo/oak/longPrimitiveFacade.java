@@ -5,8 +5,6 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
 
-import com.yahoo.oak.BST.Info;
-import com.yahoo.oak.BST.Node;
 import com.yahoo.oak.FacadeTest.ReaderThread;
 
 import sun.misc.Unsafe;
@@ -28,7 +26,6 @@ public class longPrimitiveFacade {
         final long value;
         volatile Node  left;
         volatile Node  right;
-        volatile Info  info;
 
         /** FOR MANUAL CREATION OF NODES (only used directly by testbed) **/
         Node(final long key, final long value,
@@ -37,7 +34,6 @@ public class longPrimitiveFacade {
             this.value = value;
             this.left = left;
             this.right = right;
-            this.info = null;
         }
 
         /** TO CREATE A LEAF NODE **/

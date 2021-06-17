@@ -21,6 +21,9 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.LL.HarrisLinkedListHE;
+
 
 public class LL_HE_bench {
 		final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);

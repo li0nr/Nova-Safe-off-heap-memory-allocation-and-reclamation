@@ -149,7 +149,7 @@ public class Facade <T> {
 		 return this;
 	}
 	
-	public <T> Facade WriteFull (NovaSerializer<T> lambda, T obj, int idx ) {//for now write doesnt take lambda for writing 
+	public <T> Facade WriteFull (NovaS<T> lambda, T obj, int idx ) {//for now write doesnt take lambda for writing 
 
 		long facademeta = FacadeMetaData;
 		if(facademeta%2==DELETED) {
@@ -184,7 +184,7 @@ public class Facade <T> {
 	
 
 	
-	public <T> T Read(NovaSerializer<T> lambda) {
+	public <T> T Read(NovaS<T> lambda) {
 		long facademeta = FacadeMetaData;
 		
 		if(facademeta%2!=0)
@@ -212,7 +212,7 @@ public class Facade <T> {
 	}
 
 	
-	public Facade WriteFast(NovaSerializer<T> lambda, T obj, int idx ) {//for now write doesnt take lambda for writing 
+	public Facade WriteFast(NovaS<T> lambda, T obj, int idx ) {//for now write doesnt take lambda for writing 
 		long facademeta = FacadeMetaData;
 		
 		if(facademeta%2!=0)
@@ -226,7 +226,7 @@ public class Facade <T> {
 		 return this;
 	}
 	
-	public boolean AllocateWrite_Private(NovaSerializer<T> lambda, int size, T obj, int idx) {
+	public boolean AllocateWrite_Private(NovaS<T> lambda, int size, T obj, int idx) {
 		
 		NovaSlice 	newslice = novaManager.getSlice(size,idx);
 		int offset=	newslice.getAllocatedOffset();
