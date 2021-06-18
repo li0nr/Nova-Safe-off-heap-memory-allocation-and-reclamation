@@ -28,24 +28,18 @@ public class NovaManager implements MemoryManager {
 
     private final AtomicInteger globalNovaNumber;
     private final BlockMemoryAllocator allocator;
-    
-    private final int blockcount;    
     private final long TAP[];
-
-//    private final List<NovaReadBuffer> ReadBuffers;
-//    private final List<NovaWriteBuffer> WriteBuffers;
-    private final List<NovaSlice> Slices;
+    private final NovaSlice[] Slices;
 
     public NovaManager(BlockMemoryAllocator allocator) {
         this.NreleaseLists = new CopyOnWriteArrayList<>();
         for (int i = 0; i < MAX_THREADS; i++) {
             this.NreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
         }
-        this.Slices = new ArrayList<>();
+        this.Slices = new NovaSlice[MAX_THREADS];
         for (int i = 0; i < MAX_THREADS; i++) {
-            this.Slices.add(new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE));
+            this.Slices[i]=new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE);
         }
-        blockcount = allocator.getBlocks();
         
         TAP = new long[ MAX_THREADS * CACHE_PADDING];
         //block 0 is not used ?
@@ -119,12 +113,12 @@ public class NovaManager implements MemoryManager {
 	int i= idx%MAX_THREADS;
 	TAP[CACHE_PADDING*i+IDENTRY]=idx;
 	TAP[CACHE_PADDING*i+REFENTRY]=ref;
-}
+  }
     
   public  void UnsetTap(int block,int idx) {
 	int i= idx%MAX_THREADS;
 	TAP[CACHE_PADDING*i+IDENTRY]=-1;
-}
+  }
 
     public long getAdress(int blockID) {
     	return allocator.getAddress(blockID);
@@ -133,7 +127,7 @@ public class NovaManager implements MemoryManager {
 
     
     public NovaSlice getSlice(int size,int ThreadIdx) {
-    	NovaSlice s=Slices.get(ThreadIdx);
+    	NovaSlice s = Slices[ThreadIdx];
     	allocate(s, size);
     	return s;
     

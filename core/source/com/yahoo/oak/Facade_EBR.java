@@ -3,7 +3,7 @@ package com.yahoo.oak;
 import com.yahoo.oak.EBR.EBRslice;
 import sun.misc.Unsafe;
 
-public class Facade_EBR <T,K> {
+public class Facade_EBR {
 
 	static final Unsafe UNSAFE=UnsafeUtils.unsafe;
 	static EBR  _EBR;

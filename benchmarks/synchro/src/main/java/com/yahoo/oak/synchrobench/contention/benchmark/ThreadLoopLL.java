@@ -138,7 +138,6 @@ public class ThreadLoopLL implements Runnable {
             	}
             	else {
             		failures++;
-            		bench.print();
             	}
             }
             total++;
