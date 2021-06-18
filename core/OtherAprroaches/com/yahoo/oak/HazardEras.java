@@ -183,7 +183,7 @@ public class HazardEras {
 	//DEBUG
 	void ForceCleanUp() {
 		for(int i =0 ; i < HE_MAX_THREADS; i++) {
-	        ArrayList<HazardEras_interface> rlist = retiredList[i*CLPAD+ 16];
+	        ArrayList<HazardEras_interface> rlist = retiredList[i*CLPAD];
             HazardEras_interface toDeleteObj;
 	        for (int iret = 0; iret < rlist.size(); ) {
             	toDeleteObj = (HazardEras_interface)rlist.get(iret);

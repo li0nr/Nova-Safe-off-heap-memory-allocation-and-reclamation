@@ -87,7 +87,7 @@ public class Facade_Nova <T,K> {
 		long len=OffHeapMetaData>>>24; 
 		 
 		novaManager.free(new NovaSlice(block, offset, (int)len));
-		 return true; 
+		return true; 
 	}
 	
 	static public <T> long WriteFull (NovaS<T> lambda, T obj, long facade_meta ,int idx ) {//for now write doesnt take lambda for writing 

@@ -136,7 +136,7 @@ public class BST_Test {
 	}
 	
 	@Test
-	public void BST_Fill_delete() {
+	public void BST_Fill_delete_Nova() {
 		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
@@ -144,9 +144,6 @@ public class BST_Test {
 	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
 	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
 	    
-	    BST_HE<Buff,Buff> BST_HE = 
-	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
-	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
 	    int i = 0;
 	    Buff k = new Buff();
 	    k.set(0);
@@ -155,28 +152,53 @@ public class BST_Test {
     	BST.remove( k, 0);
     	BST.remove( k, 0);
 
-    	BST_HE.put(k, k, 0);
-    	BST_HE.put(k, k, 0);
-    	BST_HE.remove( k, 0);
-    	BST_HE.remove( k, 0);
-
-
 	    while(i < 1) {
 	    	k.set(i);
 	    	i++;
 	    	assert BST.put(k, k, 0) == null;
-		    assert BST_HE.put(k, k, 0) == null;
 	    }
 	    i = 0;
 	    while(i < 1) {
 	    	k.set(i);
 	    	i++;
 	    	assert BST.remove( k, 0) == true;
+
+	    }
+	    novaManager.ForceCleanUp();
+	    assert allocator.allocated() == 0;
+	    
+	}
+	
+	@Test
+	public void BST_Fill_delete_HE() {
+		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	    
+	    BST_HE<Buff,Buff> BST_HE = 
+	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
+	    int i = 0;
+	    Buff k = new Buff();
+	    k.set(0);
+
+    	BST_HE.put(k, k, 0);
+    	BST_HE.put(k, k, 0);
+    	BST_HE.remove( k, 0);
+    	BST_HE.remove( k, 0);
+
+
+	    while(i < 1) {
+	    	k.set(i);
+	    	i++;
+		    assert BST_HE.put(k, k, 0) == null;
+	    }
+	    i = 0;
+	    while(i < 1) {
+	    	k.set(i);
+	    	i++;
 		    assert BST_HE.remove( k, 0) == true;
 
 	    }
 	    BST_HE.getHE().ForceCleanUp();
-	    novaManager.ForceCleanUp();
 	    assert allocator.allocated() == 0;
 	    
 	}
