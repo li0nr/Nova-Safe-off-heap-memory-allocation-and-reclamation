@@ -86,7 +86,7 @@ public class Facade_Nova <T,K> {
 
 		long len=OffHeapMetaData>>>24; 
 		 
-		 novaManager.release(block,offset,(int)len,idx); 
+		novaManager.free(new NovaSlice(block, offset, (int)len));
 		 return true; 
 	}
 	
@@ -194,7 +194,6 @@ public class Facade_Nova <T,K> {
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
-		int x = (int)(UNSAFE.getLong(address+offset)&0xFFFFFF);
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
 			throw new IllegalArgumentException("slice changed");
 		return res;	

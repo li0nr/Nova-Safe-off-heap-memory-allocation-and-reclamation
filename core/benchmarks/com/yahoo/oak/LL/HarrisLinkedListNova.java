@@ -1,9 +1,6 @@
 package com.yahoo.oak.LL;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicMarkableReference;
-
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import com.yahoo.oak.Facade;
 import com.yahoo.oak.Facade_Nova;
@@ -13,8 +10,6 @@ import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.Buff.Buff;
-
-import joptsimple.internal.Reflection;
 import sun.misc.Unsafe;
 
 /**
@@ -78,7 +73,7 @@ public class HarrisLinkedListNova<E> {
     }
     
     // Figure 9.24, page 216
-    static class Window<T> {
+    static class Window {
         public Node pred;
         public Node curr;
         
@@ -116,7 +111,7 @@ public class HarrisLinkedListNova<E> {
         CmpFail: while(true)
         try{
         	while (true) {
-                final Window<Facade> window = find(key, idx);
+                final Window window = find(key, idx);
                 // On Harris paper, pred is named left_node and curr is right_node
                 final Node pred = window.pred;
                 final Node curr = window.curr;
@@ -147,7 +142,7 @@ public class HarrisLinkedListNova<E> {
         CmpFail: while(true)
     	try {
             while (true) {
-                final Window<Facade> window = find(key, tidx);
+                final Window window = find(key, tidx);
                 // On Harris's paper, "pred" is named "left_node" and the "curr"
                 // variable is named "right_node".            
                 final Node pred = window.pred;
@@ -188,7 +183,7 @@ public class HarrisLinkedListNova<E> {
 
         // I think there is a special case for an empty list
         if (head.next.getReference() == tail) {
-            return new Window<Facade>(head, tail);
+            return new Window(head, tail);
         }
         CmpFail: while(true)
         	try {
@@ -208,7 +203,7 @@ public class HarrisLinkedListNova<E> {
 	                        }
 	
 	                        if (curr == tail || Facade_Nova.Compare(key, Cmp, curr.key) >= 0) { //we compare the offheap vs the key thus looking for >
-	                            return new Window<Facade>(pred, curr);
+	                            return new Window(pred, curr);
 	                        }
 	                        pred = curr;
 	                        curr = succ;

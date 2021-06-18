@@ -3,6 +3,8 @@ package com.yahoo.oak.LL;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.CopyConstructor;
+import com.yahoo.oak.Facade_Nova;
+import com.yahoo.oak.LL.HarrisLinkedListNova.Node;
 
 
 public class HarrisLinkedList <E extends Comparable<? super E>>{
@@ -146,8 +148,6 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	        }
 	    }
 
-
-	    
 	    /**
 	     * Searches for a given key.
 	     * 
@@ -167,7 +167,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	        boolean[] marked = {false};
 	        Node<E> curr = head.next.getReference();
 	        curr.next.get(marked);
-	        while (curr != tail && curr.key.compareTo(key) < 0) {
+	        while (curr != tail && curr.key.compareTo(key) > 0) {
 	            curr = curr.next.getReference();
 	            curr.next.get(marked);
 	        }

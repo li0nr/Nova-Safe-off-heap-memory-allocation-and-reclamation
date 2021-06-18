@@ -39,8 +39,8 @@ import com.yahoo.oak.HazardEras.HEslice;
  */
 public class HarrisLinkedListHE<E> {
 
-    final Node<HEslice> head;
-    final Node<HEslice> tail;
+    final Node head;
+    final Node tail;
     
     final NovaC<E> Cmp;
     final NovaS<E> Srz;
@@ -48,22 +48,22 @@ public class HarrisLinkedListHE<E> {
     final NativeMemoryAllocator allocator;
     final static int MAXTHREADS = 32;
     
-    static class Node<E> {
+    static class Node {
         final HEslice key;
-        final AtomicMarkableReference<Node<HEslice>> next;
+        final AtomicMarkableReference<Node> next;
                
         Node(HEslice key) {
             this.key = key;
-            this.next = new AtomicMarkableReference<Node<HEslice>>(null, false);
+            this.next = new AtomicMarkableReference<Node>(null, false);
         }
     }
     
     // Figure 9.24, page 216
-    static class Window<T> {
-        public Node<T> pred;
-        public Node<T> curr;
+    static class Window {
+        public Node pred;
+        public Node curr;
         
-        Window(Node<T> myPred, Node<T> myCurr) {
+        Window(Node myPred, Node myCurr) {
             pred = myPred; 
             curr = myCurr;
         }
@@ -78,8 +78,8 @@ public class HarrisLinkedListHE<E> {
     	this.allocator = allocator;
 		Cmp = cmp; Srz = srz;
     	
-        tail = new Node<>(null);
-        head = new Node<>(null);
+        tail = new Node(null);
+        head = new Node(null);
         head.next.set(tail, false);
     }
     
@@ -96,17 +96,17 @@ public class HarrisLinkedListHE<E> {
     public boolean add(E key, int tidx) {
     	HEslice access  = HE.allocate( Srz.calculateSize(key));
 		Srz.serialize(key, access.address+access.offset);
-		final Node<HEslice> newNode = new Node<>(access);
+		final Node newNode = new Node(access);
         CmpFail: while(true)
         try{
         while (true) {
-            final Window<HEslice> window = find(key, tidx);
+            final Window window = find(key, tidx);
             // On Harris paper, pred is named left_node and curr is right_node
-            final Node<HEslice> pred = window.pred;
-            final Node<HEslice> curr = window.curr;
+            final Node pred = window.pred;
+            final Node curr = window.curr;
             if (curr.key!= null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
             	HE.clear(tidx);
-            	HE.retire(tidx, access);
+            	HE.fastFree(access);
                 return false;
             } else {
                 newNode.next.set(curr, false);
@@ -133,16 +133,16 @@ public class HarrisLinkedListHE<E> {
         CmpFail: while(true)
     	try {
         while (true) {
-            final Window<HEslice> window = find(key, tidx);
+            final Window window = find(key, tidx);
             // On Harris's paper, "pred" is named "left_node" and the "curr"
             // variable is named "right_node".            
-            final Node<HEslice> pred = window.pred;
-            final Node<HEslice> curr = window.curr;
+            final Node pred = window.pred;
+            final Node curr = window.curr;
             if ( curr.key == null ||Cmp.compareKeys(curr.key.address + curr.key.offset, key) != 0) {
             	HE.clear(tidx);
                 return false;
             } 
-            final Node<HEslice> succ = curr.next.getReference();
+            final Node succ = curr.next.getReference();
             // In "The Art of Multiprocessor Programming - 1st edition", 
             // the code shown has attemptMark() but we can't use it, 
             // because attemptMark() returns true if the node
@@ -169,50 +169,42 @@ public class HarrisLinkedListHE<E> {
      * @param key
      * @return
      */
-    public Window<HEslice> find(E key, int tidx) {
-        Node<HEslice> pred = null;
-        Node<HEslice> curr = null; 
-        Node<HEslice> succ = null;
+    public Window find(E key, int tidx) {
+        Node pred = null;
+        Node curr = null; 
+        Node succ = null;
         boolean[] marked = {false};
 
         // I think there is a special case for an empty list
         if (head.next.getReference() == tail) {
-            return new Window<HEslice>(head, tail);
+            return new Window(head, tail);
         }
         CmpFail: while(true)
         	try {
-        retry: 
-        while (true) {
-            pred = head;
-            //curr = HE.get_protected(pred.next.getReference(),1,tidx);
-            curr = pred.next.getReference();
-            while (true) {
-               // succ = HE.get_protected(curr.next.get(marked),0,tidx);
-            	succ = curr.next.get(marked);
-                while (marked[0]) {
-                    if (!pred.next.compareAndSet(curr, succ, false, false)) {
-                        continue retry;
-                    }
-                    HE.retire(tidx, curr.key);
-                    //UnsafeUtils.unsafe.fullFence();//needed analog to the compare exchange strong in java?
-                    //HE.protectEraRelease(1, 0, tidx);
-                    curr = succ;
-                    //succ = HE.get_protected(curr.next.get(marked),0,tidx);
-                    succ = curr.next.get(marked);
-                }
-                HEslice access = HE.get_protected(curr.key, 0, tidx);
-                if (curr == tail || Cmp.compareKeys(access.address + access.offset, key) >= 0) {
-                    return new Window<HEslice>(pred, curr);
-                }
-                pred = curr;
-                //HE.protectEraRelease(2, 1, tidx);
-
-                curr = succ;
-                //HE.protectEraRelease(1, 0, tidx);
-            }
-        }
-    }catch (Exception e) {continue CmpFail;}
-}
+        		retry: 
+        			while (true) {
+        				pred = head;
+        				curr = pred.next.getReference();
+        				while (true) {
+        					succ = curr.next.get(marked);
+			                while (marked[0]) {
+			                    if (!pred.next.compareAndSet(curr, succ, false, false)) {
+			                        continue retry;
+			                    }
+			                    HE.retire(tidx, curr.key);
+			                    curr = succ;
+			                    succ = curr.next.get(marked);
+			                }
+			                HEslice access = HE.get_protected(curr.key, 0, tidx);
+			                if (curr == tail || Cmp.compareKeys(access.address + access.offset, key) >= 0) {
+			                    return new Window(pred, curr);
+			                    }
+			                pred = curr;			
+			                curr = succ;
+			                }
+        				}
+        }catch (Exception e) {continue CmpFail;}    
+    }
         
         
 
@@ -237,20 +229,18 @@ public class HarrisLinkedListHE<E> {
         boolean[] marked = {false};
         CmpFail: while(true)
         	try {
-        //Node<HEslice> curr = HE.get_protected(head.next.getReference(),01,tidx);
-        Node<HEslice> curr = head.next.getReference();
-        curr.next.get(marked);
-        HEslice access = HE.get_protected(curr.key, 0, tidx);
-        while (curr != tail && Cmp.compareKeys(access.address + access.offset, key) < 0) {
-            //curr = HE.get_protected(curr.next.getReference(),01,tidx);
-        	curr = curr.next.getReference();
-            curr.next.get(marked);
-            access = HE.get_protected(curr.key, 0, tidx);
-        }
-        boolean flag = curr.key != null && Cmp.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
-        HE.clear(tidx);
-        return flag;
-	}catch (Exception e) {continue CmpFail;}
+		        Node curr = head.next.getReference();
+		        curr.next.get(marked);
+		        HEslice access = HE.get_protected(curr.key, 0, tidx);
+		        while (curr != tail && Cmp.compareKeys(access.address + access.offset, key) < 0) {
+		        	curr = curr.next.getReference();
+		            curr.next.get(marked);
+		            access = HE.get_protected(curr.key, 0, tidx);
+		        }
+		        boolean flag = curr.key != null && Cmp.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
+		        HE.clear(tidx);
+		        return flag;
+	        }catch (Exception e) {continue CmpFail;}
 }
     
 	public HazardEras getHE() {

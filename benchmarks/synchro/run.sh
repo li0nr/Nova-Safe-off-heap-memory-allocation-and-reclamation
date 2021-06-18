@@ -5,7 +5,7 @@ java=java
 jarfile="target/nova-synchrobench-0.0.1-SNAPSHOT.jar"
 
 thread="01 02 04 06 08 "
-size="10000"
+size="20000"
 keysize="4"
 valuesize="4"
 #writes="0 50"
@@ -35,6 +35,17 @@ declare -A direct_limit=(["BST_HE_Synch"]="22g"
 						 ["LL_Synch"]="0g"
                         )
 
+declare -A becnh_size=(["BST_HE_Synch"]="1000000"
+                         ["BST_NoMM_Synch"]="1000000"
+                         ["BST_Nova_Synch"]="1000000"
+            						 ["LL_HE_Synch"]="10000"
+						             ["LL_NoMM_Synch"]="10000"
+            						 ["LL_Nova_Synch"]="10000"
+		            				 ["BST_Synch"]="1000000"
+	            					 ["LL_Synch"]="10000"
+                        )
+                        
+                        
 if [ ! -d "${output}" ]; then
   mkdir $output
 else
@@ -69,16 +80,17 @@ for scenario in ${!scenarios[@]}; do
     echo "Scenario: ${bench} ${scenario}"
     heapSize="${heap_limit[${bench}]}"
     directMemSize="${direct_limit[${bench}]}"
+    benchSize="${becnh_size[${bench}]}"
     for heapLimit in ${heapSize}; do
       #for gcAlg in ${gcAlgorithms}; do
         gcAlg=""
         javaopt="-server -Xmx${heapLimit} -XX:MaxDirectMemorySize=${directMemSize} ${gcAlg}"
         for write in ${writes}; do
           for t in ${thread}; do
-            for i in ${size}; do
-              r=`echo "2*${i}" | bc`
+            #for i in ${size}; do
+              r=`echo "2*${benchSize}" | bc`
               out=${output}/oak-${scenario}-${bench}-xmx${heapLimit}-DirectMeM${directMemSize}-t${t}-${gcAlg}.log
-              cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keysize} -v ${valuesize} -i ${i} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
+              cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keysize} -v ${valuesize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
               echo ${cmd}
               echo ${cmd} >> ${out}
               ${cmd} >> ${out} 2>&1

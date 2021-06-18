@@ -185,8 +185,7 @@ public class HarrisLinkedListNoMM <E>{
 	            curr = curr.next.getReference();
 	            curr.next.get(marked);
 	        }
-	        boolean flag = Cmp.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
-	        return flag;
+	        return curr.key == null? false: Cmp.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
 	    }
 	    
 	    public void Print() {
