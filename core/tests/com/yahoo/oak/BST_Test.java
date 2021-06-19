@@ -106,9 +106,6 @@ public class BST_Test {
 	    	x.set(i);
 		    assert BST.containsKey(x) == true;
 	    }
-
-
-		    
 	  }
 	
 	@Test

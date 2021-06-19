@@ -36,6 +36,6 @@ public class LL_Nova_Synch implements CompositionalLL<Buff>{
     }
     
     public void print() {
-    	LL.Print();
+    	//LL.Print();
     }
 }

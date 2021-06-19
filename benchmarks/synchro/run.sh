@@ -44,6 +44,26 @@ declare -A becnh_size=(["BST_HE_Synch"]="1000000"
 		            				 ["BST_Synch"]="1000000"
 	            					 ["LL_Synch"]="10000"
                         )
+						
+declare -A key_size=(["BST_HE_Synch"]="10"
+						["BST_NoMM_Synch"]="10"
+						["BST_Nova_Synch"]="10"
+						["BST_Synch"]="10"
+			 ["LL_HE_Synch"]="4"
+			 ["LL_NoMM_Synch"]="4"
+			 ["LL_Nova_Synch"]="4"
+			 ["LL_Synch"]="4"
+)
+
+declare -A val_size=(["BST_HE_Synch"]="1000"
+						["BST_NoMM_Synch"]="1000"
+						["BST_Nova_Synch"]="1000"
+						["BST_Synch"]="1000"
+			 ["LL_HE_Synch"]="4"
+			 ["LL_NoMM_Synch"]="4"
+			 ["LL_Nova_Synch"]="4"
+			 ["LL_Synch"]="4"
+)
                         
                         
 if [ ! -d "${output}" ]; then
@@ -81,6 +101,8 @@ for bench in ${benchs}; do
     heapSize="${heap_limit[${bench}]}"
     directMemSize="${direct_limit[${bench}]}"
     benchSize="${becnh_size[${bench}]}"
+	keySize="key_size[${bench}]"
+	valSize="val_size[${bench}]"
     for heapLimit in ${heapSize}; do
       #for gcAlg in ${gcAlgorithms}; do
         gcAlg=""
@@ -90,7 +112,7 @@ for bench in ${benchs}; do
             #for i in ${size}; do
               r=`echo "2*${benchSize}" | bc`
               out=${output}/oak-${scenario}-${bench}-xmx${heapLimit}-DirectMeM${directMemSize}-t${t}-${gcAlg}.log
-              cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keysize} -v ${valuesize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
+              cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keySize} -v ${valSize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
               echo ${cmd}
               echo ${cmd} >> ${out}
               ${cmd} >> ${out} 2>&1

@@ -72,6 +72,7 @@ public class ThreadLoop implements Runnable {
     Random rand = new Random();
     
     Buff key = new Buff(Parameters.confKeySize);
+    Buff val = new Buff(Parameters.confValSize);
 
     /**
      * The distribution of methods as an array of percentiles
@@ -111,7 +112,8 @@ public class ThreadLoop implements Runnable {
             newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
         	key.set(newInt);
-
+        	val.set(newInt);
+        	
             int coin = rand.nextInt(1000);
             if(coin < cdf[0]) { //-a deleting is good?
         		numRemove++;
