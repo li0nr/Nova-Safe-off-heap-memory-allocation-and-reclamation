@@ -126,7 +126,7 @@ public class ThreadLoop implements Runnable {
             }
             else if (coin < cdf[1]) { // -u writing is better than deleting?
             	numAdd++;
-            	if(bench.put(key, key, myThreadNum) == null) {
+            	if(bench.put(key, val, myThreadNum) == null) {
             		numSuccAdd++;
             	}
             	else failures++;
