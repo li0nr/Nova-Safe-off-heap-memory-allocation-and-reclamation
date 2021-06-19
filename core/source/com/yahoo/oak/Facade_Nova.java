@@ -177,7 +177,7 @@ public class Facade_Nova <T,K> {
 
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
-		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
+		if(! (version == (int)(UNSAFE.getLong(address2+offset2)&0xFFFFFF))) 
 			throw new IllegalArgumentException("slice changed");
 		
 		 return facade_meta;
