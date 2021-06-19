@@ -252,7 +252,7 @@ public class BST_Nova<K , V> {
                     }
             	else {
             		// key is not in the tree, try to replace a leaf with a small subtree
-                    newSibling = new Node(Illegal_facade, Illegal_facade);
+                    newSibling = new Node(l.key, l.value);
                     if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) // newinternal = max(ret.l.key, key);
                     {
                     	newInternal = new Node(Illegal_facade, newNode, newSibling);
