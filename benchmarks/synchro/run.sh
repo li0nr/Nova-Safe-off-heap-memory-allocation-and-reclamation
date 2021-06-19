@@ -94,8 +94,8 @@ summary="${output}/summary.csv"
 echo "Starting nova test `date`"
 echo "Scenario, Bench, Heap size, Direct Mem, # Threads, Throughput, stdError" > ${summary}
 
-for bench in ${benchs}; do
-  for scenario in ${!scenarios[@]}; do
+for scenario in ${!scenarios[@]}; do
+ for bench in ${benchs}; do
     echo ""
     echo "Scenario: ${bench} ${scenario}"
     heapSize="${heap_limit[${bench}]}"
