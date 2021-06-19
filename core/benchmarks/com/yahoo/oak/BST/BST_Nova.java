@@ -252,13 +252,13 @@ public class BST_Nova<K , V> {
                     }
             	else {
             		// key is not in the tree, try to replace a leaf with a small subtree
-                    newSibling = new Node(l.key, l.value);
+                    newSibling = new Node(Illegal_facade, Illegal_facade);
                     if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) // newinternal = max(ret.l.key, key);
                     {
                     	newInternal = new Node(Illegal_facade, newNode, newSibling);
                     	if(l.key != Illegal_facade)
                     		Facade_Nova.
-                    	WriteFastFromOffheap(SrzK,l.key,
+                    		ReadFromOffheap(SrzK,l.key,
                     			Facade_Nova.
                     			AllocateSlice(newInternal, Facade_long_offset_key, Illegal_facade, SrzK.calculateSize(key), idx),
                     			idx);

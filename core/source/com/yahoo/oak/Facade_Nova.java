@@ -158,7 +158,7 @@ public class Facade_Nova <T,K> {
 		 return facade_meta;
 	}
 	
-	static public <T>long WriteFastFromOffheap(NovaS<T> lambda, long source_meta, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
+	static public <T>long ReadFromOffheap(NovaS<T> lambda, long source_meta, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2!=0 || source_meta%2 != 0)
 			throw new IllegalArgumentException("cant locate slice");
@@ -167,6 +167,7 @@ public class Facade_Nova <T,K> {
 		int offset 	= ExtractOffset	(facade_meta);
 		long address = novaManager.getAdress(block);
 		
+		int version = ExtractVer_Del(source_meta);
 		int block2 	= Extractblock	(source_meta);
 		int offset2 	= ExtractOffset	(source_meta);
 		long address2 = novaManager.getAdress(block2);
@@ -174,6 +175,11 @@ public class Facade_Nova <T,K> {
 		lambda.serialize(address2+NovaManager.HEADER_SIZE+offset2,
 				address+NovaManager.HEADER_SIZE+offset);
 
+		if(bench_Flags.Fences)UNSAFE.loadFence();
+		
+		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
+			throw new IllegalArgumentException("slice changed");
+		
 		 return facade_meta;
 	}
 	
