@@ -183,6 +183,23 @@ public class Facade_Nova <T,K> {
 		 return facade_meta;
 	}
 	
+	 static public <T> void checkDeleted(T obj, long metadata) {
+			
+		if(metadata%2!=0)
+			throw new IllegalArgumentException("cant locate slice");
+		
+		int version	= ExtractVer_Del(metadata);
+		int block 	= Extractblock	(metadata);
+		int offset 	= ExtractOffset	(metadata);
+
+		
+		long address = novaManager.getAdress(block);
+		
+		if(bench_Flags.Fences)UNSAFE.loadFence();
+		
+		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
+			throw new IllegalArgumentException("slice changed");
+	}
 	
 	 static public <T> int Compare(T obj, NovaC<T> srZ, long metadata) {
 		

@@ -252,7 +252,15 @@ public class BST_Nova<K , V> {
                     }
             	else {
             		// key is not in the tree, try to replace a leaf with a small subtree
-                    newSibling = new Node(l.key, l.value);
+                    newSibling = new Node(Illegal_facade, Illegal_facade);
+                    if(l.key != Illegal_facade) {
+                        Facade_Nova.ReadFromOffheap(SrzK, l.key, Facade_Nova.AllocateSlice(newSibling, Facade_long_offset_key, 
+                        		Illegal_facade, SrzK.calculateSize(key), idx),idx);
+                        Facade_Nova.ReadFromOffheap(SrzK, l.value, Facade_Nova.AllocateSlice(newSibling, Facade_long_offset_value,
+                        		Illegal_facade, SrzV.calculateSize(value), idx),idx);
+                    }
+                    
+                    
                     if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) // newinternal = max(ret.l.key, key);
                     {
                     	newInternal = new Node(Illegal_facade, newNode, newSibling);
@@ -280,7 +288,9 @@ public class BST_Nova<K , V> {
                 }else {
                 	// if fails, help the current operation
                 	// need to get the latest p.info since CAS doesnt return current value
-                	Facade_Nova.Delete(idx, newInternal.key, newInternal, Facade_long_offset_key );
+                	Facade_Nova.Delete(idx, newInternal.key, 	newInternal, 	Facade_long_offset_key );
+                	Facade_Nova.Delete(idx, newSibling.key, 	newInternal, 	Facade_long_offset_key );
+                	Facade_Nova.Delete(idx, newSibling.value, 	newInternal, 	Facade_long_offset_value );
                 	help(p.info, idx);
                 	}
                 }
