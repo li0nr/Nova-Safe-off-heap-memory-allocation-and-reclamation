@@ -216,13 +216,7 @@ public class BST_Nova<K , V> {
         Info pinfo;
         Node l;
         /** END SEARCH VARIABLES **/
-
-        newNode = new Node<>(Illegal_facade, Illegal_facade);
-        Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_key, 
-        		Illegal_facade, SrzK.calculateSize(key), idx),idx);
-        Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_value,
-        		Illegal_facade, SrzV.calculateSize(value), idx),idx);
-        		
+	
        Redo:
     	   while (true) {
     		   try {
@@ -246,11 +240,17 @@ public class BST_Nova<K , V> {
             		// key already in the tree, cant continue
         			result = l.value;
                     V  objret = (V)Facade_Nova.Read(SrzV, l.value);
-                    Facade_Nova.DeletePrivate(idx, newNode.key );
-                    Facade_Nova.DeletePrivate(idx, newNode.value);
                     return objret;
                     }
             	else {
+            		
+                    newNode = new Node<>(Illegal_facade, Illegal_facade);
+                    Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_key, 
+                    		Illegal_facade, SrzK.calculateSize(key), idx),idx);
+                    Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_value,
+                    		Illegal_facade, SrzV.calculateSize(value), idx),idx);
+                    	
+                    
             		// key is not in the tree, try to replace a leaf with a small subtree
                     newSibling = new Node(Illegal_facade, Illegal_facade);
                     if(l.key != Illegal_facade) {
@@ -391,10 +391,11 @@ public class BST_Nova<K , V> {
 
     private void helpMarked(final DInfo info, int idx) {
         final Node other = (info.p.right == info.l) ? info.p.left : info.p.right;
-        (info.gp.left == info.p ? leftUpdater : rightUpdater).compareAndSet(info.gp, info.p, other);
-        Facade_Nova.Delete(idx, info.l.key, info.l, Facade_long_offset_key );
-        Facade_Nova.Delete(idx, info.l.value, info.l, Facade_long_offset_value );
-        if(info.p.key != Illegal_facade ) Facade_Nova.Delete(idx, info.p.key, info.p, Facade_long_offset_key );
+        if((info.gp.left == info.p ? leftUpdater : rightUpdater).compareAndSet(info.gp, info.p, other)){
+            Facade_Nova.Delete(idx, info.l.key	, info.l, Facade_long_offset_key );
+            Facade_Nova.Delete(idx, info.l.value, info.l, Facade_long_offset_value );
+            Facade_Nova.Delete(idx, info.p.key	, info.p, Facade_long_offset_key );	
+        }
         infoUpdater.compareAndSet(info.gp, info, new Clean());
     }
 
