@@ -53,8 +53,6 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	     * @return
 	     */
 	    public boolean add(E key, int tidx) {	
-	    	E myKey = CC.Copy(key);
-			final Node<E> newNode = new Node<>(myKey);
 	        while (true) {
 	            final Window<E> window = find(key, tidx);
 	            // On Harris paper, pred is named left_node and curr is right_node
@@ -63,6 +61,8 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	            if (curr.key != null && curr.key.compareTo(key) == 0) { 
 	                return false;
 	            } else {
+	    	    	E myKey = CC.Copy(key);
+	    			final Node<E> newNode = new Node<>(myKey);
 	                newNode.next.set(curr, false);
 	                if (pred.next.compareAndSet(curr, newNode, false, false)) {
 	                    return true;

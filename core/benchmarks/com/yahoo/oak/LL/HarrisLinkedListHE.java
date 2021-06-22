@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
 import com.yahoo.oak.HazardEras;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
+import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.HazardEras.HEslice;
 
@@ -94,9 +95,6 @@ public class HarrisLinkedListHE<E> {
      * @return
      */
     public boolean add(E key, int tidx) {
-    	HEslice access  = HE.allocate( Srz.calculateSize(key));
-		Srz.serialize(key, access.address+access.offset);
-		final Node newNode = new Node(access);
         CmpFail: while(true)
         try{
         while (true) {
@@ -106,9 +104,12 @@ public class HarrisLinkedListHE<E> {
             final Node curr = window.curr;
             if (curr.key!= null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
             	HE.clear(tidx);
-            	HE.fastFree(access);
                 return false;
             } else {
+            	HEslice access  = HE.allocate( Srz.calculateSize(key));
+        		Srz.serialize(key, access.address+access.offset);
+        		final Node newNode = new Node(access);
+        		
                 newNode.next.set(curr, false);
                 if (pred.next.compareAndSet(curr, newNode, false, false)) {
                 	HE.clear(tidx);
@@ -116,9 +117,8 @@ public class HarrisLinkedListHE<E> {
                 }
             }
         }       
-    }catch(Exception e) {continue CmpFail;}
+	}catch(NovaIllegalAccess e) {continue CmpFail;}
 }
-
     
     /**
      * Inspired by Figure 9.26, page 218 on "The Art of Multiprocessor Programming".
@@ -131,8 +131,8 @@ public class HarrisLinkedListHE<E> {
      */
     public boolean remove(E key, int tidx) {
         CmpFail: while(true)
-    	try {
-        while (true) {
+        try{
+    	while (true) {
             final Window window = find(key, tidx);
             // On Harris's paper, "pred" is named "left_node" and the "curr"
             // variable is named "right_node".            
@@ -155,10 +155,10 @@ public class HarrisLinkedListHE<E> {
             	HE.clear(tidx);
             	HE.retire(tidx, curr.key);
                 return true;	
+                }
             }
-        }
-	}catch(Exception e) {continue CmpFail;}
-}
+    	}catch(NovaIllegalAccess e) {continue CmpFail;}
+    }
 
     
     /**
@@ -203,7 +203,7 @@ public class HarrisLinkedListHE<E> {
 			                curr = succ;
 			                }
         				}
-        }catch (Exception e) {continue CmpFail;}    
+        }catch (NovaIllegalAccess e) {continue CmpFail;}    
     }
         
         
@@ -240,7 +240,7 @@ public class HarrisLinkedListHE<E> {
 		        boolean flag = curr.key != null && Cmp.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
 		        HE.clear(tidx);
 		        return flag;
-	        }catch (Exception e) {continue CmpFail;}
+	        }catch (NovaIllegalAccess e) {continue CmpFail;}
 }
     
 	public HazardEras getHE() {

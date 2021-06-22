@@ -6,6 +6,7 @@ import com.yahoo.oak.Facade;
 import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
+import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
@@ -125,7 +126,7 @@ public class HarrisLinkedListNova<E> {
                     }
                 }
             }  
-        }catch(Exception e) {continue CmpFail;}
+        }catch(NovaIllegalAccess e) {continue CmpFail;}
     }
 
     
@@ -163,7 +164,7 @@ public class HarrisLinkedListNova<E> {
                 Facade_Nova.Delete(tidx, curr.key, curr, key_offset);
                 return true;
             }
-    	}catch(Exception e) {continue CmpFail;}
+    	}catch(NovaIllegalAccess e) {continue CmpFail;}
     }
 
     
@@ -209,7 +210,7 @@ public class HarrisLinkedListNova<E> {
 	                        curr = succ;
 	                    }
         			}
-        }catch (Exception e) {continue CmpFail;}
+        }catch (NovaIllegalAccess e) {continue CmpFail;}
     }
 
 
@@ -240,7 +241,7 @@ public class HarrisLinkedListNova<E> {
                     curr.next.get(marked);
                 }
                 return curr.key == Illegal_nu ? false : Facade_Nova.Compare(key, Cmp, curr.key) == 0 && !marked[0];
-        	}catch (Exception e) {continue CmpFail;}
+        	}catch (NovaIllegalAccess e) {continue CmpFail;}
     }
     
 
