@@ -20,34 +20,24 @@ public class Facade_Nova <T,K> {
 	}
 
 	static public <K> long AllocateReusedSlice(K obj, long meta_offset, long data, int size, int idx) {
-		
 		if(data%2!=DELETED)
 			return -1;
-	
 		NovaSlice 	newslice = novaManager.getSlice(size,idx);
 		int offset=	newslice.getAllocatedOffset();
 		int block =	newslice.getAllocatedBlockID();
 		int version=  (int)newslice.getVersion();
-        
         long facadeNewData = combine(block,offset,version);
-
         if(!UNSAFE.compareAndSwapLong(obj, meta_offset, data, facadeNewData))
         	novaManager.free(newslice);
         return facadeNewData;
 	}
 	
-	static public <K> long AllocateSlice(K obj, long meta_offset, long data, int size, int idx) {
-		
-		if(data%2!=DELETED)
-			return -1;
-	
+	static public <K> long AllocateSlice(K obj, long meta_offset, int size, int idx) {
 		NovaSlice 	newslice = novaManager.getSlice(size,idx);
 		int offset=	newslice.getAllocatedOffset();
 		int block =	newslice.getAllocatedBlockID();
 		int version=  (int)newslice.getVersion();
-        
         long facadeNewData = combine(block,offset,version);
-
         return facadeNewData;
 	}
 	
@@ -55,9 +45,9 @@ public class Facade_Nova <T,K> {
     /**
      * deletes the object referenced by the current facade 
      *
-     * @param idx          the thread index that wants to delete
+     * @param  idx the thread index that wants to delete
      */
-	static public <K> boolean Delete(int idx, long metadata, K obj, long meta_offset) {
+	static public <K> boolean DeleteReusedSlice(int idx, long metadata, K obj, long meta_offset) {
 	
 		if(metadata %2 != 0) 
 			return false;
@@ -87,23 +77,29 @@ public class Facade_Nova <T,K> {
 		 return true; 
 	}
 
-	static public <K> boolean DeletePrivate(int idx, long metadata) {
+	static public <K> boolean Delete(int idx, long metadata, K obj, long meta_offset) {
 		
-		if(metadata %2 != 0) 
-			return false;
 		int block 	= Extractblock(metadata);
 		int offset	= ExtractOffset(metadata);
-		
 		long address = novaManager.getAdress(block);
 
-		
 		long OffHeapMetaData= UNSAFE.getLong(address+offset);//reads off heap meta
+		
+		
+		long len=OffHeapMetaData>>>24; //get the lenght 
+		long version = ExtractVer_Del(metadata); //get the version in the facade including delete
+		OffHeapMetaData = len <<24 | version; // created off heap style meta 
 
-		long len=OffHeapMetaData>>>24; 
-		 
-		novaManager.free(new NovaSlice(block, offset, (int)len));
-		return true; 
+		long SliceHeaderAddress= address + offset;
+
+		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
+				OffHeapMetaData|1)) //swap with CAS
+			 return false;
+				 
+		 novaManager.release(block,offset,(int)len,idx); 
+		 return true; 
 	}
+
 	
 	static public <T> long WriteFull (NovaS<T> lambda, T obj, long facade_meta ,int idx ) {//for now write doesnt take lambda for writing 
 

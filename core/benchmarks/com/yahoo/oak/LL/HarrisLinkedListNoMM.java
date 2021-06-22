@@ -61,20 +61,19 @@ public class HarrisLinkedListNoMM <E>{
 	     * @return
 	     */
 	    public boolean add(E key, int tidx) {
-	    	NovaSlice access = new NovaSlice(0,0,0);
-			allocator.allocate(access, Srz.calculateSize(key));
-			Srz.serialize(key, access.address+access.offset);
-			
-			final Node<NovaSlice> newNode = new Node<>(access);
 	        while (true) {
 	            final Window<NovaSlice> window = find(key, tidx);
 	            // On Harris paper, pred is named left_node and curr is right_node
 	            final Node<NovaSlice> pred = window.pred;
 	            final Node<NovaSlice> curr = window.curr;
 	            if (curr.key != null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
-	            	allocator.free(access);
 	                return false;
 	            } else {
+	    	    	NovaSlice access = new NovaSlice(0,0,0);
+	    			allocator.allocate(access, Srz.calculateSize(key));
+	    			Srz.serialize(key, access.address+access.offset);
+	    			
+	    			final Node<NovaSlice> newNode = new Node<>(access);
 	                newNode.next.set(curr, false);
 	                if (pred.next.compareAndSet(curr, newNode, false, false)) {
 	                    return true;

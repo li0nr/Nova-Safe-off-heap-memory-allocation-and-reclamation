@@ -118,7 +118,7 @@ public class HarrisLinkedListNova<E> {
                     return false;
                 } else {
                     long OffRef = Facade_Nova.WriteFast(Srz, key, Facade_Nova.AllocateSlice(null, key_offset,
-                    		Illegal_nu, Srz.calculateSize(key), idx),idx);
+                    		Srz.calculateSize(key), idx),idx);
                     Node newNode = new Node(OffRef);
 
                     newNode.next.set(curr, false);

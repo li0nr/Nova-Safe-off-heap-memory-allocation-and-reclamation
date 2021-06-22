@@ -246,18 +246,18 @@ public class BST_Nova<K , V> {
             		
                     newNode = new Node<>(Illegal_facade, Illegal_facade);
                     Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_key, 
-                    		Illegal_facade, SrzK.calculateSize(key), idx),idx);
+                    		 SrzK.calculateSize(key), idx),idx);
                     Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_value,
-                    		Illegal_facade, SrzV.calculateSize(value), idx),idx);
+                    		 SrzV.calculateSize(value), idx),idx);
                     	
                     
             		// key is not in the tree, try to replace a leaf with a small subtree
                     newSibling = new Node(Illegal_facade, Illegal_facade);
                     if(l.key != Illegal_facade) {
                         Facade_Nova.ReadFromOffheap(SrzK, l.key, Facade_Nova.AllocateSlice(newSibling, Facade_long_offset_key, 
-                        		Illegal_facade, SrzK.calculateSize(key), idx),idx);
+                        		 SrzK.calculateSize(key), idx),idx);
                         Facade_Nova.ReadFromOffheap(SrzK, l.value, Facade_Nova.AllocateSlice(newSibling, Facade_long_offset_value,
-                        		Illegal_facade, SrzV.calculateSize(value), idx),idx);
+                        		 SrzV.calculateSize(value), idx),idx);
                     }
                     
                     
@@ -268,14 +268,14 @@ public class BST_Nova<K , V> {
                     		Facade_Nova.
                     		ReadFromOffheap(SrzK,l.key,
                     			Facade_Nova.
-                    			AllocateSlice(newInternal, Facade_long_offset_key, Illegal_facade, SrzK.calculateSize(key), idx),
+                    			AllocateSlice(newInternal, Facade_long_offset_key,  SrzK.calculateSize(key), idx),
                     			idx);
                         } else {
                         	newInternal = new Node(Illegal_facade,newSibling,newNode);
                         	Facade_Nova.
                         	WriteFast(SrzK, key,
                         			Facade_Nova.
-                        			AllocateSlice(newInternal, Facade_long_offset_key, Illegal_facade, SrzK.calculateSize(key), idx),
+                        			AllocateSlice(newInternal, Facade_long_offset_key,  SrzK.calculateSize(key), idx),
                         			idx);
                         	}
                     newPInfo = new IInfo(l, p, newInternal);

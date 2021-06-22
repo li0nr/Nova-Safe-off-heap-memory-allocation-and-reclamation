@@ -73,6 +73,6 @@ public class longPrimitiveFacade {
 	public void concurrentREAD() throws InterruptedException {
 		initNova();   
 		Node x = new Node(1, 1);
-		Facade_Nova.AllocateSlice(x,Facade_long_offset_key, 1, 8, 0);
+		Facade_Nova.AllocateSlice(x,Facade_long_offset_key, 8, 0);
 	}
 }
