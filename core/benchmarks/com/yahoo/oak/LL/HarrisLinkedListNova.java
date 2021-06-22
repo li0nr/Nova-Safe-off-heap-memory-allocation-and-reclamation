@@ -106,9 +106,7 @@ public class HarrisLinkedListNova<E> {
      */
     public boolean add(E key, int idx) {
     	
-        Node newNode = new Node(Illegal_nu);
-        Facade_Nova.WriteFast(Srz, key, Facade_Nova.AllocateSlice(newNode, key_offset, 
-        		Illegal_nu, Srz.calculateSize(key), idx),idx);
+
         CmpFail: while(true)
         try{
         	while (true) {
@@ -117,9 +115,12 @@ public class HarrisLinkedListNova<E> {
                 final Node pred = window.pred;
                 final Node curr = window.curr;
                 if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Cmp, curr.key) == 0) { 
-                	Facade_Nova.DeletePrivate(idx,newNode.key);
                     return false;
                 } else {
+                    long OffRef = Facade_Nova.WriteFast(Srz, key, Facade_Nova.AllocateSlice(null, key_offset,
+                    		Illegal_nu, Srz.calculateSize(key), idx),idx);
+                    Node newNode = new Node(OffRef);
+
                     newNode.next.set(curr, false);
                     if (pred.next.compareAndSet(curr, newNode, false, false)) {
                         return true;
