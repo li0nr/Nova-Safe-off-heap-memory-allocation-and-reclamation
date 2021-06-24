@@ -217,11 +217,11 @@ public class HarrisLinkedListNoMM <E>{
 
 		   public LLIterator(HarrisLinkedListNoMM<E> list)
 		   {
-		        current = list.head;
+		        current = list.head.getNext();
 	        }
 	        // Checks if the next element exists
 	        public boolean hasNext() {
-	            return current != null; 	
+	            return current.key != null; 	
 	        }
 	          
 	        // moves the cursor/iterator to next element

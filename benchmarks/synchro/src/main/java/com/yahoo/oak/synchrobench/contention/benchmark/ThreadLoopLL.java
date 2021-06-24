@@ -121,7 +121,7 @@ public class ThreadLoopLL implements Runnable {
         	if(iterate) {
         		Iterator itr = bench.iterator(myThreadNum);
         		while(itr.hasNext()) {
-        			itr.next();
+        			Buff my =(Buff)itr.next();
         			total++;
         		}
         		continue;

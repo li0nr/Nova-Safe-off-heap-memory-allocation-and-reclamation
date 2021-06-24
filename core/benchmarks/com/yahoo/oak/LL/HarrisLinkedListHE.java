@@ -9,8 +9,6 @@ import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.HazardEras.HEslice;
-import com.yahoo.oak.LL.HarrisLinkedListNoMM.Node;
-import com.yahoo.oak.LL.HarrisLinkedListNova.LLIterator;
 
 /**
  * <h1>HarrisAMRLinkedList</h1>
@@ -261,12 +259,12 @@ public class HarrisLinkedListHE<E> {
         
 	   public LLIterator(HarrisLinkedListHE<E> list, int idx)
 	   {
-	        current = list.head;
+	        current = list.head.getNext();
 	        this.idx = idx;
         }
         // Checks if the next element exists
         public boolean hasNext() {
-            return current != null; 	
+            return current.key != null; 	
         }
           
         // moves the cursor/iterator to next element
