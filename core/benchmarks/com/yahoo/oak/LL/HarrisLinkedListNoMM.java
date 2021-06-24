@@ -12,7 +12,7 @@ import com.yahoo.oak.LL.HarrisLinkedListHE.Node;
 import com.yahoo.oak.LL.HarrisLinkedListHE.Window;
 import com.yahoo.oak.LL.HarrisLinkedListNova.LLIterator;
 
-public class HarrisLinkedListNoMM <E> implements Iterable<E>{
+public class HarrisLinkedListNoMM <E>{
 
 	    final Node<NovaSlice> head;
 	    final Node<NovaSlice> tail;
@@ -198,7 +198,7 @@ public class HarrisLinkedListNoMM <E> implements Iterable<E>{
 	    }
 	    
 	    
-	    public Iterator<E> iterator() {
+	    public Iterator<E> iterator(int idx) {
 	        return new LLIterator<E>(this);
 	    }
 	    

@@ -1,5 +1,7 @@
 package com.yahoo.oak;
 
+import java.util.Iterator;
+
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HarrisLinkedListNova;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
@@ -23,6 +25,10 @@ public class LL_Nova_Synch implements CompositionalLL<Buff>{
     
     public  boolean remove(final Buff key, int idx) {
     	return LL.remove(key, idx);
+    }
+    
+    public  Iterator<Buff> iterator(int idx){
+    	return LL.iterator(idx);
     }
     
     public long allocated() {

@@ -84,6 +84,8 @@ public class Test {
      * The total number of aborts
      */
     private long aborts = 0;
+    
+    private long iterOps = 0;
     /**
      * The instance of the benchmark
      */
@@ -451,6 +453,9 @@ public class Test {
                     case "-v":
                         Parameters.confValSize = Integer.parseInt(args[argNumber++]);
                         break;
+                    case "-itr":
+                        Parameters.iterate = true;
+                        break;
                 }
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("Missing value after option: " + currentArg + ". Ignoring...");
@@ -621,9 +626,6 @@ public class Test {
 //        System.out.println("    |--removeAll succ.:    \t" + numRemoveAll
 //                + "\t( "
 //                + formatDouble(((double) numRemoveAll / (double) total) * 100)
-//                + " %)");
-//        System.out.println("    size successful:       \t" + numSize + "\t( "
-//                + formatDouble(((double) numSize / (double) total) * 100)
 //                + " %)");
         System.out.println("    contains all:        \t" + numContains
                 + "\t( "

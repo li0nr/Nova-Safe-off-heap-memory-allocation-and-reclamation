@@ -3,6 +3,7 @@ package com.yahoo.oak;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.yahoo.oak.BST.BST;
@@ -10,10 +11,11 @@ import com.yahoo.oak.BST.BST_HE;
 import com.yahoo.oak.BST.BST_Nova;
 import com.yahoo.oak.Buff.Buff;
 
+@Ignore
 public class BST_Test {
 
 	
-	@Test
+    @Test
 	public void BST_Nova_CoverTest() {
 		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager novaManager = new NovaManager(allocator);

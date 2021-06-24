@@ -11,6 +11,7 @@ import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -71,6 +72,12 @@ public class ThreadLoopLL implements Runnable {
      * The random number
      */
     Random rand = new Random();
+    /**
+     * iterator operation number
+     */
+    long iterops = 0;
+    
+    boolean iterate = false;
     
     Buff key = new Buff(Parameters.confKeySize);
 
@@ -89,6 +96,7 @@ public class ThreadLoopLL implements Runnable {
         this.bench = bench;
         this.methods = methods;
         /* initialize the method boundaries */
+        iterate = Parameters.iterate;
         assert (Parameters.confNumWrites >= Parameters.confNumWriteAlls);
         cdf[0] = 10 * Parameters.confNumWriteAlls;
         cdf[1] = 10 * Parameters.confNumWrites;
@@ -109,6 +117,16 @@ public class ThreadLoopLL implements Runnable {
         //int newInt = Parameters.confSize;
 
         while (!stop) {
+        	
+        	if(iterate) {
+        		Iterator itr = bench.iterator(myThreadNum);
+        		while(itr.hasNext()) {
+        			itr.next();
+        			total++;
+        		}
+        		continue;
+        	}
+        	
             newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
         	key.set(newInt);

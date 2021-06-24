@@ -276,12 +276,12 @@ public class HarrisLinkedListNova<E> {
 
 	   public LLIterator(HarrisLinkedListNova<E> list, int idx)
 	   {
-	        current = list.head;
+	        current = list.head.getNext();
 	        this.idx = idx;
         }
         // Checks if the next element exists
         public boolean hasNext() {
-            return current != null; 	
+            return current.key != 1; 	
         }
           
         // moves the cursor/iterator to next element

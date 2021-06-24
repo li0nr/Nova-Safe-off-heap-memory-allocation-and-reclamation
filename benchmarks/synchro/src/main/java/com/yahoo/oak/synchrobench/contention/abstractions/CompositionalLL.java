@@ -6,6 +6,8 @@
 
 package com.yahoo.oak.synchrobench.contention.abstractions;
 
+import java.util.Iterator;
+
 public interface CompositionalLL<K> {
 
 	boolean containsKey(final K key, int tidx);
@@ -14,9 +16,12 @@ public interface CompositionalLL<K> {
     
     public  boolean remove(final K key, int idx);
     
+    public  Iterator<K> iterator(int idx);
+    
     public long allocated();
     
     public void clear ();
     
     public void print();
+    
 }
