@@ -75,7 +75,7 @@ public class ThreadLoopLL implements Runnable {
     /**
      * iterator operation number
      */
-    long iterops = 0;
+    long itrSuccess = 0;
     
     boolean iterate = false;
     
@@ -121,7 +121,8 @@ public class ThreadLoopLL implements Runnable {
         	if(iterate) {
         		Iterator itr = bench.iterator(myThreadNum);
         		while(itr.hasNext()) {
-        			Buff my =(Buff)itr.next();
+        			if((Buff)itr.next() != null)
+        				itrSuccess ++;
         			total++;
         		}
         		continue;

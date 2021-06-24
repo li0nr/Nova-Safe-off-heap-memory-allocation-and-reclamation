@@ -589,6 +589,7 @@ public class Test {
 
 	            failures += threadLoops_LL[threadNum].failures;
 	            total += threadLoops_LL[threadNum].total;
+	            iterOps += threadLoops_LL[threadNum].itrSuccess;
 				break;
 
 			default:
@@ -623,10 +624,10 @@ public class Test {
 //        System.out.println("    |--addAll succ.:       \t" + numAddAll + "\t( "
 //                + formatDouble(((double) numAddAll / (double) total) * 100)
 //                + " %)");
-//        System.out.println("    |--removeAll succ.:    \t" + numRemoveAll
-//                + "\t( "
-//                + formatDouble(((double) numRemoveAll / (double) total) * 100)
-//                + " %)");
+        System.out.println("    iter succ.:    \t" + iterOps
+                + "\t( "
+                + formatDouble(((double) iterOps / (double) total) * 100)
+                + " %)");
         System.out.println("    contains all:        \t" + numContains
                 + "\t( "
                 + formatDouble(((double) numContains / (double) total) * 100)
@@ -711,6 +712,7 @@ public class Test {
 	            threadLoops_LL[threadNum].numSuccAdd = 0;
 	            threadLoops_LL[threadNum].numSucContains = 0;
 	            threadLoops_LL[threadNum].numSucRemove = 0;
+	            threadLoops_LL[threadNum].itrSuccess = 0;
 				break;
 
 			default:
