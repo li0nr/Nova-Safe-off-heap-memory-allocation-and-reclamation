@@ -1,5 +1,6 @@
 package com.yahoo.oak.LL;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.Facade;
@@ -70,6 +71,14 @@ public class HarrisLinkedListNova<E> {
         Node(long key) {
             this.key = key;
             this.next = new AtomicMarkableReference<Node>(null, false);
+        }
+        
+        public <E> E Read(NovaS<E> Srz) {
+        	return Facade_Nova.Read(Srz ,key);
+        }
+        
+        public Node getNext() {
+        	return this.next.getReference();
         }
     }
     
@@ -245,6 +254,11 @@ public class HarrisLinkedListNova<E> {
         	}catch (NovaIllegalAccess e) {continue CmpFail;}
     }
     
+    
+    public Iterator<E> iterator(int idx) {
+        return new LLIterator<E>(this, idx);
+    }
+    
 
     public void Print() {
         Node curr = head.next.getReference();
@@ -255,6 +269,28 @@ public class HarrisLinkedListNova<E> {
 
         }
     }
+    
+    class LLIterator<E> implements Iterator<E> {
+        Node current;
+        int idx;
+
+	   public LLIterator(HarrisLinkedListNova<E> list, int idx)
+	   {
+	        current = list.head;
+	        this.idx = idx;
+        }
+        // Checks if the next element exists
+        public boolean hasNext() {
+            return current != null; 	
+        }
+          
+        // moves the cursor/iterator to next element
+        public E next() {
+            E data = (E)current.Read(Srz);
+            current = current.getNext();
+            return data;
+        }
+    }	
     
 	public static void main(String[] args) {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);

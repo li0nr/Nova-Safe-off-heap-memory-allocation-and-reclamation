@@ -1,5 +1,6 @@
 package com.yahoo.oak.LL;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.HazardEras;
@@ -8,6 +9,8 @@ import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.HazardEras.HEslice;
+import com.yahoo.oak.LL.HarrisLinkedListNoMM.Node;
+import com.yahoo.oak.LL.HarrisLinkedListNova.LLIterator;
 
 /**
  * <h1>HarrisAMRLinkedList</h1>
@@ -56,6 +59,10 @@ public class HarrisLinkedListHE<E> {
         Node(HEslice key) {
             this.key = key;
             this.next = new AtomicMarkableReference<Node>(null, false);
+        }
+        
+        public Node getNext() {
+        	return this.next.getReference();
         }
     }
     
@@ -241,7 +248,36 @@ public class HarrisLinkedListHE<E> {
 		        HE.clear(tidx);
 		        return flag;
 	        }catch (NovaIllegalAccess e) {continue CmpFail;}
-}
+        }
+    
+    
+    public Iterator<E> iterator(int idx) {
+        return new LLIterator<E>(this, idx);
+    }
+    
+    class LLIterator<E> implements Iterator<E> {
+        Node current;
+        int idx;
+        
+	   public LLIterator(HarrisLinkedListHE<E> list, int idx)
+	   {
+	        current = list.head;
+	        this.idx = idx;
+        }
+        // Checks if the next element exists
+        public boolean hasNext() {
+            return current != null; 	
+        }
+          
+        // moves the cursor/iterator to next element
+        public E next() {
+	        HEslice access = HE.get_protected(current.key, 0, idx);
+            E data = (E)Srz.deserialize(access.address + access.offset);
+            HE.clear(idx);
+            current = current.getNext();
+            return data;
+        }
+    }	
     
 	public HazardEras getHE() {
 		return HE;

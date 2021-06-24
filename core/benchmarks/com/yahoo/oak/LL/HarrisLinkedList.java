@@ -1,9 +1,12 @@
 package com.yahoo.oak.LL;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.CopyConstructor;
 import com.yahoo.oak.Facade_Nova;
+import com.yahoo.oak.HazardEras.HEslice;
+import com.yahoo.oak.LL.HarrisLinkedListHE.LLIterator;
 import com.yahoo.oak.LL.HarrisLinkedListNova.Node;
 
 
@@ -20,6 +23,10 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	        Node(E key) {
 	            this.key = key;
 	            this.next = new AtomicMarkableReference<Node<E>>(null, false);
+	        }
+	        
+	        public Node getNext() {
+	        	return this.next.getReference();
 	        }
 	    }
 	    
@@ -174,4 +181,30 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	        boolean flag = curr.key!= null && curr.key.compareTo(key) == 0 && !marked[0];
 	        return flag;
 	    }
+	    
+	    public Iterator<E> iterator(int idx) {
+	        return new LLIterator<E>(this, idx);
+	    }
+	    
+	    class LLIterator<E> implements Iterator<E> {
+	        Node current;
+	        int idx;
+	        
+		   public LLIterator(HarrisLinkedList list, int idx)
+		   {
+		        current = list.head;
+		        this.idx = idx;
+	        }
+	        // Checks if the next element exists
+	        public boolean hasNext() {
+	            return current != null; 	
+	        }
+	          
+	        // moves the cursor/iterator to next element
+	        public E next() {
+	            E data = (E)current.key;
+	            current = current.getNext();
+	            return data;
+	        }
+	    }	
 }

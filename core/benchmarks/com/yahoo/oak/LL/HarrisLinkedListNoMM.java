@@ -1,5 +1,6 @@
 package com.yahoo.oak.LL;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.Facade_Nova;
@@ -9,8 +10,9 @@ import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
 import com.yahoo.oak.LL.HarrisLinkedListHE.Node;
 import com.yahoo.oak.LL.HarrisLinkedListHE.Window;
+import com.yahoo.oak.LL.HarrisLinkedListNova.LLIterator;
 
-public class HarrisLinkedListNoMM <E>{
+public class HarrisLinkedListNoMM <E> implements Iterable<E>{
 
 	    final Node<NovaSlice> head;
 	    final Node<NovaSlice> tail;
@@ -27,6 +29,14 @@ public class HarrisLinkedListNoMM <E>{
 	        Node(NovaSlice key) {
 	            this.key = key;
 	            this.next = new AtomicMarkableReference<Node<NovaSlice>>(null, false);
+	        }
+	        
+	        public <E> E Read(NovaS<E> Srz) {
+	        	return Srz.deserialize(key.address+key.offset);
+	        }
+	        
+	        public Node getNext() {
+	        	return this.next.getReference();
 	        }
 	    }
 	    
@@ -187,12 +197,38 @@ public class HarrisLinkedListNoMM <E>{
 	        return curr.key == null? false: Cmp.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
 	    }
 	    
+	    
+	    public Iterator<E> iterator() {
+	        return new LLIterator<E>(this);
+	    }
+	    
 	    public void Print() {
 	    	Node<NovaSlice> curr = head.next.getReference();
 	        while (curr != tail ) {
 	        	Cmp.Print(curr.key.address+curr.key.offset);
 	        	System.out.print("-->");
 	        	curr = curr.next.getReference();
+	        }
+	    }
+	    
+	    
+	    class LLIterator<E> implements Iterator<E> {
+	        Node current;
+
+		   public LLIterator(HarrisLinkedListNoMM<E> list)
+		   {
+		        current = list.head;
+	        }
+	        // Checks if the next element exists
+	        public boolean hasNext() {
+	            return current != null; 	
+	        }
+	          
+	        // moves the cursor/iterator to next element
+	        public E next() {
+	            E data = (E)current.Read(Srz);
+	            current = current.getNext();
+	            return data;
 	        }
 	    }
 }
