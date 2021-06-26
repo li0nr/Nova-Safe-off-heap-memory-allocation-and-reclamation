@@ -16,43 +16,43 @@ duration="30000"
 #gcAlgorithms="-XX:+UseParallelOldGC -XX:+UseConcMarkSweepGC -XX:+UseG1GC"
 
 declare -A heap_limit=(
-						["LL_EBR_CAS_bench"]="1g"
-						["LL_EBR_noCAS_bench"]="1g"
-						["LL_EBR_noCAS_opt_bench"]="1g"
-						["LL_EBR_noCAS_opt_bench"]="1g"
+						["LL_EBR_CAS_bench"]="10m"
+						["LL_EBR_noCAS_bench"]="10m"
+						["LL_EBR_noCAS_opt_bench"]="10m"
+						["LL_EBR_noCAS_opt_bench"]="10m"
 
-						["LL_HE_CAS_bench"]="1g"
-						["LL_HE_noCAS_bench"]="1g"
-						["LL_HE_noCAS_opt_bench"]="1g"
-						["LL_HE_noCAS_opt_bench"]="1g"
+						["LL_HE_CAS_bench"]="10m"
+						["LL_HE_noCAS_bench"]="10m"
+						["LL_HE_noCAS_opt_bench"]="10m"
+						["LL_HE_noCAS_opt_bench"]="10m"
 
-                       ["LL_Nova_CAS_bench"]="1g"
-                       ["LL_Nova_noCAS_bench"]="1g"
-                       ["LL_Nova_primitive_CAS_bench"]="1g"
-                       ["LL_Nova_primitive_noCAS_bench"]="1g"
+                       ["LL_Nova_CAS_bench"]="10m"
+                       ["LL_Nova_noCAS_bench"]="10m"
+                       ["LL_Nova_primitive_CAS_bench"]="10m"
+                       ["LL_Nova_primitive_noCAS_bench"]="10m"
 						
-                       ["LL_NoMM_Synch"]="1g"
-                       ["LL_Synch"]="2g"
+                       ["LL_NoMM_Synch"]="10m"
+                       ["LL_Synch"]="30m"
                       )
 
 declare -A direct_limit=(						
-						["LL_EBR_CAS_bench"]="1g"
-						["LL_EBR_noCAS_bench"]="1g"
-						["LL_EBR_noCAS_opt_bench"]="1g"
-						["LL_EBR_noCAS_opt_bench"]="1g"
+						["LL_EBR_CAS_bench"]="20m"
+						["LL_EBR_noCAS_bench"]="20m"
+						["LL_EBR_noCAS_opt_bench"]="20m"
+						["LL_EBR_noCAS_opt_bench"]="20m"
 
-						["LL_HE_CAS_bench"]="1g"
-						["LL_HE_noCAS_bench"]="1g"
-						["LL_HE_noCAS_opt_bench"]="1g"
-						["LL_HE_noCAS_opt_bench"]="1g"
+						["LL_HE_CAS_bench"]="20m"
+						["LL_HE_noCAS_bench"]="20m"
+						["LL_HE_noCAS_opt_bench"]="20m"
+						["LL_HE_noCAS_opt_bench"]="20m"
 
-                       ["LL_Nova_CAS_bench"]="1g"
-                       ["LL_Nova_noCAS_bench"]="1g"
-                       ["LL_Nova_primitive_CAS_bench"]="1g"
-                       ["LL_Nova_primitive_noCAS_bench"]="1g"
+                       ["LL_Nova_CAS_bench"]="20m"
+                       ["LL_Nova_noCAS_bench"]="20m"
+                       ["LL_Nova_primitive_CAS_bench"]="20m"
+                       ["LL_Nova_primitive_noCAS_bench"]="20m"
 						
-                       ["LL_NoMM_Synch"]="1g"
-                       ["LL_Synch"]="2g"
+                       ["LL_NoMM_Synch"]="20m"
+                       ["LL_Synch"]="0"
                         )
 
 declare -A becnh_size=(						

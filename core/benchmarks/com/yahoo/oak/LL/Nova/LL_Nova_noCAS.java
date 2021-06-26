@@ -120,8 +120,8 @@ public class LL_Nova_noCAS<K,V> {
                     
                 	Node newNode = new Node(new Facade_slice(), new Facade_slice());
                 	
-					Facade_Slice.AllocateSlice(newNode.key,Ksr.calculateSize(key), idx);
-					Facade_Slice.AllocateSlice(newNode.value,Vsr.calculateSize(value), idx);
+					Facade_Slice.AllocateSliceCAS(newNode.key,Ksr.calculateSize(key), idx);
+					Facade_Slice.AllocateSliceCAS(newNode.value,Vsr.calculateSize(value), idx);
                     	
 					Facade_Slice.WriteFast(Ksr, key, newNode.key, idx);
 					Facade_Slice.WriteFast(Vsr, value, newNode.value, idx);
@@ -171,8 +171,8 @@ public class LL_Nova_noCAS<K,V> {
                     continue;
                 }
                 if(pred.next.compareAndSet(curr, succ, false, false)) {
-                	Facade_Slice.Delete(idx, curr.key);
-                	Facade_Slice.Delete(idx, curr.value);
+                	Facade_Slice.DeleteCAS(idx, curr.key);
+                	Facade_Slice.DeleteCAS(idx, curr.value);
                     return true;                	
                 }
             }
@@ -210,8 +210,8 @@ public class LL_Nova_noCAS<K,V> {
 	                            if (!pred.next.compareAndSet(curr, succ, false, false)) {
 	                                continue retry;
 	                            }
-	                        	Facade_Slice.Delete(tidx, curr.key);
-	                        	Facade_Slice.Delete(tidx, curr.value);
+	                        	Facade_Slice.DeleteCAS(tidx, curr.key);
+	                        	Facade_Slice.DeleteCAS(tidx, curr.value);
 	                            curr = succ;
 	                            succ = curr.next.get(marked);
 	                        }
