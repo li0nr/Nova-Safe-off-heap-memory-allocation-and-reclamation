@@ -34,7 +34,7 @@ public class LL_Nova_bench {
     @State(Scope.Benchmark)
     public static class BenchmarkState {
 
-    	public static  int size = BSTParam.BST_SIZE;
+    	public static  int size = LLParam.LL_Size;
         private LL_Nova_primitive_CAS<Buff,Buff> LL ;
 
         @Setup
@@ -75,8 +75,8 @@ public class LL_Nova_bench {
 		}
     
     
-    @Warmup(iterations = BSTParam.warmups)
-    @Measurement(iterations = BSTParam.iterations)
+    @Warmup(iterations = LLParam.warmups)
+    @Measurement(iterations = LLParam.iterations)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
@@ -85,8 +85,8 @@ public class LL_Nova_bench {
     	blackhole.consume(state.LL.contains(threadState.buff,threadState.i));
 	}
     
-    @Warmup(iterations = BSTParam.warmups)
-    @Measurement(iterations = BSTParam.iterations)
+    @Warmup(iterations = LLParam.warmups)
+    @Measurement(iterations = LLParam.iterations)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
@@ -100,8 +100,8 @@ public class LL_Nova_bench {
     	}
 	}
     
-    @Warmup(iterations = BSTParam.warmups)
-    @Measurement(iterations = BSTParam.iterations)
+    @Warmup(iterations = LLParam.warmups)
+    @Measurement(iterations = LLParam.iterations)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Fork(value = 0)
@@ -120,7 +120,7 @@ public class LL_Nova_bench {
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
     			.include(LL_Nova_bench.class.getSimpleName())
-                .forks(BSTParam.forks)
+                .forks(LLParam.forks)
                 .threads(1)
                 .build();
 

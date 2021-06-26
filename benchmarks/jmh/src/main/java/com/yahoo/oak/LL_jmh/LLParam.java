@@ -1,6 +1,6 @@
 package com.yahoo.oak.LL_jmh;
 
-public class BSTParam {
+public class LLParam {
 	public static final int warmups=5;
 	public static final int iterations=5;
 	
@@ -14,9 +14,9 @@ public class BSTParam {
 	static final int thread24=24;
 	static final int thread32=32;
  	
-	public static final int BST_SIZE = 1000000;
+	public static final int LL_Size = 1000000;
 	
-	public static final int Limit = BST_SIZE/4;
+	public static final int Limit = LL_Size/4;
 	public static final int range = 2500;
 	public static final int forks = 0;
 }

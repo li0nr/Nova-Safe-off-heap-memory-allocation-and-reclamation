@@ -3,6 +3,8 @@ package com.yahoo.oak;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import sun.misc.Unsafe;
+import sun.misc.Contended;
+
 
 public class EBR <T extends EBR_interface>{
 	
@@ -11,11 +13,13 @@ public class EBR <T extends EBR_interface>{
 	private static final int  CLPAD = 16;
 	private static final int  RELEASE_LIST_LIMIT = 1024;
 
+	@Contended
     private int[] releasecounter = new int[EBR_MAX_THREADS*2*CLPAD];
-
     private final AtomicLong eraClock;
+	@Contended
     private long[] reservations;
-    private final ArrayList<T>[] retiredList= new ArrayList[EBR_MAX_THREADS*CLPAD];//CLPAD is for cache padding
+	@Contended
+	private final ArrayList<T>[] retiredList= new ArrayList[EBR_MAX_THREADS*CLPAD];//CLPAD is for cache padding
     private final NativeMemoryAllocator allocator;
     	
     
