@@ -89,8 +89,8 @@ public class LL_EBR_CAS_opt <K,V>{
 	                	return true;
 	                }
 	                else {
-	                	mng.fastFree(curr.key);
-	                	mng.fastFree(curr.value);
+	                	mng.fastFree(newNode.key);
+	                	mng.fastFree(newNode.value);
 	                }
 	            }
 	    	}

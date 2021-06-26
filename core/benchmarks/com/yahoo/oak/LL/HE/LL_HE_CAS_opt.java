@@ -128,8 +128,8 @@ public class LL_HE_CAS_opt<K,V> {
                     return true;
                 }
                 else {
-                	HE.fastFree(curr.key);
-                	HE.fastFree(curr.value);
+                	HE.fastFree(newNode.key);
+                	HE.fastFree(newNode.value);
                 }
             }
         }       

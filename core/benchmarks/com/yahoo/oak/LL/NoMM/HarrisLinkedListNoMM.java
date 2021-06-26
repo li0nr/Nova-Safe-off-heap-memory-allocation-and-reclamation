@@ -2,6 +2,7 @@ package com.yahoo.oak.LL.NoMM;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaS;
@@ -85,6 +86,10 @@ public class HarrisLinkedListNoMM <K,V>{
 	                if (pred.next.compareAndSet(curr, newNode, false, false)) {
 	                    return true;
 	                }
+                    else {
+                    	allocator.free(newNode.key);
+                    	allocator.free(newNode.value);
+                    }	
 	            }
 	        }       
 	    }

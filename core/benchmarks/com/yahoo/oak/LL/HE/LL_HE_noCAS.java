@@ -124,8 +124,8 @@ public class LL_HE_noCAS<K,V> {
                     return true;
                 }
                 else {
-                	Facade_HE.fastFree(curr.key);
-                	Facade_HE.fastFree(curr.value);
+                	Facade_HE.fastFree(newNode.key);
+                	Facade_HE.fastFree(newNode.value);
                 }
             }
         }       

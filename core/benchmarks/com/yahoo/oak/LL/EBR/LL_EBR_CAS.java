@@ -89,8 +89,8 @@ public class LL_EBR_CAS <K,V>{
 	                	return true;
 	                }
 	                else {
-	                	Facade_EBR.fastFree(curr.key);
-	                	Facade_EBR.fastFree(curr.value);
+	                	Facade_EBR.fastFree(newNode.key);
+	                	Facade_EBR.fastFree(newNode.value);
 	                }
 	            }
 	    	}
