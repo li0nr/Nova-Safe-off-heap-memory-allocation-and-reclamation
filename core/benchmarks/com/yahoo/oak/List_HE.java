@@ -17,7 +17,7 @@ public class List_HE implements ListInterface{
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final HazardEras HE = new HazardEras(1, 32, allocator);
+    final HazardEras HE = new HazardEras(32, allocator);
 	
 
 

@@ -31,7 +31,7 @@ import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.HarrisLinkedListHE;
+import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
 
 
 

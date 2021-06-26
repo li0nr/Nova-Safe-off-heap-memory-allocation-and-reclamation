@@ -31,8 +31,8 @@ import com.yahoo.oak.RNG;
 import com.yahoo.oak.BST.BST_Nova;
 import com.yahoo.oak.BST_jmh.BSTParam;
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.HarrisLinkedListHE;
-import com.yahoo.oak.LL.HarrisLinkedListNova;
+import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_CAS;
 import com.yahoo.oak.LL_jmh.LL_bench_HE.BenchmarkState;
 import com.yahoo.oak.LL_jmh.LL_bench_HE.ThreadState;
 import com.yahoo.oak.ParamBench;
@@ -47,7 +47,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 
     	public static  int size  = BSTParam.BST_SIZE;
     	public static  NativeMemoryAllocator allocator;
-        private HarrisLinkedListNova<Buff> LL ;
+        private LL_Nova_primitive_CAS<Buff,Buff> LL ;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -82,13 +82,13 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager mng = new NovaManager(allocator);
-    	    LL = new HarrisLinkedListNova<Buff>(mng, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+    	    LL = new LL_Nova_primitive_CAS<Buff,Buff>(mng, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	    
         	for (int i=0; i <0.75 *size ; i++) {
         		int keyval = rand.nextInt(size);
         		Buff k = new Buff();
         		k.set(keyval);
-        		if(LL.add(k, 0) == true)
+        		if(LL.add(k,k, 0) == true)
         			i--;
         		}
         }
@@ -146,7 +146,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
 			break;
   		case(3):
-  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
+  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.buff,threadState.i));
   		}
       	i++;
       	}
@@ -171,7 +171,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
 			break;
   		case(3):
-  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
+  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.buff,threadState.i));
   		}
   		i++;
   		}
@@ -193,7 +193,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
   			break;
   		case(2):
-  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
+  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.buff,threadState.i));
   		}
   		i++;
       	}

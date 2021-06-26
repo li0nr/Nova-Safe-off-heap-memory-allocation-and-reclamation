@@ -1,16 +1,15 @@
 package com.yahoo.oak;
 
-import java.util.Iterator;
-
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.HarrisLinkedListNova;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_CAS;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
-public class LL_Nova_Synch implements CompositionalLL<Buff>{
+public class LL_Nova_Synch implements CompositionalLL<Buff,Buff>{
 	
 	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	NovaManager mng = new NovaManager(allocator);
-	HarrisLinkedListNova<Buff> LL = new HarrisLinkedListNova<Buff>(mng, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+	LL_Nova_primitive_CAS<Buff,Buff> LL = new LL_Nova_primitive_CAS<Buff,Buff>(mng, 
+			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
 	public LL_Nova_Synch(){
 		
@@ -19,18 +18,14 @@ public class LL_Nova_Synch implements CompositionalLL<Buff>{
 		return LL.contains(key, tidx);
 	}
 	
-    public  boolean put(final Buff key,  int idx) {
-    	return LL.add(key, idx);
+    public  boolean put(final Buff key,final Buff value,  int idx) {
+    	return LL.add(key,value, idx);
     }
     
     public  boolean remove(final Buff key, int idx) {
     	return LL.remove(key, idx);
     }
-    
-    public  Iterator<Buff> iterator(int idx){
-    	return LL.iterator(idx);
-    }
-    
+        
     public long allocated() {
     	return allocator.allocated();
     }
@@ -38,7 +33,8 @@ public class LL_Nova_Synch implements CompositionalLL<Buff>{
     public void clear() {
     	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	mng = new NovaManager(allocator);
-    	LL = new HarrisLinkedListNova<Buff>(mng, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+    	LL  = new LL_Nova_primitive_CAS<Buff,Buff>(mng, 
+    			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     }
     
     public void print() {

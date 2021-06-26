@@ -22,7 +22,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.HarrisLinkedListNova;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_CAS;
 
 
 
@@ -33,18 +33,19 @@ public class LL_Nova_bench {
 	    public static class BenchmarkState {
 
 	    	public static  int LIST_SIZE = MYParam.LL_SIZE;
-	        private HarrisLinkedListNova<Buff> List ;
+	        private LL_Nova_primitive_CAS<Buff,Buff> List ;
 
 	        @Setup
 	        public void setup() {
 	    	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    	    final NovaManager novaManager = new NovaManager(allocator);
 	    	    
-	    	    List = new HarrisLinkedListNova<Buff>(novaManager , Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+	    	    List = new LL_Nova_primitive_CAS<Buff,Buff>(novaManager , Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,
+	    	    		Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	        	for (int i=0; i <LIST_SIZE ; i++) {
 	        		Buff k = new Buff();
 	        		k.set(LIST_SIZE-i);
-	        		List.add(k, 0);
+	        		List.add(k,k, 0);
 	        	}
 	        }
 	    }

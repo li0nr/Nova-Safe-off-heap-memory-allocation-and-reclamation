@@ -1,15 +1,17 @@
-package com.yahoo.oak.LL;
+package com.yahoo.oak.LL.Nova;
 
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.Facade;
 import com.yahoo.oak.Facade_Nova;
+import com.yahoo.oak.Facade_Slice;
+import com.yahoo.oak.Facade_Slice.Facade_slice;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaS;
+import com.yahoo.oak.NovaSlice;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.Buff.Buff;
 import sun.misc.Unsafe;
@@ -43,42 +45,30 @@ import sun.misc.Unsafe;
  * @author Pedro Ramalhete
  * @author Andreia Correia
  */
-public class HarrisLinkedListNova<E> {
+public class LL_Nova_noCAS<K,V> {
 
     final Node head;
     final Node tail;
     
-    final NovaC<E> Cmp;
-    final NovaS<E> Srz;
+    final NovaC<K> Kcm;
+    final NovaS<K> Ksr;
+    final NovaC<V> Vcm;
+    final NovaS<V> Vsr;
     final NovaManager nm;
     
     final static int MAXTHREADS = 32;
     final static int Illegal_nu = 1;
-    final static long key_offset;
-    
-	static {
-		try {
-			final Unsafe UNSAFE=UnsafeUtils.unsafe;
-			key_offset = UNSAFE.objectFieldOffset
-				    (Node.class.getDeclaredField("key"));
-			 } catch (Exception ex) { throw new Error(ex); }
-	}
+
     
     static class Node {
-        final long key;
+        final Facade_slice key;
+        final Facade_slice value;
         final AtomicMarkableReference<Node> next;
                
-        Node(long key) {
+        Node(Facade_slice key, Facade_slice value) {
             this.key = key;
+            this.value = value;
             this.next = new AtomicMarkableReference<Node>(null, false);
-        }
-        
-        public <E> E Read(NovaS<E> Srz) {
-        	return Facade_Nova.Read(Srz ,key);
-        }
-        
-        public Node getNext() {
-        	return this.next.getReference();
         }
     }
     
@@ -94,12 +84,13 @@ public class HarrisLinkedListNova<E> {
     }
     
     
-    public HarrisLinkedListNova(NovaManager novaManager,NovaC<E> cmp,	NovaS<E> srz) {	
-		nm = novaManager; Cmp = cmp; Srz = srz;
+    public LL_Nova_noCAS(NovaManager novaManager,NovaC<K> cmp,	NovaS<K> srz,
+    		NovaC<V> Vcmp,	NovaS<V> Vsrz) {	
+		nm = novaManager; Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
 		new Facade_Nova(nm);
 	      
-        tail = new Node(Illegal_nu);
-        head = new Node(Illegal_nu);
+        tail = new Node(null,null);
+        head = new Node(null,null);
         head.next.set(tail, false);
     }
     
@@ -113,7 +104,7 @@ public class HarrisLinkedListNova<E> {
      * @param key
      * @return
      */
-    public boolean add(E key, int idx) {
+    public boolean add(K key, V value,  int idx) {
     	
 
         CmpFail: while(true)
@@ -123,16 +114,25 @@ public class HarrisLinkedListNova<E> {
                 // On Harris paper, pred is named left_node and curr is right_node
                 final Node pred = window.pred;
                 final Node curr = window.curr;
-                if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Cmp, curr.key) == 0) { 
+                if (curr.key!= null && Facade_Slice.Compare(key, Kcm, curr.key) == 0) { 
                     return false;
                 } else {
-                    long OffRef = Facade_Nova.WriteFast(Srz, key, Facade_Nova.AllocateSlice(null, key_offset,
-                    		Srz.calculateSize(key), idx),idx);
-                    Node newNode = new Node(OffRef);
-
+                    
+                	Node newNode = new Node(new Facade_slice(), new Facade_slice());
+                	
+					Facade_Slice.AllocateSlice(newNode.key,Ksr.calculateSize(key), idx);
+					Facade_Slice.AllocateSlice(newNode.value,Vsr.calculateSize(value), idx);
+                    	
+					Facade_Slice.WriteFast(Ksr, key, newNode.key, idx);
+					Facade_Slice.WriteFast(Vsr, value, newNode.value, idx);
+                    
                     newNode.next.set(curr, false);
                     if (pred.next.compareAndSet(curr, newNode, false, false)) {
                         return true;
+                    }
+                    else {
+                    	Facade_Slice.DeletePrivate(idx, newNode.key);
+                    	Facade_Slice.DeletePrivate(idx, newNode.value);
                     }
                 }
             }  
@@ -149,16 +149,16 @@ public class HarrisLinkedListNova<E> {
      * @param key
      * @return
      */
-    public boolean remove(E key, int tidx) {
+    public boolean remove(K key, int idx) {
         CmpFail: while(true)
     	try {
             while (true) {
-                final Window window = find(key, tidx);
+                final Window window = find(key, idx);
                 // On Harris's paper, "pred" is named "left_node" and the "curr"
                 // variable is named "right_node".            
                 final Node pred = window.pred;
                 final Node curr = window.curr;
-                if (curr.key == Illegal_nu || Facade_Nova.Compare(key, Cmp, curr.key) != 0) {
+                if (curr.key!= null || Facade_Slice.Compare(key, Kcm, curr.key) != 0) {
                     return false;
                 } 
                 final Node succ = curr.next.getReference();
@@ -170,9 +170,11 @@ public class HarrisLinkedListNova<E> {
                 if (!curr.next.compareAndSet(succ, succ, false, true)) {//mark
                     continue;
                 }
-                pred.next.compareAndSet(curr, succ, false, false);
-                Facade_Nova.Delete(tidx, curr.key, curr, key_offset);
-                return true;
+                if(pred.next.compareAndSet(curr, succ, false, false)) {
+                	Facade_Slice.Delete(idx, curr.key);
+                	Facade_Slice.Delete(idx, curr.value);
+                    return true;                	
+                }
             }
     	}catch(NovaIllegalAccess e) {continue CmpFail;}
     }
@@ -186,7 +188,7 @@ public class HarrisLinkedListNova<E> {
      * @param key
      * @return
      */
-    public Window find(E key, int tidx) {
+    public Window find(K key, int tidx) {
         Node pred = null;
         Node curr = null; 
         Node succ = null;
@@ -208,12 +210,13 @@ public class HarrisLinkedListNova<E> {
 	                            if (!pred.next.compareAndSet(curr, succ, false, false)) {
 	                                continue retry;
 	                            }
-	                            Facade_Nova.Delete(tidx, curr.key, curr, key_offset);
+	                        	Facade_Slice.Delete(tidx, curr.key);
+	                        	Facade_Slice.Delete(tidx, curr.value);
 	                            curr = succ;
 	                            succ = curr.next.get(marked);
 	                        }
 	
-	                        if (curr == tail || Facade_Nova.Compare(key, Cmp, curr.key) >= 0) { //we compare the offheap vs the key thus looking for >
+	                        if (curr.key!= null || Facade_Slice.Compare(key, Kcm, curr.key) >= 0) { //we compare the offheap vs the key thus looking for >
 	                            return new Window(pred, curr);
 	                        }
 	                        pred = curr;
@@ -240,83 +243,17 @@ public class HarrisLinkedListNova<E> {
      * @param key
      * @return
      */
-    public boolean contains(E key, int tidx) {
+    public boolean contains(K key, int tidx) {
         boolean[] marked = {false};
         CmpFail: while(true)
         	try {
                 Node curr = head.next.getReference();
                 curr.next.get(marked);
-                while (curr != tail && Facade_Nova.Compare(key, Cmp, curr.key) < 0) {
+                while (curr != tail && Facade_Slice.Compare(key, Kcm, curr.key) < 0) {
                     curr = curr.next.getReference();
                     curr.next.get(marked);
                 }
-                return curr.key == Illegal_nu ? false : Facade_Nova.Compare(key, Cmp, curr.key) == 0 && !marked[0];
+                return curr.key == null ? false : Facade_Slice.Compare(key, Kcm, curr.key) == 0 && !marked[0];
         	}catch (NovaIllegalAccess e) {continue CmpFail;}
     }
-    
-    
-    public Iterator<E> iterator(int idx) {
-        return new LLIterator<E>(this, idx);
-    }
-    
-
-    public void Print() {
-        Node curr = head.next.getReference();
-        while (curr != tail ) {
- 	       Facade_Nova.Print(Cmp, curr.key);
- 	       System.out.print("-->");
-           curr = curr.next.getReference();
-
-        }
-    }
-    
-    class LLIterator<E> implements Iterator<E> {
-        Node current;
-        int idx;
-
-	   public LLIterator(HarrisLinkedListNova<E> list, int idx)
-	   {
-	        current = list.head.getNext();
-	        this.idx = idx;
-        }
-        // Checks if the next element exists
-        public boolean hasNext() {
-            return current.key != 1; 	
-        }
-          
-        // moves the cursor/iterator to next element
-        public E next() {
-            E data = (E)current.Read(Srz);
-            current = current.getNext();
-            return data;
-        }
-    }	
-    
-	public static void main(String[] args) {
-	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	    final NovaManager novaManager = new NovaManager(allocator);
-	    
-	    Buff x =new Buff(4);
-	    x.set(88);
-	    HarrisLinkedListNova<Buff> List = new HarrisLinkedListNova<>(novaManager, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
-		List.add(x,0);
-		List.remove(x, 0);
-		List.add(x,0);
-		x.set(120);
-		List.add(x,0);
-
-
-	    Buff xy =new Buff(4);
-	    Buff z= new Buff(128);
-	    xy.set(110);
-	    List.add(xy,0);
-	    List.contains(x,0);
-	    
-	    
-	    List.Print();
-	    assert List.contains(x,0) == false;
-	    assert List.contains(z,0) == true;
-
-	}
-	
 }

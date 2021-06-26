@@ -6,18 +6,14 @@
 
 package com.yahoo.oak.synchrobench.contention.abstractions;
 
-import java.util.Iterator;
-
-public interface CompositionalLL<K> {
+public interface CompositionalLL<K,V> {
 
 	boolean containsKey(final K key, int tidx);
 	    
-    public  boolean put(final K key, int idx);
+    public  boolean put(final K key,final V value, int idx);
     
     public  boolean remove(final K key, int idx);
-    
-    public  Iterator<K> iterator(int idx);
-    
+        
     public long allocated();
     
     public void clear ();

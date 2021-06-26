@@ -25,7 +25,7 @@ public class ThreadLoopLL implements Runnable {
     /**
      * The instance of the running benchmark
      */
-	CompositionalLL<Buff> bench;
+	CompositionalLL<Buff,Buff> bench;
     /**
      * The stop flag, indicating whether the loop is over
      */
@@ -91,7 +91,7 @@ public class ThreadLoopLL implements Runnable {
     int[] cdf = new int[3];
 
     public ThreadLoopLL(short myThreadNum,
-                         CompositionalLL<Buff> bench, Method[] methods) {
+                         CompositionalLL<Buff,Buff> bench, Method[] methods) {
         this.myThreadNum = myThreadNum;
         this.bench = bench;
         this.methods = methods;
@@ -118,17 +118,7 @@ public class ThreadLoopLL implements Runnable {
 
         while (!stop) {
         	
-        	if(iterate) {
-        		Iterator itr = bench.iterator(myThreadNum);
-        		while(itr.hasNext()) {
-        			if((Buff)itr.next() != null)
-        				itrSuccess ++;
-        			total++;
-        		}
-        		continue;
-        	}
-        	
-            newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
+        	newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
         	key.set(newInt);
 
@@ -144,7 +134,7 @@ public class ThreadLoopLL implements Runnable {
             }
             else if (coin < cdf[1]) { // -u writing is better than deleting?
             	numAdd++;
-            	if(bench.put(key, myThreadNum)) {
+            	if(bench.put(key,key, myThreadNum)) {
             		numSuccAdd++;
             	}
             	else failures++;

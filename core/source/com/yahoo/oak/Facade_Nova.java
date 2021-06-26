@@ -1,6 +1,8 @@
 package com.yahoo.oak;
 
 
+import com.yahoo.oak.Facade_Slice.Facade_slice;
+
 import sun.misc.Unsafe;
 
 public class Facade_Nova <T,K> {
@@ -101,6 +103,20 @@ public class Facade_Nova <T,K> {
 	}
 
 	
+	static public <K> boolean DeletePrivate(int idx, long metadata) {
+		
+		int block 	= Extractblock(metadata);
+		int offset	= ExtractOffset(metadata);
+		long address = novaManager.getAdress(block);
+
+		long OffHeapMetaData= UNSAFE.getLong(address+offset);//reads off heap meta
+		int len= (int)OffHeapMetaData>>>24; //get the lenght 
+
+		 
+		novaManager.free(new NovaSlice(block, offset, len));
+		return true; 
+	}
+	
 	static public <T> long WriteFull (NovaS<T> lambda, T obj, long facade_meta ,int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2==DELETED) 
@@ -193,23 +209,6 @@ public class Facade_Nova <T,K> {
 		 return facade_meta;
 	}
 	
-	 static public <T> void checkDeleted(T obj, long metadata) {
-			
-		if(metadata%2!=0)
-			throw new NovaIllegalAccess();
-		
-		int version	= ExtractVer_Del(metadata);
-		int block 	= Extractblock	(metadata);
-		int offset 	= ExtractOffset	(metadata);
-
-		
-		long address = novaManager.getAdress(block);
-		
-		if(bench_Flags.Fences)UNSAFE.loadFence();
-		
-		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
-			throw new NovaIllegalAccess();
-	}
 	
 	 static public <T> int Compare(T obj, NovaC<T> srZ, long metadata) {
 		

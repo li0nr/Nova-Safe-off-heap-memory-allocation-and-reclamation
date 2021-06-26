@@ -1,53 +1,50 @@
 package com.yahoo.oak.LL;
 
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.CopyConstructor;
-import com.yahoo.oak.Facade_Nova;
-import com.yahoo.oak.HazardEras.HEslice;
-import com.yahoo.oak.LL.HarrisLinkedListHE.LLIterator;
-import com.yahoo.oak.LL.HarrisLinkedListNova.Node;
 
 
-public class HarrisLinkedList <E extends Comparable<? super E>>{
+public class HarrisLinkedList <E extends Comparable<? super E>,V extends Comparable<? super V>>{
 
-	    final Node<E> head;
-	    final Node<E> tail;
-	    final CopyConstructor<E> CC;
+	    final Node<E,V> head;
+	    final Node<E,V> tail;
+	    final CopyConstructor<E> KCC;
+	    final CopyConstructor<V> VCC;
 
-	    static class Node<E> {
+	    static class Node <E,V> {
 	        final E key;
-	        final AtomicMarkableReference<Node<E>> next;
+	        final V value;
+	        final AtomicMarkableReference<Node<E,V>> next;
 	               
-	        Node(E key) {
+	        Node(E key, V value) {
 	            this.key = key;
-	            this.next = new AtomicMarkableReference<Node<E>>(null, false);
+	            this.value = value;
+	            this.next = new AtomicMarkableReference<Node<E,V>>(null, false);
 	        }
 	        
-	        public Node getNext() {
-	        	return this.next.getReference();
-	        }
 	    }
 	    
 	    // Figure 9.24, page 216
-	    static class Window<T> {
-	        public Node<T> pred;
-	        public Node<T> curr;
+	    static class Window<T,R> {
+	        public Node<T,R> pred;
+	        public Node<T,R> curr;
 	        
-	        Window(Node<T> myPred, Node<T> myCurr) {
+	        Window(Node<T,R> myPred, Node<T,R> myCurr) {
 	            pred = myPred; 
 	            curr = myCurr;
 	        }
 	    }
 
 
-	    public HarrisLinkedList(CopyConstructor<E> cp) {
+	    public HarrisLinkedList(CopyConstructor<E> Kcp,CopyConstructor<V> Vcp) {
 
-	        tail = new Node<>(null);
-	        head = new Node<>(null);
+	        tail = new Node<E,V>(null,null);
+	        head = new Node<E,V>(null,null);
 	        head.next.set(tail, false);
-	        CC = cp;
+	        KCC = Kcp;
+	        VCC = Vcp;
+
 	    }
 	        
 	    /**
@@ -59,17 +56,19 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	     * @param key
 	     * @return
 	     */
-	    public boolean add(E key, int tidx) {	
+	    public boolean add(E key,V value, int tidx) {	
 	        while (true) {
-	            final Window<E> window = find(key, tidx);
+	            final Window<E,V> window = find(key, tidx);
 	            // On Harris paper, pred is named left_node and curr is right_node
-	            final Node<E> pred = window.pred;
-	            final Node<E> curr = window.curr;
+	            final Node<E,V> pred = window.pred;
+	            final Node<E,V> curr = window.curr;
 	            if (curr.key != null && curr.key.compareTo(key) == 0) { 
 	                return false;
 	            } else {
-	    	    	E myKey = CC.Copy(key);
-	    			final Node<E> newNode = new Node<>(myKey);
+	    	    	E myKey = KCC.Copy(key);
+	    	    	V myval= VCC.Copy(value);
+
+	    			final Node<E,V> newNode = new Node(myKey, myval);
 	                newNode.next.set(curr, false);
 	                if (pred.next.compareAndSet(curr, newNode, false, false)) {
 	                    return true;
@@ -90,15 +89,15 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	     */
 	    public boolean remove(E key, int tidx) {
 	        while (true) {
-	            final Window<E> window = find(key, tidx);
+	            final Window<E,V> window = find(key, tidx);
 	            // On Harris's paper, "pred" is named "left_node" and the "curr"
 	            // variable is named "right_node".            
-	            final Node<E> pred = window.pred;
-	            final Node<E> curr = window.curr;
+	            final Node<E,V> pred = window.pred;
+	            final Node<E,V> curr = window.curr;
 	            if (curr.key == null || curr.key.compareTo(key) != 0) {
 	                return false;
 	            } 
-	            final Node<E> succ = curr.next.getReference();
+	            final Node<E,V> succ = curr.next.getReference();
 	            // In "The Art of Multiprocessor Programming - 1st edition", 
 	            // the code shown has attemptMark() but we can't use it, 
 	            // because attemptMark() returns true if the node
@@ -121,15 +120,15 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	     * @param key
 	     * @return
 	     */
-	    public Window<E> find(E key, int tidx) {
-	        Node<E> pred = null;
-	        Node<E> curr = null; 
-	        Node<E> succ = null;
+	    public Window<E,V> find(E key, int tidx) {
+	        Node<E,V> pred = null;
+	        Node<E,V> curr = null; 
+	        Node<E,V> succ = null;
 	        boolean[] marked = {false};
 
 	        // I think there is a special case for an empty list
 	        if (head.next.getReference() == tail) {
-	            return new Window<E>(head, tail);
+	            return new Window<E,V>(head, tail);
 	        }
 	        
 	        retry: 
@@ -147,7 +146,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	                }
 	        		
 	                if (curr == tail || curr.key.compareTo(key) <= 0) {
-	                    return new Window<E>(pred, curr);
+	                    return new Window<E,V>(pred, curr);
 	                }
 	                pred = curr;
 	                curr = succ;
@@ -172,7 +171,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	     */
 	    public boolean contains(E key, int tidx) {
 	        boolean[] marked = {false};
-	        Node<E> curr = head.next.getReference();
+	        Node<E,V> curr = head.next.getReference();
 	        curr.next.get(marked);
 	        while (curr != tail && curr.key.compareTo(key) > 0) {
 	            curr = curr.next.getReference();
@@ -181,30 +180,4 @@ public class HarrisLinkedList <E extends Comparable<? super E>>{
 	        boolean flag = curr.key!= null && curr.key.compareTo(key) == 0 && !marked[0];
 	        return flag;
 	    }
-	    
-	    public Iterator<E> iterator(int idx) {
-	        return new LLIterator<E>(this, idx);
-	    }
-	    
-	    class LLIterator<E> implements Iterator<E> {
-	        Node current;
-	        int idx;
-	        
-		   public LLIterator(HarrisLinkedList list, int idx)
-		   {
-		        current = list.head;
-		        this.idx = idx;
-	        }
-	        // Checks if the next element exists
-	        public boolean hasNext() {
-	            return current != null; 	
-	        }
-	          
-	        // moves the cursor/iterator to next element
-	        public E next() {
-	            E data = (E)current.key;
-	            current = current.getNext();
-	            return data;
-	        }
-	    }	
 }

@@ -1,9 +1,8 @@
-package com.yahoo.oak.LL;
+package com.yahoo.oak.LL.HE;
 
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
-import com.yahoo.oak.HazardEras;
+import com.yahoo.oak.Facade_HE;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
@@ -39,23 +38,26 @@ import com.yahoo.oak.HazardEras.HEslice;
  * @author Pedro Ramalhete
  * @author Andreia Correia
  */
-public class HarrisLinkedListHE<E> {
+public class LL_HE_noCAS<K,V> {
 
     final Node head;
     final Node tail;
     
-    final NovaC<E> Cmp;
-    final NovaS<E> Srz;
-    final HazardEras HE;
-    final NativeMemoryAllocator allocator;
+    final NovaC<K> Kcm;
+    final NovaS<K> Ksr;
+    final NovaC<V> Vcm;
+    final NovaS<V> Vsr;
     final static int MAXTHREADS = 32;
     
+	
     static class Node {
         final HEslice key;
+        final HEslice value;
         final AtomicMarkableReference<Node> next;
                
-        Node(HEslice key) {
+        Node(HEslice key, HEslice value ) {
             this.key = key;
+            this.value = value;
             this.next = new AtomicMarkableReference<Node>(null, false);
         }
         
@@ -79,13 +81,13 @@ public class HarrisLinkedListHE<E> {
 
     
     
-    public HarrisLinkedListHE(NativeMemoryAllocator allocator,NovaC<E> cmp,	NovaS<E> srz) {
-    	HE = new HazardEras(1, MAXTHREADS, allocator);
-    	this.allocator = allocator;
-		Cmp = cmp; Srz = srz;
-    	
-        tail = new Node(null);
-        head = new Node(null);
+    public LL_HE_noCAS(NativeMemoryAllocator allocator, NovaC<K> cmp,	NovaS<K> srz,
+    		NovaC<V> Vcmp,	NovaS<V> Vsrz) {
+
+    	Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
+    	new Facade_HE(allocator);
+        tail = new Node(null, null);
+        head = new Node(null, null);
         head.next.set(tail, false);
     }
     
@@ -99,7 +101,7 @@ public class HarrisLinkedListHE<E> {
      * @param key
      * @return
      */
-    public boolean add(E key, int tidx) {
+    public boolean add(K key, V value , int tidx) {
         CmpFail: while(true)
         try{
         while (true) {
@@ -107,18 +109,23 @@ public class HarrisLinkedListHE<E> {
             // On Harris paper, pred is named left_node and curr is right_node
             final Node pred = window.pred;
             final Node curr = window.curr;
-            if (curr.key!= null && Cmp.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
-            	HE.clear(tidx);
+            if (curr.key!= null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0) { 
                 return false;
             } else {
-            	HEslice access  = HE.allocate( Srz.calculateSize(key));
-        		Srz.serialize(key, access.address+access.offset);
-        		final Node newNode = new Node(access);
+            	HEslice oKey  = Facade_HE.allocate( Ksr.calculateSize(key));
+        		Ksr.serialize(key, oKey.address+oKey.offset);
+            	HEslice oValue  = Facade_HE.allocate( Vsr.calculateSize(value));
+        		Vsr.serialize(value, oValue.address+oValue.offset);
+        		
+        		final Node newNode = new Node(oKey, oValue);
         		
                 newNode.next.set(curr, false);
                 if (pred.next.compareAndSet(curr, newNode, false, false)) {
-                	HE.clear(tidx);
                     return true;
+                }
+                else {
+                	Facade_HE.fastFree(curr.key);
+                	Facade_HE.fastFree(curr.value);
                 }
             }
         }       
@@ -134,7 +141,7 @@ public class HarrisLinkedListHE<E> {
      * @param key
      * @return
      */
-    public boolean remove(E key, int tidx) {
+    public boolean remove(K key, int tidx) {
         CmpFail: while(true)
         try{
     	while (true) {
@@ -143,8 +150,7 @@ public class HarrisLinkedListHE<E> {
             // variable is named "right_node".            
             final Node pred = window.pred;
             final Node curr = window.curr;
-            if ( curr.key == null ||Cmp.compareKeys(curr.key.address + curr.key.offset, key) != 0) {
-            	HE.clear(tidx);
+            if ( curr.key == null ||  Facade_HE.Compare(key, Kcm, curr.key, tidx)  != 0) {
                 return false;
             } 
             final Node succ = curr.next.getReference();
@@ -157,8 +163,8 @@ public class HarrisLinkedListHE<E> {
                 continue;
             }
             if(pred.next.compareAndSet(curr, succ, false, false)) {
-            	HE.clear(tidx);
-            	HE.retire(tidx, curr.key);
+            	Facade_HE.Delete(tidx, curr.key);
+            	Facade_HE.Delete(tidx, curr.value);
                 return true;	
                 }
             }
@@ -174,7 +180,7 @@ public class HarrisLinkedListHE<E> {
      * @param key
      * @return
      */
-    public Window find(E key, int tidx) {
+    public Window find(K key, int tidx) {
         Node pred = null;
         Node curr = null; 
         Node succ = null;
@@ -196,12 +202,13 @@ public class HarrisLinkedListHE<E> {
 			                    if (!pred.next.compareAndSet(curr, succ, false, false)) {
 			                        continue retry;
 			                    }
-			                    HE.retire(tidx, curr.key);
+			                	Facade_HE.Delete(tidx, curr.key);
+			                	Facade_HE.Delete(tidx, curr.value);
+
 			                    curr = succ;
 			                    succ = curr.next.get(marked);
 			                }
-			                HEslice access = HE.get_protected(curr.key, 0, tidx);
-			                if (curr == tail || Cmp.compareKeys(access.address + access.offset, key) >= 0) {
+			                if (curr == tail || Facade_HE.Compare(key, Kcm, curr.key, tidx) >= 0) {
 			                    return new Window(pred, curr);
 			                    }
 			                pred = curr;			
@@ -230,54 +237,18 @@ public class HarrisLinkedListHE<E> {
      * @param key
      * @return
      */
-    public boolean contains(E key, int tidx) {
+    public boolean contains(K key, int tidx) {
         boolean[] marked = {false};
         CmpFail: while(true)
         	try {
 		        Node curr = head.next.getReference();
 		        curr.next.get(marked);
-		        HEslice access = HE.get_protected(curr.key, 0, tidx);
-		        while (curr != tail && Cmp.compareKeys(access.address + access.offset, key) < 0) {
+		        while (curr != tail && Facade_HE.Compare(key, Kcm, curr.key, tidx) < 0) {
 		        	curr = curr.next.getReference();
 		            curr.next.get(marked);
-		            access = HE.get_protected(curr.key, 0, tidx);
 		        }
-		        boolean flag = curr.key != null && Cmp.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
-		        HE.clear(tidx);
+		        boolean flag = curr.key != null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0 && !marked[0];
 		        return flag;
 	        }catch (NovaIllegalAccess e) {continue CmpFail;}
         }
-    
-    
-    public Iterator<E> iterator(int idx) {
-        return new LLIterator<E>(this, idx);
-    }
-    
-    class LLIterator<E> implements Iterator<E> {
-        Node current;
-        int idx;
-        
-	   public LLIterator(HarrisLinkedListHE<E> list, int idx)
-	   {
-	        current = list.head.getNext();
-	        this.idx = idx;
-        }
-        // Checks if the next element exists
-        public boolean hasNext() {
-            return current.key != null; 	
-        }
-          
-        // moves the cursor/iterator to next element
-        public E next() {
-	        HEslice access = HE.get_protected(current.key, 0, idx);
-            E data = (E)Srz.deserialize(access.address + access.offset);
-            HE.clear(idx);
-            current = current.getNext();
-            return data;
-        }
-    }	
-    
-	public HazardEras getHE() {
-		return HE;
-	}
 }

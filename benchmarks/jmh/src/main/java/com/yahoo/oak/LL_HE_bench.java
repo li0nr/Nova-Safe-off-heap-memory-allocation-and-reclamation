@@ -22,7 +22,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.HarrisLinkedListHE;
+import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
 
 
 public class LL_HE_bench {

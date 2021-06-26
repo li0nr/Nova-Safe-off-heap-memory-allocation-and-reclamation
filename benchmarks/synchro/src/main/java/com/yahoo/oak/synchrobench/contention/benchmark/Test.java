@@ -91,7 +91,7 @@ public class Test {
      */
     private Type benchType = null;
     private CompositionalBST<Buff, Buff> BST = null;
-    private CompositionalLL<Buff> LL = null;
+    private CompositionalLL<Buff,Buff> LL = null;
     /**
      * The benchmark methods
      */
@@ -126,18 +126,18 @@ public class Test {
                     ? v + 1 : localRand.nextInt(range);
             Buff key = new Buff(Parameters.confKeySize);
             key.buffer.putInt(0, v);
-
+            Buff val = new Buff(Parameters.confValSize);
+            val.buffer.putInt(0, v);
             
 			switch(benchType) {
 			case BST:
-	            Buff val = new Buff(Parameters.confValSize);
-	            val.buffer.putInt(0, v);
+
 	            if (BST.put(key, val,0) == null) {
 	                i--;
 	            }   
 	            break;
 			case LL:
-	            if (LL.put(key,0) == true) {
+	            if (LL.put(key,val,0) == true) {
 	                i--;
 	            } 
 				break;
@@ -169,7 +169,7 @@ public class Test {
                 BST = (CompositionalBST<Buff, Buff>) c.newInstance();
                 benchType = Type.BST;
             } else if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
-            	LL = (CompositionalLL<Buff>) c.newInstance();
+            	LL = (CompositionalLL<Buff,Buff>) c.newInstance();
     			benchType = Type.LL;
             }
 
