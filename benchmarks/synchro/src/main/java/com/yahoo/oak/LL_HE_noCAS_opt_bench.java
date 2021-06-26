@@ -2,16 +2,16 @@ package com.yahoo.oak;
 
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.EBR.LL_EBR_noCAS_opt;
+import com.yahoo.oak.LL.HE.LL_HE_noCAS_opt;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
-public class LL_EBR_noCas_opt_bench implements CompositionalLL<Buff,Buff>{
+public class LL_HE_noCAS_opt_bench implements CompositionalLL<Buff,Buff>{
 	
 	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	LL_EBR_noCAS_opt<Buff,Buff> LL = new LL_EBR_noCAS_opt<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
+	LL_HE_noCAS_opt<Buff,Buff> LL = new LL_HE_noCAS_opt<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
 			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
-	public LL_EBR_noCas_opt_bench(){
+	public LL_HE_noCAS_opt_bench(){
 		
 	}
 	public boolean containsKey(final Buff key, int tidx) {
@@ -33,7 +33,7 @@ public class LL_EBR_noCas_opt_bench implements CompositionalLL<Buff,Buff>{
     
     public void clear() {
     	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	LL = new LL_EBR_noCAS_opt<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
+    	LL = new LL_HE_noCAS_opt<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
     			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     }
     
