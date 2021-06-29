@@ -38,7 +38,7 @@ public class Facade_HE <T,K> {
 		if(slice.getdelEra() != -1)
 			throw new NovaIllegalAccess();
 		
-		HEslice toRead = _HazardEras.get_protected(slice, 1, tidx);
+		HEslice toRead = _HazardEras.get_protected(slice, tidx);
 		if(slice.getdelEra() != -1)
 			throw new NovaIllegalAccess();
 
@@ -54,7 +54,7 @@ public class Facade_HE <T,K> {
 		if(slice.getdelEra() != -1)
 			throw new NovaIllegalAccess();
 		
-		HEslice toRead = _HazardEras.get_protected(slice, 1, tidx);
+		HEslice toRead = _HazardEras.get_protected(slice, tidx);
 		if(toRead.getdelEra() != -1)
 			throw new NovaIllegalAccess();
 		
@@ -81,7 +81,7 @@ public class Facade_HE <T,K> {
 			if(slice.getdelEra() != -1)
 				throw new NovaIllegalAccess();
 			
-			HEslice toRead = _HazardEras.get_protected(slice, 1, tidx);
+			HEslice toRead = _HazardEras.get_protected(slice, tidx);
 			if(toRead.getdelEra() != -1)
 				throw new NovaIllegalAccess();
 

@@ -96,7 +96,7 @@ public class BaseLine_bench {
     public void HEprt(Blackhole blackhole,BenchmarkState state) {
     	int i = 0;
     	while(i<iter) {
-        	blackhole.consume(state.HE.get_protected(state.HESlice, 0, 0));//will not wokr
+        	blackhole.consume(state.HE.get_protected(state.HESlice, 0));//will not wokr
         	i++;
     	}
     }

@@ -21,34 +21,28 @@ public class NovaManager implements MemoryManager {
     static final int HEADER_SIZE = Long.BYTES;
     static final int IDENTRY = 0;
     static final int REFENTRY = 1;
-    static final int CACHE_PADDING = 16;
-    static final int BLOCK_TAP = CACHE_PADDING*MAX_THREADS;
+    static final int CACHE_PADDING = 8;
     
-    private final List<List<NovaSlice>> NreleaseLists;
-
+    private final ArrayList<NovaSlice>[] releaseLists;
+    
     private final AtomicInteger globalNovaNumber;
     private final BlockMemoryAllocator allocator;
     private final long TAP[];
     private final NovaSlice[] Slices;
 
     public NovaManager(BlockMemoryAllocator allocator) {
-        this.NreleaseLists = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < MAX_THREADS; i++) {
-            this.NreleaseLists.add(new ArrayList<>(RELEASE_LIST_LIMIT));
-        }
-        this.Slices = new NovaSlice[MAX_THREADS];
-        for (int i = 0; i < MAX_THREADS; i++) {
-            this.Slices[i]=new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE);
-        }
-        
-        TAP = new long[ MAX_THREADS * CACHE_PADDING];
-        //block 0 is not used ?
-        for(int i=0 ; i < MAX_THREADS*CACHE_PADDING; i+=CACHE_PADDING)
-        	TAP[i+IDENTRY]=-1;
-
-        
-        globalNovaNumber = new AtomicInteger(1);
+    	
+        this.releaseLists = new ArrayList[MAX_THREADS*2*CACHE_PADDING];
+        this.Slices = new NovaSlice[MAX_THREADS*2*CACHE_PADDING];
+        this.TAP = new long[ MAX_THREADS * CACHE_PADDING * 2];
         this.allocator = allocator;
+
+        for (int i = CACHE_PADDING; i < MAX_THREADS * CACHE_PADDING* 2; i+=CACHE_PADDING) {
+            this.releaseLists[i]	= new ArrayList<>(RELEASE_LIST_LIMIT);
+            this.Slices		 [i]	= new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE);
+            this.TAP		 [i+IDENTRY]	= -1;
+        }        
+        globalNovaNumber = new AtomicInteger(1);
     }
     
 
@@ -81,13 +75,13 @@ public class NovaManager implements MemoryManager {
     }
     
     public void release(int block, int offset, int len, int idx) {
-        List<NovaSlice> myReleaseList = this.NreleaseLists.get(idx);
+        List<NovaSlice> myReleaseList = this.releaseLists[(idx+1)*CACHE_PADDING];
         myReleaseList.add(new NovaSlice(block,offset,len));
         
         if (myReleaseList.size() >= RELEASE_LIST_LIMIT) {
         	
             ArrayList<Long> HostageSlices=new ArrayList<>();
-            for (int i = 0; i < CACHE_PADDING*MAX_THREADS; i= i +CACHE_PADDING ) {
+            for (int i = CACHE_PADDING; i < 2*CACHE_PADDING*MAX_THREADS; i= i +CACHE_PADDING ) {
         		if(TAP[i+IDENTRY] != -1)
         			HostageSlices.add(TAP[i+REFENTRY]);
         		}
@@ -111,13 +105,13 @@ public class NovaManager implements MemoryManager {
 
   public  void setTap(int block,long ref,int idx) {
 	int i= idx%MAX_THREADS;
-	TAP[CACHE_PADDING*i+IDENTRY]=idx;
-	TAP[CACHE_PADDING*i+REFENTRY]=ref;
+	TAP[CACHE_PADDING*(i+1)+IDENTRY]=idx;
+	TAP[CACHE_PADDING*(i+1)+REFENTRY]=ref;
   }
     
   public  void UnsetTap(int block,int idx) {
 	int i= idx%MAX_THREADS;
-	TAP[CACHE_PADDING*i+IDENTRY]=-1;
+	TAP[CACHE_PADDING*(i+1)+IDENTRY]=-1;
   }
 
     public long getAdress(int blockID) {
@@ -125,22 +119,25 @@ public class NovaManager implements MemoryManager {
     }
 
 
-    
     public NovaSlice getSlice(int size,int ThreadIdx) {
-    	NovaSlice s = Slices[ThreadIdx];
+    	NovaSlice s = Slices[(ThreadIdx+1)*CACHE_PADDING];
     	allocate(s, size);
     	return s;
     
     }
-  
 
     public int  getNovaEra() {
         return globalNovaNumber.get();
     }
     
     public void ForceCleanUp() {//UNSAFE reclimation for deubg
-    	for(List<NovaSlice> a : NreleaseLists) {
-    		for(NovaSlice x : a) {
+//    	for(List<NovaSlice> a : releaseLists) {
+//    		for(NovaSlice x : a) {
+//    			allocator.free(x);
+//    		}
+//    	}
+    	for(int i= CACHE_PADDING; i < 2*CACHE_PADDING*MAX_THREADS; i +=CACHE_PADDING ) {
+    		for(NovaSlice x : releaseLists[i]) {
     			allocator.free(x);
     		}
     	}

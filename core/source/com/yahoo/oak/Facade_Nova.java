@@ -1,8 +1,6 @@
 package com.yahoo.oak;
 
 
-import com.yahoo.oak.Facade_Slice.Facade_slice;
-
 import sun.misc.Unsafe;
 
 public class Facade_Nova <T,K> {

@@ -26,9 +26,8 @@ public class Facade_EBR {
 		}
 	
 	static public <T> T Read(NovaS<T> lambda, EBRslice slice, int tidx) {
-	
-		if(slice.geteEpoch() != -1)
-			 throw new NovaIllegalAccess();
+//		if(slice.geteEpoch() != -1)
+//			 throw new NovaIllegalAccess();
 		
 		_EBR.start_op(tidx);
 		
@@ -44,8 +43,8 @@ public class Facade_EBR {
 
 	
 	static public <T> EBRslice Write(NovaS<T> lambda, T obj, EBRslice slice, int tidx ) {
-		if(slice.geteEpoch() != -1)
-			 throw new NovaIllegalAccess();
+//		if(slice.geteEpoch() != -1)
+//			 throw new NovaIllegalAccess();
 		
 		_EBR.start_op(tidx);
 		
@@ -70,8 +69,8 @@ public class Facade_EBR {
 	
 	
 	 static public <T> int Compare(T obj, NovaC<T> cmP, EBRslice slice, int tidx) {
-		 if(slice.geteEpoch() != -1)
-			 throw new NovaIllegalAccess();
+//		 if(slice.geteEpoch() != -1)
+//			 throw new NovaIllegalAccess();
 			
 		 _EBR.start_op(tidx);
 			

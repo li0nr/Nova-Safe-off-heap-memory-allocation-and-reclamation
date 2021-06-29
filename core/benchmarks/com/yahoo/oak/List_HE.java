@@ -51,7 +51,7 @@ public class List_HE implements ListInterface{
 		if(index >= size || index<0) 
 			throw new IndexOutOfBoundsException();
 		long x;
-		HEslice access = HE.get_protected(Slices[index], 0, idx);
+		HEslice access = HE.get_protected(Slices[index], idx);
 		if(access != null)
 			x  = UnsafeUtils.unsafe.getLong(Slices[index].getAddress() + Slices[index].getAllocatedOffset());	
 		else {
@@ -68,7 +68,7 @@ public class List_HE implements ListInterface{
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		HEslice access = HE.get_protected(Slices[index], 0, idx);
+		HEslice access = HE.get_protected(Slices[index],idx);
 		if(access != null) {
 			UnsafeUtils.unsafe.putLong(Slices[index].getAddress() + Slices[index].getAllocatedOffset(),e);
 		}

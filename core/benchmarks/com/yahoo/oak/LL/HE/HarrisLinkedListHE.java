@@ -1,6 +1,5 @@
 package com.yahoo.oak.LL.HE;
 
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.HazardEras;
@@ -200,7 +199,7 @@ public class HarrisLinkedListHE<E> {
 			                    curr = succ;
 			                    succ = curr.next.get(marked);
 			                }
-			                HEslice access = HE.get_protected(curr.key, 0, tidx);
+			                HEslice access = HE.get_protected(curr.key,tidx);
 			                if (curr == tail || Cmp.compareKeys(access.address + access.offset, key) >= 0) {
 			                    return new Window(pred, curr);
 			                    }
@@ -236,11 +235,11 @@ public class HarrisLinkedListHE<E> {
         	try {
 		        Node curr = head.next.getReference();
 		        curr.next.get(marked);
-		        HEslice access = HE.get_protected(curr.key, 0, tidx);
+		        HEslice access = HE.get_protected(curr.key, tidx);
 		        while (curr != tail && Cmp.compareKeys(access.address + access.offset, key) < 0) {
 		        	curr = curr.next.getReference();
 		            curr.next.get(marked);
-		            access = HE.get_protected(curr.key, 0, tidx);
+		            access = HE.get_protected(curr.key, tidx);
 		        }
 		        boolean flag = curr.key != null && Cmp.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
 		        HE.clear(tidx);
@@ -248,34 +247,6 @@ public class HarrisLinkedListHE<E> {
 	        }catch (NovaIllegalAccess e) {continue CmpFail;}
         }
     
-    
-    public Iterator<E> iterator(int idx) {
-        return new LLIterator<E>(this, idx);
-    }
-    
-    class LLIterator<E> implements Iterator<E> {
-        Node current;
-        int idx;
-        
-	   public LLIterator(HarrisLinkedListHE<E> list, int idx)
-	   {
-	        current = list.head.getNext();
-	        this.idx = idx;
-        }
-        // Checks if the next element exists
-        public boolean hasNext() {
-            return current.key != null; 	
-        }
-          
-        // moves the cursor/iterator to next element
-        public E next() {
-	        HEslice access = HE.get_protected(current.key, 0, idx);
-            E data = (E)Srz.deserialize(access.address + access.offset);
-            HE.clear(idx);
-            current = current.getNext();
-            return data;
-        }
-    }	
     
 	public HazardEras getHE() {
 		return HE;

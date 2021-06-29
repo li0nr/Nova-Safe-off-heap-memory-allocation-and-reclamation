@@ -18,12 +18,12 @@ duration="30000"
 declare -A heap_limit=(
 						["LL_EBR_CAS_bench"]="10m"
 						["LL_EBR_noCAS_bench"]="10m"
-						["LL_EBR_noCAS_opt_bench"]="10m"
+						["LL_EBR_CAS_opt_bench"]="10m"
 						["LL_EBR_noCAS_opt_bench"]="10m"
 
 						["LL_HE_CAS_bench"]="10m"
 						["LL_HE_noCAS_bench"]="10m"
-						["LL_HE_noCAS_opt_bench"]="10m"
+						["LL_HE_CAS_opt_bench"]="10m"
 						["LL_HE_noCAS_opt_bench"]="10m"
 
                        ["LL_Nova_CAS_bench"]="10m"
@@ -38,12 +38,12 @@ declare -A heap_limit=(
 declare -A direct_limit=(						
 						["LL_EBR_CAS_bench"]="20m"
 						["LL_EBR_noCAS_bench"]="20m"
-						["LL_EBR_noCAS_opt_bench"]="20m"
+						["LL_EBR_CAS_opt_bench"]="20m"
 						["LL_EBR_noCAS_opt_bench"]="20m"
 
 						["LL_HE_CAS_bench"]="20m"
 						["LL_HE_noCAS_bench"]="20m"
-						["LL_HE_noCAS_opt_bench"]="20m"
+						["LL_HE_CAS_opt_bench"]="20m"
 						["LL_HE_noCAS_opt_bench"]="20m"
 
                        ["LL_Nova_CAS_bench"]="20m"
@@ -58,12 +58,12 @@ declare -A direct_limit=(
 declare -A becnh_size=(						
 						["LL_EBR_CAS_bench"]="10000"
 						["LL_EBR_noCAS_bench"]="10000"
-						["LL_EBR_noCAS_opt_bench"]="10000"
+						["LL_EBR_CAS_opt_bench"]="10000"
 						["LL_EBR_noCAS_opt_bench"]="10000"
 
 						["LL_HE_CAS_bench"]="10000"
 						["LL_HE_noCAS_bench"]="10000"
-						["LL_HE_noCAS_opt_bench"]="10000"
+						["LL_HE_CAS_opt_bench"]="10000"
 						["LL_HE_noCAS_opt_bench"]="10000"
 
                        ["LL_Nova_CAS_bench"]="10000"
@@ -78,12 +78,12 @@ declare -A becnh_size=(
 declare -A key_size=(
 						["LL_EBR_CAS_bench"]="100"
 						["LL_EBR_noCAS_bench"]="100"
-						["LL_EBR_noCAS_opt_bench"]="100"
+						["LL_EBR_CAS_opt_bench"]="100"
 						["LL_EBR_noCAS_opt_bench"]="100"
 
 						["LL_HE_CAS_bench"]="100"
 						["LL_HE_noCAS_bench"]="100"
-						["LL_HE_noCAS_opt_bench"]="100"
+						["LL_HE_CAS_opt_bench"]="100"
 						["LL_HE_noCAS_opt_bench"]="100"
 
                        ["LL_Nova_CAS_bench"]="100"
@@ -98,12 +98,12 @@ declare -A key_size=(
 
 declare -A val_size=(						["LL_EBR_CAS_bench"]="1024"
 						["LL_EBR_noCAS_bench"]="1024"
-						["LL_EBR_noCAS_opt_bench"]="1024"
+						["LL_EBR_CAS_opt_bench"]="1024"
 						["LL_EBR_noCAS_opt_bench"]="1024"
 
 						["LL_HE_CAS_bench"]="1024"
 						["LL_HE_noCAS_bench"]="1024"
-						["LL_HE_noCAS_opt_bench"]="1024"
+						["LL_HE_CAS_opt_bench"]="1024"
 						["LL_HE_noCAS_opt_bench"]="1024"
 
                        ["LL_Nova_CAS_bench"]="1024"

@@ -158,7 +158,7 @@ public class LL_Test {
 	
 	
 	@Test
-	public void BST_Fill_delete_EBR() {
+	public void LL_Fill_delete_EBR() {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    LL_EBR_CAS_opt<Buff,Buff> Listopt = new LL_EBR_CAS_opt<>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
 	    		,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);

@@ -214,7 +214,7 @@ public class LL_HE_CAS_opt<K,V> {
 			                    curr = succ;
 			                    succ = curr.next.get(marked);
 			                }
-			                HEslice access = HE.get_protected(curr.key, 0, tidx);
+			                HEslice access = HE.get_protected(curr.key, tidx);
 			                if (curr == tail || Kcm.compareKeys(access.address + access.offset, key) >= 0) {
 			                    return new Window(pred, curr);
 			                    }
@@ -250,11 +250,11 @@ public class LL_HE_CAS_opt<K,V> {
         	try {
 		        Node curr = head.next.getReference();
 		        curr.next.get(marked);
-		        HEslice access = HE.get_protected(curr.key, 0, tidx);
+		        HEslice access = HE.get_protected(curr.key, tidx);
 		        while (curr != tail && Kcm.compareKeys(access.address + access.offset, key) < 0) {
 		        	curr = curr.next.getReference();
 		            curr.next.get(marked);
-		            access = HE.get_protected(curr.key, 0, tidx);
+		            access = HE.get_protected(curr.key, tidx);
 		        }
 		        boolean flag = curr.key != null && Kcm.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
 		        HE.clear(tidx);

@@ -65,7 +65,7 @@ public class Facade_Slice {
 		S.blockID =	newslice.blockID;
 		S.address = newslice.address;
 		S.length  = newslice.length;
-		int NewVer= (int) newslice.getVersion() &0xFFFFFF;
+		S.version = (int) newslice.getVersion() &0xFFFFFF;
 		return true;
 	}
 	

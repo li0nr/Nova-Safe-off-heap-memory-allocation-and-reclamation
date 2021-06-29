@@ -8,14 +8,14 @@ public class HazardEras{
 
 	private static final long NONE = 0;
 	private static final int  HE_MAX_THREADS = 32;
-	private static final int  CLPAD = 16;
+	private static final int  CLPAD = 8;
 	private static final int  RELEASE_LIST_LIMIT = 1024;
 
-    private int[] releasecounter = new int[HE_MAX_THREADS*2*CLPAD];
+    private int[] releasecounter;
 
     private final AtomicLong eraClock;
     private long[] he;
-    private final ArrayList<HazardEras_interface>[] retiredList= new ArrayList[HE_MAX_THREADS*CLPAD];//CLPAD is for cache padding
+    private final ArrayList<HazardEras_interface>[] retiredList;
     private final NativeMemoryAllocator allocator;
 	
 	
@@ -48,11 +48,14 @@ public class HazardEras{
 		 
 	public HazardEras(int maxThreads, NativeMemoryAllocator alloc) {
 		allocator = alloc;
-		eraClock = new AtomicLong(NONE);
-		he = new long[HE_MAX_THREADS*CLPAD];
+		eraClock 		= new AtomicLong(NONE);
+		he 				= new long[HE_MAX_THREADS*2*CLPAD];
+		releasecounter 	= new int[HE_MAX_THREADS*2*CLPAD];
+		retiredList		= new ArrayList[HE_MAX_THREADS*2*CLPAD];
+		 
     	for(int it=0; it< HE_MAX_THREADS; it++) {
-			he[it*CLPAD]= (NONE);
-    		retiredList[it*CLPAD] = new ArrayList<HazardEras_interface>();
+			he[it*CLPAD+CLPAD ]= (NONE);
+    		retiredList[it*CLPAD+CLPAD ] = new ArrayList<HazardEras_interface>();
     		}
     	}
 
@@ -79,7 +82,7 @@ public class HazardEras{
      */
      public void clear(int tid) {
     	 UnsafeUtils.unsafe.storeFence(); //need it so that read and writes before doesnt get reordered after
-    	 he[(tid)*CLPAD] = NONE;
+    	 he[tid*CLPAD+CLPAD] = NONE;
 	 }
      
      
@@ -87,8 +90,8 @@ public class HazardEras{
      * Progress Condition: lock-free
      */
      
-     public HEslice get_protected(HEslice obj, int ihe, int tid) {
-    	 long prevEra = he[(tid)*CLPAD+ihe];
+     public HEslice get_protected(HEslice obj, int tid) {
+    	 long prevEra = he[tid*CLPAD+CLPAD];
     	 while (true) {
     		 //T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
 		    				//A load operation with this memory order performs an acquire operation,
@@ -104,7 +107,7 @@ public class HazardEras{
 
     		 if (era == prevEra) return obj ;
     		 UnsafeUtils.unsafe.fullFence();
-    		 he[tid*CLPAD+ihe] = era; //TODO he must be volatile
+    		 he[tid*CLPAD+CLPAD] = era; //TODO he must be volatile
     		 prevEra = era;
 		}
     }
@@ -117,10 +120,10 @@ public class HazardEras{
       public <T> void retire(int mytid, HazardEras_interface obj) {
         long currEra = eraClock.get();
         obj.setDeleteEra(currEra);
-        ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD];
+        ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD+CLPAD];
         rlist.add(obj);
-        releasecounter[mytid *2* CLPAD ]++;
-        if(releasecounter[mytid *2* CLPAD] == RELEASE_LIST_LIMIT) {
+        releasecounter[mytid*CLPAD+CLPAD]++;
+        if(releasecounter[mytid*CLPAD+CLPAD] == RELEASE_LIST_LIMIT) {
             if (eraClock.get() == currEra) eraClock.getAndAdd(1);
             HazardEras_interface toDeleteObj;
             for (int iret = 0; iret < rlist.size();) {
@@ -132,7 +135,7 @@ public class HazardEras{
                 }
                 iret++;
             }
-            releasecounter[mytid *2* CLPAD ] = 0;
+            releasecounter[mytid*CLPAD+CLPAD] = 0;
         }
 
     }
@@ -141,10 +144,10 @@ public class HazardEras{
     	  long currEra = eraClock.get();
           obj.setDeleteEra(currEra);
           UnsafeUtils.unsafe.fullFence();
-          ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD];
+          ArrayList<HazardEras_interface> rlist = retiredList[mytid*CLPAD+CLPAD];
           rlist.add(obj);
-          releasecounter[mytid *2* CLPAD ]++;
-          if(releasecounter[mytid *2* CLPAD] == RELEASE_LIST_LIMIT) {
+          releasecounter[mytid*CLPAD+CLPAD]++;
+          if(releasecounter[mytid *CLPAD+CLPAD] == RELEASE_LIST_LIMIT) {
               if (eraClock.get() == currEra) eraClock.getAndAdd(1);
               HazardEras_interface toDeleteObj;
               for (int iret = 0; iret < rlist.size();) {
@@ -156,7 +159,7 @@ public class HazardEras{
                   }
                   iret++;
               }
-              releasecounter[mytid *2* CLPAD ] = 0;
+              releasecounter[mytid*CLPAD+CLPAD] = 0;
           }
 
       }
@@ -168,7 +171,7 @@ public class HazardEras{
 
       private boolean  canDelete(HazardEras_interface obj,  int mytid) {
     	  for (int tid = 0; tid < HE_MAX_THREADS; tid++) {
-            long era = he[tid*CLPAD ]; //we want to garantue that the last updated he is seen
+            long era = he[tid*CLPAD+CLPAD]; //we want to garantue that the last updated he is seen
             UnsafeUtils.unsafe.loadFence();
             if (era == NONE || era < obj.getnewEra() || era > obj.getdelEra()) continue;
             return false;
@@ -180,7 +183,7 @@ public class HazardEras{
 	//DEBUG
 	void ForceCleanUp() {
 		for(int i =0 ; i < HE_MAX_THREADS; i++) {
-	        ArrayList<HazardEras_interface> rlist = retiredList[i*CLPAD];
+	        ArrayList<HazardEras_interface> rlist = retiredList[i*CLPAD+CLPAD];
             HazardEras_interface toDeleteObj;
 	        for (int iret = 0; iret < rlist.size(); ) {
             	toDeleteObj = (HazardEras_interface)rlist.get(iret);

@@ -87,7 +87,7 @@ public class LL_Nova_noCAS<K,V> {
     public LL_Nova_noCAS(NovaManager novaManager,NovaC<K> cmp,	NovaS<K> srz,
     		NovaC<V> Vcmp,	NovaS<V> Vsrz) {	
 		nm = novaManager; Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
-		new Facade_Nova(nm);
+		new Facade_Slice(nm);
 	      
         tail = new Node(null,null);
         head = new Node(null,null);
