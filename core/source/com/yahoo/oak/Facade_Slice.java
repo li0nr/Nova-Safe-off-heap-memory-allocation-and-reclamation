@@ -33,6 +33,13 @@ public class Facade_Slice {
 			super(INVALID_BLOCKID, INVALID_OFFSET, 0);
 			version = 1;
 		}
+		
+		public boolean isDeleted() {
+			if (version %2 == 1)
+				return true;
+			return false;
+		}
+		
 	}
 	
 	public Facade_Slice(NovaManager mng) {
