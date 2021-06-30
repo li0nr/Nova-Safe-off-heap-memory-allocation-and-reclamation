@@ -158,7 +158,7 @@ public class LL_Nova_CAS<K,V> {
                 // variable is named "right_node".            
                 final Node pred = window.pred;
                 final Node curr = window.curr;
-                if (curr.key!= null || Facade_Slice.Compare(key, Kcm, curr.key) != 0) {
+                if (curr.key == null || Facade_Slice.Compare(key, Kcm, curr.key) != 0) {
                     return false;
                 } 
                 final Node succ = curr.next.getReference();
@@ -216,7 +216,7 @@ public class LL_Nova_CAS<K,V> {
 	                            succ = curr.next.get(marked);
 	                        }
 	
-	                        if (curr.key!= null || Facade_Slice.Compare(key, Kcm, curr.key) >= 0) { //we compare the offheap vs the key thus looking for >
+	                        if (curr == tail || Facade_Slice.Compare(key, Kcm, curr.key) >= 0) { //we compare the offheap vs the key thus looking for >
 	                            return new Window(pred, curr);
 	                        }
 	                        pred = curr;
