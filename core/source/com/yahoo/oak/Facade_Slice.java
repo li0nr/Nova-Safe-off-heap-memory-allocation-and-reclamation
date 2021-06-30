@@ -78,7 +78,7 @@ public class Facade_Slice {
 	static public boolean DeleteCAS(int idx, Facade_slice S) {
 	
 		if(S.version%2 == DELETED)
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 		
 		
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
@@ -102,7 +102,7 @@ public class Facade_Slice {
 	static public boolean Delete(int idx, Facade_slice S) {
 		
 		if(S.version%2 == DELETED)
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 		
 		
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
@@ -124,7 +124,7 @@ public class Facade_Slice {
 	static public <K> boolean DeletePrivate(int idx, Facade_slice S) {
 		
 		if(S.version%2 == DELETED)
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 		
 	
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
@@ -136,7 +136,7 @@ public class Facade_Slice {
 	static public <T> Facade_slice WriteFull (NovaS<T> lambda, T obj, Facade_slice S ,int idx) {//for now write doesnt take lambda for writing 
 
 		if(S.version%2 == DELETED)
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 		
 		long facadeRef	= buildRef		(S.blockID,S.offset);
 		
@@ -147,7 +147,7 @@ public class Facade_Slice {
 				
 		if(! (S.version == (int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF))) {
 			novaManager.UnsetTap(S.blockID,idx);
-			throw new IllegalArgumentException("slice was deleted");
+			throw new NovaIllegalAccess();
 			}
 		lambda.serialize(obj,S.address+ S.offset +NovaManager.HEADER_SIZE);
 		 if(bench_Flags.TAP) {
@@ -161,7 +161,7 @@ public class Facade_Slice {
 	static public <T> Facade_slice WriteFast(NovaS<T> lambda, T obj, Facade_slice S, int idx) {//for now write doesnt take lambda for writing 
 	
 		if(S.version %2 == DELETED)
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 
 		lambda.serialize(obj,S.address+ S.offset +NovaManager.HEADER_SIZE);
 		 return S;
@@ -172,14 +172,14 @@ public class Facade_Slice {
 	static public <T> T Read(NovaS<T> lambda, Facade_slice S) {
 	
 		if(S.version%2 == DELETED)
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 
 		T obj = lambda.deserialize(S.address + S.offset+NovaManager.HEADER_SIZE);
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
 		if(! (S.version == (int)(UNSAFE.getLong(S.address + S.offset)&0xFFFFFF))) 
-			throw new IllegalArgumentException("slice changed");
+			throw new NovaIllegalAccess();
 		return obj;
 	}
 
@@ -187,7 +187,7 @@ public class Facade_Slice {
 	
 	static public <T> int Compare(T obj, NovaC<T> srZ, Facade_slice S) {
 		 if(S.version%2 == DELETED)
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 
 		int res = srZ.compareKeys(S.address + S.offset +NovaManager.HEADER_SIZE, obj);
 		
@@ -196,7 +196,7 @@ public class Facade_Slice {
 		if(S.version >> 1 == novaManager.getCurrentVersion())
 			return res;
 		if(! (S.version == (int)(UNSAFE.getLong(S.address + S.offset)&0xFFFFFF))) 
-			throw new IllegalArgumentException("slice changed");
+			throw new NovaIllegalAccess();
 		return res;
 	}
 	 
