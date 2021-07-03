@@ -260,6 +260,7 @@ public class Test {
 				break;
 			case LL:
 	        	allocated = ( LL).allocated();
+				break;
 			case SA:
 	        	allocated = ( SA).allocated();
 			default:

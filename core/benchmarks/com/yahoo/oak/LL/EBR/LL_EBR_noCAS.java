@@ -5,9 +5,11 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.Facade_EBR;
 import com.yahoo.oak.EBR.EBRslice;
+import com.yahoo.oak.LL.EBR.LL_EBR_noCAS_opt.Node;
 
 
 public class LL_EBR_noCAS <K,V>{
@@ -19,7 +21,6 @@ public class LL_EBR_noCAS <K,V>{
 	    final NovaS<K> Ksr;
 	    final NovaC<V> Vcm;
 	    final NovaS<V> Vsr;
-	    final static int MAXTHREADS = 32;
 	    
 	    static class Node {
 	        final EBRslice key;
@@ -73,7 +74,8 @@ public class LL_EBR_noCAS <K,V>{
 	            // On Harris paper, pred is named left_node and curr is right_node
 	            final Node pred = window.pred;
 	            final Node curr = window.curr;
-	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
+	            if (curr.key != null && Facade_EBR.Compare(key, Kcm, curr.key, tidx) == 0) {
+	            	Facade_EBR.Write(Vsr, value, curr.value, tidx);
 	                return false;
 	            } else {
 	            	EBRslice oKey  = Facade_EBR.allocate(Ksr.calculateSize(key));
@@ -171,6 +173,25 @@ public class LL_EBR_noCAS <K,V>{
 	                curr = succ;
 	            }
 	        }
+	    }
+	    
+	    public <R> R get(K key, NovaR Reader, int tidx) {
+	        boolean[] marked = {false};
+	    	CmpFail: while(true)
+	    	try {
+		        Node curr = head.next.getReference();
+		        curr.next.get(marked);
+		        while (curr != tail && Facade_EBR.Compare(key, Kcm, curr.key, tidx) < 0) {
+		            curr = curr.next.getReference();
+		            curr.next.get(marked);
+		        }
+		        boolean ret = curr.key == null? false: Facade_EBR.Compare(key, Kcm, curr.key, tidx)==0 && !marked[0];
+		        R obj = null;
+		        if(ret)
+		        	obj = (R) Facade_EBR.Read(Reader, curr.key, tidx);
+		        return obj;
+	    	}catch(NovaIllegalAccess e) {continue CmpFail;}
+
 	    }
 
 	    public boolean contains(K key, int tidx) {

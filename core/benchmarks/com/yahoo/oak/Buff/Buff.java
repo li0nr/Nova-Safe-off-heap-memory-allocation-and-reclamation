@@ -1,9 +1,11 @@
 package com.yahoo.oak.Buff;
 
 import java.nio.ByteBuffer;
+import java.util.function.Function;
 
 import com.yahoo.oak.CopyConstructor;
 import com.yahoo.oak.NovaC;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 
@@ -167,6 +169,23 @@ public class Buff  implements Comparable<Buff>{
 		}
 	};
 
+	public static final NovaR DEFAULT_R = new NovaR<Integer>() {
+		public
+	    Integer apply(Long address) {
+	    	int capacity = UnsafeUtils.getInt(address);
+	    	address += Integer.BYTES;
+	    	int accumulator =0;
+	    	while(capacity > 0 ) {
+	    		accumulator += UnsafeUtils.getInt(address);
+		    	address += Integer.BYTES;
+		    	capacity -= Integer.BYTES;
+	    	}
+	    	return accumulator;
+	    }
+		
+	};
+	public interface GCReader<T> extends Function<Buff,T> {}
+
 	public static final CopyConstructor<Buff> CC= new CopyConstructor<Buff>() {
 		 public Buff Copy(Buff o) {
 			Buff toRet = new Buff(o.capacity);
@@ -176,4 +195,19 @@ public class Buff  implements Comparable<Buff>{
 			return toRet;
 		}
 	};
+	
+	public static final GCReader GCR= new GCReader<Integer>() {
+		 public Integer apply(Buff buff) {
+			 int capacity = buff.capacity;
+			 int accumulator = 0;
+			 int i =0;
+			 while(capacity > 0) {
+				 accumulator = buff.buffer.getInt(i);
+				 capacity -= Integer.BYTES;
+				 i += Integer.BYTES;
+			 }
+			 return accumulator;
+		}
+	};
+
 }

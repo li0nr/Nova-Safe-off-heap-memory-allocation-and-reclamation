@@ -27,13 +27,13 @@ public class EBR <T extends EBR_interface>{
 			epoch = -1;
 			}
 		
-		 public void setEpoch(long Era) {
-			 epoch = Era;
-		 }
+		public void setEpoch(long Era) {
+			epoch = Era;
+			}
 		 
-		 public long geteEpoch(){
-			 return epoch;
-		 }
+		public long getEpoch(){
+			return epoch;
+			}
 	}
 	
 
@@ -61,14 +61,14 @@ public class EBR <T extends EBR_interface>{
     public EBRslice allocateCAS(int size) {
     	EBRslice ret = new EBRslice();
     	allocator.allocate(ret, size);
-		UnsafeUtils.unsafe.storeFence();
+		UnsafeUtils.unsafe.fullFence();
     	return ret;
     }
     
 	public void start_op(int tid){
 		long e = eraClock.get();
 		reservations.set(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING,e);
-		UnsafeUtils.unsafe.storeFence();
+		UnsafeUtils.unsafe.fullFence();
 	}
 		
 	public void end_op(int tid){
@@ -97,7 +97,7 @@ public class EBR <T extends EBR_interface>{
 	public void retire(T obj, int tid){
 		if(obj== null) return;
 		long currEra = eraClock.get();        
-		
+		obj.setEpoch(currEra);
 		retiredList[tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING].add(obj);
         
         releasecounter[tid *_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING]++;
@@ -113,25 +113,25 @@ public class EBR <T extends EBR_interface>{
 		long minEpoch = Long.MAX_VALUE;
 		for (int i = 0; i<_Global_Defs.MAX_THREADS; i++){
 			long res = reservations.get(i*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING);
-			UnsafeUtils.unsafe.loadFence();
 			if(res<minEpoch){
 				minEpoch = res;
 			}
 		}
-		// erase safe objects
+		UnsafeUtils.unsafe.loadFence();
 
+		// erase safe objects
 		ArrayList<T> rlist = retiredList[tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING];
 		T toDeleteObj = null;
 		for (int iret = 0; iret < rlist.size();) {
           	toDeleteObj = rlist.get(iret);
-          	if (toDeleteObj.geteEpoch() < minEpoch) {
+          	if (toDeleteObj.getEpoch() < minEpoch) {
               	rlist.remove(toDeleteObj);
               	allocator.free((NovaSlice)toDeleteObj);
-                  continue;
-                  }
-              iret++;
-              }
-	}
+              	continue;
+              	}
+          	iret++;
+          	}
+		}
 	
 	public void ForceCleanUp() {
 		for(int i =0 ; i < _Global_Defs.MAX_THREADS; i++) {

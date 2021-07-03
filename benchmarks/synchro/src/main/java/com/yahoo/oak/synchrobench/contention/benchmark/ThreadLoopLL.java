@@ -142,7 +142,7 @@ public class ThreadLoopLL implements Runnable {
             }
             else if (coin < cdf[2]) { // -s reading is the best ever
             	numContains++;
-            	if(bench.containsKey(key, myThreadNum)) {
+            	if(bench.containsKey(key, myThreadNum) != Integer.MIN_VALUE) {
             		numSucContains++;
             	}
             	else {

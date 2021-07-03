@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
 import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
 
@@ -18,7 +19,6 @@ public class HarrisLinkedListNoMM <K,V>{
 	    final NovaC<V> Vcm;
 	    final NovaS<V> Vsr;
 	    final NativeMemoryAllocator allocator;
-	    final static int MAXTHREADS = 32;
 	    
 	    static class Node {
 	        final NovaSlice key;
@@ -71,7 +71,7 @@ public class HarrisLinkedListNoMM <K,V>{
 	            final Node pred = window.pred;
 	            final Node curr = window.curr;
 	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
-	                return false;
+	                Vsr.serialize(value,curr.value.address + curr.value.offset);;
 	            } else {
 	    	    	NovaSlice myK = new NovaSlice(0,0,0);
 	    	    	NovaSlice myV = new NovaSlice(0,0,0);
@@ -172,22 +172,22 @@ public class HarrisLinkedListNoMM <K,V>{
 	    }
 
 
+	    public <R> R get(K key,NovaR Reader, int tidx) {
+	        boolean[] marked = {false};
+	        Node curr = head.next.getReference();
+	        curr.next.get(marked);
+	        while (curr != tail && Kcm.compareKeys(curr.key.address + curr.key.offset, key) < 0) {
+	            curr = curr.next.getReference();
+	            curr.next.get(marked);
+	        }
+	        boolean flag = curr.key == null? false: Kcm.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
+	        R obj = null;
+	        if(flag) {
+	        	obj = (R)Reader.apply(curr.value.address+curr.value.offset);
+	        }
+	        return obj;
+	    }
 	    
-	    /**
-	     * Searches for a given key.
-	     * 
-	     * Inspired by Figure 9.27, page 218 on "The Art of Multiprocessor Programming".
-	     * 
-	     * As soon as we find a matching key we immediately return false/true 
-	     * depending whether the corresponding node is marked or not. We can do 
-	     * this because add() will always insert new elements immediately after a
-	     * non-marked node.
-	     * <p>
-	     * Progress Condition: Wait-Free - bounded by the number of nodes 
-	     * 
-	     * @param key
-	     * @return
-	     */
 	    public boolean contains(K key, int tidx) {
 	        boolean[] marked = {false};
 	        Node curr = head.next.getReference();

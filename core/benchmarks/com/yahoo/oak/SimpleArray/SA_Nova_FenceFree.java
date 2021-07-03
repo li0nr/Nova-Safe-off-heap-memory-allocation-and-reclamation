@@ -4,23 +4,23 @@ package com.yahoo.oak.SimpleArray;
 import java.util.Arrays;
 
 import com.yahoo.oak.Facade_Nova;
+import com.yahoo.oak.Facade_Nova_FenceFree;
+
 import sun.misc.Unsafe;
 
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaIllegalAccess;
-import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.NovaManagerNoTap;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
-import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.EBR.EBRslice;
 
-public class SA_Nova_Primitive_CAS {
+public class SA_Nova_FenceFree {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final NovaManager mng = new NovaManager(allocator);
+    final NovaManagerNoTap mng = new NovaManagerNoTap(allocator);
     
     
 	
@@ -41,14 +41,14 @@ public class SA_Nova_Primitive_CAS {
 	private long[] refrences;
 
 	
-	public SA_Nova_Primitive_CAS(NovaS srZ){
-		new Facade_Nova(mng);
+	public SA_Nova_FenceFree(NovaS srZ){
+		new Facade_Nova_FenceFree(mng);
 		refrences = new long[DEFAULT_CAPACITY];
 		this.srZ = srZ;
 	}
 	
-	public SA_Nova_Primitive_CAS(int capacity,NovaS srZ ){
-		new Facade_Nova(mng);
+	public SA_Nova_FenceFree(int capacity,NovaS srZ ){
+		new Facade_Nova_FenceFree(mng);
 		refrences = new long[capacity];
 		this.srZ = srZ;
 
@@ -58,39 +58,30 @@ public class SA_Nova_Primitive_CAS {
 		if(size == refrences.length) {
 			EnsureCap();//might be problematic 
 		}
-//		Facade_Nova.AllocateSlice(e, refrences_offset + size*Long.BYTES, srZ.calculateSize(e) , threadIDX);
-		//Facade_Nova.AllocateSlice(e, 1, srZ.calculateSize(e) , threadIDX);
-		refrences[size]= Facade_Nova.WriteFast(srZ, e, Facade_Nova.AllocateSlice(e, 1, srZ.calculateSize(e) , threadIDX), threadIDX);
+		refrences[size]= Facade_Nova_FenceFree.WriteFast(srZ, e, 
+				Facade_Nova.AllocateSlice(e, 1, srZ.calculateSize(e) , threadIDX), threadIDX);
 		size++;
 		return true;
 	}
-	
+
+
 	public <R> R get(int index, NovaR Reader, int threadIDX) {
 		try {
-			return (R)Facade_Nova.Read(Reader, refrences[index]);
+			return  Facade_Nova_FenceFree.Read(Reader, refrences[index]);
 		}catch(NovaIllegalAccess e) {
 			return null;
-		}
+		}	
 	}
 	
-
 	public <T> boolean set(int index, T obj, int threadIDX)  {
 		try {
 			if(refrences[index] %2 == 1)
-				Facade_Nova.AllocateReusedSlice(refrences,ref_base_offset+index*ref_scale,
+				Facade_Nova_FenceFree.AllocateReusedSlice(refrences,ref_base_offset+index*ref_scale,
 						refrences[index],srZ.calculateSize(obj),threadIDX);
-			Facade_Nova.WriteFull(srZ, obj, refrences[index], threadIDX);
+			Facade_Nova_FenceFree.WriteFull(srZ, obj, refrences[index], threadIDX);
 			return true;
 		}catch(NovaIllegalAccess e) {
 			return false;
-		}
-	}
-	
-	public <T> T get(NovaR<T> Reader, int index, int threadIDX)  {
-		try {
-			return  (T)Facade_Nova.Read(Reader, refrences[index]);
-		}catch(NovaIllegalAccess e) {
-			return null;
 		}
 	}
 	
@@ -98,7 +89,7 @@ public class SA_Nova_Primitive_CAS {
 	public boolean delete(int index, int threadIDX) {
 		if(refrences[index]%2 == 1)
 			return false;
-		if(Facade_Nova.DeleteReusedSlice(threadIDX, refrences[index], refrences,ref_base_offset+index*ref_scale)){
+		if(Facade_Nova_FenceFree.DeleteReusedSlice(threadIDX, refrences[index], refrences,ref_base_offset+index*ref_scale)){
 			return true;
 		}
 		return false;

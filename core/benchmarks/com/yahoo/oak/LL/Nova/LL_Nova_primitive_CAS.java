@@ -9,6 +9,7 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.Buff.Buff;
@@ -124,7 +125,7 @@ public class LL_Nova_primitive_CAS<K,V> {
                 final Node pred = window.pred;
                 final Node curr = window.curr;
                 if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Kcm, curr.key) == 0) { 
-                    return false;
+                    Facade_Nova.WriteFull(Vsr, value, curr.value, idx);
                 } else {
                     Node newNode = new Node(Illegal_nu,Illegal_nu);
 
@@ -233,23 +234,24 @@ public class LL_Nova_primitive_CAS<K,V> {
         }catch (NovaIllegalAccess e) {continue CmpFail;}
     }
 
+    public <R> R get(K key,NovaR Reader, int tidx) {
+        boolean[] marked = {false};
+        CmpFail: while(true)
+        	try {
+                Node curr = head.next.getReference();
+                curr.next.get(marked);
+                while (curr != tail && Facade_Nova.Compare(key, Kcm, curr.key) < 0) {
+                    curr = curr.next.getReference();
+                    curr.next.get(marked);
+                }
+                boolean flag = curr.key == Illegal_nu ? false : Facade_Nova.Compare(key, Kcm, curr.key) == 0 && !marked[0];
+                R obj = null;
+                if(flag) 
+                	obj = (R) Facade_Nova.Read(Reader, curr.value);
+                return obj;
+        	}catch (NovaIllegalAccess e) {continue CmpFail;}
+    }
 
-    
-    /**
-     * Searches for a given key.
-     * 
-     * Inspired by Figure 9.27, page 218 on "The Art of Multiprocessor Programming".
-     * 
-     * As soon as we find a matching key we immediately return false/true 
-     * depending whether the corresponding node is marked or not. We can do 
-     * this because add() will always insert new elements immediately after a
-     * non-marked node.
-     * <p>
-     * Progress Condition: Wait-Free - bounded by the number of nodes 
-     * 
-     * @param key
-     * @return
-     */
     public boolean contains(K key, int tidx) {
         boolean[] marked = {false};
         CmpFail: while(true)

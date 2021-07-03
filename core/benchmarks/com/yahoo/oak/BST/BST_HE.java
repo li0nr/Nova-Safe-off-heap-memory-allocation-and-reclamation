@@ -172,7 +172,7 @@ public class BST_HE<K , V> {
     		try {	
 	        while (l.left != null) {
 	     	   access = HE.get_protected(l.key,idx);
-	            l = (access == null || KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
+	            l = (access == null || (int)KCt.compareKeys(access.address + access.offset, key) > 0) ? l.left : l.right;
 	        }
 	        access = HE.get_protected(l.key,idx);
 	        V ret = (l.key != null && KCt.compareKeys(access.address+ access.offset, key)  == 0) ? 

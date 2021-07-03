@@ -1,14 +1,14 @@
 package com.yahoo.oak;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalSA;
 
 
-public class SA_HE implements CompositionalSA<Buff>{
-	SA_HE_CAS_opt SA = new SA_HE_CAS_opt(Buff.DEFAULT_SERIALIZER);
+public class SA_Nova_FenceFree implements CompositionalSA<Buff>{
+	com.yahoo.oak.SimpleArray.SA_Nova_FenceFree SA = 
+			new com.yahoo.oak.SimpleArray.SA_Nova_FenceFree(Buff.DEFAULT_SERIALIZER);
 	
-	public SA_HE(){
+	public SA_Nova_FenceFree(){
 		
 	}
     public  boolean fill(final Buff value, int idx) {
@@ -33,7 +33,7 @@ public class SA_HE implements CompositionalSA<Buff>{
     }
 	
     public void clear() {
-    	SA = new SA_HE_CAS_opt(Buff.DEFAULT_SERIALIZER);
+    	SA = new com.yahoo.oak.SimpleArray.SA_Nova_FenceFree(Buff.DEFAULT_SERIALIZER);
     }
     
     public void print() {

@@ -1,7 +1,6 @@
 package com.yahoo.oak;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalSA;
 
 
@@ -15,6 +14,11 @@ public class SA_GC implements CompositionalSA<Buff>{
     public  boolean fill(final Buff value, int idx) {
     	return SA.fill( value, idx);
     }
+    
+    public  Integer get( int index, int idx) {
+    	return SA.get(index, Buff.GCR, idx);
+    }
+    
     public  boolean put(final Buff value,  int index, int idx) {
     	return SA.set(index, value, idx);
     }

@@ -69,12 +69,6 @@ public class HazardEras{
     	return ret;
     }
 
-    public HEslice allocateCAS(int size) {
-    	HEslice ret = new HEslice(getEra());
-    	allocator.allocate(ret, size);
-    	UnsafeUtils.unsafe.storeFence();
-    	return ret;
-    }
 
     /**
      * Progress Condition: wait-free bounded (by maxHEs)
@@ -105,7 +99,7 @@ public class HazardEras{
     		 UnsafeUtils.unsafe.loadFence(); ////must be here this is aquvilent to the acquire 
 
     		 if (era == prevEra) return obj ;
-    		 UnsafeUtils.unsafe.storeFence();
+    		 UnsafeUtils.unsafe.fullFence();
     		 he.set(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING, era); //TODO he must be volatile
     		 prevEra = era;
 		}
@@ -139,34 +133,6 @@ public class HazardEras{
 
     }
       
-      public <T> void retireCAS(int mytid, HazardEras_interface obj) {
-    	  long currEra = eraClock.get();
-          obj.setDeleteEra(currEra);
-          UnsafeUtils.unsafe.storeFence();
-          ArrayList<HazardEras_interface> rlist = retiredList[mytid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING];
-          rlist.add(obj);
-          releasecounter[mytid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING]++;
-          if(releasecounter[mytid *_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING] == _Global_Defs.RELEASE_LIST_LIMIT) {
-              if (eraClock.get() == currEra) eraClock.getAndAdd(1);
-              HazardEras_interface toDeleteObj;
-              for (int iret = 0; iret < rlist.size();) {
-              	toDeleteObj = (HazardEras_interface)rlist.get(iret);
-                  if (canDelete(toDeleteObj, mytid)) {
-                  	rlist.remove(toDeleteObj);
-                  	allocator.free((NovaSlice)toDeleteObj);
-                      continue;
-                  }
-                  iret++;
-              }
-              releasecounter[mytid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING] = 0;
-          }
-
-      }
-      
-     
-      public void fastFree(NovaSlice s) {
-    	  allocator.free(s);
-      }
 
       private boolean  canDelete(HazardEras_interface obj,  int mytid) {
     	  for (int tid = 0; tid < _Global_Defs.MAX_THREADS; tid++) {
@@ -178,6 +144,9 @@ public class HazardEras{
     	  return true;
     	  }
 
+      public void fastFree(NovaSlice s) {
+    	  allocator.free(s);
+      }
 
 	//DEBUG
 	void ForceCleanUp() {
@@ -192,5 +161,36 @@ public class HazardEras{
 
 		}
 	}
+		
+	//Adding the CAS 
+    public HEslice allocateCAS(int size) {
+    	HEslice ret = new HEslice(getEra());
+    	allocator.allocate(ret, size);
+    	UnsafeUtils.unsafe.storeFence();
+    	return ret;
+    }
+    
+    public <T> void retireCAS(int mytid, HazardEras_interface obj) {
+  	  long currEra = eraClock.get();
+        obj.setDeleteEra(currEra);
+        UnsafeUtils.unsafe.storeFence();
+        ArrayList<HazardEras_interface> rlist = retiredList[mytid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING];
+        rlist.add(obj);
+        releasecounter[mytid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING]++;
+        if(releasecounter[mytid *_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING] == _Global_Defs.RELEASE_LIST_LIMIT) {
+            if (eraClock.get() == currEra) eraClock.getAndAdd(1);
+            HazardEras_interface toDeleteObj;
+            for (int iret = 0; iret < rlist.size();) {
+            	toDeleteObj = (HazardEras_interface)rlist.get(iret);
+                if (canDelete(toDeleteObj, mytid)) {
+                	rlist.remove(toDeleteObj);
+                	allocator.free((NovaSlice)toDeleteObj);
+                    continue;
+                }
+                iret++;
+            }
+            releasecounter[mytid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING] = 0;
+        }
 
+    }
 }

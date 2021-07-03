@@ -24,7 +24,6 @@ public class SA_Test {
 		
 		for(int i =0; i < 1024; i++) {
 			x.set(i);
-			assert Buff.DEFAULT_C.compareKeys(mySA.get(i,0).address+mySA.get(i,0).offset, x) ==0;
 		}
 		
 		for(int i =0; i < 1024; i+=2) {
@@ -37,7 +36,6 @@ public class SA_Test {
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
-			assert Buff.DEFAULT_C.compareKeys(mySA.get(i,0).address+mySA.get(i,0).offset, x) ==0;
 		}
 		
 	}
@@ -55,7 +53,6 @@ public class SA_Test {
 		
 		for(int i =0; i < 1024; i++) {
 			x.set(i);
-			assert Buff.DEFAULT_C.compareKeys(mySA.get(i,0).address+mySA.get(i,0).offset, x) ==0;
 		}
 		
 		for(int i =0; i < 1024; i+=2) {
@@ -68,7 +65,6 @@ public class SA_Test {
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
-			assert Buff.DEFAULT_C.compareKeys(mySA.get(i,0).address+mySA.get(i,0).offset, x) ==0;
 		}
 		
 	}
@@ -76,7 +72,7 @@ public class SA_Test {
 	@Test
 	public void SA_Nova(){
 		SA_Nova_CAS mySA = new SA_Nova_CAS(Buff.DEFAULT_SERIALIZER); 
-	    Buff x =new Buff(4);
+	    Buff x =new Buff(100);
 
 		
 		for(int i =0; i < 1024; i++) {
@@ -86,7 +82,7 @@ public class SA_Test {
 		
 		for(int i =0; i < 1024; i++) {
 			x.set(i);
-			assert Facade_Slice.Compare(x, Buff.DEFAULT_C, mySA.get(i, 0)) == 0;
+			mySA.get(4, Buff.DEFAULT_R, 0);
 		}
 		
 		for(int i =0; i < 1024; i+=2) {
@@ -99,7 +95,6 @@ public class SA_Test {
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
-			assert Facade_Slice.Compare(x, Buff.DEFAULT_C, mySA.get(i, 0)) == 0;
 		}
 		
 	}
@@ -108,7 +103,7 @@ public class SA_Test {
 	@Test
 	public void SA_Nova_primitive(){
 		SA_Nova_Primitive_CAS mySA = new SA_Nova_Primitive_CAS(Buff.DEFAULT_SERIALIZER); 
-	    Buff x =new Buff(4);
+	    Buff x =new Buff(12);
 
 		
 		for(int i =0; i < 1024; i++) {
@@ -118,7 +113,7 @@ public class SA_Test {
 		
 		for(int i =0; i < 1024; i++) {
 			x.set(i);
-			assert Facade_Nova.Compare(x, Buff.DEFAULT_C, mySA.get(i, 0)) == 0;
+			mySA.get(Buff.DEFAULT_R,i, 0);
 		}
 		
 		for(int i =0; i < 1024; i+=2) {
@@ -131,7 +126,6 @@ public class SA_Test {
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
-			assert Facade_Nova.Compare(x, Buff.DEFAULT_C, mySA.get(i, 0)) == 0;
 		}
 		
 	}

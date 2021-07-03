@@ -1,7 +1,6 @@
 package com.yahoo.oak;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.Nova.LL_Nova_CAS;
 import com.yahoo.oak.LL.Nova.LL_Nova_primitive_CAS;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
@@ -15,8 +14,8 @@ public class LL_Nova_primitive_CAS_bench implements CompositionalLL<Buff,Buff>{
 	public LL_Nova_primitive_CAS_bench(){
 		
 	}
-	public boolean containsKey(final Buff key, int tidx) {
-		return LL.contains(key, tidx);
+	public Integer containsKey(final Buff key, int tidx) {
+		return LL.get(key,Buff.DEFAULT_R, tidx);
 	}
 	
     public  boolean put(final Buff key,final Buff value,  int idx) {

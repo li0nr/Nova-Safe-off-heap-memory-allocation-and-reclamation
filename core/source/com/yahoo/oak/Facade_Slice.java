@@ -153,7 +153,6 @@ public class Facade_Slice {
 			novaManager.setTap(S.blockID,facadeRef,idx);	
 			if(bench_Flags.Fences)UNSAFE.fullFence();
 		}
-		int x =(int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF);
 		if(! (S.version == (int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF))) {
 			novaManager.UnsetTap(S.blockID,idx);
 			throw new NovaIllegalAccess();
@@ -178,12 +177,12 @@ public class Facade_Slice {
 	
 	
 
-	static public <T> T Read(NovaS<T> lambda, Facade_slice S) {
+	static public <T> T Read(NovaR<T> lambda, Facade_slice S) {
 	
 		if(S.version%2 == DELETED)
 			throw new NovaIllegalAccess();
 
-		T obj = lambda.deserialize(S.address + S.offset+NovaManager.HEADER_SIZE);
+		T obj = lambda.apply(S.address + S.offset+NovaManager.HEADER_SIZE);
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
@@ -202,8 +201,6 @@ public class Facade_Slice {
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
-		if(S.version >> 1 == novaManager.getCurrentVersion())
-			return res;
 		if(! (S.version == (int)(UNSAFE.getLong(S.address + S.offset)&0xFFFFFF))) 
 			throw new NovaIllegalAccess();
 		return res;

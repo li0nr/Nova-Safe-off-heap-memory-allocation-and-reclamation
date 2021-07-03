@@ -14,8 +14,8 @@ public class LL_EBR_noCAS_opt_bench implements CompositionalLL<Buff,Buff>{
 	public LL_EBR_noCAS_opt_bench(){
 		
 	}
-	public boolean containsKey(final Buff key, int tidx) {
-		return LL.contains(key, tidx);
+	public Integer containsKey(final Buff key, int tidx) {
+		return LL.get(key, Buff.DEFAULT_R, tidx);
 	}
 	
     public  boolean put(final Buff key,final Buff value,  int idx) {

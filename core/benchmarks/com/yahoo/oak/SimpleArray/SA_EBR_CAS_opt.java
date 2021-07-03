@@ -2,11 +2,13 @@ package com.yahoo.oak.SimpleArray;
 
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import com.yahoo.oak.EBR;
 import com.yahoo.oak.EBR.EBRslice;
 import sun.misc.Unsafe;
 import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 
@@ -55,15 +57,19 @@ public class SA_EBR_CAS_opt {
 		return true;
 	}
 	
-	public EBRslice get(int index, int threadIDX) {
-		return Slices[index];
+	public <R> R get(int index, Function Reader, int threadIDX) {
+		_EBR.start_op(threadIDX);
+		EBRslice toRead = Slices[index];
+		if(toRead == null) return null;
+		R obj = (R) Reader.apply(Slices[index]);
+		_EBR.end_op(threadIDX);
+		return obj;
 	}
 	
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
 		EBRslice toEnter = Slices[index];
 		if(toEnter== null) {
-			//EBRslice toEnter = _EBR.allocateCAS(srZ.calculateSize(obj));
 			toEnter = _EBR.allocate(srZ.calculateSize(obj));
 			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
 				_EBR.fastFree(toEnter);

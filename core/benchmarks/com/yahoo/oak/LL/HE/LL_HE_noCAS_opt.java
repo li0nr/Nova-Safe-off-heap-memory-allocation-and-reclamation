@@ -6,6 +6,7 @@ import com.yahoo.oak.HazardEras;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.HazardEras.HEslice;
@@ -225,22 +226,29 @@ public class LL_HE_noCAS_opt<K,V> {
         }catch (NovaIllegalAccess e) {continue CmpFail;}    
     }
         
+    
+    public <R> R get(K key, NovaR Reader, int tidx) {
+        boolean[] marked = {false};
+        CmpFail: while(true)
+        	try {
+		        Node curr = head.next.getReference();
+		        curr.next.get(marked);
+		        HEslice access = HE.get_protected(curr.key, tidx);
+		        while (curr != tail && Kcm.compareKeys(access.address + access.offset, key) < 0) {
+		        	curr = curr.next.getReference();
+		            curr.next.get(marked);
+		            access = HE.get_protected(curr.key, tidx);
+		        }
+		        boolean flag = curr.key != null && Kcm.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
+		        HE.clear(tidx);
+		        R obj = null;
+		        if (flag)
+		        	obj = (R)Reader.apply(access.address+ access.offset);
+		        return obj;
+        	}catch (NovaIllegalAccess e) {continue CmpFail;}
+        }
+    
 
-    /**
-     * Searches for a given key.
-     * 
-     * Inspired by Figure 9.27, page 218 on "The Art of Multiprocessor Programming".
-     * 
-     * As soon as we find a matching key we immediately return false/true 
-     * depending whether the corresponding node is marked or not. We can do 
-     * this because add() will always insert new elements immediately after a
-     * non-marked node.
-     * <p>
-     * Progress Condition: Wait-Free - bounded by the number of nodes 
-     * 
-     * @param key
-     * @return
-     */
     public boolean contains(K key, int tidx) {
         boolean[] marked = {false};
         CmpFail: while(true)

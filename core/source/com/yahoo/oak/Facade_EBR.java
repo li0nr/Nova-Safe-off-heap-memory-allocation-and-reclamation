@@ -25,17 +25,13 @@ public class Facade_EBR {
 		_EBR.retire(slice, idx);
 		}
 	
-	static public <T> T Read(NovaS<T> lambda, EBRslice slice, int tidx) {
-//		if(slice.geteEpoch() != -1)
-//			 throw new NovaIllegalAccess();
-		
+	static public <T> T Read(NovaR<T> Reader, EBRslice slice, int tidx) {
 		_EBR.start_op(tidx);
 		
-		if(slice.geteEpoch() != -1)
+		if(slice.getEpoch() != -1)
 			 throw new NovaIllegalAccess();
 
-
-		T obj = lambda.deserialize(slice.address+slice.offset);
+		T obj = Reader.apply(slice.address+slice.offset);
 		
 		_EBR.clear(tidx);
 		return obj;
@@ -43,14 +39,11 @@ public class Facade_EBR {
 
 	
 	static public <T> EBRslice Write(NovaS<T> lambda, T obj, EBRslice slice, int tidx ) {
-//		if(slice.geteEpoch() != -1)
-//			 throw new NovaIllegalAccess();
 		
 		_EBR.start_op(tidx);
 		
-		if(slice.geteEpoch() != -1)
+		if(slice.getEpoch() != -1)
 			 throw new NovaIllegalAccess();
-		
 		
 		lambda.serialize(obj,slice.address+slice.offset);
 		_EBR.clear(tidx);
@@ -60,7 +53,7 @@ public class Facade_EBR {
 	
 	
 	static public <T> EBRslice WriteFast(NovaS<T> lambda, T obj, EBRslice slice, int tidx ) {
-		if(slice.geteEpoch() != -1)
+		if(slice.getEpoch() != -1)
 			 throw new NovaIllegalAccess();
 		
 		lambda.serialize(obj,slice.address+slice.offset);
@@ -69,12 +62,10 @@ public class Facade_EBR {
 	
 	
 	 static public <T> int Compare(T obj, NovaC<T> cmP, EBRslice slice, int tidx) {
-//		 if(slice.geteEpoch() != -1)
-//			 throw new NovaIllegalAccess();
 			
 		 _EBR.start_op(tidx);
 			
-		 if(slice.geteEpoch() != -1)
+		 if(slice.getEpoch() != -1)
 			 throw new NovaIllegalAccess();
 		 
 		 int res = cmP.compareKeys(slice.address+slice.offset, obj);

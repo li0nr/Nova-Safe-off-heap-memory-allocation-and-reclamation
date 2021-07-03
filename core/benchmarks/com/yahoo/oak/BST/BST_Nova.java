@@ -144,8 +144,8 @@ public class BST_Nova<K , V> {
         // to avoid handling special case when <= 2 nodes,
         // create 2 dummy nodes, both contain key null
         // All real keys inside BST are required to be non-null
-    	Facade_Nova<K, Node> dummyK  = new Facade_Nova(mng);
-    	Facade_Nova<V, Node> dummyV  = new Facade_Nova(mng); //setting up nova manager
+    	Facade_Nova dummyK  = new Facade_Nova(mng);
+    	Facade_Nova dummyV  = new Facade_Nova(mng); //setting up nova manager
 
  	   SrzK = sK; SrzV = sV;
  	   KCt = cKt; VCt = cVt;
@@ -182,7 +182,7 @@ public class BST_Nova<K , V> {
     }
 
     /** PRECONDITION: k CANNOT BE NULL **/
-    public final V get(final K key, int tidx) {
+    public final Long get(final K key, int tidx) {
     	get_count ++;
     	if (key == null) throw new NullPointerException();
     	Retry: while (true){
@@ -191,9 +191,9 @@ public class BST_Nova<K , V> {
     		while (l.left != null) {
     			l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
     			}
-    		V ret = (l.key != Illegal_facade&& Facade_Nova.Compare(key, KCt, l.key) == 0) ? 
-    				(V)Facade_Nova.Read(SrzV, l.value): null;
-    				return ret;	   
+//    		V ret = (l.key != Illegal_facade&& Facade_Nova.Compare(key, KCt, l.key) == 0) ? 
+//    				(V)Facade_Nova.Read(SrzV, l.value): null;
+    				return null; //TODO I have fix this to be compliant with the lambda if need to use BST need to fix approilty	   
 			}catch (Exception e) {
     		continue Retry; //Facade throws
     		}
@@ -203,7 +203,7 @@ public class BST_Nova<K , V> {
     // Insert key to dictionary, return the previous value associated with the specified key,
     // or null if there was no mapping for the key
     /** PRECONDITION: k CANNOT BE NULL **/
-    public final V put(final K key, final V value, int idx) {
+    public final Long put(final K key, final V value, int idx) {
     	put_count++;
     	
         Node newInternal;
@@ -239,8 +239,8 @@ public class BST_Nova<K , V> {
             	if (l.key != Illegal_facade && Facade_Nova.Compare(key, KCt, l.key) == 0) {
             		// key already in the tree, cant continue
         			result = l.value;
-                    V  objret = (V)Facade_Nova.Read(SrzV, l.value);
-                    return objret;
+                    //V  objret = (V)Facade_Nova.Read(SrzV, l.value);
+                    return result;
                     }
             	else {
             		

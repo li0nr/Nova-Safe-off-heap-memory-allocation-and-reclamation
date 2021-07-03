@@ -7,6 +7,7 @@ import com.yahoo.oak.CopyConstructor;
 import sun.misc.Unsafe;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.Buff.Buff.GCReader;
 
 public class SA_GC {
 	
@@ -49,11 +50,13 @@ public class SA_GC {
 		return true;
 	}
 	
-	public Buff get(int index, int threadIDX) {
-		return Slices[index];
+	public <R> R get(int index, GCReader Reader, int threadIDX) {
+		Buff toRead = Slices[index];
+		if(toRead == null)
+			return null;
+		return (R)Reader.apply(Slices[index]);
 	}
 	
-
 	public boolean set(int index, Buff obj, int threadIDX)  {
 		if(Slices[index] == null) {
 			Buff toAdd = CC.Copy(obj); 

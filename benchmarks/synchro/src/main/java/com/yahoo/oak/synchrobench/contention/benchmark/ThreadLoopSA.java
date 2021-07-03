@@ -73,7 +73,6 @@ public class ThreadLoopSA implements Runnable {
     boolean iterate = false;
     
     Buff key = new Buff(Parameters.confKeySize);
-    int index;
 
 
     /**
@@ -115,7 +114,7 @@ public class ThreadLoopSA implements Runnable {
         	
         	newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
-        	
+            key.set(rand.nextInt());
             int coin = rand.nextInt(1000);
             if(coin < cdf[0]) { //-a deleting is good?
         		numRemove++;
@@ -137,15 +136,15 @@ public class ThreadLoopSA implements Runnable {
             	}
             		
             }
-//            else if (coin < cdf[2]) { // -s reading is the best ever
-//            	numContains++;
-//            	if(bench.containsKey(key, myThreadNum)) {
-//            		numSucContains++;
-//            	}
-//            	else {
-//            		failures++;
-//            	}
-//            }
+            else if (coin < cdf[2]) { // -s reading is the best ever
+            	numContains++;
+            	if(bench.get(newInt, myThreadNum) != null) {
+            		numSucContains++;
+            	}
+            	else {
+            		failures++;
+            	}
+            }
             total++;
 
             assert total == failures + numContains + + numRemove + numAdd ;

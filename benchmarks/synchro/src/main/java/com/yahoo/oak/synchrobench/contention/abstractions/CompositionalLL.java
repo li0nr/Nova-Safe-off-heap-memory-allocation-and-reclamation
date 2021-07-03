@@ -8,7 +8,7 @@ package com.yahoo.oak.synchrobench.contention.abstractions;
 
 public interface CompositionalLL<K,V> {
 
-	boolean containsKey(final K key, int tidx);
+	public Integer containsKey(final K key, int tidx);
 	    
     public  boolean put(final K key,final V value, int idx);
     

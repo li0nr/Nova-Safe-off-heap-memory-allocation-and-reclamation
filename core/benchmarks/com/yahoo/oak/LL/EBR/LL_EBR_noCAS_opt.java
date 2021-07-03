@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.EBR;
 import com.yahoo.oak.EBR.EBRslice;
@@ -65,15 +66,15 @@ public class LL_EBR_noCAS_opt <K,V>{
 	     * @return
 	     */
 	    public boolean add(K key, V value, int tidx) {
-	        CmpFail: while(true)
-	            try{
+//	        CmpFail: while(true)
+//	            try{
 	    	while (true) {
 	            final Window window = find(key, tidx);
 	            // On Harris paper, pred is named left_node and curr is right_node
 	            final Node pred = window.pred;
 	            final Node curr = window.curr;
 	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
-	                return false;
+	                Vsr.serialize(value, curr.value.address+curr.value.offset);
 	            } else {
 	            	EBRslice oKey  = mng.allocate( Ksr.calculateSize(key));
 	        		Ksr.serialize(key, oKey.address+oKey.offset);
@@ -93,7 +94,7 @@ public class LL_EBR_noCAS_opt <K,V>{
 	                }
 	            }
 	    	}
-	    	}catch(NovaIllegalAccess e) {continue CmpFail;}
+//	    	}catch(NovaIllegalAccess e) {continue CmpFail;}
 	    }
 
 	    
@@ -107,8 +108,8 @@ public class LL_EBR_noCAS_opt <K,V>{
 	     * @return
 	     */
 	    public boolean remove(K key, int tidx) {
-	        CmpFail: while(true)
-	            try{
+//	        CmpFail: while(true)
+//	            try{
 	        while (true) {
 	            final Window window = find(key, tidx);
 	            // On Harris's paper, "pred" is named "left_node" and the "curr"
@@ -135,7 +136,7 @@ public class LL_EBR_noCAS_opt <K,V>{
 		            return true;	
 		            }
 	        	}
-	        }catch(NovaIllegalAccess e) {continue CmpFail;}
+//	        }catch(NovaIllegalAccess e) {continue CmpFail;}
     	}
 
 	    
@@ -145,9 +146,9 @@ public class LL_EBR_noCAS_opt <K,V>{
 	        Node succ = null;
 	        boolean[] marked = {false};
 
-	        mng.start_op(tidx);
+	        mng.start_op(tidx); // no need to check for every slice wether its deleted or not
 	        // I think there is a special case for an empty list
-	        if (head.next.getReference() == tail) {
+	        if (head.next.getReference() == tail) { 
 	            return new Window (head, tail);
 	        }
 	        
@@ -176,6 +177,22 @@ public class LL_EBR_noCAS_opt <K,V>{
 	        }
 	    }
 
+	    public <R> R get(K key, NovaR Reader, int tidx) {
+	        boolean[] marked = {false};
+	        Node curr = head.next.getReference();
+	        curr.next.get(marked);
+	        mng.start_op(tidx);
+	        while (curr != tail && Kcm.compareKeys(curr.key.address + curr.key.offset, key) < 0) {
+	            curr = curr.next.getReference();
+	            curr.next.get(marked);
+	        }
+	        boolean ret = curr.key == null? false: Kcm.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
+	        R obj = null;
+	        if(ret)
+	        	obj = (R)Reader.apply(curr.value.address+curr.value.offset);
+	        mng.end_op(tidx);
+	        return obj;
+	    }
 
 	    public boolean contains(K key, int tidx) {
 	        boolean[] marked = {false};

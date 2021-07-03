@@ -84,11 +84,14 @@ public class LL_Test {
 	    xy.set(110);
 	    List.add(xy,xy,0);
 	    List.contains(x,0);
+	    assert (int)List.get(x, Buff.GCR, 0) == 120;
+
 		assert List.contains(x, 0) == true;
 	    assert List.remove(x,0) == true;
 
 	    assert List.contains(x,0) == false; 
 	    assert List.contains(z,0) == false;
+	    
 
 	}
 	

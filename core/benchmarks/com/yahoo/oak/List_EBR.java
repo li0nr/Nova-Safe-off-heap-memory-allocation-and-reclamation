@@ -161,7 +161,7 @@ class EBRslice_n extends NovaSlice implements EBR_interface{
 		 bornEra = Era;
 	 }
 
-	 public long geteEpoch() {
+	 public long getEpoch() {
 		 return bornEra;
 	 }
 	 

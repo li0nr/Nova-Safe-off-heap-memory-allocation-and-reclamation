@@ -3,7 +3,7 @@ package com.yahoo.oak.LL;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.CopyConstructor;
-
+import com.yahoo.oak.Buff.Buff.GCReader;
 
 public class HarrisLinkedList <E extends Comparable<? super E>,V extends Comparable<? super V>>{
 
@@ -14,7 +14,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 
 	    static class Node <E,V> {
 	        final E key;
-	        final V value;
+	        V value;
 	        final AtomicMarkableReference<Node<E,V>> next;
 	               
 	        Node(E key, V value) {
@@ -63,7 +63,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	            final Node<E,V> pred = window.pred;
 	            final Node<E,V> curr = window.curr;
 	            if (curr.key != null && curr.key.compareTo(key) == 0) { 
-	                return false;
+	                curr.value = VCC.Copy(value);
 	            } else {
 	    	    	E myKey = KCC.Copy(key);
 	    	    	V myval= VCC.Copy(value);
@@ -153,22 +153,24 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	            }
 	        }
 	    }
+	    
+	    
+	    public <R> R get(E key, GCReader Reader, int tidx) {
+	        boolean[] marked = {false};
+	        Node<E,V> curr = head.next.getReference();
+	        curr.next.get(marked);
+	        while (curr != tail && curr.key.compareTo(key) > 0) {
+	            curr = curr.next.getReference();
+	            curr.next.get(marked);
+	        }
+	        boolean flag = curr.key!= null && curr.key.compareTo(key) == 0 && !marked[0];
+	        R obj = null;
+	        if(flag) {
+	        	obj = (R)Reader.apply(curr.value);
+	        }
+	        return obj;
+	    }
 
-	    /**
-	     * Searches for a given key.
-	     * 
-	     * Inspired by Figure 9.27, page 218 on "The Art of Multiprocessor Programming".
-	     * 
-	     * As soon as we find a matching key we immediately return false/true 
-	     * depending whether the corresponding node is marked or not. We can do 
-	     * this because add() will always insert new elements immediately after a
-	     * non-marked node.
-	     * <p>
-	     * Progress Condition: Wait-Free - bounded by the number of nodes 
-	     * 
-	     * @param key
-	     * @return
-	     */
 	    public boolean contains(E key, int tidx) {
 	        boolean[] marked = {false};
 	        Node<E,V> curr = head.next.getReference();

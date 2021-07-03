@@ -7,6 +7,7 @@ import com.yahoo.oak.Facade_Slice.Facade_slice;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 
 public class SA_Nova_CAS {
@@ -47,11 +48,14 @@ public class SA_Nova_CAS {
 		return true;
 	}
 	
-	public Facade_slice get(int index, int threadIDX) {
-		return Slices[index];
+	public <R> R get(int index, NovaR Reader, int threadIDX) {
+		try {
+			return (R)Facade_Slice.Read(Reader,Slices[index]);
+		}catch(NovaIllegalAccess e) {
+			return null;
+		}
 	}
 	
-
 	public <T> boolean set(int index, T obj, int threadIDX)  {
 		Facade_slice toSet = Slices[index];
 		if(toSet.isDeleted())
@@ -65,7 +69,6 @@ public class SA_Nova_CAS {
 		}
 	}
 	
-
 	public boolean delete(int index, int threadIDX) {
 		try {
 			if(Slices[index].isDeleted())
@@ -77,15 +80,11 @@ public class SA_Nova_CAS {
 		}catch (NovaIllegalAccess e) {
 			return false;
 		}
-
-
 	}
 
-	
 	public int getSize(){
 		return size;
 	}
-
 	
 	private void EnsureCap() {
 		int newSize = Slices.length *2;

@@ -14,9 +14,8 @@ public class LL_HE_CAS_opt_bench implements CompositionalLL<Buff,Buff>{
 	public LL_HE_CAS_opt_bench(){
 		
 	}
-	public boolean containsKey(final Buff key, int tidx) {
-		return LL.contains(key, tidx);
-	}
+	public Integer containsKey(final Buff key, int tidx) {return 0;	}
+
 	
     public  boolean put(final Buff key,final Buff value,  int idx) {
     	return LL.add(key,value, idx);

@@ -6,8 +6,10 @@ import com.yahoo.oak.Facade_HE;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.HazardEras.HEslice;
+import com.yahoo.oak.LL.HE.LL_HE_noCAS_opt.Node;
 
 /**
  * <h1>HarrisAMRLinkedList</h1>
@@ -47,7 +49,6 @@ public class LL_HE_noCAS<K,V> {
     final NovaS<K> Ksr;
     final NovaC<V> Vcm;
     final NovaS<V> Vsr;
-    final static int MAXTHREADS = 32;
     
 	
     static class Node {
@@ -110,7 +111,7 @@ public class LL_HE_noCAS<K,V> {
             final Node pred = window.pred;
             final Node curr = window.curr;
             if (curr.key!= null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0) { 
-                return false;
+                Facade_HE.Write(Vsr, value, curr.value, tidx);
             } else {
             	HEslice oKey  = Facade_HE.allocate( Ksr.calculateSize(key));
         		Ksr.serialize(key, oKey.address+oKey.offset);
@@ -220,23 +221,24 @@ public class LL_HE_noCAS<K,V> {
         
         
 
-
+    public <R> R get(K key, NovaR Reader, int tidx) {
+        boolean[] marked = {false};
+        CmpFail: while(true)
+        	try {
+		        Node curr = head.next.getReference();
+		        curr.next.get(marked);
+		        while (curr != tail && Facade_HE.Compare(key, Kcm, curr.key, tidx) < 0) {
+		        	curr = curr.next.getReference();
+		            curr.next.get(marked);
+		        }
+		        boolean flag = curr.key != null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0 && !marked[0];
+		        R obj = null;
+		        if (flag)
+		        	obj = (R)Reader.apply(curr.value.address+ curr.value.offset);
+		        return obj;
+        	}catch (NovaIllegalAccess e) {continue CmpFail;}
+        }
     
-    /**
-     * Searches for a given key.
-     * 
-     * Inspired by Figure 9.27, page 218 on "The Art of Multiprocessor Programming".
-     * 
-     * As soon as we find a matching key we immediately return false/true 
-     * depending whether the corresponding node is marked or not. We can do 
-     * this because add() will always insert new elements immediately after a
-     * non-marked node.
-     * <p>
-     * Progress Condition: Wait-Free - bounded by the number of nodes 
-     * 
-     * @param key
-     * @return
-     */
     public boolean contains(K key, int tidx) {
         boolean[] marked = {false};
         CmpFail: while(true)

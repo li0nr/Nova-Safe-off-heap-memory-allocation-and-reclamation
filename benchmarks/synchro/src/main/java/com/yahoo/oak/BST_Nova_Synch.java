@@ -1,7 +1,6 @@
 package com.yahoo.oak;
 
-import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.NovaManager;
+
 import com.yahoo.oak.BST.BST_Nova;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
@@ -22,11 +21,13 @@ public class BST_Nova_Synch implements CompositionalBST<Buff, Buff>{
 	}
 	
     public  Buff get(final Buff key, int tidx) {
-    	return BST.get(key, tidx);
+    	return null;
+    	//return BST.get(key, tidx);
     }
     
     public  Buff put(final Buff key, final Buff value, int idx) {
-    	return BST.put(key, value, idx);
+    	return null;
+    	//return BST.put(key, value, idx);
     }
     
     public  boolean remove(final Buff key, int idx) {

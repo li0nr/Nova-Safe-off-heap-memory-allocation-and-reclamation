@@ -9,31 +9,26 @@ package com.yahoo.oak;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicLongArray;
 
 
-public class NovaManager implements MemoryManager {
+public class NovaManagerNoTap implements MemoryManager {
     static final int INVALID_SLICE = -1;    
     static final int HEADER_SIZE = Long.BYTES;
     static final int IDENTRY = 0;
     static final int REFENTRY = 1;
     
-    private final ArrayList<NovaSlice>[] releaseLists;
+    private final ArrayList<DeletedSlice>[] releaseLists;
     
     private final AtomicInteger globalNovaNumber;
     private final BlockMemoryAllocator allocator;
-    private final AtomicLongArray TAP;
     private final long[] EpochFence;
     private final NovaSlice[] Slices;
 
-    public NovaManager(BlockMemoryAllocator allocator) {
+    public NovaManagerNoTap(BlockMemoryAllocator allocator) {
     	
         this.releaseLists = new ArrayList[_Global_Defs.MAX_THREADS*2*_Global_Defs.CACHE_PADDING];
         this.Slices = new NovaSlice[_Global_Defs.MAX_THREADS*2*_Global_Defs.CACHE_PADDING];
-        this.TAP = new AtomicLongArray(_Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING * 2);
         this.EpochFence = new long[_Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING * 2];
         this.allocator = allocator;
 
@@ -41,7 +36,6 @@ public class NovaManager implements MemoryManager {
             this.releaseLists[i]	= new ArrayList<>(_Global_Defs.RELEASE_LIST_LIMIT);
             this.Slices		 [i]	= new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE);
             this.EpochFence	 [i] = 1;
-            this.TAP.set(i+IDENTRY, -1); 
             }     
         globalNovaNumber = new AtomicInteger(1);
     }
@@ -75,55 +69,29 @@ public class NovaManager implements MemoryManager {
         s.setHeader(globalNovaNumber.get(),size);
     }
     
-    public void release(int block, int offset, int len, int idx) {
-        List<NovaSlice> myReleaseList = this.releaseLists[(idx+1)*_Global_Defs.CACHE_PADDING];
-        myReleaseList.add(new NovaSlice(block,offset,len));
+    
+    public void release(int block, int offset, int len, int idx, int born) {
+    	
+        List<DeletedSlice> myReleaseList = this.releaseLists[(idx+1)*_Global_Defs.CACHE_PADDING];
+        myReleaseList.add(new DeletedSlice(block,offset,len,born,globalNovaNumber.get()));
         
         if (myReleaseList.size() >= _Global_Defs.RELEASE_LIST_LIMIT) {
         	
-            ArrayList<Long> HostageSlices=new ArrayList<>();
-            for (int i = _Global_Defs.CACHE_PADDING; i < 2*_Global_Defs.CACHE_PADDING*_Global_Defs.MAX_THREADS; i= i +_Global_Defs.CACHE_PADDING ) {
-        		if(TAP.get(i+IDENTRY) != -1)
-        			HostageSlices.add(TAP.get(i+REFENTRY));
-        		}
         	globalNovaNumber.incrementAndGet();
-//        	Iterator<NovaSlice> itr=myReleaseList.iterator();
-//        	while(itr.hasNext()) {
-//        		NovaSlice tmp=itr.next();
-//        		if(!HostageSlices.contains(tmp.getRef())) {
-//        			allocator.free(tmp);
-//        			itr.remove();
-//        		}
-//        	}
-        	NovaSlice toDeleteObj;
-            for (int iret = 0; iret < myReleaseList.size();) {
-            	toDeleteObj = myReleaseList.get(iret);
-                if (! HostageSlices.contains(toDeleteObj)) {
-                	myReleaseList.remove(toDeleteObj);
-                	allocator.free(toDeleteObj);
-                	continue;
-                }
-                iret++;
-            }
+        	Iterator<DeletedSlice> itr=myReleaseList.iterator();
+        	while(itr.hasNext()) {
+        		DeletedSlice tmp=itr.next();
+        		if(!intersects(tmp))
+        			allocator.free(tmp);
+        			itr.remove();
+        			}
+        	}
         }
-    }
     
     public boolean free(NovaSlice s) {
     	allocator.free(new NovaSlice(s));
     	return true; //assumes always successful!
     }
-
-
-  public  void setTap(int block,long ref,int idx) {
-	int i= idx%_Global_Defs.MAX_THREADS;
-	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+IDENTRY, idx);
-	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+REFENTRY, ref);
-  }
-    
-  public  void UnsetTap(int block,int idx) {
-	int i= idx%_Global_Defs.MAX_THREADS;
-	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+IDENTRY, -1);
-  }
 
     public long getAdress(int blockID) {
     	return allocator.getAddress(blockID);
@@ -153,5 +121,36 @@ public class NovaManager implements MemoryManager {
     		}
     	}
     }
+    
+    
+    //FenceFree impl
+    public class DeletedSlice extends NovaSlice {
+    	
+        protected long born;
+        protected long death;
         
+        DeletedSlice(int block, int offset, int length, long born, long died){
+        	super(block, offset, length);
+        	this.born = born;
+        	this.death = died;
+        }
+    }
+    
+    public boolean checkEpochFences_inc(int SliceEpoch,int ThreadIdx) {
+    	if(EpochFence[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING] != SliceEpoch) {
+    		EpochFence[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING] = SliceEpoch;
+    		return false;
+    	}
+    	else return true;
+    }
+    
+    private boolean intersects(DeletedSlice s) {
+    	for (int i=0; i<_Global_Defs.MAX_THREADS; i++) {
+    		if(s.born <= EpochFence[(i+1)*_Global_Defs.CACHE_PADDING] 
+    				&& s.death >= EpochFence[(i+1)*_Global_Defs.CACHE_PADDING])
+    			return true;
+    	}
+    	return false;
+    }
+    
 }
