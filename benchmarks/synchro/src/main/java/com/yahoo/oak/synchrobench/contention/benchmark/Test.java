@@ -146,6 +146,7 @@ public class Test {
 	            if (LL.put(key,val,0) == true) {
 	                i--;
 	            } 
+	            break;
 			case SA:
 	            if (SA.fill(key, 0) == true) {
 	                i--;
