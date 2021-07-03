@@ -9,7 +9,7 @@ public class Facade_EBR {
 	static EBR  _EBR;
 
 	public Facade_EBR(NativeMemoryAllocator allocator) {
-		_EBR = new EBR<>( 32, allocator);
+		_EBR = new EBR<>(allocator);
 	}
 
 		

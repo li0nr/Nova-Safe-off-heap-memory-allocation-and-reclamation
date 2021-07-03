@@ -19,7 +19,6 @@ public class LL_EBR_noCAS_opt <K,V>{
 	    final NovaC<V> Vcm;
 	    final NovaS<V> Vsr;
 	    final EBR mng;
-	    final static int MAXTHREADS = 32;
 	    
 	    static class Node {
 	        final EBRslice key;
@@ -48,7 +47,7 @@ public class LL_EBR_noCAS_opt <K,V>{
 
 	    public LL_EBR_noCAS_opt(NativeMemoryAllocator alloc ,NovaC<K> cmp,	NovaS<K> srz,
 	    		NovaC<V> Vcmp,	NovaS<V> Vsrz) {
-	    	mng = new EBR(MAXTHREADS, alloc);
+	    	mng = new EBR(alloc);
 	    	Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
 	    	
 	        tail = new Node(null,null);

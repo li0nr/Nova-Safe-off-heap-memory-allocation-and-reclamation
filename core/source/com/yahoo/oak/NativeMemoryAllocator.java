@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.math3.exception.NullArgumentException;
+
 public class NativeMemoryAllocator implements BlockMemoryAllocator {
 
     // When allocating n bytes and there are buffers in the free list, only free buffers of size <= n *
@@ -80,35 +82,35 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
         // To search a free slice, we use the input slice as a dummy and change its length to the desired length.
         // Then, we use freeList.higher(s) which returns a free slice with greater or equal length to the length of the
         // dummy with time complexity of O(log N), where N is the number of free slices.
-        while (!NovafreeList.isEmpty()) {
-            s.update(0, 0, size ,INVALID_ADDRESS );
-            NovaSlice bestFit = NovafreeList.higher(s);
-            if (bestFit == null) {
-                break;
-            }
-            // If the best fit is more than REUSE_MAX_MULTIPLIER times as big than the desired length, than a new
-            // buffer is allocated instead of reusing.
-            // This means that currently buffers are not split, so there is some internal fragmentation.
-            if (bestFit.getLength() > (REUSE_MAX_MULTIPLIER * size)) {
-                break;     // all remaining buffers are too big
-            }
-            // If multiple threads got the same bestFit only one can use it (the one which succeeds in removing it
-            // from the free list).
-            // The rest restart the while loop.
-            if (NovafreeList.remove(bestFit)) {
-                if (stats != null) {
-                    stats.reclaim(size);
-                }
-                s.copyFrom(bestFit);
-                s.setAddress(blocksArray[bestFit.blockID].getAddress());
-                // We read again the buffer so to get the per-thread buffer.
-                // TODO: This will be redundant once we eliminate the per-thread buffers.
-                allocated.addAndGet(size);
+    	while (!NovafreeList.isEmpty()) {
+			 s.update(0, 0, size ,INVALID_ADDRESS );
+             NovaSlice bestFit = NovafreeList.higher(s);
+             if (bestFit == null) {
+                 break;
+             }
+             // If the best fit is more than REUSE_MAX_MULTIPLIER times as big than the desired length, than a new
+             // buffer is allocated instead of reusing.
+             // This means that currently buffers are not split, so there is some internal fragmentation.
+             if (bestFit.getLength() > (REUSE_MAX_MULTIPLIER * size)) {
+                 break;     // all remaining buffers are too big
+             }
+             // If multiple threads got the same bestFit only one can use it (the one which succeeds in removing it
+             // from the free list).
+             // The rest restart the while loop.
+             if (NovafreeList.remove(bestFit)) {
+                 if (stats != null) {
+                     stats.reclaim(size);
+                 }
+                 s.copyFrom(bestFit);
+                 s.setAddress(blocksArray[s.blockID].getAddress());
+                 // We read again the buffer so to get the per-thread buffer.
+                 // TODO: This will be redundant once we eliminate the per-thread buffers.
+                 allocated.addAndGet(size);
 
-                return true;
-            }
-        }
-
+                 return true;
+             }
+         }
+           
         boolean isAllocated = false;
         // freeList is empty or there is no suitable slice
         while (!isAllocated) {
@@ -138,7 +140,7 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
         }
         allocated.addAndGet(size);
         return true;
-    }  
+    }
     
 
     // Releases memory (makes it available for reuse) without other GC consideration.
@@ -149,11 +151,13 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
     @Override
     public void free(NovaSlice s) {
     	int size = s.length;
-        allocated.addAndGet(-size);
+        if(NovafreeList.add(s))
+        	allocated.addAndGet(-size);
+        if(allocated.get() < 0)
+        	throw new NovaIllegalAccess();
         if (stats != null) {
             stats.release(size);
         }
-        NovafreeList.add(s);
     }
 
     // Releases all memory allocated for this Oak (should be used as part of the Oak destruction)

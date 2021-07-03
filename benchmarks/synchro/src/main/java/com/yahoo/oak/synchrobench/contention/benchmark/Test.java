@@ -9,6 +9,7 @@ package com.yahoo.oak.synchrobench.contention.benchmark;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalSA;
 import com.yahoo.oak.synchrobench.contention.abstractions.MaintenanceAlg;
 
 import java.lang.reflect.Constructor;
@@ -27,7 +28,8 @@ public class Test {
 
     public enum Type {
         BST,
-        LL
+        LL,
+        SA
     }
 
     /**
@@ -39,6 +41,8 @@ public class Test {
      */
     private ThreadLoop[] threadLoops_BST;
     private ThreadLoopLL[] threadLoops_LL;
+    private ThreadLoopSA[] threadLoops_SA;
+
 
     /**
      * The observed duration of the benchmark
@@ -92,6 +96,8 @@ public class Test {
     private Type benchType = null;
     private CompositionalBST<Buff, Buff> BST = null;
     private CompositionalLL<Buff,Buff> LL = null;
+    private CompositionalSA<Buff> SA = null;
+
     /**
      * The benchmark methods
      */
@@ -112,7 +118,7 @@ public class Test {
     };
 
     public long fill(final int range, final long size) {
-        if (benchType != Type.LL && benchType != Type.BST) {
+        if (benchType != Type.LL && benchType != Type.BST && benchType != Type.SA) {
             System.err.println("Wrong benchmark type");
             System.exit(0);
         }
@@ -140,7 +146,11 @@ public class Test {
 	            if (LL.put(key,val,0) == true) {
 	                i--;
 	            } 
-				break;
+			case SA:
+	            if (SA.fill(key, 0) == true) {
+	                i--;
+	            } 
+	            break;
 			default:
 				System.err.println("Wrong benchmark type");
 				System.exit(0);
@@ -171,6 +181,9 @@ public class Test {
             } else if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
             	LL = (CompositionalLL<Buff,Buff>) c.newInstance();
     			benchType = Type.LL;
+            } else if (CompositionalSA.class.isAssignableFrom((Class<?>) benchClass)) {
+            	SA = (CompositionalSA<Buff>) c.newInstance();
+    			benchType = Type.SA;
             }
 
         } catch (Exception e) {
@@ -201,6 +214,14 @@ public class Test {
                 for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
                 	threadLoops_LL[threadNum] = new ThreadLoopLL(threadNum, LL, methods);
                     threads[threadNum] = new Thread(threadLoops_LL[threadNum]);
+                }
+                break;
+            case SA:
+            	threadLoops_SA = new ThreadLoopSA[Parameters.confNumThreads];
+                threads = new Thread[Parameters.confNumThreads];
+                for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
+                	threadLoops_SA[threadNum] = new ThreadLoopSA(threadNum, SA, methods);
+                    threads[threadNum] = new Thread(threadLoops_SA[threadNum]);
                 }
                 break;
         }
@@ -239,6 +260,8 @@ public class Test {
 				break;
 			case LL:
 	        	allocated = ( LL).allocated();
+			case SA:
+	        	allocated = ( SA).allocated();
 			default:
 				break;
 			}
@@ -287,6 +310,11 @@ public class Test {
         			threadLoop.stopThread();
         			}
 				break;
+			case SA:
+        		for (ThreadLoopSA threadLoop : threadLoops_SA) {
+        			threadLoop.stopThread();
+        			}
+				break;
 
 			default:
 				break;
@@ -309,6 +337,8 @@ public class Test {
                 break;
             case LL:
             	LL.clear();
+            case SA:
+            	SA.clear();
         }
     }
 
@@ -591,6 +621,20 @@ public class Test {
 	            total += threadLoops_LL[threadNum].total;
 	            iterOps += threadLoops_LL[threadNum].itrSuccess;
 				break;
+				
+			case SA:
+	        	numAdd += threadLoops_SA[threadNum].numAdd;
+	            numRemove += threadLoops_SA[threadNum].numRemove;
+	            numContains += threadLoops_SA[threadNum].numContains;
+
+	            numSucAdd += threadLoops_SA[threadNum].numSuccAdd;
+	            numSucRemove += threadLoops_SA[threadNum].numSucRemove;
+	            numSucContains += threadLoops_SA[threadNum].numSucContains;
+
+	            failures += threadLoops_SA[threadNum].failures;
+	            total += threadLoops_SA[threadNum].total;
+	            iterOps += threadLoops_SA[threadNum].itrSuccess;
+				break;
 
 			default:
 				break;
@@ -713,6 +757,21 @@ public class Test {
 	            threadLoops_LL[threadNum].numSucContains = 0;
 	            threadLoops_LL[threadNum].numSucRemove = 0;
 	            threadLoops_LL[threadNum].itrSuccess = 0;
+				break;
+			case SA:
+	        	threadLoops_SA[threadNum].numAdd = 0;
+	        	threadLoops_SA[threadNum].numRemove = 0;
+	        	threadLoops_SA[threadNum].numAddAll = 0;
+	        	threadLoops_SA[threadNum].numRemoveAll = 0;
+	        	threadLoops_SA[threadNum].numSize = 0;
+	        	threadLoops_SA[threadNum].numContains = 0;
+	        	threadLoops_SA[threadNum].failures = 0;
+	        	threadLoops_SA[threadNum].total = 0;
+	        	threadLoops_SA[threadNum].aborts = 0;
+	            threadLoops_SA[threadNum].numSuccAdd = 0;
+	            threadLoops_SA[threadNum].numSucContains = 0;
+	            threadLoops_SA[threadNum].numSucRemove = 0;
+	            threadLoops_SA[threadNum].itrSuccess = 0;
 				break;
 
 			default:

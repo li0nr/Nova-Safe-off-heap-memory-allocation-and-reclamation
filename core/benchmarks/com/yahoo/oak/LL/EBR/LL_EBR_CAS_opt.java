@@ -48,7 +48,7 @@ public class LL_EBR_CAS_opt <K,V>{
 
 	    public LL_EBR_CAS_opt(NativeMemoryAllocator alloc ,NovaC<K> cmp,	NovaS<K> srz,
 	    		NovaC<V> Vcmp,	NovaS<V> Vsrz) {
-	    	mng = new EBR(MAXTHREADS, alloc);
+	    	mng = new EBR(alloc);
 	    	Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
 	    	
 	        tail = new Node(null,null);

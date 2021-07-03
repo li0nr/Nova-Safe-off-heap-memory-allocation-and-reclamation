@@ -134,6 +134,7 @@ public class Facade_Nova <T,K> {
 
 		
 		int version = ExtractVer_Del(facade_meta);
+		int t = (int)(UNSAFE.getLong(address+offset));
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) {
 			novaManager.UnsetTap(block,idx);
 			throw new NovaIllegalAccess();

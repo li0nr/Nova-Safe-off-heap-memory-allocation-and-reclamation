@@ -92,4 +92,8 @@ public class SA_NoMM {
 		Slices = Arrays.copyOf(Slices, newSize);
 	}
 	
+	public NativeMemoryAllocator getAlloc() {
+		return allocator;
+	}
+	
 }

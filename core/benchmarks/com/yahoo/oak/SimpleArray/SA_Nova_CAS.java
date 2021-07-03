@@ -53,11 +53,12 @@ public class SA_Nova_CAS {
 	
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
-		if(Slices[index].isDeleted())
-				if(!Facade_Slice.AllocateSliceCAS(Slices[index],srZ.calculateSize(obj),threadIDX))
+		Facade_slice toSet = Slices[index];
+		if(toSet.isDeleted())
+				if(!Facade_Slice.AllocateSliceCAS(toSet,srZ.calculateSize(obj),threadIDX))
 					return false;
 		try{
-			Facade_Slice.WriteFull(srZ, obj, Slices[index], threadIDX);
+			Facade_Slice.WriteFull(srZ, obj, toSet, threadIDX);
 			return true;
 		}catch(NovaIllegalAccess e) {
 			return false;
@@ -66,12 +67,18 @@ public class SA_Nova_CAS {
 	
 
 	public boolean delete(int index, int threadIDX) {
-		if(Slices[index].isDeleted())
+		try {
+			if(Slices[index].isDeleted())
+				return false;
+			if(Facade_Slice.DeleteCAS(threadIDX, Slices[index])){
+				return true;
+			}
 			return false;
-		if(Facade_Slice.DeleteCAS(threadIDX, Slices[index])){
-			return true;
+		}catch (NovaIllegalAccess e) {
+			return false;
 		}
-		return false;
+
+
 	}
 
 	
@@ -83,6 +90,9 @@ public class SA_Nova_CAS {
 	private void EnsureCap() {
 		int newSize = Slices.length *2;
 		Slices = Arrays.copyOf(Slices, newSize);
+	}
+	public NativeMemoryAllocator getAlloc() {
+		return allocator;
 	}
 	
 }

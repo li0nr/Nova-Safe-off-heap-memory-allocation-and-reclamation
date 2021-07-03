@@ -7,6 +7,7 @@ import com.yahoo.oak.HazardEras;
 
 import sun.misc.Unsafe;
 import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.HazardEras.HEslice;
@@ -65,28 +66,32 @@ public class SA_HE_CAS_opt {
 			if(Slices[index]== null) {
 //				HEslice toEnter = _HE.allocateCAS(srZ.calculateSize(obj));
 				HEslice toEnter = _HE.allocate(srZ.calculateSize(obj));
-				srZ.serialize(obj, Slices[index].address+Slices[index].offset);
 				if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
 					_HE.fastFree(toEnter);
 					return false;
 				}
 			}
-			HEslice access = _HE.get_protected(Slices[index],threadIDX);
-			if(access == null) {
+			try {
+				HEslice access = _HE.get_protected(Slices[index],threadIDX);
+				if(access == null) {
+					_HE.clear(threadIDX);
+					return false;
+				}
+				srZ.serialize(obj, access.address+access.offset);
 				_HE.clear(threadIDX);
+				return true;
+			}catch(NovaIllegalAccess e) {
 				return false;
 			}
-			srZ.serialize(obj, Slices[index].address+Slices[index].offset);
-			_HE.clear(threadIDX);
-			return true;
+
 	}
 	
 
 	public boolean delete(int index, int threadIDX) {
-		if(Slices[index]== null)
-			return false;
 		HEslice toDel = Slices[index];
-		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, Slices[index], null))
+		if(toDel == null)
+			return false;
+		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, toDel, null))
 			Slices[index] = null;
 		else 
 			return false;
@@ -103,6 +108,10 @@ public class SA_HE_CAS_opt {
 	private void EnsureCap() {
 		int newSize = Slices.length *2;
 		Slices = Arrays.copyOf(Slices, newSize);
+	}
+	
+	public NativeMemoryAllocator getAlloc() {
+		return allocator;
 	}
 	
 }

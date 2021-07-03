@@ -126,7 +126,7 @@ public class LL_Nova_primitive_CAS<K,V> {
                 if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Kcm, curr.key) == 0) { 
                     return false;
                 } else {
-                    Node newNode = new Node(1,1);
+                    Node newNode = new Node(Illegal_nu,Illegal_nu);
 
                     long OffKRef = Facade_Nova.WriteFast(Ksr, key, Facade_Nova.AllocateReusedSlice(newNode, key_offset,
                     		newNode.key, Ksr.calculateSize(key), idx),idx);

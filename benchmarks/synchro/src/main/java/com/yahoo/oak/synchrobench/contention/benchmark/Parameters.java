@@ -29,7 +29,7 @@ public class Parameters {
     public static int confIterations = 1;
     public static int confKeySize = 4;
     public static int confValSize = 4;
-    public static int Type = 0; //0 is BST , 1 is LL
+    public static int Type = 0; //0 is BST , 1 is LL, 2 is SA
     
     public static boolean iterate = false;
 

@@ -58,7 +58,7 @@ public class SA_GC {
 		if(Slices[index] == null) {
 			Buff toAdd = CC.Copy(obj); 
 			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices,
-					slices_base_offset+index*slices_scale, toAdd, null))
+					slices_base_offset+index*slices_scale, null, toAdd))
 				return false;
 		}
 		Slices[index] = CC.Copy(obj);
@@ -71,7 +71,7 @@ public class SA_GC {
 		if(toDel == null) 
 			return false;
 		if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices,
-				slices_base_offset+index*slices_scale, null, toDel))
+				slices_base_offset+index*slices_scale, toDel, null))
 			return false;
 		else return true;
 	}

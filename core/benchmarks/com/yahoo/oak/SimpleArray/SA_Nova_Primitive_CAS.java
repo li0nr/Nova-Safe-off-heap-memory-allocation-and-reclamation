@@ -28,8 +28,8 @@ public class SA_Nova_Primitive_CAS {
     static {
 		try {
 			final Unsafe UNSAFE=UnsafeUtils.unsafe;
-			ref_base_offset = UNSAFE.arrayBaseOffset(EBRslice[].class);
-			ref_scale = UNSAFE.arrayIndexScale(EBRslice[].class);
+			ref_base_offset = UNSAFE.arrayBaseOffset(long[].class);
+			ref_scale = UNSAFE.arrayIndexScale(long[].class);
 			 } catch (Exception ex) { throw new Error(ex); }
     }
     
@@ -82,7 +82,7 @@ public class SA_Nova_Primitive_CAS {
 	
 
 	public boolean delete(int index, int threadIDX) {
-		if(refrences[index]== 1)
+		if(refrences[index]%2 == 1)
 			return false;
 		if(Facade_Nova.DeleteReusedSlice(threadIDX, refrences[index], refrences,ref_base_offset+index*ref_scale)){
 			return true;
@@ -99,6 +99,10 @@ public class SA_Nova_Primitive_CAS {
 	private void EnsureCap() {
 		int newSize = refrences.length *2;
 		refrences = Arrays.copyOf(refrences, newSize);
+	}
+	
+	public NativeMemoryAllocator getAlloc() {
+		return allocator;
 	}
 	
 }

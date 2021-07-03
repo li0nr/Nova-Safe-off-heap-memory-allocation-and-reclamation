@@ -2,6 +2,8 @@ package com.yahoo.oak;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
+
 import sun.misc.Unsafe;
 import sun.misc.Contended;
 
@@ -9,13 +11,10 @@ import sun.misc.Contended;
 public class EBR <T extends EBR_interface>{
 	
 	private static final long NONE = 0;
-	private static final int  EBR_MAX_THREADS = 32;
-	private static final int  CLPAD = 8;
-	private static final int  RELEASE_LIST_LIMIT = 1024;
 
     private final AtomicLong eraClock;
     private final int	[] releasecounter;
-    private final long	[] reservations;
+    private final AtomicLongArray reservations;
 	private final ArrayList<T>[] retiredList;
     private final NativeMemoryAllocator allocator;
     	
@@ -38,17 +37,18 @@ public class EBR <T extends EBR_interface>{
 	}
 	
 
-	public EBR( int maxThreads, NativeMemoryAllocator alloc) {
+	public EBR(NativeMemoryAllocator alloc) {
 		//EBR_MAX_THREADS = maxThreads;
 		allocator = alloc;
 		eraClock = new AtomicLong(1);
-		reservations 	= new long[EBR_MAX_THREADS*CLPAD*2];
-		releasecounter 	= new int[EBR_MAX_THREADS*CLPAD*2];
-		retiredList		= new ArrayList[EBR_MAX_THREADS*CLPAD*2];
+		reservations 	= new AtomicLongArray(_Global_Defs.MAX_THREADS*_Global_Defs.CACHE_PADDING*2);
+		releasecounter 	= new int[_Global_Defs.MAX_THREADS*_Global_Defs.CACHE_PADDING*2];
+		retiredList		= new ArrayList[_Global_Defs.MAX_THREADS*_Global_Defs.CACHE_PADDING*2];
 		
-    	for(int it=0; it< EBR_MAX_THREADS; it++) {
-    			reservations[it*CLPAD+CLPAD]	= (NONE);
-    	    	retiredList[it*CLPAD+CLPAD]	 	= new ArrayList<T>();
+    	for(int it=0; it< _Global_Defs.MAX_THREADS; it++) {
+    			reservations.set(it*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING,NONE);
+    	    	retiredList[it*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING]
+    	    			= new ArrayList<T>();
     	}
 	}
 	
@@ -61,19 +61,19 @@ public class EBR <T extends EBR_interface>{
     public EBRslice allocateCAS(int size) {
     	EBRslice ret = new EBRslice();
     	allocator.allocate(ret, size);
-		UnsafeUtils.unsafe.fullFence();
+		UnsafeUtils.unsafe.storeFence();
     	return ret;
     }
     
 	public void start_op(int tid){
 		long e = eraClock.get();
-		reservations[tid*CLPAD+CLPAD] = e;
-		UnsafeUtils.unsafe.fullFence();
+		reservations.set(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING,e);
+		UnsafeUtils.unsafe.storeFence();
 	}
 		
 	public void end_op(int tid){
-		reservations[tid*CLPAD+CLPAD] = NONE;
-		UnsafeUtils.unsafe.fullFence();
+		reservations.set(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING,NONE);
+		UnsafeUtils.unsafe.storeFence();
 	}
 	public void reserve(int tid){
 		start_op(tid);
@@ -98,21 +98,21 @@ public class EBR <T extends EBR_interface>{
 		if(obj== null) return;
 		long currEra = eraClock.get();        
 		
-		retiredList[tid*CLPAD+CLPAD].add(obj);
+		retiredList[tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING].add(obj);
         
-        releasecounter[tid *CLPAD+CLPAD]++;
-        if(releasecounter[tid *CLPAD+CLPAD] == RELEASE_LIST_LIMIT) {
+        releasecounter[tid *_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING]++;
+        if(releasecounter[tid *_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING] == _Global_Defs.RELEASE_LIST_LIMIT) {
         	incrementEpoch();
         	empty(tid);
-            releasecounter[tid *CLPAD+CLPAD] = 0;
+            releasecounter[tid *_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING] = 0;
         }
 	}
 	
 	void empty(int tid){
 		
 		long minEpoch = Long.MAX_VALUE;
-		for (int i = 0; i<EBR_MAX_THREADS; i++){
-			long res = reservations[i*CLPAD+CLPAD];
+		for (int i = 0; i<_Global_Defs.MAX_THREADS; i++){
+			long res = reservations.get(i*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING);
 			UnsafeUtils.unsafe.loadFence();
 			if(res<minEpoch){
 				minEpoch = res;
@@ -120,7 +120,7 @@ public class EBR <T extends EBR_interface>{
 		}
 		// erase safe objects
 
-		ArrayList<T> rlist = retiredList[tid*CLPAD+CLPAD];
+		ArrayList<T> rlist = retiredList[tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING];
 		T toDeleteObj = null;
 		for (int iret = 0; iret < rlist.size();) {
           	toDeleteObj = rlist.get(iret);
@@ -134,8 +134,8 @@ public class EBR <T extends EBR_interface>{
 	}
 	
 	public void ForceCleanUp() {
-		for(int i =0 ; i < EBR_MAX_THREADS; i++) {
-	        ArrayList<T> rlist = retiredList[i*CLPAD+CLPAD];
+		for(int i =0 ; i < _Global_Defs.MAX_THREADS; i++) {
+	        ArrayList<T> rlist = retiredList[i*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING];
 	        EBRslice toDeleteObj;
 	        for (int iret = 0; iret < rlist.size(); ) {
             	toDeleteObj = (EBRslice)rlist.get(iret);

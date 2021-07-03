@@ -57,7 +57,8 @@ public class Facade_Slice {
 		S.address = newslice.address;
 		S.length  = newslice.length;
 		int NewVer= (int) newslice.getVersion() &0xFFFFFF;
-                
+		assert S.blockID != 0;
+ 
         return UNSAFE.compareAndSwapLong(S, Facade_slice.version_offset , CurrVer, NewVer) ?//TODO is CAS needed when we share slices?
         		true : !novaManager.free(newslice); 
 	}
@@ -73,6 +74,7 @@ public class Facade_Slice {
 		S.address = newslice.address;
 		S.length  = newslice.length;
 		S.version = (int) newslice.getVersion() &0xFFFFFF;
+		assert S.blockID != 0;
 		return true;
 	}
 	
@@ -83,7 +85,7 @@ public class Facade_Slice {
      * @param idx          the thread index that wants to delete
      */
 	static public boolean DeleteCAS(int idx, Facade_slice S) {
-	
+		boolean flag = true;
 		if(S.version%2 == DELETED)
 			throw new NovaIllegalAccess();
 		
@@ -97,13 +99,13 @@ public class Facade_Slice {
 
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
-			 return false;
+			 flag = false;
 		
 		int CurrVer = S.version;
-		 UNSAFE.compareAndSwapLong(S, Facade_slice.version_offset, CurrVer,  CurrVer|1);
-		 
-		 novaManager.release(S.blockID, S.offset, S.length,idx); 
-		 return true; 
+		
+		if(UNSAFE.compareAndSwapLong(S, Facade_slice.version_offset, CurrVer,  CurrVer|1));
+		 	novaManager.release(S.blockID, S.offset, S.length,idx); 
+		 return flag; 
 	}
 	
 	static public boolean Delete(int idx, Facade_slice S) {
@@ -151,7 +153,7 @@ public class Facade_Slice {
 			novaManager.setTap(S.blockID,facadeRef,idx);	
 			if(bench_Flags.Fences)UNSAFE.fullFence();
 		}
-				
+		int x =(int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF);
 		if(! (S.version == (int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF))) {
 			novaManager.UnsetTap(S.blockID,idx);
 			throw new NovaIllegalAccess();

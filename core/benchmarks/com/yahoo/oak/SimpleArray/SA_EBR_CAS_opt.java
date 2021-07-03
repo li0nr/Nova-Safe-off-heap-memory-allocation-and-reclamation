@@ -15,7 +15,7 @@ public class SA_EBR_CAS_opt {
 
 	private static final int DEFAULT_CAPACITY=10;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final EBR _EBR = new EBR<>(32, allocator);
+    final EBR _EBR = new EBR<>(allocator);
 	
     static final long slices_base_offset;
     static final long slices_scale;
@@ -61,31 +61,31 @@ public class SA_EBR_CAS_opt {
 	
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
-			if(Slices[index]== null) {
-				//EBRslice toEnter = _EBR.allocateCAS(srZ.calculateSize(obj));
-				EBRslice toEnter = _EBR.allocate(srZ.calculateSize(obj));
-				srZ.serialize(obj, Slices[index].address+Slices[index].offset);
-				if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
-					_EBR.fastFree(toEnter);
-					return false;
-				}
-			}
-			_EBR.start_op(threadIDX);
-			if(Slices[index] == null) {
-				_EBR.end_op(threadIDX);
+		EBRslice toEnter = Slices[index];
+		if(toEnter== null) {
+			//EBRslice toEnter = _EBR.allocateCAS(srZ.calculateSize(obj));
+			toEnter = _EBR.allocate(srZ.calculateSize(obj));
+			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
+				_EBR.fastFree(toEnter);
 				return false;
 			}
-			srZ.serialize(obj, Slices[index].address+Slices[index].offset);
+		}
+		_EBR.start_op(threadIDX);
+		if(Slices[index] == null) {
 			_EBR.end_op(threadIDX);
-			return true;
+			return false;
+		}
+		srZ.serialize(obj, toEnter.address+toEnter.offset);
+		_EBR.end_op(threadIDX);
+		return true;
 	}
 	
 
 	public boolean delete(int index, int threadIDX) {
-		if(Slices[index]== null)
-			return false;
 		EBRslice toDel = Slices[index];
-		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, Slices[index], null))
+		if(toDel == null)
+			return false;
+		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null))
 			Slices[index] = null;
 		else 
 			return false;
@@ -102,6 +102,10 @@ public class SA_EBR_CAS_opt {
 	private void EnsureCap() {
 		int newSize = Slices.length *2;
 		Slices = Arrays.copyOf(Slices, newSize);
+	}
+	
+	public NativeMemoryAllocator getAlloc() {
+		return allocator;
 	}
 	
 }
