@@ -59,7 +59,8 @@ public class SA_Nova_FenceFree {
 			EnsureCap();//might be problematic 
 		}
 		refrences[size]= Facade_Nova_FenceFree.WriteFast(srZ, e, 
-				Facade_Nova.AllocateSlice(e, 1, srZ.calculateSize(e) , threadIDX), threadIDX);
+				Facade_Nova_FenceFree.AllocateReusedSlice(refrences,ref_base_offset+size*ref_scale,
+						refrences[size],srZ.calculateSize(e),threadIDX), threadIDX);
 		size++;
 		return true;
 	}
