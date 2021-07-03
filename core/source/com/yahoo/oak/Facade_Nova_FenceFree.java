@@ -21,7 +21,7 @@ public class Facade_Nova_FenceFree {
 
 	static public <K> long AllocateReusedSlice(K obj, long meta_offset, long data, int size, int idx) {
 		if(data%2!=DELETED)
-			return -1;
+			return 1;
 		NovaSlice 	newslice = novaManager.getSlice(size,idx);
 		int offset=	newslice.getAllocatedOffset();
 		int block =	newslice.getAllocatedBlockID();

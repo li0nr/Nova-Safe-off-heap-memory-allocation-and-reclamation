@@ -44,6 +44,8 @@ public class SA_Nova_FenceFree {
 	public SA_Nova_FenceFree(NovaS srZ){
 		new Facade_Nova_FenceFree(mng);
 		refrences = new long[DEFAULT_CAPACITY];
+		for(int i=0; i <DEFAULT_CAPACITY ; i++)
+			refrences[i] = 1;
 		this.srZ = srZ;
 	}
 	
@@ -105,6 +107,8 @@ public class SA_Nova_FenceFree {
 	private void EnsureCap() {
 		int newSize = refrences.length *2;
 		refrences = Arrays.copyOf(refrences, newSize);
+		for(int i = refrences.length/2 ; i <newSize ; i++)
+			refrences[i] = 1;
 	}
 	
 	public NativeMemoryAllocator getAlloc() {
