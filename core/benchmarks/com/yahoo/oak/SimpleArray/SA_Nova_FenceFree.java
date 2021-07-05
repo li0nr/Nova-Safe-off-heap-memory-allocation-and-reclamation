@@ -52,6 +52,9 @@ public class SA_Nova_FenceFree {
 	public SA_Nova_FenceFree(int capacity,NovaS srZ ){
 		new Facade_Nova_FenceFree(mng);
 		refrences = new long[capacity];
+		refrences = new long[DEFAULT_CAPACITY];
+		for(int i=0; i <DEFAULT_CAPACITY ; i++)
+			refrences[i] = 1;
 		this.srZ = srZ;
 
 	}
