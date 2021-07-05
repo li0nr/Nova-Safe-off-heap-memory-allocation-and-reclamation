@@ -38,7 +38,7 @@ public class Facade_Nova_FenceFree {
      * @param  idx the thread index that wants to delete
      */
 	static public <K> boolean DeleteReusedSlice(int idx, long metadata, K obj, long meta_offset) {
-	
+		boolean flag = true;
 		if(metadata %2 != 0) 
 			return false;
 		int block 	= Extractblock(metadata);
@@ -58,13 +58,13 @@ public class Facade_Nova_FenceFree {
 
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
-			 return false;
+			 flag = false;
 		
 
 		 UNSAFE.compareAndSwapLong(obj, meta_offset, metadata, metadata |1);
 		 
 		 novaManager.release(block,offset,(int)len,idx,(int)version>>1); 
-		 return true; 
+		 return flag; 
 	}
 
 
@@ -85,12 +85,11 @@ public class Facade_Nova_FenceFree {
 	static public <T>long WriteFull(NovaS<T> lambda, T obj, long facade_meta ,int idx) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2==DELETED) {
-			throw new IllegalArgumentException("cant locate slice");
+			throw new NovaIllegalAccess();
 		}
 		
 		int block		= Extractblock	(facade_meta);
 		int offset 		= ExtractOffset	(facade_meta);
-		long facadeRef	= buildRef		(block,offset);
 		
 		long address = novaManager.getAdress(block);
 
@@ -178,13 +177,6 @@ public class Facade_Nova_FenceFree {
 	
 	 
 	 
-	 
-	static private long buildRef(int block, int offset) {
-		long Ref=(block &0xFFFFF);
-		Ref=Ref<<20;
-		Ref=Ref|(offset&0xFFFFF);
-		return Ref;
-	}
 	static private int ExtractVer_Del(long toExtract) {
 		int del=(int) (toExtract)&0x7FFFFF;
 		return del;

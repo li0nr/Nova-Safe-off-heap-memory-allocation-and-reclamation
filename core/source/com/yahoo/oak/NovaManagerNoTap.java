@@ -35,7 +35,7 @@ public class NovaManagerNoTap implements MemoryManager {
         for (int i = _Global_Defs.CACHE_PADDING; i < _Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING* 2; i+=_Global_Defs.CACHE_PADDING) {
             this.releaseLists[i]	= new ArrayList<>(_Global_Defs.RELEASE_LIST_LIMIT);
             this.Slices		 [i]	= new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE);
-            this.EpochFence	 [i] = 1;
+            this.EpochFence	 [i] =  0;
             }     
         globalNovaNumber = new AtomicInteger(1);
     }
@@ -81,10 +81,11 @@ public class NovaManagerNoTap implements MemoryManager {
         	Iterator<DeletedSlice> itr=myReleaseList.iterator();
         	while(itr.hasNext()) {
         		DeletedSlice tmp=itr.next();
-        		if(!intersects(tmp))
-        			allocator.free(tmp);
-        			itr.remove();
+        		if(!intersects(tmp)) {
+        			allocator.free((NovaSlice)tmp);
+        			itr.remove();	
         			}
+    			}
         	}
         }
     
@@ -138,7 +139,7 @@ public class NovaManagerNoTap implements MemoryManager {
     
     public boolean checkEpochFences_inc(int SliceEpoch,int ThreadIdx) {
     	if(EpochFence[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING] != SliceEpoch) {
-    		EpochFence[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING] = SliceEpoch;
+    		EpochFence[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING] = getNovaEra();
     		return false;
     	}
     	else return true;
@@ -147,7 +148,7 @@ public class NovaManagerNoTap implements MemoryManager {
     private boolean intersects(DeletedSlice s) {
     	for (int i=0; i<_Global_Defs.MAX_THREADS; i++) {
     		if(s.born <= EpochFence[(i+1)*_Global_Defs.CACHE_PADDING] 
-    				&& s.death >= EpochFence[(i+1)*_Global_Defs.CACHE_PADDING])
+    				&&  s.death >= EpochFence[(i+1)*_Global_Defs.CACHE_PADDING])
     			return true;
     	}
     	return false;

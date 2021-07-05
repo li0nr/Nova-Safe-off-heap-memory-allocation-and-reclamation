@@ -48,7 +48,7 @@ public class Facade_Nova {
      * @param  idx the thread index that wants to delete
      */
 	static public <K> boolean DeleteReusedSlice(int idx, long metadata, K obj, long meta_offset) {
-	
+		boolean flag = true;
 		if(metadata %2 != 0) 
 			return false;
 		int block 	= Extractblock(metadata);
@@ -68,13 +68,13 @@ public class Facade_Nova {
 
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
-			 return false;
+			 flag = false;
 		
 
 		 UNSAFE.compareAndSwapLong(obj, meta_offset, metadata, metadata |1);
 		 
 		 novaManager.release(block,offset,(int)len,idx); 
-		 return true; 
+		 return flag; 
 	}
 
 	static public <K> boolean Delete(int idx, long metadata, K obj, long meta_offset) {
