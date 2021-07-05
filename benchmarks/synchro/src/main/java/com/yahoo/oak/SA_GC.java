@@ -6,10 +6,10 @@ import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalSA;
 
 
 public class SA_GC implements CompositionalSA<Buff>{
-	com.yahoo.oak.SimpleArray.SA_GC SA = new 	com.yahoo.oak.SimpleArray.SA_GC(Buff.CC);
+	com.yahoo.oak.SimpleArray.SA_GC SA;
 	
-	public SA_GC(){
-		
+	public SA_GC(int size){
+		SA = new com.yahoo.oak.SimpleArray.SA_GC(size, Buff.CC);
 	}
     public  boolean fill(final Buff value, int idx) {
     	return SA.fill( value, idx);
@@ -31,8 +31,8 @@ public class SA_GC implements CompositionalSA<Buff>{
     	return 0;
     }
 	
-    public void clear() {
-    	SA = new com.yahoo.oak.SimpleArray.SA_GC(Buff.CC);
+    public void clear(int size) {
+    	SA = new com.yahoo.oak.SimpleArray.SA_GC(size, Buff.CC);
     }
     
     public void print() {

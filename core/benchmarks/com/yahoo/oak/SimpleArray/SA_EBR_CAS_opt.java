@@ -17,7 +17,7 @@ public class SA_EBR_CAS_opt {
 
 	private static final int DEFAULT_CAPACITY=10;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final EBR _EBR = new EBR<>(allocator);
+    final EBR _EBR = new EBR(allocator);
 	
     static final long slices_base_offset;
     static final long slices_scale;
@@ -61,23 +61,23 @@ public class SA_EBR_CAS_opt {
 		_EBR.start_op(threadIDX);
 		EBRslice toRead = Slices[index];
 		if(toRead == null) return null;
-		R obj = (R) Reader.apply(Slices[index]);
+		R obj = (R) Reader.apply(toRead.address+toRead.offset);
 		_EBR.end_op(threadIDX);
 		return obj;
 	}
 	
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
-		EBRslice toEnter = Slices[index];
-		if(toEnter== null) {
-			toEnter = _EBR.allocate(srZ.calculateSize(obj));
+		if(Slices[index] == null) {
+			EBRslice toEnter = _EBR.allocate(srZ.calculateSize(obj));
 			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
 				_EBR.fastFree(toEnter);
 				return false;
 			}
 		}
 		_EBR.start_op(threadIDX);
-		if(Slices[index] == null) {
+		EBRslice toEnter = Slices[index];
+		if(toEnter == null) {
 			_EBR.end_op(threadIDX);
 			return false;
 		}
@@ -91,9 +91,7 @@ public class SA_EBR_CAS_opt {
 		EBRslice toDel = Slices[index];
 		if(toDel == null)
 			return false;
-		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null))
-			Slices[index] = null;
-		else 
+		if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null))
 			return false;
 		_EBR.retire(toDel, threadIDX);
 		return true;

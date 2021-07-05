@@ -2,6 +2,7 @@ package com.yahoo.oak.LL.HE;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+import com.yahoo.oak.Facade_HE;
 import com.yahoo.oak.HazardEras;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
@@ -86,7 +87,7 @@ public class LL_HE_noCAS_opt<K,V> {
     public LL_HE_noCAS_opt(NativeMemoryAllocator allocator, NovaC<K> cmp,	NovaS<K> srz,
     		NovaC<V> Vcmp,	NovaS<V> Vsrz) {
     	
-    	HE = new HazardEras(MAXTHREADS, allocator);
+    	HE = new HazardEras(allocator);
     	Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
     	
         tail = new Node(null, null);
@@ -113,8 +114,9 @@ public class LL_HE_noCAS_opt<K,V> {
             final Node pred = window.pred;
             final Node curr = window.curr;
             if (curr.key!= null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
+                Vsr.serialize(value, curr.value.address+curr.value.offset);
             	HE.clear(tidx);
-                return false;
+                return true;
             } else {
             	HEslice oKey  = HE.allocate( Ksr.calculateSize(key));
         		Ksr.serialize(key, oKey.address+oKey.offset);

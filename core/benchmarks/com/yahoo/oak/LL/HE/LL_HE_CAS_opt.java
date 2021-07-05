@@ -85,7 +85,7 @@ public class LL_HE_CAS_opt<K,V> {
     public LL_HE_CAS_opt(NativeMemoryAllocator allocator, NovaC<K> cmp,	NovaS<K> srz,
     		NovaC<V> Vcmp,	NovaS<V> Vsrz) {
     	
-    	HE = new HazardEras(MAXTHREADS, allocator);
+    	HE = new HazardEras(allocator);
     	Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
     	
         tail = new Node(null, null);

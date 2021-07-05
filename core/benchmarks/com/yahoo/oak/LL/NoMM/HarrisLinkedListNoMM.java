@@ -71,7 +71,8 @@ public class HarrisLinkedListNoMM <K,V>{
 	            final Node pred = window.pred;
 	            final Node curr = window.curr;
 	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
-	                Vsr.serialize(value,curr.value.address + curr.value.offset);;
+	                Vsr.serialize(value,curr.value.address + curr.value.offset);
+	                return true;
 	            } else {
 	    	    	NovaSlice myK = new NovaSlice(0,0,0);
 	    	    	NovaSlice myV = new NovaSlice(0,0,0);

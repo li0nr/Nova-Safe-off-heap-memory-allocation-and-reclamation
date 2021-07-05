@@ -15,7 +15,7 @@ public class List_EBR implements ListInterface{
 	private static final int DEFAULT_CAPACITY=10;
 	//final long MEM_CAPACITY=1024;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final EBR<EBRslice_n> EBR = new EBR(allocator);
+    final EBR EBR = new EBR(allocator);
 	
 
 

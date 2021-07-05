@@ -6,10 +6,10 @@ import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalSA;
 
 
 public class SA_HE implements CompositionalSA<Buff>{
-	SA_HE_CAS_opt SA = new SA_HE_CAS_opt(Buff.DEFAULT_SERIALIZER);
+	SA_HE_CAS_opt SA;
 	
-	public SA_HE(){
-		
+	public SA_HE(int size){
+		 SA = new SA_HE_CAS_opt(size, Buff.DEFAULT_SERIALIZER);
 	}
     public  boolean fill(final Buff value, int idx) {
     	return SA.fill( value, idx);
@@ -32,7 +32,7 @@ public class SA_HE implements CompositionalSA<Buff>{
 
     }
 	
-    public void clear() {
+    public void clear(int size) {
     	SA = new SA_HE_CAS_opt(Buff.DEFAULT_SERIALIZER);
     }
     

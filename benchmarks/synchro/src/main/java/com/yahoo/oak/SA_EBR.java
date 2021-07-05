@@ -5,10 +5,10 @@ import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalSA;
 
 public class SA_EBR implements CompositionalSA<Buff> {
-	SA_EBR_CAS_opt SA = new SA_EBR_CAS_opt(Buff.DEFAULT_SERIALIZER);
+	SA_EBR_CAS_opt SA;
 
-	public SA_EBR() {
-
+	public SA_EBR(int size) {
+		SA = new SA_EBR_CAS_opt(size, Buff.DEFAULT_SERIALIZER);
 	}
 
 	public boolean fill(final Buff value, int idx) {
@@ -32,8 +32,8 @@ public class SA_EBR implements CompositionalSA<Buff> {
 
 	}
 
-	public void clear() {
-		SA = new SA_EBR_CAS_opt(Buff.DEFAULT_SERIALIZER);
+	public void clear(int size) {
+		SA = new SA_EBR_CAS_opt(size, Buff.DEFAULT_SERIALIZER);
 	}
 
 	public void print() {

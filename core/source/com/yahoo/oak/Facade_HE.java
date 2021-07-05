@@ -11,7 +11,7 @@ public class Facade_HE {
 	static HazardEras  _HazardEras;
 
 	public Facade_HE(NativeMemoryAllocator allocator) {
-		_HazardEras = new HazardEras(_Global_Defs.MAX_THREADS, allocator);
+		_HazardEras = new HazardEras(allocator);
 		}
 
 	static public HEslice allocate(int size) {

@@ -5,11 +5,11 @@ import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalSA;
 
 
 public class SA_Nova_FenceFree implements CompositionalSA<Buff>{
-	com.yahoo.oak.SimpleArray.SA_Nova_FenceFree SA = 
-			new com.yahoo.oak.SimpleArray.SA_Nova_FenceFree(Buff.DEFAULT_SERIALIZER);
+	com.yahoo.oak.SimpleArray.SA_Nova_FenceFree SA;
 	
-	public SA_Nova_FenceFree(){
-		
+	public SA_Nova_FenceFree(int size){
+		SA = 
+				new com.yahoo.oak.SimpleArray.SA_Nova_FenceFree(size, Buff.DEFAULT_SERIALIZER);
 	}
     public  boolean fill(final Buff value, int idx) {
     	return SA.fill( value, idx);
@@ -32,8 +32,8 @@ public class SA_Nova_FenceFree implements CompositionalSA<Buff>{
 
     }
 	
-    public void clear() {
-    	SA = new com.yahoo.oak.SimpleArray.SA_Nova_FenceFree(Buff.DEFAULT_SERIALIZER);
+    public void clear(int size) {
+    	SA = new com.yahoo.oak.SimpleArray.SA_Nova_FenceFree(size, Buff.DEFAULT_SERIALIZER);
     }
     
     public void print() {

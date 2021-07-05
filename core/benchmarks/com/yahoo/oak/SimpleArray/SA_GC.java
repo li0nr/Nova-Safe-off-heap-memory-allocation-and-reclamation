@@ -63,6 +63,7 @@ public class SA_GC {
 			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices,
 					slices_base_offset+index*slices_scale, null, toAdd))
 				return false;
+			return true;
 		}
 		Slices[index] = CC.Copy(obj);
 		return true;

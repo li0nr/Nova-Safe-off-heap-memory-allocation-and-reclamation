@@ -117,6 +117,7 @@ public class LL_Nova_CAS<K,V> {
                 final Node curr = window.curr;
                 if (curr.key!= null && Facade_Slice.Compare(key, Kcm, curr.key) == 0) { 
                     Facade_Slice.WriteFull(Vsr, value, curr.value, idx);
+                    return true;
                 } else {
                     
                 	Node newNode = new Node(new Facade_slice(), new Facade_slice());

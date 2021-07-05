@@ -127,6 +127,7 @@ public class LL_Nova_primitive_noFences<K,V> {
                 final Node curr = window.curr;
                 if (curr.key!= Illegal_nu && Facade_Nova_FenceFree.Compare(key, Kcm, curr.key) == 0) { 
                     Facade_Nova_FenceFree.WriteFull(Vsr, value, curr.value, idx);
+                    return true;
                 } else {
                     Node newNode = new Node(Illegal_nu,Illegal_nu);
 

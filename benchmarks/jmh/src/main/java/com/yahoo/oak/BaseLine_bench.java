@@ -36,7 +36,7 @@ public class BaseLine_bench {
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager novaManager = new NovaManager(allocator);
-    	    HE = new HazardEras( 32, allocator);
+    	    HE = new HazardEras(allocator);
     	    nu = new Facade<>(novaManager);
     	    Slice = new NovaSlice(-1,-1,-1);
 

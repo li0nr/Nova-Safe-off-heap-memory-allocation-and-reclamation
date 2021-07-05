@@ -79,7 +79,7 @@ public class HarrisLinkedListHE<E> {
     
     
     public HarrisLinkedListHE(NativeMemoryAllocator allocator,NovaC<E> cmp,	NovaS<E> srz) {
-    	HE = new HazardEras(MAXTHREADS, allocator);
+    	HE = new HazardEras(allocator);
     	this.allocator = allocator;
 		Cmp = cmp; Srz = srz;
     	

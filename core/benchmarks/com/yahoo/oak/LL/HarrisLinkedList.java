@@ -64,6 +64,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	            final Node<E,V> curr = window.curr;
 	            if (curr.key != null && curr.key.compareTo(key) == 0) { 
 	                curr.value = VCC.Copy(value);
+	                return true;
 	            } else {
 	    	    	E myKey = KCC.Copy(key);
 	    	    	V myval= VCC.Copy(value);

@@ -45,7 +45,7 @@ public class HazardEras{
 		 }
 	}
 		 
-	public HazardEras(int maxThreads, NativeMemoryAllocator alloc) {
+	public HazardEras(NativeMemoryAllocator alloc) {
 		allocator = alloc;
 		eraClock 		= new AtomicLong(NONE);
 		he 				= new AtomicLongArray(_Global_Defs.MAX_THREADS*2*_Global_Defs.CACHE_PADDING);

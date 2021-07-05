@@ -76,7 +76,7 @@ public class LL_EBR_noCAS <K,V>{
 	            final Node curr = window.curr;
 	            if (curr.key != null && Facade_EBR.Compare(key, Kcm, curr.key, tidx) == 0) {
 	            	Facade_EBR.Write(Vsr, value, curr.value, tidx);
-	                return false;
+	                return true;
 	            } else {
 	            	EBRslice oKey  = Facade_EBR.allocate(Ksr.calculateSize(key));
 	        		Ksr.serialize(key, oKey.address+oKey.offset);

@@ -18,6 +18,8 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.Random;
 
+import org.junit.runners.parameterized.ParametersRunnerFactory;
+
 /**
  * Synchrobench-java, a benchmark to evaluate the implementations of
  * high level abstractions including Map and Set.
@@ -170,12 +172,19 @@ public class Test {
     @SuppressWarnings("unchecked")
     public void instanciateAbstraction(String benchName) {
         try {
-            Class<CompositionalBST<Buff, Buff>> benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
-                    .forName(benchName);
-            Constructor<CompositionalBST<Buff, Buff>> c = benchClass
-                    .getDeclaredConstructor();
-            methods = benchClass.getDeclaredMethods();
-
+        	Class benchClass; Constructor c;
+        	if(!benchName.contains("SA")) {
+                benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
+                        .forName(benchName);
+                c = benchClass.getDeclaredConstructor();
+        	}
+        	else {
+                benchClass = (Class<CompositionalSA<Buff>>) Class
+                        .forName(benchName);
+                Class[] cArg = new Class[1];
+                cArg[0] = Integer.TYPE;
+                c = benchClass.getDeclaredConstructor(cArg);
+        	}
             if (CompositionalBST.class.isAssignableFrom(benchClass)) {
                 BST = (CompositionalBST<Buff, Buff>) c.newInstance();
                 benchType = Type.BST;
@@ -183,7 +192,7 @@ public class Test {
             	LL = (CompositionalLL<Buff,Buff>) c.newInstance();
     			benchType = Type.LL;
             } else if (CompositionalSA.class.isAssignableFrom((Class<?>) benchClass)) {
-            	SA = (CompositionalSA<Buff>) c.newInstance();
+            	SA = (CompositionalSA<Buff>) c.newInstance(Parameters.confSize);
     			benchType = Type.SA;
             }
 
@@ -339,8 +348,9 @@ public class Test {
                 break;
             case LL:
             	LL.clear();
+            	break;
             case SA:
-            	SA.clear();
+            	SA.clear(Parameters.confSize);
         }
     }
 

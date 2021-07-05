@@ -18,7 +18,7 @@ public class SA_HE_CAS_opt {
 
 	private static final int DEFAULT_CAPACITY=10;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    final HazardEras _HE= new HazardEras(32, allocator);
+    final HazardEras _HE= new HazardEras(allocator);
 	
     static final long slices_base_offset;
     static final long slices_scale;

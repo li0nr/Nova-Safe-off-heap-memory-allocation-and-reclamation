@@ -130,7 +130,7 @@ public class BST_HE<K , V> {
         // All real keys inside BST are required to be non-null
  	   SrzK = sK; SrzV = sV;
  	   KCt = cmpK; VCt = cmpV;
- 	   HE = new HazardEras(32, alloc);
+ 	   HE = new HazardEras(alloc);
         root = new Node<HEslice, HEslice>(null, new Node<HEslice, HEslice>(null, null), new Node<HEslice, HEslice>(null, null));
     }
 

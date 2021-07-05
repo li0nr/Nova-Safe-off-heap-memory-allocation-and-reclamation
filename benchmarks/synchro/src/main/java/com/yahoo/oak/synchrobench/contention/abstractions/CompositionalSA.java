@@ -12,7 +12,7 @@ public interface CompositionalSA<V> {
         
     public long allocated();
     
-    public void clear ();
+    public void clear (int size);
     
     public void print();
     

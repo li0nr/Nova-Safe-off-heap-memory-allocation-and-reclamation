@@ -112,6 +112,7 @@ public class LL_HE_noCAS<K,V> {
             final Node curr = window.curr;
             if (curr.key!= null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0) { 
                 Facade_HE.Write(Vsr, value, curr.value, tidx);
+                return true;
             } else {
             	HEslice oKey  = Facade_HE.allocate( Ksr.calculateSize(key));
         		Ksr.serialize(key, oKey.address+oKey.offset);

@@ -75,6 +75,7 @@ public class LL_EBR_noCAS_opt <K,V>{
 	            final Node curr = window.curr;
 	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
 	                Vsr.serialize(value, curr.value.address+curr.value.offset);
+	                return true;
 	            } else {
 	            	EBRslice oKey  = mng.allocate( Ksr.calculateSize(key));
 	        		Ksr.serialize(key, oKey.address+oKey.offset);

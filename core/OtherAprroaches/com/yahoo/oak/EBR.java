@@ -8,14 +8,14 @@ import sun.misc.Unsafe;
 import sun.misc.Contended;
 
 
-public class EBR <T extends EBR_interface>{
+public class EBR {
 	
-	private static final long NONE = 0;
+	private static final long NONE = Long.MAX_VALUE;
 
     private final AtomicLong eraClock;
     private final int	[] releasecounter;
     private final AtomicLongArray reservations;
-	private final ArrayList<T>[] retiredList;
+	private final ArrayList[] retiredList;
     private final NativeMemoryAllocator allocator;
     	
     
@@ -40,7 +40,7 @@ public class EBR <T extends EBR_interface>{
 	public EBR(NativeMemoryAllocator alloc) {
 		//EBR_MAX_THREADS = maxThreads;
 		allocator = alloc;
-		eraClock = new AtomicLong(1);
+		eraClock = new AtomicLong(0);
 		reservations 	= new AtomicLongArray(_Global_Defs.MAX_THREADS*_Global_Defs.CACHE_PADDING*2);
 		releasecounter 	= new int[_Global_Defs.MAX_THREADS*_Global_Defs.CACHE_PADDING*2];
 		retiredList		= new ArrayList[_Global_Defs.MAX_THREADS*_Global_Defs.CACHE_PADDING*2];
@@ -48,7 +48,7 @@ public class EBR <T extends EBR_interface>{
     	for(int it=0; it< _Global_Defs.MAX_THREADS; it++) {
     			reservations.set(it*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING,NONE);
     	    	retiredList[it*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING]
-    	    			= new ArrayList<T>();
+    	    			= new ArrayList();
     	}
 	}
 	
@@ -94,7 +94,7 @@ public class EBR <T extends EBR_interface>{
   	  allocator.free(s);
     }
     
-	public void retire(T obj, int tid){
+	public <T extends EBR_interface> void retire(T obj, int tid){
 		if(obj== null) return;
 		long currEra = eraClock.get();        
 		obj.setEpoch(currEra);
@@ -108,7 +108,7 @@ public class EBR <T extends EBR_interface>{
         }
 	}
 	
-	void empty(int tid){
+	<T extends EBR_interface> void empty(int tid){
 		
 		long minEpoch = Long.MAX_VALUE;
 		for (int i = 0; i<_Global_Defs.MAX_THREADS; i++){
@@ -133,7 +133,7 @@ public class EBR <T extends EBR_interface>{
           	}
 		}
 	
-	public void ForceCleanUp() {
+	public <T extends EBR_interface> void ForceCleanUp() {
 		for(int i =0 ; i < _Global_Defs.MAX_THREADS; i++) {
 	        ArrayList<T> rlist = retiredList[i*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING];
 	        EBRslice toDeleteObj;
