@@ -136,10 +136,15 @@ declare -A scenarios=(
 
 # Oak vs JavaSkipList
 benchClassPrefix="com.yahoo.oak"
-benchs="LL_EBR_CAS_bench  LL_EBR_noCAS_bench LL_EBR_CAS_opt_bench LL_EBR_noCAS_opt_bench 
-LL_HE_CAS_bench LL_HE_noCAS_bench LL_HE_CAS_opt_bench LL_HE_noCAS_opt_bench 
-LL_Nova_CAS_bench LL_Nova_noCAS_bench LL_Nova_primitive_CAS_bench LL_Nova_primitive_noCAS_bench 
-LL_NoMM_Synch LL_Synch"
+#benchs="LL_EBR_CAS_bench  LL_EBR_noCAS_bench LL_EBR_CAS_opt_bench LL_EBR_noCAS_opt_bench 
+#LL_HE_CAS_bench LL_HE_noCAS_bench LL_HE_CAS_opt_bench LL_HE_noCAS_opt_bench 
+#LL_Nova_CAS_bench LL_Nova_noCAS_bench LL_Nova_primitive_CAS_bench LL_Nova_primitive_noCAS_bench 
+#LL_NoMM_Synch LL_Synch"
+
+benchs="LL_EBR_noCAS_bench LL_EBR_noCAS_opt_bench 
+		LL_HE_noCAS_bench  LL_HE_noCAS_opt_bench 
+		LL_Nova_CAS_bench  LL_Nova_primitive_CAS_bench 
+		LL_NoMM_Synch LL_Synch"
 
 summary="${output}/summary.csv"
 

@@ -37,7 +37,7 @@ public class SA_GC {
 	}
 	
 	public SA_GC(int capacity,CopyConstructor CC ){
-		Slices = new Buff[DEFAULT_CAPACITY];
+		Slices = new Buff[capacity];
 		this.CC = CC;
 	}
 
