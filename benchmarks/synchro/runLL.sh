@@ -12,7 +12,7 @@ valuesize="4"
 writes="0"
 warmup="30"
 iterations="3"
-duration="30000"
+duration="15000"
 #gcAlgorithms="-XX:+UseParallelOldGC -XX:+UseConcMarkSweepGC -XX:+UseG1GC"
 
 declare -A heap_limit=(

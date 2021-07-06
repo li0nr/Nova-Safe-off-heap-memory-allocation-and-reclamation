@@ -133,9 +133,9 @@ public class Test {
             v = (Parameters.confKeyDistribution == Parameters.KeyDist.INCREASING)
                     ? v + 1 : localRand.nextInt(range);
             Buff key = new Buff(Parameters.confKeySize);
-            key.buffer.putInt(0, v);
+            key.set(v);
             Buff val = new Buff(Parameters.confValSize);
-            val.buffer.putInt(0, v);
+            val.set(v);
             
 			switch(benchType) {
 			case BST:

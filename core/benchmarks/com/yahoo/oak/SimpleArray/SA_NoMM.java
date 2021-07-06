@@ -3,6 +3,7 @@ package com.yahoo.oak.SimpleArray;
 
 import java.util.Arrays;
 import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
 
@@ -57,8 +58,9 @@ public class SA_NoMM {
 		return true;
 	}
 	
-	public NovaSliceD get(int index, int threadIDX) {
-		return Slices[index];
+	public <R> R get(int index, NovaR Reader , int threadIDX) {
+		R obj = (R) Reader.apply(Slices[index].address+Slices[index].offset);
+		return obj;
 	}
 	
 

@@ -7,11 +7,9 @@
 package com.yahoo.oak.synchrobench.contention.benchmark;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -142,7 +140,7 @@ public class ThreadLoopLL implements Runnable {
             }
             else if (coin < cdf[2]) { // -s reading is the best ever
             	numContains++;
-            	if(bench.containsKey(key, myThreadNum) != Integer.MIN_VALUE) {
+            	if(bench.containsKey(key, myThreadNum) != null) {
             		numSucContains++;
             	}
             	else {
