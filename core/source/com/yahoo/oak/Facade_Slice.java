@@ -93,10 +93,10 @@ public class Facade_Slice {
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
 		
 		
-		OffHeapMetaData = S.length <<24 | S.version; // created off heap style meta 
+		OffHeapMetaData = (long)S.length <<24 | S.version; // created off heap style meta 
 
 		long SliceHeaderAddress= S.address + S.offset;
-
+				
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
 			 flag = false;
