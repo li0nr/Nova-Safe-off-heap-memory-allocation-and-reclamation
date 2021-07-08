@@ -125,24 +125,21 @@ public class Facade_Nova {
 		long facadeRef	= buildRef		(block,offset);
 		
 		if(bench_Flags.TAP) {
-			novaManager.setTap(block,facadeRef,idx);	
+			novaManager.setTap(facadeRef,idx);	
 			if(bench_Flags.Fences)UNSAFE.fullFence();
 		}
 		
 		long address = novaManager.getAdress(block);
 
-
-		
 		int version = ExtractVer_Del(facade_meta);
-		int t = (int)(UNSAFE.getLong(address+offset));
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) {
-			novaManager.UnsetTap(block,idx);
+			novaManager.UnsetTap(idx);
 			throw new NovaIllegalAccess();
 			}
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
-            novaManager.UnsetTap(block,idx);
+            novaManager.UnsetTap(idx);
             }
 		 return facade_meta;
 	}

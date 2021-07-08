@@ -128,7 +128,7 @@ public class Facade <T> {
 		long facadeRef	= buildRef		(block,offset);
 		
 		if(bench_Flags.TAP) {
-			novaManager.setTap(block,facadeRef,idx);	
+			novaManager.setTap(facadeRef,idx);	
 			if(bench_Flags.Fences)UNSAFE.fullFence();
 		}
 		
@@ -137,14 +137,14 @@ public class Facade <T> {
 		
 		int version = ExtractVer_Del(facademeta);
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) {
-			novaManager.UnsetTap(block,idx);
+			novaManager.UnsetTap(idx);
 			throw new IllegalArgumentException("slice was deleted");
 			}
 //		T ResultToReturn= caluclate(sliceLocated.s,f);
 		 UNSAFE.putLong(address+NovaManager.HEADER_SIZE+offset, toWrite);	
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
-            novaManager.UnsetTap(block,idx);
+            novaManager.UnsetTap(idx);
             }
 		 return this;
 	}
@@ -161,7 +161,7 @@ public class Facade <T> {
 		long facadeRef	= buildRef		(block,offset);
 		
 		if(bench_Flags.TAP) {
-			novaManager.setTap(block,facadeRef,idx);	
+			novaManager.setTap(facadeRef,idx);	
 			if(bench_Flags.Fences)UNSAFE.fullFence();
 		}
 		
@@ -171,13 +171,13 @@ public class Facade <T> {
 		
 		int version = ExtractVer_Del(facademeta);
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) {
-			novaManager.UnsetTap(block,idx);
+			novaManager.UnsetTap(idx);
 			throw new IllegalArgumentException("slice was deleted");
 			}
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
-            novaManager.UnsetTap(block,idx);
+            novaManager.UnsetTap(idx);
             }
 		 return this;
 	}

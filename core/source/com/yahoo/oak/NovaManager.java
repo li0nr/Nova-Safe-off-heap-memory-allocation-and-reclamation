@@ -98,7 +98,7 @@ public class NovaManager implements MemoryManager {
         	NovaSlice toDeleteObj;
             for (int iret = 0; iret < myReleaseList.size();) {
             	toDeleteObj = myReleaseList.get(iret);
-                if (! HostageSlices.contains(toDeleteObj)) {
+                if (! HostageSlices.contains(toDeleteObj.getRef())) {
                 	myReleaseList.remove(toDeleteObj);
                 	allocator.free(toDeleteObj);
                 	continue;
@@ -114,13 +114,13 @@ public class NovaManager implements MemoryManager {
     }
 
 
-  public  void setTap(int block,long ref,int idx) {
+  public  void setTap(long ref,int idx) {
 	int i= idx%_Global_Defs.MAX_THREADS;
 	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+IDENTRY, idx);
 	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+REFENTRY, ref);
   }
     
-  public  void UnsetTap(int block,int idx) {
+  public  void UnsetTap(int idx) {
 	int i= idx%_Global_Defs.MAX_THREADS;
 	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+IDENTRY, -1);
   }

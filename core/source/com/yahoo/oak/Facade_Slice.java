@@ -150,17 +150,17 @@ public class Facade_Slice {
 		long facadeRef	= buildRef		(S.blockID,S.offset);
 		
 		if(bench_Flags.TAP) {
-			novaManager.setTap(S.blockID,facadeRef,idx);	
+			novaManager.setTap(facadeRef,idx);	
 			if(bench_Flags.Fences)UNSAFE.fullFence();
 		}
 		if(! (S.version == (int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF))) {
-			novaManager.UnsetTap(S.blockID,idx);
+			novaManager.UnsetTap(idx);
 			throw new NovaIllegalAccess();
 			}
 		lambda.serialize(obj,S.address+ S.offset +NovaManager.HEADER_SIZE);
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
-            novaManager.UnsetTap(S.blockID,idx);
+            novaManager.UnsetTap(idx);
             }
 		 return S;
 	}
