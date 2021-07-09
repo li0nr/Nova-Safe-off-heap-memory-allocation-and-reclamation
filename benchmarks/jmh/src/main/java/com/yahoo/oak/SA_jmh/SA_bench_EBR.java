@@ -81,13 +81,13 @@ public class SA_bench_EBR {
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    SA = new SA_HE_CAS_opt( Buff.DEFAULT_SERIALIZER);
+    	    SA = new SA_HE_CAS_opt(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
     	    
-        	for (int i=0; i <0.5 *size ; i++) {
+        	for (int i=0; i <size ; i++) {
         		int keyval = rand.nextInt(size);
         		Buff k = new Buff(1024);
         		k.set(keyval);
-        		if(SA.fill(k, 0) == true) {
+        		if(SA.fill(k, 0) != true) {
         			i--;
         		}
         	}
