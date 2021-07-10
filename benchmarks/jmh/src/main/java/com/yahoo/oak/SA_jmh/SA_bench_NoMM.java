@@ -34,6 +34,7 @@ import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
 import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
+import com.yahoo.oak.SimpleArray.SA_NoMM;
 
 
 
@@ -46,7 +47,7 @@ public class SA_bench_NoMM {
 
     	public static  int size  = SAParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private SA_HE_CAS_opt SA;
+        private SA_NoMM SA;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -81,7 +82,7 @@ public class SA_bench_NoMM {
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    SA = new SA_HE_CAS_opt(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
+    	    SA = new SA_NoMM(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
     	    
         	for (int i=0; i <size ; i++) {
         		int keyval = rand.nextInt(size);
