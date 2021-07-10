@@ -99,7 +99,7 @@ public class SA_NoMM {
 
 	public boolean delete(int index, int threadIDX) {
 		NovaSlice toDel = Slices[index];
-		if(toDel != null)
+		if(toDel == null)
 			return false;
 		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null)) {
 			allocator.free(toDel);
