@@ -84,9 +84,8 @@ public class Facade_Nova_FenceFree {
 	
 	static public <T>long WriteFull(NovaS<T> lambda, T obj, long facade_meta ,int idx) {//for now write doesnt take lambda for writing 
 
-		if(facade_meta%2==DELETED) {
-			throw new NovaIllegalAccess();
-		}
+		if(facade_meta%2==DELETED)
+			return -1;
 		
 		int block		= Extractblock	(facade_meta);
 		int offset 		= ExtractOffset	(facade_meta);
@@ -98,7 +97,7 @@ public class Facade_Nova_FenceFree {
 			UnsafeUtils.unsafe.fullFence();
 		
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF)))
-			throw new NovaIllegalAccess();
+			return -1;
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
 		 return facade_meta;
 	}
@@ -108,7 +107,7 @@ public class Facade_Nova_FenceFree {
 	static public <T> T Read(NovaR lambda, long metadata) {
 	
 		if(metadata%2!=0)
-			throw new NovaIllegalAccess();
+			return null;
 		
 		int version	= ExtractVer_Del(metadata);
 		int block 	= Extractblock	(metadata);
@@ -122,7 +121,7 @@ public class Facade_Nova_FenceFree {
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
-			throw new NovaIllegalAccess();
+			return null;
 		return obj;
 	}
 

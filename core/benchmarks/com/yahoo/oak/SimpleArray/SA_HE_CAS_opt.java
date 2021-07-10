@@ -59,41 +59,33 @@ public class SA_HE_CAS_opt {
 	}
 	
 	public <R> R get(int index, NovaR Reader, int threadIDX) {
-		try {
-			HEslice access = _HE.get_protected(Slices[index],threadIDX);
-			if(access == null) {
-				_HE.clear(threadIDX);
-				return null;
-			}
-			R obj = (R) Reader.apply(access.address+access.offset);
+		HEslice access = _HE.get_protected(Slices[index],threadIDX);
+		if(access == null) {
 			_HE.clear(threadIDX);
-			return obj;
-		}catch(NovaIllegalAccess e) {
 			return null;
 		}
+		R obj = (R) Reader.apply(access.address+access.offset);
+		_HE.clear(threadIDX);
+		return obj;
 	}
 	
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
-			if(Slices[index]== null) {
-				HEslice toEnter = _HE.allocate(srZ.calculateSize(obj));
-				if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
-					_HE.fastFree(toEnter);
-					return false;
-				}
-			}
-			try {
-				HEslice access = _HE.get_protected(Slices[index],threadIDX);
-				if(access == null) {
-					_HE.clear(threadIDX);
-					return false;
-				}
-				srZ.serialize(obj, access.address+access.offset);
-				_HE.clear(threadIDX);
-				return true;
-			}catch(NovaIllegalAccess e) {
+		if(Slices[index]== null) {
+			HEslice toEnter = _HE.allocate(srZ.calculateSize(obj));
+			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
+				_HE.fastFree(toEnter);
 				return false;
+				}
 			}
+		HEslice access = _HE.get_protected(Slices[index],threadIDX);
+		if(access == null) {
+			_HE.clear(threadIDX);
+			return false;
+			}
+		srZ.serialize(obj, access.address+access.offset);
+		_HE.clear(threadIDX);
+		return true;
 	}
 	
 	public boolean delete(int index, int threadIDX) {

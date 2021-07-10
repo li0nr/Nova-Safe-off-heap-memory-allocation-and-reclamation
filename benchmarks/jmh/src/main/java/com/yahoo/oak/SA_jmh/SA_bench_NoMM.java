@@ -37,7 +37,7 @@ import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
 
 
 
-public class SA_bench_EBR {
+public class SA_bench_NoMM {
 	
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
@@ -46,7 +46,7 @@ public class SA_bench_EBR {
 
     	public static  int size  = SAParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private SA_EBR_CAS_opt SA;
+        private SA_HE_CAS_opt SA;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -81,7 +81,7 @@ public class SA_bench_EBR {
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    SA = new SA_EBR_CAS_opt(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
+    	    SA = new SA_HE_CAS_opt(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
     	    
         	for (int i=0; i <size ; i++) {
         		int keyval = rand.nextInt(size);
@@ -334,7 +334,7 @@ public class SA_bench_EBR {
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(SA_bench_EBR.class.getSimpleName())
+	    			.include(SA_bench_NoMM.class.getSimpleName())
 	                .forks(SAParam.forks)
 	                .threads(1)
 	                .build();

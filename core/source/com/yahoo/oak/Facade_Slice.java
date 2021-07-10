@@ -87,12 +87,9 @@ public class Facade_Slice {
 	static public boolean DeleteCAS(int idx, Facade_slice S) {
 		boolean flag = true;
 		if(S.version%2 == DELETED)
-			throw new NovaIllegalAccess();
-		
+			return false;
 		
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
-		
-		
 		OffHeapMetaData = (long)S.length <<24 | S.version; // created off heap style meta 
 
 		long SliceHeaderAddress= S.address + S.offset;
@@ -111,12 +108,9 @@ public class Facade_Slice {
 	static public boolean Delete(int idx, Facade_slice S) {
 		
 		if(S.version%2 == DELETED)
-			throw new NovaIllegalAccess();
+			return false;		
 		
-		
-		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
-		
-		
+		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta		
 		OffHeapMetaData = S.length <<24 | S.version; // created off heap style meta 
 
 		long SliceHeaderAddress= S.address + S.offset;
@@ -133,8 +127,7 @@ public class Facade_Slice {
 	static public <K> boolean DeletePrivate(int idx, Facade_slice S) {
 		
 		if(S.version%2 == DELETED)
-			throw new NovaIllegalAccess();
-		
+			return false;
 	
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
 		 
@@ -145,17 +138,17 @@ public class Facade_Slice {
 	static public <T> Facade_slice WriteFull (NovaS<T> lambda, T obj, Facade_slice S ,int idx) {//for now write doesnt take lambda for writing 
 
 		if(S.version%2 == DELETED)
-			throw new NovaIllegalAccess();
+			return null;
 		
 		long facadeRef	= buildRef		(S.blockID,S.offset);
 		
 		if(bench_Flags.TAP) {
 			novaManager.setTap(facadeRef,idx);	
 			if(bench_Flags.Fences)UNSAFE.fullFence();
-		}
+			}
 		if(! (S.version == (int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF))) {
 			novaManager.UnsetTap(idx);
-			throw new NovaIllegalAccess();
+			return null;
 			}
 		lambda.serialize(obj,S.address+ S.offset +NovaManager.HEADER_SIZE);
 		 if(bench_Flags.TAP) {
@@ -166,11 +159,9 @@ public class Facade_Slice {
 	}
 	
 	
-	static public <T> Facade_slice WriteFast(NovaS<T> lambda, T obj, Facade_slice S, int idx) {//for now write doesnt take lambda for writing 
-	
+	static public <T> Facade_slice WriteFast(NovaS<T> lambda, T obj, Facade_slice S, int idx) {
 		if(S.version %2 == DELETED)
-			throw new NovaIllegalAccess();
-
+			return null;
 		lambda.serialize(obj,S.address+ S.offset +NovaManager.HEADER_SIZE);
 		 return S;
 	}
@@ -178,16 +169,12 @@ public class Facade_Slice {
 	
 
 	static public <T> T Read(NovaR<T> lambda, Facade_slice S) {
-	
 		if(S.version%2 == DELETED)
-			throw new NovaIllegalAccess();
-
+			return null;
 		T obj = lambda.apply(S.address + S.offset+NovaManager.HEADER_SIZE);
-		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
-		
 		if(! (S.version == (int)(UNSAFE.getLong(S.address + S.offset)&0xFFFFFF))) 
-			throw new NovaIllegalAccess();
+			return null;
 		return obj;
 	}
 

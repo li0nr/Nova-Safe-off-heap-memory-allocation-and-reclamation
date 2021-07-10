@@ -46,41 +46,23 @@ public class SA_Nova_CAS {
 		Facade_Slice.WriteFast(srZ,e,Slices[size],threadIDX);
 		size++;
 		return true;
-	}
+		}
 	
 	public <R> R get(int index, NovaR Reader, int threadIDX) {
-		try {
-			return (R)Facade_Slice.Read(Reader,Slices[index]);
-		}catch(NovaIllegalAccess e) {
-			return null;
+		return (R)Facade_Slice.Read(Reader,Slices[index]);
 		}
-	}
 	
 	public <T> boolean set(int index, T obj, int threadIDX)  {
 		Facade_slice toSet = Slices[index];
 		if(toSet.isDeleted())
 				if(!Facade_Slice.AllocateSliceCAS(toSet,srZ.calculateSize(obj),threadIDX))
 					return false;
-		try{
-			Facade_Slice.WriteFull(srZ, obj, toSet, threadIDX);
-			return true;
-		}catch(NovaIllegalAccess e) {
-			return false;
+		return Facade_Slice.WriteFull(srZ, obj, toSet, threadIDX) != null ? true : false;
 		}
-	}
 	
 	public boolean delete(int index, int threadIDX) {
-		try {
-			if(Slices[index].isDeleted())
-				return false;
-			if(Facade_Slice.DeleteCAS(threadIDX, Slices[index])){
-				return true;
-			}
-			return false;
-		}catch (NovaIllegalAccess e) {
-			return false;
+		return Facade_Slice.DeleteCAS(threadIDX, Slices[index]);
 		}
-	}
 
 	public int getSize(){
 		return size;

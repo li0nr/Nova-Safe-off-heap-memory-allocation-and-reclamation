@@ -92,7 +92,7 @@ public class HazardEras{
 		    				//and read-modify-write performs both an acquire operation and a release operation,
 		    				//plus a single total order exists in which all threads observe all modifications in the same order
     		 if(obj != null && obj.deadEra != -1)
-    				throw new NovaIllegalAccess();
+    			 return null;
 
     		 UnsafeUtils.unsafe.loadFence();
     		 long era = eraClock.get();

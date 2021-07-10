@@ -55,10 +55,7 @@ public class Facade_Nova {
 		int offset	= ExtractOffset(metadata);
 		
 		long address = novaManager.getAdress(block);
-
-		
 		long OffHeapMetaData= UNSAFE.getLong(address+offset);//reads off heap meta
-		
 		
 		long len=OffHeapMetaData>>>24; //get the lenght 
 		long version = ExtractVer_Del(metadata); //get the version in the facade including delete
@@ -118,7 +115,7 @@ public class Facade_Nova {
 	static public <T> long WriteFull (NovaS<T> lambda, T obj, long facade_meta ,int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2==DELETED) 
-			throw new NovaIllegalAccess();
+			return -1;
 		
 		int block		= Extractblock	(facade_meta);
 		int offset 		= ExtractOffset	(facade_meta);
@@ -134,13 +131,13 @@ public class Facade_Nova {
 		int version = ExtractVer_Del(facade_meta);
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) {
 			novaManager.UnsetTap(idx);
-			throw new NovaIllegalAccess();
+			return -1;
 			}
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
 		 if(bench_Flags.TAP) {
-             if(bench_Flags.Fences)UNSAFE.storeFence();
-            novaManager.UnsetTap(idx);
-            }
+			 if(bench_Flags.Fences)UNSAFE.storeFence();
+			 novaManager.UnsetTap(idx);
+			 }
 		 return facade_meta;
 	}
 	
@@ -148,8 +145,7 @@ public class Facade_Nova {
 	static public <T> T Read(NovaR<T> lambda, long metadata) {
 	
 		if(metadata%2!=0)
-			throw new NovaIllegalAccess();
-		
+			return null;
 		int version	= ExtractVer_Del(metadata);
 		int block 	= Extractblock	(metadata);
 		int offset 	= ExtractOffset	(metadata);
@@ -162,7 +158,7 @@ public class Facade_Nova {
 		if(bench_Flags.Fences)UNSAFE.loadFence();
 		
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
-			throw new NovaIllegalAccess();
+			return null;
 		return obj;
 	}
 
@@ -170,8 +166,7 @@ public class Facade_Nova {
 	static public <T>long WriteFast(NovaS<T> lambda, T obj, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
 
 		if(facade_meta%2!=0)
-			throw new NovaIllegalAccess();
-		
+			return -1;
 		int block 	= Extractblock	(facade_meta);
 		int offset 	= ExtractOffset	(facade_meta);
 		long address = novaManager.getAdress(block);

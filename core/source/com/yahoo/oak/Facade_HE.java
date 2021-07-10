@@ -28,7 +28,7 @@ public class Facade_HE {
 			
 		HEslice toRead = _HazardEras.get_protected(slice, tidx);
 		if(toRead.getdelEra() != -1)
-			throw new NovaIllegalAccess();
+			return null;
 
 		T obj = (T)Reader.apply(toRead.address+toRead.offset);
 		
@@ -41,8 +41,7 @@ public class Facade_HE {
 		
 		HEslice toRead = _HazardEras.get_protected(slice, tidx);
 		if(toRead.getdelEra() != -1)
-			throw new NovaIllegalAccess();
-		
+			return null;		
 		
 		lambda.serialize(obj,slice.address+slice.offset);
 		_HazardEras.clear(tidx);

@@ -72,33 +72,20 @@ public class SA_Nova_FenceFree {
 
 
 	public <R> R get(int index, NovaR Reader, int threadIDX) {
-		try {
-			return  Facade_Nova_FenceFree.Read(Reader, refrences[index]);
-		}catch(NovaIllegalAccess e) {
-			return null;
-		}	
-	}
+		return  Facade_Nova_FenceFree.Read(Reader, refrences[index]);
+		}
 	
 	public <T> boolean set(int index, T obj, int threadIDX)  {
-		try {
-			if(refrences[index] %2 == 1)
-				Facade_Nova_FenceFree.AllocateReusedSlice(refrences,ref_base_offset+index*ref_scale,
-						refrences[index],srZ.calculateSize(obj),threadIDX);
-			Facade_Nova_FenceFree.WriteFull(srZ, obj, refrences[index], threadIDX);
-			return true;
-		}catch(NovaIllegalAccess e) {
-			return false;
-		}
+		if(refrences[index] %2 == 1)
+			Facade_Nova_FenceFree.AllocateReusedSlice(refrences,ref_base_offset+index*ref_scale,
+					refrences[index],srZ.calculateSize(obj),threadIDX);
+		return Facade_Nova_FenceFree.WriteFull(srZ, obj, refrences[index], threadIDX) != -1 ? true : false;
 	}
 	
 
 	public boolean delete(int index, int threadIDX) {
-		if(refrences[index]%2 == 1)
-			return false;
-		if(Facade_Nova_FenceFree.DeleteReusedSlice(threadIDX, refrences[index], refrences,ref_base_offset+index*ref_scale)){
-			return true;
-		}
-		return false;
+		return Facade_Nova_FenceFree.DeleteReusedSlice(threadIDX, refrences[index],
+				refrences,ref_base_offset+index*ref_scale);
 	}
 
 	
