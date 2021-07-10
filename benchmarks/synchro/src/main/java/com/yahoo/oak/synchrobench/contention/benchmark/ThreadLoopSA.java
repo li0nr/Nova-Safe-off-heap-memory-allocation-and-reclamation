@@ -123,7 +123,6 @@ public class ThreadLoopSA implements Runnable {
             	}
             	else {
             		failures++;
-            		bench.remove(newInt, myThreadNum);
             	}
             }
             else if (coin < cdf[1]) { // -u writing is better than deleting?

@@ -6,6 +6,10 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
+import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak.EBR.EBRslice;
+
+import sun.misc.Unsafe;
 
 public class SA_NoMM {
 	
@@ -13,11 +17,20 @@ public class SA_NoMM {
 	private static final int DEFAULT_CAPACITY=10;
     final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     
-	
+    static final long slices_base_offset;
+    static final long slices_scale;
+    
+    static {
+		try {
+			final Unsafe UNSAFE=UnsafeUtils.unsafe;
+			slices_base_offset = UNSAFE.arrayBaseOffset(NovaSliceD[].class);
+			slices_scale = UNSAFE.arrayIndexScale(NovaSliceD[].class);
+			 } catch (Exception ex) { throw new Error(ex); }
+    }
 
     private final NovaS srZ;
 	private int size=0;
-	private NovaSliceD[] Slices;
+	private NovaSlice[] Slices;
 
 	
 	
@@ -27,7 +40,7 @@ public class SA_NoMM {
 		
 		public NovaSliceD() {
 			super(-1, -1, 0);
-			deleted = true;
+			deleted = false;
 		}
 		
 		public boolean isDeleted() {
@@ -59,27 +72,36 @@ public class SA_NoMM {
 	}
 	
 	public <R> R get(int index, NovaR Reader , int threadIDX) {
-		R obj = (R) Reader.apply(Slices[index].address+Slices[index].offset);
+		NovaSlice toRead = Slices[index];
+		if(toRead == null)
+			return null;
+		R obj = (R) Reader.apply(toRead.address+toRead.offset);
 		return obj;
 	}
 	
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
-		if(Slices[index].isDeleted())
-			allocator.allocate(Slices[index], srZ.calculateSize(obj));
-		srZ.serialize(obj, Slices[index].address + Slices[index].offset);
+		if(Slices[index] == null) {
+			NovaSlice toEnter = new NovaSlice(0, 0, 0);
+			allocator.allocate(toEnter, srZ.calculateSize(obj));
+			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
+				allocator.free(toEnter);
+				return false;
+			}
+		}
+		NovaSlice toEnte = Slices[index] ;
+		if(toEnte == null)			
+			return false;
+		srZ.serialize(obj, toEnte.address + toEnte.offset);
 		return true;
 	}
-
 	
 
 	public boolean delete(int index, int threadIDX) {
-		if(Slices[index].isDeleted())
+		NovaSlice toDel = Slices[index];
+		if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null))
 			return false;
-		else {
-			allocator.free(Slices[index]);
-
-		}
+		allocator.free(toDel);
 		return true;
 	}
 
