@@ -5,7 +5,6 @@ import java.util.Arrays;
 import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.Facade_Slice.Facade_slice;
 import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;

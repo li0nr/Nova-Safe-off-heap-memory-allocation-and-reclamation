@@ -26,7 +26,6 @@ public class NovaManager implements MemoryManager {
     private final AtomicInteger globalNovaNumber;
     private final BlockMemoryAllocator allocator;
     private final AtomicLongArray TAP;
-    private final long[] EpochFence;
     private final NovaSlice[] Slices;
 
     public NovaManager(BlockMemoryAllocator allocator) {
@@ -34,13 +33,11 @@ public class NovaManager implements MemoryManager {
         this.releaseLists = new ArrayList[_Global_Defs.MAX_THREADS*2*_Global_Defs.CACHE_PADDING];
         this.Slices = new NovaSlice[_Global_Defs.MAX_THREADS*2*_Global_Defs.CACHE_PADDING];
         this.TAP = new AtomicLongArray(_Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING * 2);
-        this.EpochFence = new long[_Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING * 2];
         this.allocator = allocator;
 
         for (int i = _Global_Defs.CACHE_PADDING; i < _Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING* 2; i+=_Global_Defs.CACHE_PADDING) {
             this.releaseLists[i]	= new ArrayList<>(_Global_Defs.RELEASE_LIST_LIMIT);
             this.Slices		 [i]	= new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE);
-            this.EpochFence	 [i] = 1;
             this.TAP.set(i+IDENTRY, -1); 
             }     
         globalNovaNumber = new AtomicInteger(1);

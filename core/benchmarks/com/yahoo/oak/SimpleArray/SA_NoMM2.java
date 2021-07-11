@@ -66,7 +66,7 @@ public class SA_NoMM2 {
 	public <T> boolean set(int index, T obj, int threadIDX)  {
 		if(Slices[index] == null) {
 			NovaSlice toEnter = new NovaSlice(0, 0, 0);
-			allocator.allocate(Slices[size], srZ.calculateSize(obj));
+			allocator.allocate(toEnter, srZ.calculateSize(obj));
 			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale, null, toEnter)) {
 				allocator.free(toEnter);
 				return false;
