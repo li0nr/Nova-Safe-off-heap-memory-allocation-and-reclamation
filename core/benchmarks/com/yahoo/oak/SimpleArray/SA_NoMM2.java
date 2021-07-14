@@ -9,12 +9,13 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
 import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak._Global_Defs;
 
 public class SA_NoMM2 {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(_Global_Defs.MAXSIZE);
 	
     static final long slices_base_offset;
     static final long slices_scale;

@@ -14,12 +14,13 @@ import com.yahoo.oak.NovaManagerNoTap;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak._Global_Defs;
 
 public class SA_Nova_FenceFree {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(_Global_Defs.MAXSIZE);
     final NovaManagerNoTap mng = new NovaManagerNoTap(allocator);
     
     

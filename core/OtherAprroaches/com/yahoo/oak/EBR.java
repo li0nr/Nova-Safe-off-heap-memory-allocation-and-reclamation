@@ -126,7 +126,7 @@ public class EBR {
           	toDeleteObj = rlist.get(iret);
           	if (toDeleteObj.getEpoch() < minEpoch) {
               	rlist.remove(toDeleteObj);
-              	allocator.free((NovaSlice)toDeleteObj);
+              	allocator.free(new NovaSlice((NovaSlice)toDeleteObj));
               	continue;
               	}
           	iret++;

@@ -11,12 +11,13 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak._Global_Defs;
 
 public class SA_EBR_CAS_opt {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(_Global_Defs.MAXSIZE);
     final EBR _EBR = new EBR(allocator);
 	
     static final long slices_base_offset;

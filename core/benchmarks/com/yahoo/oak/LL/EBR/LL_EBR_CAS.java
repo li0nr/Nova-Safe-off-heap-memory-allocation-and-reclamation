@@ -20,7 +20,6 @@ public class LL_EBR_CAS <K,V>{
 	    final NovaS<K> Ksr;
 	    final NovaC<V> Vcm;
 	    final NovaS<V> Vsr;
-	    final static int MAXTHREADS = 32;
 	    
 	    static class Node {
 	        final EBRslice key;

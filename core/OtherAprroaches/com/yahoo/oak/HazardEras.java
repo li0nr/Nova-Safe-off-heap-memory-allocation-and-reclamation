@@ -123,7 +123,7 @@ public class HazardEras{
             	toDeleteObj = (HazardEras_interface)rlist.get(iret);
                 if (canDelete(toDeleteObj, mytid)) {
                 	rlist.remove(toDeleteObj);
-                	allocator.free((NovaSlice)toDeleteObj);
+                	allocator.free(new NovaSlice((NovaSlice)toDeleteObj));
                     continue;
                 }
                 iret++;

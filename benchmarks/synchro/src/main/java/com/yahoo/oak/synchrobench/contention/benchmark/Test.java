@@ -6,6 +6,7 @@
 
 package com.yahoo.oak.synchrobench.contention.benchmark;
 
+import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
@@ -308,7 +309,18 @@ public class Test {
         }
 
         try {
-            Thread.sleep(milliseconds);
+            if(Parameters.memory) {
+            	NativeMemoryAllocator.collectStats();
+            	int total_sleepy = 0;
+            	while(total_sleepy < milliseconds) {
+                	total_sleepy += 10000;
+                	Thread.sleep(10000);
+                	printHeapStats("after" +total_sleepy/1000+ "secs\n");
+                	NativeMemoryAllocator.PrintStats();
+            	}        	
+            }
+            else 
+                Thread.sleep(milliseconds);
         } finally {
         	switch (benchType) {
 			case BST:
@@ -497,6 +509,9 @@ public class Test {
                         break;
                     case "-itr":
                         Parameters.iterate = true;
+                        break;
+                    case "-m":
+                        Parameters.memory = true;
                         break;
                 }
             } catch (IndexOutOfBoundsException e) {

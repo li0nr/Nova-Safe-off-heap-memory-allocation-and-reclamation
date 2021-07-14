@@ -3,10 +3,11 @@ package com.yahoo.oak;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.NoMM.HarrisLinkedListNoMM;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
+import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class LL_NoMM_Synch implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
 	HarrisLinkedListNoMM<Buff,Buff> LL = new HarrisLinkedListNoMM<Buff,Buff>(allocator,
 			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
@@ -30,7 +31,7 @@ public class LL_NoMM_Synch implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
-    	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    	allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
     	LL = new HarrisLinkedListNoMM<Buff,Buff>(allocator,
     			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     }

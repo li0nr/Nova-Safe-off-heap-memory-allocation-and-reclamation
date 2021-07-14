@@ -32,11 +32,12 @@ public class Parameters {
     public static int Type = 0; //0 is BST , 1 is LL, 2 is SA
     
     public static boolean iterate = false;
-
+    public static boolean memory = false;
     public static boolean confDetailedStats = false;
     static boolean confChange = false;
     public static boolean confStreamIteration = false;
 
+    public static long MAXSIZE = ((long) Integer.MAX_VALUE) * 8;
 
     public static KeyDist confKeyDistribution = KeyDist.RANDOM;
 

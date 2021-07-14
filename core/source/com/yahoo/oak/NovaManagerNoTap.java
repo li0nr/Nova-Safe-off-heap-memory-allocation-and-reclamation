@@ -26,6 +26,7 @@ public class NovaManagerNoTap implements MemoryManager {
     private final AtomicLongArray EpochFence;
     private final NovaSlice[] Slices;
     private int LastTime = 0;
+    private int slicesAllocated = 0;
     public NovaManagerNoTap(BlockMemoryAllocator allocator) {
     	
         this.releaseLists = new ArrayList[_Global_Defs.MAX_THREADS*2*_Global_Defs.CACHE_PADDING];
@@ -67,6 +68,8 @@ public class NovaManagerNoTap implements MemoryManager {
     public void allocate(NovaSlice s, int size) {
         boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
         assert allocated;
+        if(slicesAllocated++ == _Global_Defs.RELEASE_LIST_LIMIT)
+        	globalNovaNumber.incrementAndGet();
         s.setHeader(globalNovaNumber.get(),size);
     }
     
@@ -77,7 +80,6 @@ public class NovaManagerNoTap implements MemoryManager {
         myReleaseList.add(new DeletedSlice(block,offset,len,born,globalNovaNumber.get()));
         
         if (myReleaseList.size() >=  LastTime + _Global_Defs.RELEASE_LIST_LIMIT) {
-        	
         	globalNovaNumber.incrementAndGet();
         	EpochFence.set((idx+1)*_Global_Defs.CACHE_PADDING,getNovaEra());
         	Iterator<DeletedSlice> itr=myReleaseList.iterator();
@@ -88,8 +90,8 @@ public class NovaManagerNoTap implements MemoryManager {
         			itr.remove();	
         			}
     			}
+            LastTime = myReleaseList.size();
         	}
-        LastTime = myReleaseList.size();
         }
     
     public boolean free(NovaSlice s) {
@@ -150,11 +152,11 @@ public class NovaManagerNoTap implements MemoryManager {
     
     private boolean intersects(DeletedSlice s) {
     	for (int i=0; i<_Global_Defs.MAX_THREADS; i++) {
-    		if(s.born <= EpochFence.get((i+1)*_Global_Defs.CACHE_PADDING) 
-    				&&  s.death >= EpochFence.get((i+1)*_Global_Defs.CACHE_PADDING))
-    			return true;
+    		long epoch = EpochFence.get((i+1)*_Global_Defs.CACHE_PADDING); 
+    		if(s.born > epoch ||  s.death < epoch)
+    			return false;
     	}
-    	return false;
+    	return true;
     }
     
 }

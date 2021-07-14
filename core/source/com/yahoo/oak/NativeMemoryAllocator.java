@@ -229,17 +229,25 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
         return idGenerator.get() - 1;
     }
 
-    private Stats stats = null;
+    private static Stats stats = null;
 
     
-    public void collectStats() {
+    static public void collectStats() {
         stats = new Stats();
     }
 
     public Stats getStats() {
         return stats;
     }
+    
+    static public void PrintStats() {
+    	System.out.print("******************************\n");
+    	System.out.print("Total Reclaimed MBytes is :" + stats.reclaimedBytes/(1024*1024) +"\n");
+    	System.out.print("Total Released  MBytes is :" + stats.releasedBytes/(1024*1024)+"\n");
+    	System.out.print("******************************\n");
 
+    }
+    
     static class Stats {
         int reclaimedBuffers;
         int releasedBuffers;
@@ -259,6 +267,7 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
                 reclaimedBytes += size;
             }
         }
+        
     }
 
 }

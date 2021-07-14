@@ -12,6 +12,7 @@ import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak._Global_Defs;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.EBR.EBRslice;
 
@@ -19,7 +20,7 @@ public class SA_Nova_Primitive_CAS {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(_Global_Defs.MAXSIZE);
     final NovaManager mng = new NovaManager(allocator);
     
     

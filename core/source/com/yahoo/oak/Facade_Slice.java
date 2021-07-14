@@ -34,6 +34,11 @@ public class Facade_Slice {
 			version = 1;
 		}
 		
+		public Facade_slice(Facade_slice o) {
+			super(o.blockID, o.offset, o.length);
+			version = o.version;
+		}
+		
 		public boolean isDeleted() {
 			if (version %2 == 1)
 				return true;
@@ -93,15 +98,18 @@ public class Facade_Slice {
 		OffHeapMetaData = (long)S.length <<24 | S.version; // created off heap style meta 
 
 		long SliceHeaderAddress= S.address + S.offset;
-				
+		Facade_slice todel = new Facade_slice(S);
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
 			 flag = false;
 		
 		int CurrVer = S.version;
 		
+		NovaSlice toDel = novaManager.privateSlice(idx);
+		toDel.copyFrom((NovaSlice)S);
+		UNSAFE.fullFence();
 		if(UNSAFE.compareAndSwapLong(S, Facade_slice.version_offset, CurrVer,  CurrVer|1));
-		 	novaManager.release(S.blockID, S.offset, S.length,idx); 
+		 	novaManager.release(toDel.blockID, toDel.offset, toDel.length,idx); 
 		 return flag; 
 	}
 	

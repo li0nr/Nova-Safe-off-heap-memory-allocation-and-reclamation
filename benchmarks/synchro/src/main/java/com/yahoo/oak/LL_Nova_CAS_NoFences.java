@@ -3,10 +3,11 @@ package com.yahoo.oak;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noFences;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
+import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class LL_Nova_CAS_NoFences implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
 	NovaManagerNoTap mng = new NovaManagerNoTap(allocator);
 	LL_Nova_primitive_noFences<Buff,Buff> LL = new LL_Nova_primitive_noFences<Buff,Buff>(mng, 
 			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
@@ -31,7 +32,7 @@ public class LL_Nova_CAS_NoFences implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
-    	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    	allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
     	mng = new NovaManagerNoTap(allocator);
     	LL  = new LL_Nova_primitive_noFences<Buff,Buff>(mng, 
     			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);

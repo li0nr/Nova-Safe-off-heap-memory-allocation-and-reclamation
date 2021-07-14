@@ -133,7 +133,10 @@ public class NovaManager implements MemoryManager {
     	return s;
     
     }
-
+    
+    public NovaSlice privateSlice(int ThreadIdx) {
+    	return Slices[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING];
+    }
     public int  getNovaEra() {
         return globalNovaNumber.get();
     }

@@ -109,44 +109,86 @@ public class ThreadLoopSA implements Runnable {
         // for the key distribution RANDOM the below value will be overwritten anyway
         int newInt = 0; //start deleting from 0
         //int newInt = Parameters.confSize;
+        if(Parameters.memory) {
+        	while (!stop) {
+            	newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
+                        rand.nextInt(Parameters.confRange) : newInt + 1;
+                key.set(rand.nextInt());
+                int coin = rand.nextInt(1000);
+                if(coin < cdf[0]) { //-a deleting is good?
+            		numRemove++;
+                	if(bench.remove(newInt, myThreadNum)) {
+                		numSucRemove++;
+                	}
+                	else {
+                		failures++;
+                	}
+                }
+                else if (coin < cdf[1]) { // -u writing is better than deleting?
+                	numAdd++;
+                	if(bench.put(key, newInt, myThreadNum)) {
+                		numSuccAdd++;
+                	}
+                	else {
+                		failures++;
+                	}
+                		
+                }
+                else if (coin < cdf[2]) { // -s reading is the best ever
+                	numContains++;
+                	if(bench.get(newInt, myThreadNum) != null) {
+                		numSucContains++;
+                	}
+                	else {
+                		failures++;
+                	}
+                }
+                total++;
 
-        while (!stop) {
+                assert total == failures + numContains + + numRemove + numAdd ;
+            }
         	
-        	newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
-                    rand.nextInt(Parameters.confRange) : newInt + 1;
-            key.set(rand.nextInt());
-            int coin = rand.nextInt(1000);
-            if(coin < cdf[0]) { //-a deleting is good?
-        		numRemove++;
-            	if(bench.remove(newInt, myThreadNum)) {
-            		numSucRemove++;
-            	}
-            	else {
-            		failures++;
-            	}
-            }
-            else if (coin < cdf[1]) { // -u writing is better than deleting?
-            	numAdd++;
-            	if(bench.put(key, newInt, myThreadNum)) {
-            		numSuccAdd++;
-            	}
-            	else {
-            		failures++;
-            	}
-            		
-            }
-            else if (coin < cdf[2]) { // -s reading is the best ever
-            	numContains++;
-            	if(bench.get(newInt, myThreadNum) != null) {
-            		numSucContains++;
-            	}
-            	else {
-            		failures++;
-            	}
-            }
-            total++;
+        	
+        }
+        
+        else {
+            while (!stop) {
+            	newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
+                        rand.nextInt(Parameters.confRange) : newInt + 1;
+                key.set(rand.nextInt());
+                int coin = rand.nextInt(1000);
+                if(coin < cdf[0]) { //-a deleting is good?
+            		numRemove++;
+                	if(bench.remove(newInt, myThreadNum)) {
+                		numSucRemove++;
+                	}
+                	else {
+                		failures++;
+                	}
+                }
+                else if (coin < cdf[1]) { // -u writing is better than deleting?
+                	numAdd++;
+                	if(bench.put(key, newInt, myThreadNum)) {
+                		numSuccAdd++;
+                	}
+                	else {
+                		failures++;
+                	}
+                		
+                }
+                else if (coin < cdf[2]) { // -s reading is the best ever
+                	numContains++;
+                	if(bench.get(newInt, myThreadNum) != null) {
+                		numSucContains++;
+                	}
+                	else {
+                		failures++;
+                	}
+                }
+                total++;
 
-            assert total == failures + numContains + + numRemove + numAdd ;
+                assert total == failures + numContains + + numRemove + numAdd ;
+            }	
         }
     }
 

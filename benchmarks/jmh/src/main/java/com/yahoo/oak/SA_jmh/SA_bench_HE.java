@@ -32,6 +32,8 @@ import com.yahoo.oak.RNG;
 
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
+import com.yahoo.oak.SA_jmh.SA_bench_Nova_FF.BenchmarkState;
+import com.yahoo.oak.SA_jmh.SA_bench_Nova_FF.ThreadState;
 import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
 
@@ -180,27 +182,29 @@ public class SA_bench_HE {
 //  		}
 //  	}
 //  
-//  @Warmup(iterations = LLParam.warmups)
-//  @Measurement(iterations = LLParam.iterations)
-//  @BenchmarkMode(Mode.AverageTime)
-//  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//  @Fork(value = 0)
-//  @OperationsPerInvocation(LLParam.LL_Size)
-//  @Benchmark
-//  public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//  	int i = 0;
-//  	while( i < BenchmarkState.size/ThreadState.threads) {
-//  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//  		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
-//  		case(1):
-//  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
-//  			break;
-//  		case(2):
-//  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
-//  		}
-//  		i++;
-//      	}
-//  	}
+  @Warmup(iterations = SAParam.warmups)
+  @Measurement(iterations = SAParam.iterations)
+  @BenchmarkMode(Mode.AverageTime)
+  @OutputTimeUnit(TimeUnit.MILLISECONDS)
+  @Fork(value = 0)
+  @OperationsPerInvocation(SAParam.LL_Size)
+  @Benchmark
+  public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+  	int i = 0;
+  	while( i < BenchmarkState.size/ThreadState.threads) {
+  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+  		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
+  		case(1):
+  			blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+  	      			,threadState.i));
+  		break;
+  		case(2):
+  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+  	      			, threadState.buff,threadState.i));
+  		}
+  		i++;
+  		}
+  	}
     
 	
 //	 @Warmup(iterations = BSTParam.warmups)

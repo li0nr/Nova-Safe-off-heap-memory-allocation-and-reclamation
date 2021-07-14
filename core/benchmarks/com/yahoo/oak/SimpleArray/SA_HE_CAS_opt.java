@@ -11,13 +11,14 @@ import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak._Global_Defs;
 import com.yahoo.oak.HazardEras.HEslice;
 
 public class SA_HE_CAS_opt {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(_Global_Defs.MAXSIZE);
     final HazardEras _HE= new HazardEras(allocator);
 	
     static final long slices_base_offset;

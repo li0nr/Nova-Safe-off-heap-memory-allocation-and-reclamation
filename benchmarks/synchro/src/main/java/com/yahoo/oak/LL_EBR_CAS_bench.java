@@ -4,10 +4,11 @@ package com.yahoo.oak;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.EBR.LL_EBR_CAS;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
+import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class LL_EBR_CAS_bench implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
 	LL_EBR_CAS<Buff,Buff> LL = new LL_EBR_CAS<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
 			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
@@ -30,7 +31,7 @@ public class LL_EBR_CAS_bench implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
-    	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    	allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
     	LL = new LL_EBR_CAS<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
     			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     }
