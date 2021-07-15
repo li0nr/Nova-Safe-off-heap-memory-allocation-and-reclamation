@@ -10,7 +10,6 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
-import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
 import com.yahoo.oak.UnsafeUtils;
@@ -116,14 +115,13 @@ public class LL_Nova_CAS<K,V> {
                 final Node pred = window.pred;
                 final Node curr = window.curr;
                 if (curr.key!= null && Facade_Slice.Compare(key, Kcm, curr.key) == 0) { 
-                    Facade_Slice.WriteFull(Vsr, value, curr.value, idx);
-                    return true;
+                    return false;
                 } else {
                     
                 	Node newNode = new Node(new Facade_slice(), new Facade_slice());
                 	
-					Facade_Slice.AllocateSlice(newNode.key,Ksr.calculateSize(key), idx);
-					Facade_Slice.AllocateSlice(newNode.value,Vsr.calculateSize(value), idx);
+					Facade_Slice.AllocateSliceCAS(newNode.key,Ksr.calculateSize(key), idx);
+					Facade_Slice.AllocateSliceCAS(newNode.value,Vsr.calculateSize(value), idx);
                     	
 					Facade_Slice.WriteFast(Ksr, key, newNode.key, idx);
 					Facade_Slice.WriteFast(Vsr, value, newNode.value, idx);
@@ -173,8 +171,8 @@ public class LL_Nova_CAS<K,V> {
                     continue;
                 }
                 if(pred.next.compareAndSet(curr, succ, false, false)) {
-                	Facade_Slice.Delete(idx, curr.key);
-                	Facade_Slice.Delete(idx, curr.value);
+                	Facade_Slice.DeleteCAS(idx, curr.key);
+                	Facade_Slice.DeleteCAS(idx, curr.value);
                     return true;                	
                 }
             }
@@ -212,8 +210,8 @@ public class LL_Nova_CAS<K,V> {
 	                            if (!pred.next.compareAndSet(curr, succ, false, false)) {
 	                                continue retry;
 	                            }
-	                        	Facade_Slice.Delete(tidx, curr.key);
-	                        	Facade_Slice.Delete(tidx, curr.value);
+	                        	Facade_Slice.DeleteCAS(tidx, curr.key);
+	                        	Facade_Slice.DeleteCAS(tidx, curr.value);
 	                            curr = succ;
 	                            succ = curr.next.get(marked);
 	                        }
@@ -229,25 +227,22 @@ public class LL_Nova_CAS<K,V> {
     }
 
 
-
-	public <R>R get(K key, NovaR Reader, int tidx) {
-        boolean[] marked = {false};
-        CmpFail: while(true)
-        	try {
-                Node curr = head.next.getReference();
-                curr.next.get(marked);
-                while (curr != tail && Facade_Slice.Compare(key, Kcm, curr.key) < 0) {
-                    curr = curr.next.getReference();
-                    curr.next.get(marked);
-                }
-                boolean flag =  curr.key == null ? false : Facade_Slice.Compare(key, Kcm, curr.key) == 0 && !marked[0];
-                R obj = null;
-                if(flag) 
-                	obj = (R) Facade_Slice.Read(Reader, curr.value);
-                return obj;
-        	}catch (NovaIllegalAccess e) {continue CmpFail;}
-    }
     
+    /**
+     * Searches for a given key.
+     * 
+     * Inspired by Figure 9.27, page 218 on "The Art of Multiprocessor Programming".
+     * 
+     * As soon as we find a matching key we immediately return false/true 
+     * depending whether the corresponding node is marked or not. We can do 
+     * this because add() will always insert new elements immediately after a
+     * non-marked node.
+     * <p>
+     * Progress Condition: Wait-Free - bounded by the number of nodes 
+     * 
+     * @param key
+     * @return
+     */
     public boolean contains(K key, int tidx) {
         boolean[] marked = {false};
         CmpFail: while(true)
