@@ -81,18 +81,14 @@ public class Facade_Nova {
 		long address = novaManager.getAdress(block);
 
 		long OffHeapMetaData= UNSAFE.getLong(address+offset);//reads off heap meta
-		
-		
-		long len=OffHeapMetaData>>>24; //get the lenght 
-		long version = ExtractVer_Del(metadata); //get the version in the facade including delete
-		OffHeapMetaData = len <<24 | version; // created off heap style meta 
-
+				
 		long SliceHeaderAddress= address + offset;
 
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
 			 return false;
-				 
+
+		long len=OffHeapMetaData>>>24; //get the lenght 
 		 novaManager.release(block,offset,(int)len,idx); 
 		 return true; 
 	}

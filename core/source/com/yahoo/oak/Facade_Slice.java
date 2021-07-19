@@ -95,10 +95,9 @@ public class Facade_Slice {
 			return false;
 		
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
-		OffHeapMetaData = (long)S.length <<24 | S.version; // created off heap style meta 
 
 		long SliceHeaderAddress= S.address + S.offset;
-		Facade_slice todel = new Facade_slice(S);
+
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
 			 flag = false;
@@ -107,8 +106,8 @@ public class Facade_Slice {
 		
 		NovaSlice toDel = novaManager.privateSlice(idx);
 		toDel.copyFrom((NovaSlice)S);
-		UNSAFE.fullFence();
-		if(UNSAFE.compareAndSwapLong(S, Facade_slice.version_offset, CurrVer,  CurrVer|1));
+
+		if(UNSAFE.compareAndSwapLong(S, Facade_slice.version_offset, CurrVer,  CurrVer|1))
 		 	novaManager.release(toDel.blockID, toDel.offset, toDel.length,idx); 
 		 return flag; 
 	}
@@ -119,7 +118,6 @@ public class Facade_Slice {
 			return false;		
 		
 		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta		
-		OffHeapMetaData = S.length <<24 | S.version; // created off heap style meta 
 
 		long SliceHeaderAddress= S.address + S.offset;
 
