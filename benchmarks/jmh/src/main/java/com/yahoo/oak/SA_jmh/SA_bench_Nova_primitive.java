@@ -34,12 +34,13 @@ import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
 import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
-import com.yahoo.oak.SimpleArray.SA_NoMM;
-import com.yahoo.oak.SimpleArray.SA_NoMM2;
+import com.yahoo.oak.SimpleArray.SA_Nova_CAS;
+import com.yahoo.oak.SimpleArray.SA_Nova_FenceFree;
+import com.yahoo.oak.SimpleArray.SA_Nova_Primitive_CAS;
 
 
 
-public class SA_bench_NoMM {
+public class SA_bench_Nova_primitive {
 	
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
@@ -48,7 +49,7 @@ public class SA_bench_NoMM {
 
     	public static  int size  = SAParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private SA_NoMM2 SA;
+        private SA_Nova_Primitive_CAS SA;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -83,7 +84,7 @@ public class SA_bench_NoMM {
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    SA = new SA_NoMM2(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
+    	    SA = new SA_Nova_Primitive_CAS(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
     	    
         	for (int i=0; i <size ; i++) {
         		int keyval = rand.nextInt(size);
@@ -182,27 +183,29 @@ public class SA_bench_NoMM {
 //  		}
 //  	}
 //  
-//  @Warmup(iterations = LLParam.warmups)
-//  @Measurement(iterations = LLParam.iterations)
-//  @BenchmarkMode(Mode.AverageTime)
-//  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//  @Fork(value = 0)
-//  @OperationsPerInvocation(LLParam.LL_Size)
-//  @Benchmark
-//  public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//  	int i = 0;
-//  	while( i < BenchmarkState.size/ThreadState.threads) {
-//  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//  		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
-//  		case(1):
-//  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
-//  			break;
-//  		case(2):
-//  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
-//  		}
-//  		i++;
-//      	}
-//  	}
+  @Warmup(iterations = SAParam.warmups)
+  @Measurement(iterations = SAParam.iterations)
+  @BenchmarkMode(Mode.AverageTime)
+  @OutputTimeUnit(TimeUnit.MILLISECONDS)
+  @Fork(value = 0)
+  @OperationsPerInvocation(SAParam.LL_Size)
+  @Benchmark
+  public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+  	int i = 0;
+  	while( i < BenchmarkState.size/ThreadState.threads) {
+  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+  		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
+  		case(1):
+  			blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+  	      			,threadState.i));
+  		break;
+  		case(2):
+  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+  	      			, threadState.buff,threadState.i));
+  		}
+  		i++;
+  		}
+  	}
     
 	
 //	 @Warmup(iterations = BSTParam.warmups)
@@ -336,7 +339,7 @@ public class SA_bench_NoMM {
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(SA_bench_NoMM.class.getSimpleName())
+	    			.include(SA_bench_Nova_primitive.class.getSimpleName())
 	                .forks(SAParam.forks)
 	                .threads(1)
 	                .build();
