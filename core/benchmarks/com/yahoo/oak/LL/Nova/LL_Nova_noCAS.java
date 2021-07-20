@@ -261,4 +261,38 @@ public class LL_Nova_noCAS<K,V> {
                 return curr.key == null ? false : Facade_Slice.Compare(key, Kcm, curr.key) == 0 && !marked[0];
         	}catch (NovaIllegalAccess e) {continue CmpFail;}
     }
+    
+    
+    public boolean BenchFill(K key, V value,  int idx) {
+        CmpFail: while(true)
+        try{
+        	while (true) {
+                final Window window = find(key, idx);
+                // On Harris paper, pred is named left_node and curr is right_node
+                final Node pred = window.pred;
+                final Node curr = window.curr;
+                if (curr.key!= null && Facade_Slice.Compare(key, Kcm, curr.key) == 0) { 
+                    return false;
+                } else {
+                    
+                	Node newNode = new Node(new Facade_slice(), new Facade_slice());
+                	
+					Facade_Slice.AllocateSlice(newNode.key,Ksr.calculateSize(key), idx);
+					Facade_Slice.AllocateSlice(newNode.value,Vsr.calculateSize(value), idx);
+                    	
+					Facade_Slice.WriteFast(Ksr, key, newNode.key, idx);
+					Facade_Slice.WriteFast(Vsr, value, newNode.value, idx);
+                    
+                    newNode.next.set(curr, false);
+                    if (pred.next.compareAndSet(curr, newNode, false, false)) {
+                        return true;
+                    }
+                    else {
+                    	Facade_Slice.DeletePrivate(idx, newNode.key);
+                    	Facade_Slice.DeletePrivate(idx, newNode.value);
+                    }
+                }
+            }  
+        }catch(NovaIllegalAccess e) {continue CmpFail;}
+    }
 }

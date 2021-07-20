@@ -254,4 +254,38 @@ public class LL_HE_noCAS<K,V> {
 		        return flag;
 	        }catch (NovaIllegalAccess e) {continue CmpFail;}
         }
+    
+
+    //********************************************//
+    //for filling the benchmarks
+    public boolean BenchFill(K key, V value , int tidx) {
+        CmpFail: while(true)
+        try{
+        while (true) {
+            final Window window = find(key, tidx);
+            // On Harris paper, pred is named left_node and curr is right_node
+            final Node pred = window.pred;
+            final Node curr = window.curr;
+            if (curr.key!= null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0) { 
+                return false;
+            } else {
+            	HEslice oKey  = Facade_HE.allocate( Ksr.calculateSize(key));
+        		Ksr.serialize(key, oKey.address+oKey.offset);
+            	HEslice oValue  = Facade_HE.allocate( Vsr.calculateSize(value));
+        		Vsr.serialize(value, oValue.address+oValue.offset);
+        		
+        		final Node newNode = new Node(oKey, oValue);
+        		
+                newNode.next.set(curr, false);
+                if (pred.next.compareAndSet(curr, newNode, false, false)) {
+                    return true;
+                }
+                else {
+                	Facade_HE.fastFree(newNode.key);
+                	Facade_HE.fastFree(newNode.value);
+                }
+            }
+        }       
+	}catch(NovaIllegalAccess e) {continue CmpFail;}
+}
 }

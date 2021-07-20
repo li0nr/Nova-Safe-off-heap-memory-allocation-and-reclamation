@@ -200,6 +200,37 @@ public class HarrisLinkedListNoMM <K,V>{
 	        return curr.key == null? false: Kcm.compareKeys(curr.key.address + curr.key.offset, key)==0 && !marked[0];
 	    }
 	    
+	    
+	    public boolean BenchFill(K key,V value, int tidx) {
+	        while (true) {
+	            final Window window = find(key, tidx);
+	            // On Harris paper, pred is named left_node and curr is right_node
+	            final Node pred = window.pred;
+	            final Node curr = window.curr;
+	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
+	                return false;
+	            } else {
+	    	    	NovaSlice myK = new NovaSlice(0,0,0);
+	    	    	NovaSlice myV = new NovaSlice(0,0,0);
+
+	    			allocator.allocate(myK, Ksr.calculateSize(key));
+	    			Ksr.serialize(key, myK.address+myK.offset);
+	    			allocator.allocate(myV, Vsr.calculateSize(value));
+	    			Vsr.serialize(value, myV.address+myV.offset);
+	    			
+	    			final Node newNode = new Node(myK, myV);
+	                newNode.next.set(curr, false);
+	                if (pred.next.compareAndSet(curr, newNode, false, false)) {
+	                    return true;
+	                }
+                    else {
+                    	allocator.free(newNode.key);
+                    	allocator.free(newNode.value);
+                    }	
+	            }
+	        }       
+	    }
+	    
 	    public void Print() {
 	    	Node curr = head.next.getReference();
 	        while (curr != tail ) {

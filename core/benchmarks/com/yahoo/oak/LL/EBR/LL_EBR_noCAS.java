@@ -206,6 +206,38 @@ public class LL_EBR_noCAS <K,V>{
 	        return ret;
 	    }
 	    
+	    
+	    public boolean BenchFill(K key, V value, int tidx) {
+	        CmpFail: while(true)
+	            try{
+	    	while (true) {
+	            final Window window = find(key, tidx);
+	            // On Harris paper, pred is named left_node and curr is right_node
+	            final Node pred = window.pred;
+	            final Node curr = window.curr;
+	            if (curr.key != null && Facade_EBR.Compare(key, Kcm, curr.key, tidx) == 0) {
+	                return false;
+	            } else {
+	            	EBRslice oKey  = Facade_EBR.allocate(Ksr.calculateSize(key));
+	        		Ksr.serialize(key, oKey.address+oKey.offset);
+	        		EBRslice oValue  = Facade_EBR.allocate( Vsr.calculateSize(value));
+	        		Vsr.serialize(value, oValue.address+oValue.offset);
+	        		
+	        		final Node newNode = new Node(oKey, oValue);
+	        		
+	                newNode.next.set(curr, false);
+	                if (pred.next.compareAndSet(curr, newNode, false, false)) {
+	                	return true;
+	                }
+	                else {
+	                	Facade_EBR.fastFree(newNode.key);
+	                	Facade_EBR.fastFree(newNode.value);
+	                }
+	            }
+	    	}
+	    	}catch(NovaIllegalAccess e) {continue CmpFail;}
+	    }
+	    
 	    public void ForceCleanUp() {
 	    	Facade_EBR.ForceCleanUp();
 	    }

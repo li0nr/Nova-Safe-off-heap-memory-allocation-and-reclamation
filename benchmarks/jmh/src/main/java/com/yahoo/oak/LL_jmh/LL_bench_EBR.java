@@ -7,8 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Group;
-import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -26,29 +24,25 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
-import com.yahoo.oak.BST.BST_Nova;
-import com.yahoo.oak.BST_jmh.BSTParam;
+
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.EBR.LL_EBR_noCAS;
-import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
-import com.yahoo.oak.LL.Nova.LL_Nova_primitive_CAS;
-import com.yahoo.oak.LL_jmh.LL_bench_HE.BenchmarkState;
-import com.yahoo.oak.LL_jmh.LL_bench_HE.ThreadState;
-import com.yahoo.oak.ParamBench;
+import com.yahoo.oak.LL.HE.LL_HE_noCAS;
 
 
 
-public class LL_EBR_bench {
-final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
+public class LL_bench_EBR {
+	
+	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 
     	public static  int size  = LLParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private LL_EBR_noCAS<Buff,Buff> LL ;
+        private LL_EBR_noCAS<Buff, Buff> LL ;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -76,24 +70,25 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
     	}
 	    
         @Setup(Level.Iteration)
-        public void fillTree() {
-    		Random rand = new Random(208);
+        public void Fill_Bench() {
+    		Random rand = new Random(new Random().nextInt());
     		if(allocator != null)
     			ParamBench.PrintMem(allocator);
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	    LL = new LL_EBR_noCAS<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	    
-    	    int i = (int) 0.75 *size;
-    	    while(i >= 0) {
-        		int keyval = rand.nextInt(size);
+    	    LL = new LL_EBR_noCAS<Buff, Buff>(allocator,
+    	    		Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,
+    	    		Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+    	    
+        	for (int i=0; i < size ; i++) {
+        		int keyval = rand.nextInt(2*size);
         		Buff k = new Buff();
         		k.set(keyval);
-        		if(LL.add(k,k, 0) == true)
+        		if(LL.BenchFill(k,k, 0) == false)
         			i--;
         		}
-    	    }
-        
+        }
         @TearDown(Level.Iteration)
         public void printStats() {
     		//ParamBench.PrintMem(allocator);
@@ -129,16 +124,17 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 	
 	
 	
-  @Warmup(iterations = BSTParam.warmups)
-  @Measurement(iterations = BSTParam.iterations)
+  @Warmup(iterations = LLParam.warmups)
+  @Measurement(iterations = LLParam.iterations)
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void search90_delete5_insert5(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
-  	while( i < BenchmarkState.size/ThreadState.threads) {
-  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+  	while( i < LLParam.OpsInOperations) {
+  		threadState.buff.set(threadState.rand.nextInt(2*BenchmarkState.size));
   		switch(BenchmarkState.BenchmarkState_90_5_5.Functions_3()) {
   		case(1):
   	      	blackhole.consume(state.LL.contains(threadState.buff,threadState.i));
@@ -153,16 +149,17 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
       	}
   	}
   
-  @Warmup(iterations = BSTParam.warmups)
-  @Measurement(iterations = BSTParam.iterations)
+  @Warmup(iterations = LLParam.warmups)
+  @Measurement(iterations = LLParam.iterations)
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
-  	while( i < BenchmarkState.size/ThreadState.threads) {
-  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+  	while( i < LLParam.OpsInOperations) {
+  		threadState.buff.set(threadState.rand.nextInt(2*BenchmarkState.size));
   		switch(BenchmarkState.BenchmarkState_50_25_25.Functions_3()) {
   		case(1):
   	      	blackhole.consume(state.LL.contains(threadState.buff,threadState.i));
@@ -177,16 +174,17 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   		}
   	}
   
-  @Warmup(iterations = BSTParam.warmups)
-  @Measurement(iterations = BSTParam.iterations)
+  @Warmup(iterations = LLParam.warmups)
+  @Measurement(iterations = LLParam.iterations)
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
-  	while( i < BenchmarkState.size/ThreadState.threads) {
-  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+  	while( i < LLParam.OpsInOperations) {
+  		threadState.buff.set(threadState.rand.nextInt(2*BenchmarkState.size));
   		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
   		case(1):
   	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
@@ -198,15 +196,14 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
       	}
   	}
     
-    
-    
-    public static void main(String[] args) throws RunnerException {
-    	Options opt = new OptionsBuilder()
-    			.include(LL_EBR_bench.class.getSimpleName())
-                .forks(BSTParam.forks)
-                .threads(1)
-                .build();
+	    
+	    public static void main(String[] args) throws RunnerException {
+	    	Options opt = new OptionsBuilder()
+	    			.include(LL_bench_EBR.class.getSimpleName())
+	                .forks(LLParam.forks)
+	                .threads(1)
+	                .build();
 
-    	new Runner(opt).run();
-    }
-}
+	    	new Runner(opt).run();
+	    }
+	}

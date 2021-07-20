@@ -41,7 +41,7 @@ import sun.misc.Unsafe;
  * @author Pedro Ramalhete
  * @author Andreia Correia
  */
-public class LL_Nova_Primitive_noCAS<K,V> {
+public class LL_Nova_primitive_noCAS<K,V> {
 
     final Node head;
     final Node tail;
@@ -91,7 +91,7 @@ public class LL_Nova_Primitive_noCAS<K,V> {
     }
     
     
-    public LL_Nova_Primitive_noCAS(NovaManager novaManager,NovaC<K> cmp,	NovaS<K> srz,
+    public LL_Nova_primitive_noCAS(NovaManager novaManager,NovaC<K> cmp,	NovaS<K> srz,
     		NovaC<V> Vcmp,	NovaS<V> Vsrz) {	
 		nm = novaManager; Kcm = cmp; Ksr = srz; Vcm = Vcmp; Vsr = Vsrz;
 		new Facade_Nova(nm);

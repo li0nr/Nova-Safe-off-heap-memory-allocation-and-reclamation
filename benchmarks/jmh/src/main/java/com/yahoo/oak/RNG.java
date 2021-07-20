@@ -11,11 +11,11 @@ public class RNG {
     }
 
     public void addNumber(int value, double _distribution) {
-    	distribution[value-1] = _distribution;
+    	distribution[value-1] = _distribution*10;
     }
 
     public int Functions_3() {
-        double rand = Math.random()*100;
+        double rand = Math.random()*1000;
         if(rand < distribution[0])
         	return 1;
         else if(rand < distribution[1])

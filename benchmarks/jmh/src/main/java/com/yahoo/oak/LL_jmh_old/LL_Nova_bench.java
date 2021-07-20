@@ -1,4 +1,4 @@
-package com.yahoo.oak.LL_jmh;
+package com.yahoo.oak.LL_jmh_old;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -23,9 +23,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
-import com.yahoo.oak.BST.BST_Nova;
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.Nova.LL_Nova_primitive_CAS;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noCAS;
 
 
 public class LL_Nova_bench {
@@ -35,14 +34,14 @@ public class LL_Nova_bench {
     public static class BenchmarkState {
 
     	public static  int size = LLParam.LL_Size;
-        private LL_Nova_primitive_CAS<Buff,Buff> LL ;
+        private LL_Nova_primitive_noCAS<Buff,Buff> LL ;
 
         @Setup
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager novaManager = new NovaManager(allocator);
     	    
-    	    LL = new LL_Nova_primitive_CAS<Buff,Buff>(novaManager, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
+    	    LL = new LL_Nova_primitive_noCAS<Buff,Buff>(novaManager, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
     	    		,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
         	for (int i=0; i <size ; i++) {
         		Buff k = new Buff();
