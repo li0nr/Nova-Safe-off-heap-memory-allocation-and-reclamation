@@ -10,6 +10,8 @@ public interface CompositionalLL<K,V> {
 
 	public Integer containsKey(final K key, int tidx);
 	    
+    public  boolean Fill(final K key,final V value, int idx);
+
     public  boolean put(final K key,final V value, int idx);
     
     public  boolean remove(final K key, int idx);

@@ -85,7 +85,7 @@ public class LL_bench_EBR {
         		int keyval = rand.nextInt(2*size);
         		Buff k = new Buff();
         		k.set(keyval);
-        		if(LL.BenchFill(k,k, 0) == false)
+        		if(LL.Fill(k,k, 0) == false)
         			i--;
         		}
         }

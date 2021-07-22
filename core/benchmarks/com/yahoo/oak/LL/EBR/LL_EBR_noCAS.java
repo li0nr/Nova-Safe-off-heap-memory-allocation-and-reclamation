@@ -1,7 +1,6 @@
 package com.yahoo.oak.LL.EBR;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
-
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
@@ -9,7 +8,6 @@ import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.Facade_EBR;
 import com.yahoo.oak.EBR.EBRslice;
-import com.yahoo.oak.LL.EBR.LL_EBR_noCAS_opt.Node;
 
 
 public class LL_EBR_noCAS <K,V>{
@@ -68,7 +66,7 @@ public class LL_EBR_noCAS <K,V>{
 	     */
 	    public boolean add(K key, V value, int tidx) {
 	        CmpFail: while(true)
-	            try{
+	        	try{
 	    	while (true) {
 	            final Window window = find(key, tidx);
 	            // On Harris paper, pred is named left_node and curr is right_node
@@ -207,7 +205,7 @@ public class LL_EBR_noCAS <K,V>{
 	    }
 	    
 	    
-	    public boolean BenchFill(K key, V value, int tidx) {
+	    public boolean Fill(K key, V value, int tidx) {
 	        CmpFail: while(true)
 	            try{
 	    	while (true) {

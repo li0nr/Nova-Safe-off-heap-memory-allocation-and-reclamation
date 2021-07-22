@@ -183,4 +183,25 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	        boolean flag = curr.key!= null && curr.key.compareTo(key) == 0 && !marked[0];
 	        return flag;
 	    }
+	    
+	    public boolean Fill(E key,V value, int tidx) {	
+	        while (true) {
+	            final Window<E,V> window = find(key, tidx);
+	            // On Harris paper, pred is named left_node and curr is right_node
+	            final Node<E,V> pred = window.pred;
+	            final Node<E,V> curr = window.curr;
+	            if (curr.key != null && curr.key.compareTo(key) == 0) { 
+	                return false;
+	            } else {
+	    	    	E myKey = KCC.Copy(key);
+	    	    	V myval= VCC.Copy(value);
+
+	    			final Node<E,V> newNode = new Node(myKey, myval);
+	                newNode.next.set(curr, false);
+	                if (pred.next.compareAndSet(curr, newNode, false, false)) {
+	                    return true;
+	                }
+	            }
+	        }       
+	    }
 }

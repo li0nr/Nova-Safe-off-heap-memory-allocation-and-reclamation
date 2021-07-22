@@ -15,7 +15,7 @@ public class SA_NoMM2 {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(_Global_Defs.MAXSIZE);
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator((long)10 * _Global_Defs.MAXSIZE);
 	
     static final long slices_base_offset;
     static final long slices_scale;
@@ -88,7 +88,6 @@ public class SA_NoMM2 {
 			return false;
 		if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null))
 			return false;
-		allocator.free(toDel);
 		return true;
 	}
 

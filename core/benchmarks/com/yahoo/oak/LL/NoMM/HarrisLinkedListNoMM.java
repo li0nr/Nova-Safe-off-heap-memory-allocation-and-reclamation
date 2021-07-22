@@ -201,7 +201,7 @@ public class HarrisLinkedListNoMM <K,V>{
 	    }
 	    
 	    
-	    public boolean BenchFill(K key,V value, int tidx) {
+	    public boolean Fill(K key,V value, int tidx) {
 	        while (true) {
 	            final Window window = find(key, tidx);
 	            // On Harris paper, pred is named left_node and curr is right_node

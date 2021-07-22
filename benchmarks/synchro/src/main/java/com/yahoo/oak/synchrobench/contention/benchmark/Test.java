@@ -146,7 +146,7 @@ public class Test {
 	            }   
 	            break;
 			case LL:
-	            if (LL.put(key,val,0) == true) {
+	            if (LL.Fill(key,val,0) == true) {
 	                i--;
 	            } 
 	            break;

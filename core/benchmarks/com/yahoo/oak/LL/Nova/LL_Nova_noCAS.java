@@ -263,7 +263,7 @@ public class LL_Nova_noCAS<K,V> {
     }
     
     
-    public boolean BenchFill(K key, V value,  int idx) {
+    public boolean Fill(K key, V value,  int idx) {
         CmpFail: while(true)
         try{
         	while (true) {

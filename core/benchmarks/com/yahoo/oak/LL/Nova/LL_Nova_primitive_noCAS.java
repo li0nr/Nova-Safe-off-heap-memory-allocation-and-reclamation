@@ -3,6 +3,7 @@ package com.yahoo.oak.LL.Nova;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.Facade_Nova;
+import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
@@ -121,7 +122,8 @@ public class LL_Nova_primitive_noCAS<K,V> {
                 // On Harris paper, pred is named left_node and curr is right_node
                 final Node pred = window.pred;
                 final Node curr = window.curr;
-                if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Kcm, curr.key) == 0) { 
+                if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Kcm, curr.key) == 0) {
+                	Facade_Nova.WriteFull(Vsr, value, curr.value, idx);
                     return false;
                 } else {
 
@@ -263,6 +265,38 @@ public class LL_Nova_primitive_noCAS<K,V> {
         	}catch (NovaIllegalAccess e) {continue CmpFail;}
     }
     
+    
+    public boolean Fill(K key, V value,  int idx) {
+        CmpFail: while(true)
+        try{
+        	while (true) {
+                final Window window = find(key, idx);
+                // On Harris paper, pred is named left_node and curr is right_node
+                final Node pred = window.pred;
+                final Node curr = window.curr;
+                if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Kcm, curr.key) == 0) { 
+                    return false;
+                } else {
+
+                    long OffKRef = Facade_Nova.WriteFast(Ksr, key, Facade_Nova.AllocateSlice(null, key_offset,
+                    		Ksr.calculateSize(key), idx),idx);
+                    long OffVRef = Facade_Nova.WriteFast(Vsr, value, Facade_Nova.AllocateSlice(null, value_offset,
+                    		Vsr.calculateSize(value), idx),idx);
+                    
+                    Node newNode = new Node(OffKRef,OffVRef);
+
+                    newNode.next.set(curr, false);
+                    if (pred.next.compareAndSet(curr, newNode, false, false)) {
+                        return true;
+                    }
+                    else {
+                    	Facade_Nova.DeletePrivate(idx, newNode.key);
+                    	Facade_Nova.DeletePrivate(idx, newNode.value);
+                    }
+                }
+            }  
+        }catch(NovaIllegalAccess e) {continue CmpFail;}
+    }
   
     public void Print() {
         Node curr = head.next.getReference();
