@@ -61,7 +61,7 @@ public class Facade_HE {
 	 static public <T> int Compare(T obj, NovaC<T> srZ, HEslice slice, int tidx) {
 						
 			HEslice toRead = _HazardEras.get_protected(slice, tidx);
-			if(toRead.getdelEra() != -1)
+			if(toRead == null ||toRead.getdelEra() != -1 )
 				throw new NovaIllegalAccess();
 
 			int res = srZ.compareKeys(toRead.address+toRead.offset, obj);

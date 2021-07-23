@@ -33,6 +33,7 @@ public class SA_EBR implements CompositionalSA<Buff> {
 	}
 
 	public void clear(int size) {
+		SA.close();
 		SA = new SA_EBR_CAS_opt(size, Buff.DEFAULT_SERIALIZER);
 	}
 

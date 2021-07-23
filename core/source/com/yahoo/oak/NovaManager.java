@@ -84,14 +84,7 @@ public class NovaManager implements MemoryManager {
         			HostageSlices.add(TAP.get(i+REFENTRY));
         		}
         	globalNovaNumber.incrementAndGet();
-//        	Iterator<NovaSlice> itr=myReleaseList.iterator();
-//        	while(itr.hasNext()) {
-//        		NovaSlice tmp=itr.next();
-//        		if(!HostageSlices.contains(tmp.getRef())) {
-//        			allocator.free(tmp);
-//        			itr.remove();
-//        		}
-//        	}
+
         	NovaSlice toDeleteObj;
             for (int iret = 0; iret < myReleaseList.size();) {
             	toDeleteObj = myReleaseList.get(iret);

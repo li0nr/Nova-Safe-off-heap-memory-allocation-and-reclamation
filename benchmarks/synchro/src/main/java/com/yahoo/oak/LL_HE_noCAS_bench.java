@@ -36,6 +36,7 @@ public class LL_HE_noCAS_bench implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
+    	
     	allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
     	LL = new LL_HE_noCAS<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
     			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);

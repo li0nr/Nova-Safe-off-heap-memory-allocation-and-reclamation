@@ -113,4 +113,7 @@ public class SA_EBR_CAS_opt {
 		return allocator;
 	}
 	
+	public void close() {
+		allocator.close();
+	}
 }

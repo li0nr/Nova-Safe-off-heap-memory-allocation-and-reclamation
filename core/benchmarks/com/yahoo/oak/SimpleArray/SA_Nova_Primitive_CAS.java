@@ -92,12 +92,7 @@ public class SA_Nova_Primitive_CAS {
 	
 
 	public boolean delete(int index, int threadIDX) {
-		if(refrences[index]%2 == 1)
-			return false;
-		if(Facade_Nova.DeleteReusedSlice(threadIDX, refrences[index], refrences,ref_base_offset+index*ref_scale)){
-			return true;
-		}
-		return false;
+		return Facade_Nova.DeleteReusedSlice(threadIDX, refrences[index], refrences,ref_base_offset+index*ref_scale);
 	}
 
 	

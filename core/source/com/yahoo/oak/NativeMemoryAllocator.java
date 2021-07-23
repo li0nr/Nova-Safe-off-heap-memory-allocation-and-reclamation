@@ -224,6 +224,8 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
         b.setID(blockID);
         this.currentBlock = b;
     }
+    
+    
 
     private long numberOfBlocks() {
         return idGenerator.get() - 1;

@@ -66,11 +66,9 @@ public class Facade_Nova {
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
 			 flag = false;
-		
-
 		 UNSAFE.compareAndSwapLong(obj, meta_offset, metadata, metadata |1);
-		 
-		 novaManager.release(block,offset,(int)len,idx); 
+		 if(flag)
+			 novaManager.release(block,offset,(int)len,idx); 
 		 return flag; 
 	}
 
