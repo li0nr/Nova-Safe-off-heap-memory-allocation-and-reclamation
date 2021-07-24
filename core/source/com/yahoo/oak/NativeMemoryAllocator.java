@@ -225,6 +225,9 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
         this.currentBlock = b;
     }
     
+    public void FreeNative() {
+    	((BlocksPool)blocksProvider).close();
+    }
     
 
     private long numberOfBlocks() {

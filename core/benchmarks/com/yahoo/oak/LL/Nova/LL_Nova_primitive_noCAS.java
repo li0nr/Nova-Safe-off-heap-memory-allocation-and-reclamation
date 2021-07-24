@@ -8,6 +8,7 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.Buff.Buff;
@@ -262,6 +263,25 @@ public class LL_Nova_primitive_noCAS<K,V> {
                     curr.next.get(marked);
                 }
                 return curr.key == Illegal_nu ? false : Facade_Nova.Compare(key, Kcm, curr.key) == 0 && !marked[0];
+        	}catch (NovaIllegalAccess e) {continue CmpFail;}
+    }
+    
+    public <R>R get(K key,  NovaR Reader, int tidx) {
+        boolean[] marked = {false};
+        CmpFail: while(true)
+        	try {
+                Node curr = head.next.getReference();
+                curr.next.get(marked);
+                while (curr != tail && Facade_Nova.Compare(key, Kcm, curr.key) < 0) {
+                    curr = curr.next.getReference();
+                    curr.next.get(marked);
+                }
+                boolean flag =  curr.key == Illegal_nu ? 
+                		false : Facade_Nova.Compare(key, Kcm, curr.key) == 0 && !marked[0];
+                R obj = null;
+                if(flag) 
+                	obj = (R) Facade_Nova.Read(Reader, curr.value);
+                return obj;
         	}catch (NovaIllegalAccess e) {continue CmpFail;}
     }
     

@@ -15,7 +15,9 @@ public class LL_Nova_primitive_noCAS_bench implements CompositionalLL<Buff,Buff>
 	public LL_Nova_primitive_noCAS_bench(){
 		
 	}
-	public Integer containsKey(final Buff key, int tidx) {return 0;}
+	public Integer containsKey(final Buff key, int tidx) {
+		return LL.get(key,Buff.DEFAULT_R, tidx);
+	}
 	
     public  boolean put(final Buff key,final Buff value,  int idx) {
     	return LL.add(key,value, idx);

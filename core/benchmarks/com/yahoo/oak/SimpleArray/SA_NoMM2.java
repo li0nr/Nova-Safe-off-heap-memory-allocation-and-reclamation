@@ -96,7 +96,9 @@ public class SA_NoMM2 {
 		return size;
 	}
 
-	
+	public void Clear() {
+		allocator.close();
+	}
 	private void EnsureCap() {
 		int newSize = Slices.length *2;
 		Slices = Arrays.copyOf(Slices, newSize);

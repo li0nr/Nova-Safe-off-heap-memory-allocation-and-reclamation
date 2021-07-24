@@ -32,6 +32,8 @@ public class SA_NoMM implements CompositionalSA<Buff>{
     }
 	
     public void clear(int size) {
+    	SA.getAlloc().close();
+    	SA.getAlloc().FreeNative();
     	SA = new com.yahoo.oak.SimpleArray.SA_NoMM2(size, Buff.DEFAULT_SERIALIZER);
     }
     

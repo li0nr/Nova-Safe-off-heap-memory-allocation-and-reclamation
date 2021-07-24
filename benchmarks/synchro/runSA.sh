@@ -4,7 +4,7 @@ output=${dir}/outputSA
 java=java
 jarfile="target/nova-synchrobench-0.0.1-SNAPSHOT.jar"
 
-thread="01 02 04 06 08 "
+thread="01 04 08 12 16 20 24 28 32"
 size="20000"
 keysize="1024"
 #writes="0 50"
