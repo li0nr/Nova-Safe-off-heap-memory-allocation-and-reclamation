@@ -158,31 +158,34 @@ public class SA_bench_Nova {
       	}
   	}
   
-//  @Warmup(iterations = LLParam.warmups)
-//  @Measurement(iterations = LLParam.iterations)
-//  @BenchmarkMode(Mode.AverageTime)
-//  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//  @Fork(value = 0)
-//  @OperationsPerInvocation(LLParam.LL_Size)
-//  @Benchmark
-//  public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//  	int i = 0;
-//  	while( i < BenchmarkState.size/ThreadState.threads) {
-//  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//  		switch(BenchmarkState.BenchmarkState_50_25_25.Functions_3()) {
-//  		case(1):
-//  	      	blackhole.consume(state.LL.contains(threadState.buff,threadState.i));
-//			break;
-//  		case(2):
-//  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
-//			break;
-//  		case(3):
-//  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
-//  		}
-//  		i++;
-//  		}
-//  	}
-//  
+  @Warmup(iterations = SAParam.warmups)
+  @Measurement(iterations = SAParam.iterations)
+  @BenchmarkMode(Mode.AverageTime)
+  @OutputTimeUnit(TimeUnit.MILLISECONDS)
+  @Fork(value = 0)
+  @OperationsPerInvocation(SAParam.LL_Size)
+  @Benchmark
+  public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+  	int i = 0;
+  	while( i < BenchmarkState.size/ThreadState.threads) {
+  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+  		switch(BenchmarkState.BenchmarkState_50_25_25.Functions_3()) {
+  		case(1):
+  	      	blackhole.consume(state.SA.get(threadState.rand.nextInt(BenchmarkState.size), 
+  	      			Buff.DEFAULT_R,threadState.i));
+			break;
+  		case(2):
+  	      	blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+  	      			,threadState.i));
+			break;
+  		case(3):
+  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+  	      			, threadState.buff,threadState.i));
+  		}
+  		i++;
+  		}
+  	}
+  
   @Warmup(iterations = SAParam.warmups)
   @Measurement(iterations = SAParam.iterations)
   @BenchmarkMode(Mode.AverageTime)
