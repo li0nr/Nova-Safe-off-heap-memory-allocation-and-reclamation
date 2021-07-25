@@ -14,10 +14,8 @@ public class SAParam {
 	static final int thread24=24;
 	static final int thread32=32;
  	
-	public static final int LL_Size = 1000;
-	
-	public static final int Limit = LL_Size/4;
-	public static final int range = 2500;
+	public static final int LL_Size = 1000_000;
+
 	public static final int forks = 0;
 }
 //java -jar -Xmx8g -XX:MaxDirectMemorySize=8g ./benchmarks/target/benchmarks.jar put -p numRows=500000 -prof stack

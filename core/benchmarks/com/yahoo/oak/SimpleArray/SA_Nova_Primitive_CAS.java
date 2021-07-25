@@ -11,6 +11,7 @@ import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
+import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak._Global_Defs;
 import com.yahoo.oak.Buff.Buff;
