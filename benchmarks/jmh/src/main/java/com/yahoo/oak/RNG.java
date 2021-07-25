@@ -1,12 +1,14 @@
 package com.yahoo.oak;
 
-import java.util.Map;
+import java.util.Random;
 
 public class RNG {
 
     private double[] distribution;
-
+    private Random rand;
+    
     public RNG(int size) {
+        rand = new Random();
         distribution = new double[size];
     }
 
@@ -15,21 +17,21 @@ public class RNG {
     }
 
     public int Functions_3() {
-        double rand = Math.random()*1000;
-        if(rand < distribution[0])
+    	int coin = rand.nextInt(1000);
+        if(coin < distribution[0])
         	return 1;
-        else if(rand < distribution[1])
+        else if(coin < distribution[1])
         	return 2;
-        else if(rand < distribution[2])
+        else if(coin < distribution[2])
         	return 3;
         return -1;
     }
     
     public int Functions_2() {
-        double rand = Math.random()*100;
-        if(rand < distribution[0])
+    	int coin = rand.nextInt(1000);
+        if(coin < distribution[0])
         	return 1;
-        else if(rand < distribution[1])
+        else if(coin < distribution[1])
         	return 2;
         return -1;
     }

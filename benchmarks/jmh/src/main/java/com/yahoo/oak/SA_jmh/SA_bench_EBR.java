@@ -47,7 +47,6 @@ public class SA_bench_EBR {
 	public static class BenchmarkState {
 
     	public static  int size  = SAParam.LL_Size;
-    	public static  NativeMemoryAllocator allocator;
         private SA_EBR_CAS_opt SA;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
@@ -78,11 +77,10 @@ public class SA_bench_EBR {
         @Setup(Level.Iteration)
         public void fill() {
     		Random rand = new Random(208);
-    		if(allocator != null)
-    			ParamBench.PrintMem(allocator);
-    		
-    	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	    
+    		if(SA != null) {
+    			ParamBench.PrintMem(SA.getAlloc());
+    			SA.getAlloc().FreeNative();
+    		}
     	    SA = new SA_EBR_CAS_opt(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
     	    
         	for (int i=0; i <size ; i++) {
