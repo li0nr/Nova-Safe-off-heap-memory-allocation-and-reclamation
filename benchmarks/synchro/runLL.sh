@@ -32,7 +32,7 @@ declare -A heap_limit=(
                        ["LL_Nova_primitive_noCAS_bench"]="10m"
 						
                        ["LL_NoMM_Synch"]="10m"
-                       ["LL_Synch"]="30m"
+                       ["LL_Synch"]="16358k"
                       )
 
 declare -A direct_limit=(						
@@ -141,9 +141,9 @@ benchClassPrefix="com.yahoo.oak"
 #LL_Nova_CAS_bench LL_Nova_noCAS_bench LL_Nova_primitive_CAS_bench LL_Nova_primitive_noCAS_bench 
 #LL_NoMM_Synch LL_Synch"
 
-benchs="LL_EBR_noCAS_bench LL_EBR_noCAS_opt_bench 
-		LL_HE_noCAS_bench  LL_HE_noCAS_opt_bench 
-		LL_Nova_CAS_bench  LL_Nova_primitive_CAS_bench 
+benchs="LL_EBR_noCAS_bench  
+		LL_HE_noCAS_bench   
+		LL_Nova_noCAS_bench  LL_Nova_primitive_noCAS_bench 
 		LL_NoMM_Synch LL_Synch"
 
 summary="${output}/summary.csv"

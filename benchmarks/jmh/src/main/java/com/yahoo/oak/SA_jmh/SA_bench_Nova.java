@@ -79,9 +79,9 @@ public class SA_bench_Nova {
         @Setup(Level.Iteration)
         public void fill() {
     		Random rand = new Random(208);
-    		if(allocator != null) {
-    			ParamBench.PrintMem(allocator);
-    			allocator.FreeNative();
+    		if(SA != null) {
+    			ParamBench.PrintMem(SA.getAlloc());
+    			SA.getAlloc().FreeNative();
     		}
     		    	    
     	    SA = new SA_Nova_CAS(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);

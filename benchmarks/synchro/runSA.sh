@@ -41,9 +41,9 @@ declare -A heap_limit=(
 						["SA_NoMM","25del-25put-50search"]="110m"
 						["SA_NoMM","50del-50put"]="110m"
 
-						["SA_GC","05del-05put-90search"]="1400m"
-						["SA_GC","25del-25put-50search"]="1400m"
-						["SA_GC","50del-50put"]="1500m"
+						["SA_GC","05del-05put-90search"]="1371m"
+						["SA_GC","25del-25put-50search"]="1371m"
+						["SA_GC","50del-50put"]="1371m"
 
 						
                       )
