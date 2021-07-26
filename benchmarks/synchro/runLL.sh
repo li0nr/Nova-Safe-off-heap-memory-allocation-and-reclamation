@@ -32,7 +32,7 @@ declare -A heap_limit=(
                        ["LL_Nova_primitive_noCAS_bench"]="10m"
 						
                        ["LL_NoMM_Synch"]="10m"
-                       ["LL_Synch"]="16358k"
+                       ["LL_Synch"]="18874370"
                       )
 
 declare -A direct_limit=(						
@@ -168,7 +168,7 @@ for scenario in ${!scenarios[@]}; do
           for t in ${thread}; do
             #for i in ${size}; do
               r=`echo "2*${benchSize}" | bc`
-              out=${output}/oak-${scenario}-${bench}-xmx${heapLimit}-DirectMeM${directMemSize}-t${t}-${gcAlg}.log
+              out=${output}/oak-${scenario}-${bench}-xmx${heapLimit}-Xms${heapLimit}-t${t}-${gcAlg}.log
               cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keySize} -v ${valSize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
               echo ${cmd}
               echo ${cmd} >> ${out}
