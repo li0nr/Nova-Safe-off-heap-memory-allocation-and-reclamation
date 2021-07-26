@@ -32,6 +32,8 @@ public class SA_GC implements CompositionalSA<Buff>{
     }
 	
     public void clear(int size) {
+    	SA = null;
+    	System.gc();
     	SA = new com.yahoo.oak.SimpleArray.SA_GC(size, Buff.CC);
     }
     

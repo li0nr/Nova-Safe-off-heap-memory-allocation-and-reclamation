@@ -45,7 +45,7 @@ public class SA_GC {
 		if(size == Slices.length) {
 			EnsureCap();//might be problematic 
 		}
-		Slices[size] = CC.Copy(e);
+		Slices[size] = e;
 		size++;
 		return true;
 	}
