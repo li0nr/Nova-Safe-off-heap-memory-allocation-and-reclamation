@@ -2,6 +2,7 @@ package com.yahoo.oak.LL.HE;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+import com.yahoo.oak.Facade_EBR;
 import com.yahoo.oak.Facade_HE;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
@@ -235,7 +236,7 @@ public class LL_HE_noCAS<K,V> {
 		        boolean flag = curr.key != null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0 && !marked[0];
 		        R obj = null;
 		        if (flag)
-		        	obj = (R)Reader.apply(curr.value.address+ curr.value.offset);
+		        	obj = (R) Facade_HE.Read(Reader, curr.value, tidx);
 		        return obj;
         	}catch (NovaIllegalAccess e) {continue CmpFail;}
         }

@@ -186,7 +186,7 @@ public class LL_EBR_noCAS <K,V>{
 		        boolean ret = curr.key == null? false: Facade_EBR.Compare(key, Kcm, curr.key, tidx)==0 && !marked[0];
 		        R obj = null;
 		        if(ret)
-		        	obj = (R) Facade_EBR.Read(Reader, curr.key, tidx);
+		        	obj = (R) Facade_EBR.Read(Reader, curr.value, tidx);
 		        return obj;
 	    	}catch(NovaIllegalAccess e) {continue CmpFail;}
 
