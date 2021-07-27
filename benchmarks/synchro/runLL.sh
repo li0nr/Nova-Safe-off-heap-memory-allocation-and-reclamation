@@ -4,10 +4,10 @@ output=${dir}/output
 java=java
 jarfile="target/nova-synchrobench-0.0.1-SNAPSHOT.jar"
 
-thread="01 02 04 06 08 "
+thread="01 04 08 12 16 20 24 28 32"
 size="20000"
-keysize="4"
-valuesize="4"
+keysize="1024"
+valuesize="16384"
 #writes="0 50"
 writes="0"
 warmup="30"
@@ -16,23 +16,23 @@ duration="15000"
 #gcAlgorithms="-XX:+UseParallelOldGC -XX:+UseConcMarkSweepGC -XX:+UseG1GC"
 
 declare -A heap_limit=(
-						["LL_EBR_CAS_bench"]="10m"
-						["LL_EBR_noCAS_bench"]="10m"
-						["LL_EBR_CAS_opt_bench"]="10m"
-						["LL_EBR_noCAS_opt_bench"]="10m"
+						["LL_EBR_CAS_bench"]="20m"
+						["LL_EBR_noCAS_bench"]="20m"
+						["LL_EBR_CAS_opt_bench"]="20m"
+						["LL_EBR_noCAS_opt_bench"]="20m"
 
-						["LL_HE_CAS_bench"]="10m"
-						["LL_HE_noCAS_bench"]="10m"
-						["LL_HE_CAS_opt_bench"]="10m"
-						["LL_HE_noCAS_opt_bench"]="10m"
+						["LL_HE_CAS_bench"]="20m"
+						["LL_HE_noCAS_bench"]="20m"
+						["LL_HE_CAS_opt_bench"]="20m"
+						["LL_HE_noCAS_opt_bench"]="20m"
 
-                       ["LL_Nova_CAS_bench"]="10m"
-                       ["LL_Nova_noCAS_bench"]="10m"
-                       ["LL_Nova_primitive_CAS_bench"]="10m"
-                       ["LL_Nova_primitive_noCAS_bench"]="10m"
+                       ["LL_Nova_CAS_bench"]="20m"
+                       ["LL_Nova_noCAS_bench"]="20m"
+                       ["LL_Nova_primitive_CAS_bench"]="20m"
+                       ["LL_Nova_primitive_noCAS_bench"]="20m"
 						
-                       ["LL_NoMM_Synch"]="10m"
-                       ["LL_Synch"]="18874370"
+                       ["LL_NoMM_Synch"]="20m"
+                       ["LL_Synch"]="217m"
                       )
 
 declare -A direct_limit=(						
@@ -75,45 +75,6 @@ declare -A becnh_size=(
                        ["LL_Synch"]="10000"
 					   )
 						
-declare -A key_size=(
-						["LL_EBR_CAS_bench"]="100"
-						["LL_EBR_noCAS_bench"]="100"
-						["LL_EBR_CAS_opt_bench"]="100"
-						["LL_EBR_noCAS_opt_bench"]="100"
-
-						["LL_HE_CAS_bench"]="100"
-						["LL_HE_noCAS_bench"]="100"
-						["LL_HE_CAS_opt_bench"]="100"
-						["LL_HE_noCAS_opt_bench"]="100"
-
-                       ["LL_Nova_CAS_bench"]="100"
-                       ["LL_Nova_noCAS_bench"]="100"
-                       ["LL_Nova_primitive_CAS_bench"]="100"
-                       ["LL_Nova_primitive_noCAS_bench"]="100"
-						
-                       ["LL_NoMM_Synch"]="100"
-                       ["LL_Synch"]="100"
-					   
-					   )
-
-declare -A val_size=(						["LL_EBR_CAS_bench"]="1024"
-						["LL_EBR_noCAS_bench"]="1024"
-						["LL_EBR_CAS_opt_bench"]="1024"
-						["LL_EBR_noCAS_opt_bench"]="1024"
-
-						["LL_HE_CAS_bench"]="1024"
-						["LL_HE_noCAS_bench"]="1024"
-						["LL_HE_CAS_opt_bench"]="1024"
-						["LL_HE_noCAS_opt_bench"]="1024"
-
-                       ["LL_Nova_CAS_bench"]="1024"
-                       ["LL_Nova_noCAS_bench"]="1024"
-                       ["LL_Nova_primitive_CAS_bench"]="1024"
-                       ["LL_Nova_primitive_noCAS_bench"]="1024"
-						
-                       ["LL_NoMM_Synch"]="1024"
-                       ["LL_Synch"]="1024"
-)
                         
                         
 if [ ! -d "${output}" ]; then
@@ -143,7 +104,8 @@ benchClassPrefix="com.yahoo.oak"
 
 benchs="LL_EBR_noCAS_bench  
 		LL_HE_noCAS_bench   
-		LL_Nova_noCAS_bench  LL_Nova_primitive_noCAS_bench 
+		LL_Nova_noCAS_bench 
+		LL_Nova_primitive_noCAS_bench 
 		LL_NoMM_Synch LL_Synch"
 
 summary="${output}/summary.csv"
@@ -158,18 +120,16 @@ for scenario in ${!scenarios[@]}; do
     heapSize="${heap_limit[${bench}]}"
     directMemSize="${direct_limit[${bench}]}"
     benchSize="${becnh_size[${bench}]}"
-	keySize="${key_size[${bench}]}"
-	valSize="${val_size[${bench}]}"
     for heapLimit in ${heapSize}; do
       #for gcAlg in ${gcAlgorithms}; do
         gcAlg=""
-        javaopt="-server -Xmx${heapLimit} -XX:MaxDirectMemorySize=${directMemSize} ${gcAlg}"
+        javaopt="-server -Xmx${heapLimit}"
         for write in ${writes}; do
           for t in ${thread}; do
             #for i in ${size}; do
               r=`echo "2*${benchSize}" | bc`
               out=${output}/oak-${scenario}-${bench}-xmx${heapLimit}-Xms${heapLimit}-t${t}-${gcAlg}.log
-              cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keySize} -v ${valSize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
+              cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keysize} -v ${valuesize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
               echo ${cmd}
               echo ${cmd} >> ${out}
               ${cmd} >> ${out} 2>&1
