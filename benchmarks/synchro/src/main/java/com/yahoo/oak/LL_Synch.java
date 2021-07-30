@@ -32,6 +32,7 @@ public class LL_Synch implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
+    	LL.Size();
     	LL = null;
     	System.gc();
     	LL = new HarrisLinkedList<Buff,Buff>(Buff.CC,Buff.CC);

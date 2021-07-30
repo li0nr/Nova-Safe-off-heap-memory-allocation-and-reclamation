@@ -33,7 +33,7 @@ import com.yahoo.oak.LL.HE.LL_HE_noCAS;
 
 
 
-public class LL_bench_EBR {
+public class LL_EBR {
 	
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
@@ -199,7 +199,7 @@ public class LL_bench_EBR {
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(LL_bench_EBR.class.getSimpleName())
+	    			.include(LL_EBR.class.getSimpleName())
 	                .forks(LLParam.forks)
 	                .threads(1)
 	                .build();

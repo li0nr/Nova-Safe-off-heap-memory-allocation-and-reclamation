@@ -204,4 +204,31 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	            }
 	        }       
 	    }
+	    
+	    public boolean FastFill(E key,V value, int tidx) {	
+	        while (true) {
+	            // On Harris paper, pred is named left_node and curr is right_node
+	            final Node<E,V> pred = head;
+	            final Node<E,V> curr = head.next.getReference();
+	            
+	            final Node<E,V> newNode = new Node(key, value);
+	            newNode.next.set(curr, false);
+	            if (pred.next.compareAndSet(curr, newNode, false, false)) {
+	            	return true;
+	            	}
+	            return false;
+	        }
+	    }
+	    
+	    public int Size() {
+	    	int i =0;
+	        boolean[] marked = {false};
+	        Node<E,V> curr = head.next.getReference();
+	        while (curr != tail) {
+	        	i ++;
+	            curr = curr.next.getReference();
+	            curr.next.get(marked);
+	        }
+	        return i;
+	    }
 }

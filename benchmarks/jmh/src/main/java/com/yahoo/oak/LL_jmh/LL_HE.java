@@ -29,11 +29,10 @@ import com.yahoo.oak.RNG;
 
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HE.LL_HE_noCAS;
-import com.yahoo.oak.LL.NoMM.HarrisLinkedListNoMM;
 
 
 
-public class LL_bench_NoMM {
+public class LL_HE {
 	
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
@@ -42,7 +41,7 @@ public class LL_bench_NoMM {
 
     	public static  int size  = LLParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private HarrisLinkedListNoMM<Buff, Buff> LL ;
+        private LL_HE_noCAS<Buff, Buff> LL ;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -77,7 +76,7 @@ public class LL_bench_NoMM {
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    LL = new HarrisLinkedListNoMM<Buff, Buff>(allocator,
+    	    LL = new LL_HE_noCAS<Buff, Buff>(allocator,
     	    		Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,
     	    		Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	    
@@ -199,7 +198,7 @@ public class LL_bench_NoMM {
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(LL_bench_NoMM.class.getSimpleName())
+	    			.include(LL_HE.class.getSimpleName())
 	                .forks(LLParam.forks)
 	                .threads(1)
 	                .build();

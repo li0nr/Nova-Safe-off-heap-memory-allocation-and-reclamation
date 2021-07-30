@@ -33,8 +33,8 @@ import com.yahoo.oak.BST_jmh.BSTParam;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
 import com.yahoo.oak.LL.Nova.LL_Nova_primitive_CAS;
-import com.yahoo.oak.LL_jmh.LL_bench_HE.BenchmarkState;
-import com.yahoo.oak.LL_jmh.LL_bench_HE.ThreadState;
+import com.yahoo.oak.LL_jmh.LL_HE.BenchmarkState;
+import com.yahoo.oak.LL_jmh.LL_HE.ThreadState;
 import com.yahoo.oak.ParamBench;
 
 
