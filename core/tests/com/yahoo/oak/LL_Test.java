@@ -66,6 +66,7 @@ public class LL_Test {
 
 	    assert List.contains(x,0) == false; 
 	    assert List.contains(z,0) == false; 
+	    List.Print();
 	}
 	
 	@Test

@@ -146,7 +146,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	                    succ = curr.next.get(marked);
 	                }
 	        		
-	                if (curr == tail || curr.key.compareTo(key) <= 0) {
+	                if (curr == tail || curr.key.compareTo(key) >= 0) {
 	                    return new Window<E,V>(pred, curr);
 	                }
 	                pred = curr;
@@ -160,7 +160,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	        boolean[] marked = {false};
 	        Node<E,V> curr = head.next.getReference();
 	        curr.next.get(marked);
-	        while (curr != tail && curr.key.compareTo(key) > 0) {
+	        while (curr != tail && curr.key.compareTo(key) < 0) {
 	            curr = curr.next.getReference();
 	            curr.next.get(marked);
 	        }
@@ -176,7 +176,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	        boolean[] marked = {false};
 	        Node<E,V> curr = head.next.getReference();
 	        curr.next.get(marked);
-	        while (curr != tail && curr.key.compareTo(key) > 0) {
+	        while (curr != tail && curr.key.compareTo(key) < 0) {
 	            curr = curr.next.getReference();
 	            curr.next.get(marked);
 	        }
