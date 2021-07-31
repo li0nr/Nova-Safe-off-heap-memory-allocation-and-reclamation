@@ -130,7 +130,12 @@ public class Test {
         final Random localRand = S_RANDOM.get();
         int v = 0;
 
-        for (long i = size; i > 0; ) {
+        long i = size;
+        if(benchType == Type.LL) {
+        	i -=LL.Size();
+        }
+        for ( ;i > 0; ) {
+        	
             v = (Parameters.confKeyDistribution == Parameters.KeyDist.INCREASING)
                     ? v + 1 : localRand.nextInt(range);
             Buff key = new Buff(Parameters.confKeySize);
@@ -146,7 +151,7 @@ public class Test {
 	            }   
 	            break;
 			case LL:
-	            if (LL.Fill(key,val,0) == true) {
+				if (LL.Fill(key,val,0) == true) {
 	                i--;
 	            } 
 	            break;

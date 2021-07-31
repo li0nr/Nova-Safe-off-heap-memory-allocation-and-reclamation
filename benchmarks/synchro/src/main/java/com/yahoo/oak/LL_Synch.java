@@ -31,11 +31,12 @@ public class LL_Synch implements CompositionalLL<Buff,Buff>{
     	return 0;
     }
     
+    public int Size() {
+    	return LL.Size();
+    }
+    
     public void clear() {
-    	LL.Size();
-    	LL = null;
-    	System.gc();
-    	LL = new HarrisLinkedList<Buff,Buff>(Buff.CC,Buff.CC);
+
     }
     
     public void print() {

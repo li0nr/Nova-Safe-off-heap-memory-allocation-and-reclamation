@@ -15,7 +15,7 @@ public class LLParam {
 	static final int thread32=32;
  	
 	public static final int LL_Size = 10000;
-	public static final int OpsInOperations = 100 * LL_Size;
+	public static final int OpsInOperations = 10 * LL_Size;
 	
 	public static final int Limit = LL_Size/4;
 	public static final int range = 2500;

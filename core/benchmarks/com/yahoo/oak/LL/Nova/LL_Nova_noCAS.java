@@ -6,6 +6,7 @@ import com.yahoo.oak.Facade;
 import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.Facade_Slice.Facade_slice;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noCAS.Node;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
@@ -294,5 +295,15 @@ public class LL_Nova_noCAS<K,V> {
                 }
             }  
         }catch(NovaIllegalAccess e) {continue CmpFail;}
+    }
+    
+    public int Size() {
+    	int i = 0;
+        Node curr = head.next.getReference();
+        while (curr != tail ) {
+           curr = curr.next.getReference();
+           i ++;
+        }
+        return i;
     }
 }

@@ -31,6 +31,9 @@ public class LL_EBR_noCAS_bench implements CompositionalLL<Buff,Buff>{
     	return LL.remove(key, idx);
     }
     
+    public int Size() {
+    	return LL.Size();
+    }
     
     public long allocated() {
     	return allocator.allocated();

@@ -20,6 +20,8 @@ public interface CompositionalLL<K,V> {
     
     public void clear ();
     
+    public int Size();
+    
     public void print();
     
 }

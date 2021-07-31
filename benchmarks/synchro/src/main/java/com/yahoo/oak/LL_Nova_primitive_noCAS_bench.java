@@ -35,6 +35,10 @@ public class LL_Nova_primitive_noCAS_bench implements CompositionalLL<Buff,Buff>
     	return allocator.allocated();
     }
     
+    public int Size() {
+    	return LL.Size();
+    }
+    
     public void clear() {
     	allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
     	mng = new NovaManager(allocator);

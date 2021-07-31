@@ -30,8 +30,6 @@ import com.yahoo.oak.RNG;
 
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HarrisLinkedList;
-import com.yahoo.oak.LL.EBR.LL_EBR_noCAS;
-import com.yahoo.oak.LL.HE.LL_HE_noCAS;
 
 
 
@@ -76,9 +74,7 @@ public class LL_GC {
     		Random rand = new Random(new Random().nextInt());
     		if(allocator != null)
     			ParamBench.PrintMem(allocator);
-    		
-    	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	    
+    		    	    
     	    LL = new HarrisLinkedList<Buff, Buff>(Buff.CC,Buff.CC);
     	    
         	for (int i=0; i < size ; i++) {

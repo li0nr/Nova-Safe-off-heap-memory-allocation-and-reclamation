@@ -29,6 +29,7 @@ import com.yahoo.oak.RNG;
 import com.yahoo.oak.BST_jmh.BSTParam;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.Nova.LL_Nova_noCAS;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noCAS;
 import com.yahoo.oak.ParamBench;
 
 
@@ -39,9 +40,9 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 
-    	public static  int size  = BSTParam.BST_SIZE;
+    	public static  int size  = LLParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private LL_Nova_noCAS<Buff,Buff> LL ;
+        private LL_Nova_primitive_noCAS<Buff,Buff> LL ;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -76,7 +77,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
     		
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager mng = new NovaManager(allocator);
-    	    LL = new LL_Nova_noCAS<Buff,Buff>(mng, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+    	    LL = new LL_Nova_primitive_noCAS<Buff,Buff>(mng, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	    
         	for (int i=0; i < size ; i++) {
         		int keyval = rand.nextInt(2*size);
@@ -126,7 +127,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(BSTParam.BST_SIZE)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void search90_delete5_insert5(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
@@ -151,7 +152,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(BSTParam.BST_SIZE)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
@@ -176,7 +177,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(BSTParam.BST_SIZE)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
@@ -197,7 +198,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
     
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
-    			.include(LL_Nova_primitive.class.getSimpleName())
+    			.include(LL_Nova.class.getSimpleName())
                 .forks(BSTParam.forks)
                 .threads(1)
                 .build();

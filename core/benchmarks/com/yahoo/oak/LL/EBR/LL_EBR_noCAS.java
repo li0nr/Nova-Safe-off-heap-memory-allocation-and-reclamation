@@ -236,6 +236,16 @@ public class LL_EBR_noCAS <K,V>{
 	    	}catch(NovaIllegalAccess e) {continue CmpFail;}
 	    }
 	    
+	    public int Size() {
+	    	int i = 0;
+	        Node curr = head.next.getReference();
+	        while (curr != tail ) {
+	           curr = curr.next.getReference();
+	           i ++;
+	        }
+	        return i;
+	    }
+	    
 	    public void ForceCleanUp() {
 	    	Facade_EBR.ForceCleanUp();
 	    }

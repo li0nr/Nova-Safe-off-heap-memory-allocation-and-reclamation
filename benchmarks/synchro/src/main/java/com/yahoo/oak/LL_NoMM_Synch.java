@@ -34,6 +34,10 @@ public class LL_NoMM_Synch implements CompositionalLL<Buff,Buff>{
     	return allocator.allocated();
     }
     
+    public int Size() {
+    	return LL.Size();
+    }
+    
     public void clear() {
     	allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
     	LL = new HarrisLinkedListNoMM<Buff,Buff>(allocator,

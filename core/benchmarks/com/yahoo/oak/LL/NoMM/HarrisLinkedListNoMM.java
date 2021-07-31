@@ -231,6 +231,16 @@ public class HarrisLinkedListNoMM <K,V>{
 	        }       
 	    }
 	    
+	    public int Size() {
+	    	int i = 0;
+	        Node curr = head.next.getReference();
+	        while (curr != tail ) {
+	           curr = curr.next.getReference();
+	           i ++;
+	        }
+	        return i;
+	    }
+	    
 	    public void Print() {
 	    	Node curr = head.next.getReference();
 	        while (curr != tail ) {

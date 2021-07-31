@@ -30,9 +30,12 @@ public class LL_HE_noCAS_bench implements CompositionalLL<Buff,Buff>{
     	return LL.remove(key, idx);
     }
     
-    
     public long allocated() {
     	return allocator.allocated();
+    }
+    
+    public int Size() {
+    	return LL.Size();
     }
     
     public void clear() {

@@ -39,7 +39,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 
-    	public static  int size  = BSTParam.BST_SIZE;
+    	public static  int size  = LLParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
         private LL_Nova_noCAS<Buff,Buff> LL ;
 
@@ -126,7 +126,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(BSTParam.BST_SIZE)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void search90_delete5_insert5(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
@@ -151,7 +151,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(BSTParam.BST_SIZE)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
@@ -176,7 +176,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(BSTParam.BST_SIZE)
+  @OperationsPerInvocation(LLParam.LL_Size)
   @Benchmark
   public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
