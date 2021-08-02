@@ -88,10 +88,10 @@ benchClassPrefix="com.yahoo.oak"
 #LL_Nova_CAS_bench LL_Nova_noCAS_bench LL_Nova_primitive_CAS_bench LL_Nova_primitive_noCAS_bench 
 #LL_NoMM_Synch LL_Synch"
 
-benchs="  
-		   
-		 
-		 
+benchs="LL_EBR_noCAS_bench  
+		LL_HE_noCAS_bench   
+		LL_Nova_noCAS_bench 
+		LL_Nova_primitive_noCAS_bench 
 		LL_Nova_Magic_noCAS_bench
 		LL_NoMM_Synch LL_Synch"
 
