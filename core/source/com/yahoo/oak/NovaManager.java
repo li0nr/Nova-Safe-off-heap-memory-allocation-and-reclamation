@@ -9,6 +9,7 @@ package com.yahoo.oak;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,8 +17,10 @@ import java.util.concurrent.atomic.AtomicLongArray;
 
 
 public class NovaManager implements MemoryManager {
-    static final int INVALID_SLICE = -1;    
-    static final int HEADER_SIZE = Long.BYTES;
+    static final int INVALID_SLICE 		= -1;    
+    static final int HEADER_SIZE 		= Long.BYTES;
+    static final int MAGIC_SIZE 		= Long.BYTES;
+    static final long MAGIC_NUM = UUID.randomUUID().getLeastSignificantBits();
     static final int IDENTRY = 0;
     static final int REFENTRY = 1;
     
@@ -70,6 +73,12 @@ public class NovaManager implements MemoryManager {
         boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
         assert allocated;
         s.setHeader(globalNovaNumber.get(),size);
+    }
+    
+    public void allocate_Magic(NovaSlice s, int size) {
+        boolean allocated = allocator.allocate(s, size+ HEADER_SIZE + MAGIC_SIZE);
+        assert allocated;
+        s.setHeader_Magic(globalNovaNumber.get(),size);
     }
     
     public void release(int block, int offset, int len, int idx) {
@@ -127,6 +136,12 @@ public class NovaManager implements MemoryManager {
     
     }
     
+    public NovaSlice getSlice_Magic(int size,int ThreadIdx) {
+    	NovaSlice s = Slices[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING];
+    	allocate_Magic(s, size);
+    	return s;
+    
+    }
     public NovaSlice privateSlice(int ThreadIdx) {
     	return Slices[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING];
     }

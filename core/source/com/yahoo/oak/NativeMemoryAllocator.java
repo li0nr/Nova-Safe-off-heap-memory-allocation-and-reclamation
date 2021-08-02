@@ -6,6 +6,9 @@
 
 package com.yahoo.oak;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -229,6 +232,34 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
     	((BlocksPool)blocksProvider).close();
     }
     
+    public void deFrag() {
+    	Iterator<NovaSlice> iter = NovafreeList.iterator();
+    	ArrayList<NovaSliceDefrag> toClear = new ArrayList<>();
+    	TreeSet<NovaSliceDefrag> defragList = new TreeSet<>();
+    	while (iter.hasNext()) {
+    		NovaSlice curr=iter.next();
+    		if(NovafreeList.remove(curr))
+    			defragList.add(new NovaSliceDefrag(curr));
+    	}
+    	Iterator <NovaSliceDefrag> iter2 = defragList.iterator();
+    	NovaSliceDefrag prev= null;
+    	while (iter2.hasNext()) { 	
+    		NovaSliceDefrag curr=iter2.next();
+    		if(prev != null && prev.CheckForMatch(curr)) {
+    			//UnsafeUtils.unsafe.putInt(curr.getMetadataAddress(),0); //to nullify we need the buffer to be attached to slice
+    			UnsafeUtils.unsafe.putInt(blocksArray[curr.blockID].getAddress()+curr.offset,0);
+    			//when merged with somebody and the header is in the middle of the slice then we put the Magic number to 0
+    			prev.setLenght(prev.length+curr.length);
+    			toClear.add(curr);
+    		}
+    		prev = curr;
+    	}
+    	defragList.removeAll(toClear);
+    	iter2 = defragList.iterator();
+    	while (iter2.hasNext()) { 	
+    		NovafreeList.add(iter2.next());
+    	}
+    }
 
     private long numberOfBlocks() {
         return idGenerator.get() - 1;

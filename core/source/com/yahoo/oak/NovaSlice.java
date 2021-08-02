@@ -73,6 +73,18 @@ public class NovaSlice implements  Comparable<NovaSlice> {
     	
     	UnsafeUtils.unsafe.putLong(address+offset, header);
 	}
+    
+    void setHeader_Magic(int version, int size) {
+    	long header_slice	= (long)(size+NovaManager.HEADER_SIZE) <<24 & 0xFFFFF000;
+    	int  newVer			= (version<<1 | 0) & 0xFFF;
+    	long header			= header_slice | newVer ;
+    	
+    	UnsafeUtils.unsafe.putLong(address+offset, NovaManager.MAGIC_NUM); //Magic number changes
+    	UnsafeUtils.unsafe.putLong(address+offset+NovaManager.MAGIC_SIZE, header); //Magic number changes		
+    }
+    
+    
+
 
     /* ------------------------------------------------------------------------------------
      * Allocation info getters
@@ -102,6 +114,10 @@ public class NovaSlice implements  Comparable<NovaSlice> {
 
     long getVersion() {
     	return UnsafeUtils.unsafe.getLong(address+offset)& 0xFFFFFF;
+	}
+
+    long getVersionMagic() {
+    	return UnsafeUtils.unsafe.getLong(address+offset+NovaManager.MAGIC_SIZE)& 0xFFFFFF;
 	}
     
     long getRef() {
