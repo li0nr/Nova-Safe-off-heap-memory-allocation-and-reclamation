@@ -16,49 +16,49 @@ duration="15000"
 #gcAlgorithms="-XX:+UseParallelOldGC -XX:+UseConcMarkSweepGC -XX:+UseG1GC"
 
 declare -A heap_limit=(
-						["LL_EBR_CAS_bench"]="10m"
-						["LL_EBR_noCAS_bench"]="10m"
-						["LL_EBR_CAS_opt_bench"]="10m"
-						["LL_EBR_noCAS_opt_bench"]="10m"
+						["LL_EBR_CAS_bench"]="15m"
+						["LL_EBR_noCAS_bench"]="15m"
+						["LL_EBR_CAS_opt_bench"]="15m"
+						["LL_EBR_noCAS_opt_bench"]="15m"
 
-						["LL_HE_CAS_bench"]="10m"
-						["LL_HE_noCAS_bench"]="10m"
-						["LL_HE_CAS_opt_bench"]="10m"
-						["LL_HE_noCAS_opt_bench"]="10m"
+						["LL_HE_CAS_bench"]="15m"
+						["LL_HE_noCAS_bench"]="15m"
+						["LL_HE_CAS_opt_bench"]="15m"
+						["LL_HE_noCAS_opt_bench"]="15m"
 
-                       ["LL_Nova_CAS_bench"]="10m"
-                       ["LL_Nova_noCAS_bench"]="10m"
-                       ["LL_Nova_primitive_CAS_bench"]="10m"
-                       ["LL_Nova_primitive_noCAS_bench"]="10m"
+                       ["LL_Nova_CAS_bench"]="15m"
+                       ["LL_Nova_noCAS_bench"]="15m"
+                       ["LL_Nova_primitive_CAS_bench"]="15m"
+                       ["LL_Nova_primitive_noCAS_bench"]="15m"
 					   
-					   ["LL_Nova_Magic_noCAS_bench"]="10m"
+					   ["LL_Nova_Magic_noCAS_bench"]="15m"
 
 						
-                       ["LL_NoMM_Synch"]="10m"
-                       ["LL_Synch"]="79m"
+                       ["LL_NoMM_Synch"]="15m"
+                       ["LL_Synch"]="118m"
                       )
 
 
 declare -A becnh_size=(						
-						["LL_EBR_CAS_bench"]="32115"
-						["LL_EBR_noCAS_bench"]="32115"
-						["LL_EBR_CAS_opt_bench"]="32115"
-						["LL_EBR_noCAS_opt_bench"]="32115"
+						["LL_EBR_CAS_bench"]="64115"
+						["LL_EBR_noCAS_bench"]="64115"
+						["LL_EBR_CAS_opt_bench"]="64115"
+						["LL_EBR_noCAS_opt_bench"]="64115"
 
-						["LL_HE_CAS_bench"]="32115"
-						["LL_HE_noCAS_bench"]="32115"
-						["LL_HE_CAS_opt_bench"]="32115"
-						["LL_HE_noCAS_opt_bench"]="32115"
+						["LL_HE_CAS_bench"]="64115"
+						["LL_HE_noCAS_bench"]="64115"
+						["LL_HE_CAS_opt_bench"]="64115"
+						["LL_HE_noCAS_opt_bench"]="64115"
 
-                       ["LL_Nova_CAS_bench"]="32115"
-                       ["LL_Nova_noCAS_bench"]="32115"
-                       ["LL_Nova_primitive_CAS_bench"]="32115"
-                       ["LL_Nova_primitive_noCAS_bench"]="32115"
-					   ["LL_Nova_Magic_noCAS_bench"]="32115"
+                       ["LL_Nova_CAS_bench"]="64115"
+                       ["LL_Nova_noCAS_bench"]="64115"
+                       ["LL_Nova_primitive_CAS_bench"]="64115"
+                       ["LL_Nova_primitive_noCAS_bench"]="64115"
+					   ["LL_Nova_Magic_noCAS_bench"]="64115"
 
 						
-                       ["LL_NoMM_Synch"]="32115"
-                       ["LL_Synch"]="32115"
+                       ["LL_NoMM_Synch"]="64115"
+                       ["LL_Synch"]="64115"
 					   )
 						
                         
