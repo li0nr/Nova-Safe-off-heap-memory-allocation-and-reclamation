@@ -117,16 +117,22 @@ public class Facade_Slice {
 		if(S.version%2 == DELETED)
 			return false;		
 		
-		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta		
+		int localBlock = S.blockID;
+		int localOffset = S.offset;
+		int localLenght = S.length;
+		long localAddress = S.address;
+		
+		long SliceHeaderAddress= localAddress+localOffset;
 
-		long SliceHeaderAddress= S.address + S.offset;
+		long OffHeapMetaData= UNSAFE.getLong(SliceHeaderAddress);//reads off heap meta		
+
 
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
 			 return false;
-				 
-		 novaManager.release(S.blockID, S.offset, S.length,idx); 
-		 return true; 
+		
+		novaManager.release(localBlock, localOffset, localLenght,idx); 
+		return true; 
 	}
 
 

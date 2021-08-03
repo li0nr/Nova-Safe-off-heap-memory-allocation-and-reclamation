@@ -125,7 +125,7 @@ public class LL_Nova_primitive_noCAS<K,V> {
                 final Node curr = window.curr;
                 if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Kcm, curr.key) == 0) {
                 	Facade_Nova.WriteFull(Vsr, value, curr.value, idx);
-                    return false;
+                    return true;
                 } else {
 
                     long OffKRef = Facade_Nova.WriteFast(Ksr, key, Facade_Nova.AllocateSlice(null, key_offset,
