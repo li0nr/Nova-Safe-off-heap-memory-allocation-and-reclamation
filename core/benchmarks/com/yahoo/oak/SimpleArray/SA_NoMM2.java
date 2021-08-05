@@ -15,7 +15,7 @@ public class SA_NoMM2 {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator((long)10 * _Global_Defs.MAXSIZE);
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator((long)10 * ((long) Integer.MAX_VALUE) * 8);
 	
     static final long slices_base_offset;
     static final long slices_scale;

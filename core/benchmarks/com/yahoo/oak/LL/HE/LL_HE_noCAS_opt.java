@@ -11,6 +11,7 @@ import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.HazardEras.HEslice;
+import com.yahoo.oak.LL.HE.LL_HE_noCAS.Node;
 /**
  * <h1>HarrisAMRLinkedList</h1>
  * Harris's Linked List with AtomicMarkableReference.
@@ -269,6 +270,48 @@ public class LL_HE_noCAS_opt<K,V> {
 	        }catch (NovaIllegalAccess e) {continue CmpFail;}
         }
     
+    
+    public int Size() {
+    	int i = 0;
+        Node curr = head.next.getReference();
+        while (curr != tail ) {
+           curr = curr.next.getReference();
+           i ++;
+        }
+        return i;
+    }
+    
+    public boolean Fill(K key, V value , int tidx) {
+        CmpFail: while(true)
+        try{
+        while (true) {
+            final Window window = find(key, tidx);
+            // On Harris paper, pred is named left_node and curr is right_node
+            final Node pred = window.pred;
+            final Node curr = window.curr;
+            if (curr.key!= null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
+            	return false;
+            } else {
+            	HEslice oKey  = HE.allocate( Ksr.calculateSize(key));
+        		Ksr.serialize(key, oKey.address+oKey.offset);
+            	HEslice oValue  = HE.allocate( Vsr.calculateSize(value));
+        		Vsr.serialize(value, oValue.address+oValue.offset);
+        		
+        		final Node newNode = new Node(oKey, oValue);
+        		
+                newNode.next.set(curr, false);
+                if (pred.next.compareAndSet(curr, newNode, false, false)) {
+                	HE.clear(tidx);
+                    return true;
+                }
+                else {
+                	HE.fastFree(newNode.key);
+                	HE.fastFree(newNode.value);
+                }
+            }
+        }       
+	}catch(NovaIllegalAccess e) {continue CmpFail;}
+}
     
 	public HazardEras getHE() {
 		return HE;
