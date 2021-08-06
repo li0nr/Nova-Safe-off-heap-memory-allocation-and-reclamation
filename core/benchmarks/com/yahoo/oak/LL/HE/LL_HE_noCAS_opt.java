@@ -239,20 +239,22 @@ public class LL_HE_noCAS_opt<K,V> {
 		        Node curr = head.next.getReference();
 		        curr.next.get(marked);
 		        HEslice access = HE.get_protected(curr.key, tidx);
-                if(access == null)
+                if(access == null && curr != tail )
                 	throw new NovaIllegalAccess();
 		        while (curr != tail && Kcm.compareKeys(access.address + access.offset, key) < 0) {
 		        	curr = curr.next.getReference();
 		            curr.next.get(marked);
 		            access = HE.get_protected(curr.key, tidx);
-	                if(access == null)
+	                if(access == null && curr != tail)
 	                	throw new NovaIllegalAccess();
 		        }
 		        boolean flag = curr.key != null && Kcm.compareKeys(access.address + access.offset, key) == 0 && !marked[0];
 		        HE.clear(tidx);
+		        access = HE.get_protected(curr.value, tidx);
 		        R obj = null;
 		        if (flag)
 		        	obj = (R)Reader.apply(access.address+ access.offset);
+		        HE.clear(tidx);
 		        return obj;
         	}catch (NovaIllegalAccess e) {continue CmpFail;}
         }
