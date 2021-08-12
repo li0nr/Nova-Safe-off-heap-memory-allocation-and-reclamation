@@ -38,7 +38,7 @@ public class SA_HE implements CompositionalSA<Buff>{
 	
     public void clear(int size) {
     	SA.close();
-    	SA = new SA_HE_CAS_opt(Buff.DEFAULT_SERIALIZER);
+    	SA = new SA_HE_CAS_opt(size,Buff.DEFAULT_SERIALIZER);
     }
     
     public void print() {
