@@ -112,4 +112,7 @@ public class SA_HE_CAS_opt {
 		return allocator;
 	}
 	
+	public void close() {
+		allocator.close();
+	}
 }

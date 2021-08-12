@@ -111,4 +111,7 @@ public class SA_Nova_Primitive_CAS {
 		return allocator;
 	}
 	
+	public void close() {
+		allocator.close();
+	}
 }

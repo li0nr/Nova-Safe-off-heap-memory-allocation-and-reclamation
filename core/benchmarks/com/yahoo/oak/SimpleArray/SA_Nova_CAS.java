@@ -76,4 +76,7 @@ public class SA_Nova_CAS {
 		return allocator;
 	}
 	
+	public void close() {
+		allocator.close();
+	}
 }

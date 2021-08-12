@@ -33,6 +33,7 @@ public class SA_Nova_primitive implements CompositionalSA<Buff>{
     }
 	
     public void clear(int size) {
+    	SA.close();
     	SA = new SA_Nova_Primitive_CAS(size, Buff.DEFAULT_SERIALIZER);
     }
     
