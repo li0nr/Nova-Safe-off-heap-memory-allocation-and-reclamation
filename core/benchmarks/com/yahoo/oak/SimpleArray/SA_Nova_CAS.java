@@ -116,12 +116,13 @@ public class SA_Nova_CAS {
 		
 		@Override
 		public void run() {
-			int v = localRanom.nextInt();
 			int i = 0;
+			int v ;
 	        Buff key = new Buff(1024);
-	        key.set(v);
-	        
-			while( i < 1_000_000) {			
+
+			while( i < 1_000_000) {		
+				v = localRanom.nextInt();
+		        key.set(v);	
 				array[idx*1_000_000 + i] = new Facade_slice();
 				Facade_Slice.AllocateSlice(Slices[idx*1_000_000 + i],srZ.calculateSize(key), idx);
 				Facade_Slice.WriteFast(srZ,key,Slices[idx*1_000_000 + i],idx);

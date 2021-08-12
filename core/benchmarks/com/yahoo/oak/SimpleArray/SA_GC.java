@@ -11,8 +11,6 @@ import sun.misc.Unsafe;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.Buff.Buff.GCReader;
-import com.yahoo.oak.benchmarks.BenchmarkConcurrent.ReaderThread;
-import com.yahoo.oak.benchmarks.BenchmarkConcurrent.ReaderThreadSerial;
 
 public class SA_GC {
 	
@@ -128,12 +126,13 @@ public class SA_GC {
 		
 		@Override
 		public void run() {
-			int v = localRanom.nextInt();
 			int i = 0;
-	        Buff key = new Buff(1024);
-	        key.set(v);
-	        
-			while( i < 1_000_000) {			
+			int v ;
+   
+			while( i < 1_000_000) {		
+				v = localRanom.nextInt();
+		        Buff key = new Buff(1024);
+		        key.set(v);
 				array[idx*1_000_000 + i] = key;
 				i++;
 				}

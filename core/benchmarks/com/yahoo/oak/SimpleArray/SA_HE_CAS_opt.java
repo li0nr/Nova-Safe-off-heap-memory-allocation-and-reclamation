@@ -152,11 +152,13 @@ public class SA_HE_CAS_opt {
 		
 		@Override
 		public void run() {
-			int v = localRanom.nextInt();
 			int i = 0;
+			int v ;
 	        Buff key = new Buff(1024);
-	        key.set(v);
-			while( i < 1_000_000) {			
+   
+			while( i < 1_000_000) {		
+				v = localRanom.nextInt();
+		        key.set(v);		
 				array[idx*1_000_000 + i] = _HE.allocate(srZ.calculateSize(key));
 				srZ.serialize(key, Slices[idx*1_000_000 + i].address+Slices[idx*1_000_000 + i].offset);
 				i++;

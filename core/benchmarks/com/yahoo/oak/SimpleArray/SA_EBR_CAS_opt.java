@@ -153,12 +153,13 @@ public class SA_EBR_CAS_opt {
 		
 		@Override
 		public void run() {
-			int v = localRanom.nextInt();
 			int i = 0;
 	        Buff key = new Buff(1024);
-	        key.set(v);
-	        
-			while( i < 1_000_000) {			
+			int v ;
+   
+			while( i < 1_000_000) {		
+				v = localRanom.nextInt();
+		        key.set(v);		
 				array[idx*1_000_000 + i] = _EBR.allocate(srZ.calculateSize(key));
 				srZ.serialize(key, Slices[idx*1_000_000 + i].address+Slices[idx*1_000_000 + i].offset);
 				i++;
