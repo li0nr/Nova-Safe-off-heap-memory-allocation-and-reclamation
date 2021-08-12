@@ -1,14 +1,20 @@
 package com.yahoo.oak.SimpleArray;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
+
+import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.Facade_Slice.Facade_slice;
+import com.yahoo.oak.SimpleArray.SA_Nova_Primitive_CAS.FillerThread;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak._Global_Defs;
+import com.yahoo.oak.Buff.Buff;
 
 public class SA_Nova_CAS {
 	
@@ -48,6 +54,23 @@ public class SA_Nova_CAS {
 		return true;
 		}
 	
+	public boolean ParallelFill(int size) {
+		ArrayList<Thread> threads = new ArrayList<>();
+		int NUM_THREADS = size/1_000_000;;
+	    for (int i = 0; i < NUM_THREADS; i++) {
+	    	threads.add(new Thread(new FillerThread(i, Slices)));
+	    	threads.get(i).start();
+	    	}	
+	    for (Thread thread : threads) {
+	        try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+	    }
+		return true;
+	}
+	
 	public <R> R get(int index, NovaR Reader, int threadIDX) {
 		return (R)Facade_Slice.Read(Reader,Slices[index]);
 		}
@@ -78,5 +101,33 @@ public class SA_Nova_CAS {
 	
 	public void close() {
 		allocator.close();
+	}
+	
+	public class FillerThread extends Thread {
+
+		int idx;
+		Facade_slice[] array;
+		Random localRanom;
+		FillerThread(int index, Facade_slice[] local){
+			idx = index;
+			array = local;
+			localRanom = new Random(idx);
+		}
+		
+		@Override
+		public void run() {
+			int v = localRanom.nextInt();
+			int i = 0;
+	        Buff key = new Buff(1024);
+	        key.set(v);
+	        
+			while( i < 1_000_000) {			
+				array[idx*1_000_000 + i] = new Facade_slice();
+				Facade_Slice.AllocateSlice(Slices[idx*1_000_000 + i],srZ.calculateSize(key), idx);
+				Facade_Slice.WriteFast(srZ,key,Slices[idx*1_000_000 + i],idx);
+				i++;
+				}
+			
+	        }
 	}
 }

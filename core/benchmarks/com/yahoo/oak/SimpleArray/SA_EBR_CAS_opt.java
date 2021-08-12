@@ -1,17 +1,23 @@
 package com.yahoo.oak.SimpleArray;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.function.Function;
 
 import com.yahoo.oak.EBR;
+import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.EBR.EBRslice;
+import com.yahoo.oak.SimpleArray.SA_Nova_Primitive_CAS.FillerThread;
+
 import sun.misc.Unsafe;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak._Global_Defs;
+import com.yahoo.oak.Buff.Buff;
 
 public class SA_EBR_CAS_opt {
 	
@@ -55,6 +61,23 @@ public class SA_EBR_CAS_opt {
 		Slices[size] = _EBR.allocate(srZ.calculateSize(e));
 		srZ.serialize(e, Slices[size].address+Slices[size].offset);
 		size++;
+		return true;
+	}
+	
+	public boolean ParallelFill(int size) {
+		ArrayList<Thread> threads = new ArrayList<>();
+		int NUM_THREADS = size/1_000_000;;
+	    for (int i = 0; i < NUM_THREADS; i++) {
+	    	threads.add(new Thread(new FillerThread(i, Slices)));
+	    	threads.get(i).start();
+	    	}	
+	    for (Thread thread : threads) {
+	        try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+	    }
 		return true;
 	}
 	
@@ -115,5 +138,32 @@ public class SA_EBR_CAS_opt {
 	
 	public void close() {
 		allocator.close();
+	}
+	
+	public class FillerThread extends Thread {
+
+		int idx;
+		EBRslice[] array;
+		Random localRanom;
+		FillerThread(int index, EBRslice[] local){
+			idx = index;
+			array = local;
+			localRanom = new Random(idx);
+		}
+		
+		@Override
+		public void run() {
+			int v = localRanom.nextInt();
+			int i = 0;
+	        Buff key = new Buff(1024);
+	        key.set(v);
+	        
+			while( i < 1_000_000) {			
+				array[idx*1_000_000 + i] = _EBR.allocate(srZ.calculateSize(key));
+				srZ.serialize(key, Slices[idx*1_000_000 + i].address+Slices[idx*1_000_000 + i].offset);
+				i++;
+				}
+			
+	        }
 	}
 }

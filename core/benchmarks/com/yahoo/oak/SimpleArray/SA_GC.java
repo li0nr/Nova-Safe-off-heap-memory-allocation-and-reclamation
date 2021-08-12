@@ -1,13 +1,18 @@
 package com.yahoo.oak.SimpleArray;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.yahoo.oak.CopyConstructor;
 import sun.misc.Unsafe;
 import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.Buff.Buff.GCReader;
+import com.yahoo.oak.benchmarks.BenchmarkConcurrent.ReaderThread;
+import com.yahoo.oak.benchmarks.BenchmarkConcurrent.ReaderThreadSerial;
 
 public class SA_GC {
 	
@@ -50,6 +55,24 @@ public class SA_GC {
 		return true;
 	}
 	
+	public boolean Parallelfill(int size) {
+		ArrayList<Thread> threads = new ArrayList<>();
+		int NUM_THREADS = size/1_000_000;
+	    for (int i = 0; i < NUM_THREADS; i++) {
+	    	threads.add(new Thread(new FillerThread(i, Slices)));
+	    	threads.get(i).start();
+	    	}	
+	    for (Thread thread : threads) {
+	        try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+	    }
+		return true;
+	}
+	
+	
 	public <R> R get(int index, GCReader Reader, int threadIDX) {
 		Buff toRead = Slices[index];
 		if(toRead == null)
@@ -91,4 +114,30 @@ public class SA_GC {
 		Slices = Arrays.copyOf(Slices, newSize);
 	}
 	
+	
+	public class FillerThread extends Thread {
+
+		int idx;
+		Buff[] array;
+		Random localRanom;
+		FillerThread(int index, Buff[] local){
+			idx = index;
+			array = local;
+			localRanom = new Random(idx);
+		}
+		
+		@Override
+		public void run() {
+			int v = localRanom.nextInt();
+			int i = 0;
+	        Buff key = new Buff(1024);
+	        key.set(v);
+	        
+			while( i < 1_000_000) {			
+				array[idx*1_000_000 + i] = key;
+				i++;
+				}
+			
+	        }
+	}
 }

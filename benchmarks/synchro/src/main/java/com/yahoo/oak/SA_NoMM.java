@@ -13,6 +13,9 @@ public class SA_NoMM implements CompositionalSA<Buff>{
     public  boolean fill(final Buff value, int idx) {
     	return SA.fill( value, idx);
     }
+    public  boolean ParallelFill(int size) {
+    	return SA.ParallelFill(size);
+    }
     
 	public Integer get(int index, int idx) {
     	return SA.get(index, Buff.DEFAULT_R, idx);

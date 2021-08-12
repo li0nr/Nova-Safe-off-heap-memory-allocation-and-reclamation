@@ -3,6 +3,8 @@ package com.yahoo.oak.synchrobench.contention.abstractions;
 public interface CompositionalSA<V> {
 
     public  boolean fill(final V value, int idx);
+
+    public  boolean ParallelFill(int size);
 	
     public  Integer get(int index, int idx);
 

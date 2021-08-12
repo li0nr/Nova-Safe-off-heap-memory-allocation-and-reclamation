@@ -134,6 +134,12 @@ public class Test {
         if(benchType == Type.LL) {
         	i -=LL.Size();
         }
+        
+        if(benchType == Type.SA) {
+        	SA.ParallelFill((int)size);
+        	return size;
+        }
+
         for ( ;i > 0; ) {
         	
             v = (Parameters.confKeyDistribution == Parameters.KeyDist.INCREASING)
