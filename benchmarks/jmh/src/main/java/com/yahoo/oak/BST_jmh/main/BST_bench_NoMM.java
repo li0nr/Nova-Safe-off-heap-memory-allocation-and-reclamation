@@ -83,7 +83,7 @@ public class BST_bench_NoMM {
         		Buff v = new Buff();
         		k.set(keyval);
         		v.set(size - keyval);
-        		if(BST.put(k,v, 0) != null)
+        		if(BST.put(k,v, 0) != false)
         			i--;
         		}
 			System.out.println("\n after fill BST size: "+ BST.size());

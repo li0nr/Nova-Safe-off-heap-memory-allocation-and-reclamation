@@ -23,8 +23,12 @@ public class BST_NoMM_Synch implements CompositionalBST<Buff, Buff>{
     	return BST.get(key, tidx);
     }
     
-    public  Buff put(final Buff key, final Buff value, int idx) {
+    public  boolean put(final Buff key, final Buff value, int idx) {
     	return BST.put(key, value, idx);
+    }
+    
+    public  boolean Fill(final Buff key, final Buff value, int idx) {
+    	return BST.Fill(key, value, idx);
     }
     
     public  boolean remove(final Buff key, int idx) {
@@ -36,6 +40,7 @@ public class BST_NoMM_Synch implements CompositionalBST<Buff, Buff>{
     }
     
     public void clear() {
+    	allocator.close();
     	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	BST = new BST_NoMM<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
     			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);

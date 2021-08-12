@@ -1,19 +1,19 @@
 package com.yahoo.oak;
 
 
-import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.BST.BST_Nova_Long;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 
-public class BST_Nova_Synch implements CompositionalBST<Buff, Buff>{
+public class BST_Nova implements CompositionalBST<Buff, Buff>{
 	
 	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	NovaManager novaManager = new NovaManager(allocator);
-	BST_Nova<Buff,Buff>BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	BST_Nova_Long<Buff,Buff>BST = new BST_Nova_Long<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 			, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
 	
 	
-	public BST_Nova_Synch(){
+	public BST_Nova(){
 		
 	}
 	public boolean containsKey(final Buff key, int tidx) {
@@ -25,9 +25,12 @@ public class BST_Nova_Synch implements CompositionalBST<Buff, Buff>{
     	//return BST.get(key, tidx);
     }
     
-    public  Buff put(final Buff key, final Buff value, int idx) {
-    	return null;
-    	//return BST.put(key, value, idx);
+    public boolean put(final Buff key, final Buff value, int idx) {
+    	return BST.put(key, value, idx);
+    }
+    
+    public boolean Fill(final Buff key, final Buff value, int idx) {
+    	return BST.Fill(key, value, idx);
     }
     
     public  boolean remove(final Buff key, int idx) {
@@ -41,7 +44,7 @@ public class BST_Nova_Synch implements CompositionalBST<Buff, Buff>{
     public void clear() {
     	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	novaManager = new NovaManager(allocator);
-    	BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    	BST = new BST_Nova_Long<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
     			, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
     }
     public void print() {

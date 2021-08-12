@@ -34,7 +34,7 @@ public class BST<K extends Comparable<? super K> , V> {
    //--------------------------------------------------------------------------------
    protected final static class Node<E extends Comparable<? super E>, V> {
        final E key;
-       final V value;
+       V value;
        volatile Node<E,V> left;
        volatile Node<E,V> right;
        volatile Info<E,V> info;
@@ -155,10 +155,10 @@ public class BST<K extends Comparable<? super K> , V> {
    // Insert key to dictionary, return the previous value associated with the specified key,
    // or null if there was no mapping for the key
    /** PRECONDITION: k CANNOT BE NULL **/
-   public final V put(final K key, final V value) {
+   public final boolean put(final K key, final V value) {
        Node<K, V> newInternal;
        Node<K, V> newSibling, newNode;
-       IInfo<K, V> newPInfo;
+       IInfo<K, V> newPInfo =  null;
        V result;
 
        /** SEARCH VARIABLES **/
@@ -191,8 +191,7 @@ public class BST<K extends Comparable<? super K> , V> {
            } else {
                if (l.key!= null && key.compareTo(l.key) == 0) {
                    // key already in the tree, try to replace the old node with new node
-                   newPInfo = new IInfo<K, V>(l, p, newNode);
-                   result = l.value;
+            	   l.value = value;
                } else {
                    // key is not in the tree, try to replace a leaf with a small subtree
                    newSibling = new Node<K, V>(l.key, l.value);
@@ -210,7 +209,7 @@ public class BST<K extends Comparable<? super K> , V> {
                // try to IFlag parent
                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                    helpInsert(newPInfo);
-                   return result;
+                   return true;
                } else {
                    // if fails, help the current operation
                    // need to get the latest p.info since CAS doesnt return current value
@@ -345,6 +344,70 @@ public class BST<K extends Comparable<? super K> , V> {
        return sequentialSize(node.left) + sequentialSize(node.right);
    }
 
+   
+   
+   public final boolean Fill(final K key, final V value) {
+       Node<K, V> newInternal;
+       Node<K, V> newSibling, newNode;
+       IInfo<K, V> newPInfo;
+       V result;
+
+       /** SEARCH VARIABLES **/
+       Node<K, V> p;
+       Info<K, V> pinfo;
+       Node<K, V> l;
+
+
+       newNode = new Node<K, V>(key, value);
+
+       while (true) {
+
+           /** SEARCH **/
+           p = root;
+           pinfo = p.info;
+           l = p.left;
+           while (l.left != null) {
+               p = l;
+               l = (l.key == null || key.compareTo(l.key) < 0) ? l.left : l.right;
+           }
+           pinfo = p.info;                             // read pinfo once instead of every iteration
+           if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
+                                                       // (just as if we'd read p's info field before the reference to l)
+           /** END SEARCH **/
+
+           if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+               help(pinfo);
+           } else {
+               if (l.key!= null && key.compareTo(l.key) == 0) {
+                   // key already in the tree, try to replace the old node with new node
+            	   return false;
+               } else {
+                   // key is not in the tree, try to replace a leaf with a small subtree
+                   newSibling = new Node<K, V>(l.key, l.value);
+                   if (l.key == null || key.compareTo(l.key) < 0) // newinternal = max(ret.l.key, key);
+                   {
+                       newInternal = new Node<K, V>(l.key, newNode, newSibling);
+                   } else {
+                       newInternal = new Node<K, V>(key, newSibling, newNode);
+                   }
+
+                   newPInfo = new IInfo<K, V>(l, p, newInternal);
+                   result = null;
+               }
+
+               // try to IFlag parent
+               if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
+                   helpInsert(newPInfo);
+                   return true;
+               } else {
+                   // if fails, help the current operation
+                   // need to get the latest p.info since CAS doesnt return current value
+                   help(p.info);
+               }
+           }
+       }
+   }
+   
    
    public static void main(String[] args){
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);

@@ -5,13 +5,13 @@ import java.util.Random;
 
 import javax.swing.plaf.SliderUI;
 
-import com.yahoo.oak.BST.BST_HE;
+import com.yahoo.oak.BST.BST_HE_;
 import com.yahoo.oak.Buff.Buff;
 
 
 public class BST_HE_mem {
 	
-	static private BST_HE<Buff,Buff> BSTX ;
+	static private BST_HE_<Buff,Buff> BSTX ;
     static final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 
 	    
@@ -25,7 +25,7 @@ public class BST_HE_mem {
 	    	
 	        static public void setup() {
 	    	    
-	    	    BSTX = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,
+	    	    BSTX = new BST_HE_<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,
 	    	    		 Buff.DEFAULT_C,  Buff.DEFAULT_C, allocator);
 	    	    
 	    	    ParamBench.PrintMem(allocator);
@@ -108,7 +108,7 @@ public class BST_HE_mem {
 			public void run() {
 	    		while(true) {
 	        		iB.set(random.nextInt(BenchmarkState.LIST_SIZE));
-	        		if(BSTX.put(iB,iB, idx) == null)
+	        		if(BSTX.put(iB,iB, idx) == true)
 	        			BenchmarkState.success_put++;
 	        		else 
 	        			BenchmarkState.failed_put++;

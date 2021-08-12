@@ -22,7 +22,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.BST.BST_HE;
+import com.yahoo.oak.BST.BST_HE_;
 import com.yahoo.oak.Buff.Buff;
 
 
@@ -33,13 +33,13 @@ public class BST_HE_bench {
     public static class BenchmarkState {
 
     	public static  int size  = BSTParam.BST_SIZE;
-        private BST_HE<Buff,Buff> BST ;
+        private BST_HE_<Buff,Buff> BST ;
 
         @Setup
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    
-    	    BST = new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    	    BST = new BST_HE_<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 										,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
         	for (int i=0; i <size ; i++) {
         		Buff k = new Buff();

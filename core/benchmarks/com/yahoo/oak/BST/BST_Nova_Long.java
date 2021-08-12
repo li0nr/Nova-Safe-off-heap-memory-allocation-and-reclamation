@@ -24,12 +24,16 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak.BST.BST_HE_.IInfo;
+import com.yahoo.oak.BST.BST_HE_.Node;
+import com.yahoo.oak.HazardEras.HEslice;
 
 import sun.misc.Unsafe;
 
-public class BST_Nova<K , V> {
+public class BST_Nova_Long<K , V> {
 	   final NovaS<K> SrzK;
 	   final NovaS<V> SrzV;
 	   final NovaC<K> KCt;
@@ -55,7 +59,7 @@ public class BST_Nova<K , V> {
    //--------------------------------------------------------------------------------
    // Class: Node
    //--------------------------------------------------------------------------------
-   protected final static class Node<E , V> {
+   protected final static class Node {
        final long key;
        final long value;
        volatile Node  left;
@@ -139,7 +143,7 @@ public class BST_Nova<K , V> {
 
     final Node root;
 
-    public BST_Nova(  NovaS<K> sK, NovaS<V> sV,
+    public BST_Nova_Long(  NovaS<K> sK, NovaS<V> sV,
  		   			NovaC<K> cKt, NovaC<V> cVt, NovaManager mng) {
         // to avoid handling special case when <= 2 nodes,
         // create 2 dummy nodes, both contain key null
@@ -182,7 +186,7 @@ public class BST_Nova<K , V> {
     }
 
     /** PRECONDITION: k CANNOT BE NULL **/
-    public final Long get(final K key, int tidx) {
+    public final Long get(final K key, int tidx, NovaR Reader) {
     	get_count ++;
     	if (key == null) throw new NullPointerException();
     	Retry: while (true){
@@ -191,8 +195,8 @@ public class BST_Nova<K , V> {
     		while (l.left != null) {
     			l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
     			}
-//    		V ret = (l.key != Illegal_facade&& Facade_Nova.Compare(key, KCt, l.key) == 0) ? 
-//    				(V)Facade_Nova.Read(SrzV, l.value): null;
+    		V ret = (l.key != Illegal_facade&& Facade_Nova.Compare(key, KCt, l.key) == 0) ? 
+    				(V)Facade_Nova.Read(Reader, l.value): null;
     				return null; //TODO I have fix this to be compliant with the lambda if need to use BST need to fix approilty	   
 			}catch (Exception e) {
     		continue Retry; //Facade throws
@@ -203,9 +207,8 @@ public class BST_Nova<K , V> {
     // Insert key to dictionary, return the previous value associated with the specified key,
     // or null if there was no mapping for the key
     /** PRECONDITION: k CANNOT BE NULL **/
-    public final Long put(final K key, final V value, int idx) {
-    	put_count++;
-    	
+    public final boolean put(final K key, final V value, int idx) {
+   	
         Node newInternal;
         Node newSibling, newNode;
         IInfo newPInfo;
@@ -216,7 +219,14 @@ public class BST_Nova<K , V> {
         Info pinfo;
         Node l;
         /** END SEARCH VARIABLES **/
-	
+        newNode = new Node(        
+        		Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx),
+        		Facade_Nova.AllocateSlice(null, Facade_long_offset_value,SrzV.calculateSize(value), idx));
+        
+        Facade_Nova.WriteFast(SrzK, key, newNode.key ,idx);
+        Facade_Nova.WriteFast(SrzV, value, newNode.value,idx);
+
+
        Redo:
     	   while (true) {
     		   try {
@@ -237,60 +247,40 @@ public class BST_Nova<K , V> {
                 help(pinfo, idx);
             } else {
             	if (l.key != Illegal_facade && Facade_Nova.Compare(key, KCt, l.key) == 0) {
-            		// key already in the tree, cant continue
-        			result = l.value;
-                    //V  objret = (V)Facade_Nova.Read(SrzV, l.value);
-                    return result;
+            		// key already in the tree
+        			Facade_Nova.WriteFull(SrzV, value, l.value, idx);
+        			Facade_Nova.DeletePrivate(idx, newNode.key);
+        			Facade_Nova.DeletePrivate(idx, newNode.value);
+                    return true;
                     }
             	else {
-            		
-                    newNode = new Node<>(Illegal_facade, Illegal_facade);
-                    Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_key, 
-                    		 SrzK.calculateSize(key), idx),idx);
-                    Facade_Nova.WriteFast(SrzK, key, Facade_Nova.AllocateSlice(newNode, Facade_long_offset_value,
-                    		 SrzV.calculateSize(value), idx),idx);
-                    	
-                    
+
             		// key is not in the tree, try to replace a leaf with a small subtree
-                    newSibling = new Node(Illegal_facade, Illegal_facade);
-                    if(l.key != Illegal_facade) {
-                        Facade_Nova.ReadFromOffheap(SrzK, l.key, Facade_Nova.AllocateSlice(newSibling, Facade_long_offset_key, 
-                        		 SrzK.calculateSize(key), idx),idx);
-                        Facade_Nova.ReadFromOffheap(SrzK, l.value, Facade_Nova.AllocateSlice(newSibling, Facade_long_offset_value,
-                        		 SrzV.calculateSize(value), idx),idx);
+                    newSibling = new Node(l.key, l.value);
+                    if(l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) {
+                    	long tmp =Illegal_facade;
+                    	if(l.key != Illegal_facade) {
+                    		tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                            Facade_Nova.ReadFromOffheap(SrzK, l.key, tmp,idx);
+                    	}
+                        newInternal = new Node(tmp, newNode, newSibling);
+                    }else {
+                    	long tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                    	Facade_Nova.WriteFast(SrzK, key, tmp, idx);
+                    	newInternal = new Node(tmp, newSibling, newNode);
                     }
-                    
-                    
-                    if (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) // newinternal = max(ret.l.key, key);
-                    {
-                    	newInternal = new Node(Illegal_facade, newNode, newSibling);
-                    	if(l.key != Illegal_facade)
-                    		Facade_Nova.
-                    		ReadFromOffheap(SrzK,l.key,
-                    			Facade_Nova.
-                    			AllocateSlice(newInternal, Facade_long_offset_key,  SrzK.calculateSize(key), idx),
-                    			idx);
-                        } else {
-                        	newInternal = new Node(Illegal_facade,newSibling,newNode);
-                        	Facade_Nova.
-                        	WriteFast(SrzK, key,
-                        			Facade_Nova.
-                        			AllocateSlice(newInternal, Facade_long_offset_key,  SrzK.calculateSize(key), idx),
-                        			idx);
-                        	}
                     newPInfo = new IInfo(l, p, newInternal);
                     result = Illegal_facade;
-                    }
+            	}
+                    
             	// try to IFlag parent
                 if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                 	helpInsert(newPInfo);
-                	return null;
+                	return true;
                 }else {
                 	// if fails, help the current operation
                 	// need to get the latest p.info since CAS doesnt return current value
                 	Facade_Nova.Delete(idx, newInternal.key, 	newInternal, 	Facade_long_offset_key );
-                	Facade_Nova.Delete(idx, newSibling.key, 	newInternal, 	Facade_long_offset_key );
-                	Facade_Nova.Delete(idx, newSibling.value, 	newInternal, 	Facade_long_offset_value );
                 	help(p.info, idx);
                 	}
                 }
@@ -356,6 +346,83 @@ public class BST_Nova<K , V> {
         }
     }
 
+    
+    public final boolean Fill(final K key, final V value, int idx) {
+       	
+        Node newInternal;
+        Node newSibling, newNode;
+        IInfo newPInfo;
+        long result;
+
+        /** SEARCH VARIABLES **/
+        Node p;
+        Info pinfo;
+        Node l;
+        /** END SEARCH VARIABLES **/
+        newNode = new Node(        
+        		Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx),
+        		Facade_Nova.AllocateSlice(null, Facade_long_offset_value,SrzV.calculateSize(value), idx));
+        
+        Facade_Nova.WriteFast(SrzK, key, newNode.key ,idx);
+        Facade_Nova.WriteFast(SrzV, value, newNode.value,idx);
+
+
+       Redo:
+    	   while (true) {
+    		   try {
+        	/** SEARCH **/
+            p = root;
+            pinfo = p.info;
+            l = p.left;
+            while (l.left != null) {
+                p = l;
+                l = (l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) ? l.left : l.right;
+            }
+            pinfo = p.info;                             // read pinfo once instead of every iteration
+            if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
+                                                        // (just as if we'd read p's info field before the reference to l)
+            /** END SEARCH **/
+
+            if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+                help(pinfo, idx);
+            } else {
+            	if (l.key != Illegal_facade && Facade_Nova.Compare(key, KCt, l.key) == 0) {
+            		return false;
+                    }
+            	else {
+
+            		// key is not in the tree, try to replace a leaf with a small subtree
+                    newSibling = new Node(l.key, l.value);
+                    if(l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) {
+                    	long tmp =Illegal_facade;
+                    	if(l.key != Illegal_facade) {
+                    		tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                            Facade_Nova.ReadFromOffheap(SrzK, l.key, tmp,idx);
+                    	}
+                        newInternal = new Node(tmp, newNode, newSibling);
+                    }else {
+                    	long tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                    	Facade_Nova.WriteFast(SrzK, key, tmp, idx);
+                    	newInternal = new Node(tmp, newSibling, newNode);
+                    }
+                    newPInfo = new IInfo(l, p, newInternal);
+                    result = Illegal_facade;
+            	}
+                    
+            	// try to IFlag parent
+                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
+                	helpInsert(newPInfo);
+                	return true;
+                }else {
+                	// if fails, help the current operation
+                	// need to get the latest p.info since CAS doesnt return current value
+                	Facade_Nova.Delete(idx, newInternal.key, 	newInternal, 	Facade_long_offset_key );
+                	help(p.info, idx);
+                	}
+                }
+            }catch (Exception e) { continue Redo;}   
+    	   }
+    }
  //--------------------------------------------------------------------------------
  //PRIVATE METHODS
  //- helpInsert

@@ -12,7 +12,9 @@ public interface CompositionalBST<K, V> {
 	
     public  V get(final K key, int tidx);
     
-    public  V put(final K key, final V value, int idx);
+    public  boolean put(final K key, final V value, int idx);
+    
+    public  boolean Fill(final K key, final V value, int idx);
     
     public  boolean remove(final K key, int idx);
     

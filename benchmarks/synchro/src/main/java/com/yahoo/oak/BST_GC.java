@@ -4,12 +4,12 @@ import com.yahoo.oak.BST.BST;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 
-public class BST_Synch implements CompositionalBST<Buff, Buff>{
+public class BST_GC implements CompositionalBST<Buff, Buff>{
 	
 	BST<Buff,Buff>BST = new BST<Buff,Buff>(Buff.CC,Buff.CC);
 	
 	
-	public BST_Synch(){
+	public BST_GC(){
 		
 	}
 	public boolean containsKey(final Buff key, int tidx) {
@@ -20,8 +20,12 @@ public class BST_Synch implements CompositionalBST<Buff, Buff>{
     	return BST.get(key);
     }
     
-    public  Buff put(final Buff key, final Buff value, int idx) {
+    public  boolean put(final Buff key, final Buff value, int idx) {
     	return BST.put(key, value);
+    }
+    
+    public  boolean Fill(final Buff key, final Buff value, int idx) {
+    	return BST.Fill(key, value);
     }
     
     public  boolean remove(final Buff key, int idx) {

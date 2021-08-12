@@ -146,7 +146,7 @@ public class Test {
 			switch(benchType) {
 			case BST:
 
-	            if (BST.put(key, val,0) == null) {
+	            if (BST.Fill(key, val,0) == true) {
 	                i--;
 	            }   
 	            break;

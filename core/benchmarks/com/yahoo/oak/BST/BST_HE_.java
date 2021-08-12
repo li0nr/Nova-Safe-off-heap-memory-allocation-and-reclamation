@@ -25,10 +25,11 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import com.yahoo.oak.HazardEras;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
+import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.HazardEras.HEslice;
 
-public class BST_HE<K , V> {
+public class BST_HE_<K , V> {
 	
 	   final NovaS<K> SrzK;
 	   final NovaS<V> SrzV;
@@ -123,7 +124,7 @@ public class BST_HE<K , V> {
 
     final Node<HEslice, HEslice> root;
 
-    public BST_HE(NovaS<K> sK, NovaS<V> sV,
+    public BST_HE_(NovaS<K> sK, NovaS<V> sV,
  		   		 NovaC<K> cmpK , NovaC<V> cmpV, NativeMemoryAllocator alloc) {
         // to avoid handling special case when <= 2 nodes,
         // create 2 dummy nodes, both contain key null
@@ -162,7 +163,7 @@ public class BST_HE<K , V> {
     }
 
     /** PRECONDITION: k CANNOT BE NULL **/
-    public final V get(final K key, int idx) {
+    public final V get(final K key, int idx,NovaR Reader) {
     	get_count ++;
 
         if (key == null) throw new NullPointerException();
@@ -176,7 +177,7 @@ public class BST_HE<K , V> {
 	        }
 	        access = HE.get_protected(l.key,idx);
 	        V ret = (l.key != null && KCt.compareKeys(access.address+ access.offset, key)  == 0) ? 
-	     		   SrzV.deserialize(l.value.address + l.value.offset) : null;
+	        		(V)Reader.apply(l.value.address + l.value.offset) : null;
 	        HE.clear(idx);
 	        return ret;
 			}catch (Exception e) {
@@ -188,9 +189,8 @@ public class BST_HE<K , V> {
     // Insert key to dictionary, return the previous value associated with the specified key,
     // or null if there was no mapping for the key
     /** PRECONDITION: k CANNOT BE NULL **/
-    public final V put(final K key, final V value, int idx) {
-    	put_count ++;
-    	
+    public final boolean put(final K key, final V value, int idx) {
+
         Node<HEslice, HEslice> newInternal;
         Node<HEslice, HEslice> newSibling, newNode;
         IInfo<HEslice, HEslice> newPInfo;
@@ -234,7 +234,7 @@ public class BST_HE<K , V> {
                 	V objret = SrzV.deserialize(result.address+ result.offset);
                 	HE.fastFree(newNode.key);
                 	HE.fastFree(newNode.value);
-                	return objret;
+                	return true;
                 	
                 } else {
                     // key is not in the tree, try to replace a leaf with a small subtree
@@ -246,7 +246,6 @@ public class BST_HE<K , V> {
                         if(access != null) {
                             tmp = HE.allocate(SrzK.calculateSize(key));
                         	SrzK.serialize(access.address+access.offset,   tmp.address   +tmp.offset);
-
                         }
                         newInternal = new Node<HEslice, HEslice>(tmp, newNode, newSibling);
                  	   } else {
@@ -261,13 +260,12 @@ public class BST_HE<K , V> {
                 // try to IFlag parent
                 if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                     helpInsert(newPInfo);
-                    return null;
+                    return true;
                 } else {
                     // if fails, help the current operation
                     // need to get the latest p.info since CAS doesnt return current value
                     HE.fastFree(newInternal.key);
                 	help(p.info, idx);
-                    return null;
                     }
                 }
             }catch (Exception e) { continue Redo;}
@@ -338,6 +336,86 @@ public class BST_HE<K , V> {
             }catch (Exception e) { continue Redo;}
         	}
     }
+    
+    
+    public final boolean Fill(final K key, final V value, int idx) {
+
+        Node<HEslice, HEslice> newInternal;
+        Node<HEslice, HEslice> newSibling, newNode;
+        IInfo<HEslice, HEslice> newPInfo;
+        HEslice result;
+
+        /** SEARCH VARIABLES **/
+        Node<HEslice, HEslice> p;
+        Info<HEslice, HEslice> pinfo;
+        Node<HEslice, HEslice> l;
+        /** END SEARCH VARIABLES **/
+        newNode = new Node<HEslice, HEslice>(HE.allocate(SrzK.calculateSize(key)),
+     		   							   HE.allocate(SrzV.calculateSize(value)));
+        SrzK.serialize(key,   newNode.key.address   +newNode.key.offset);
+        SrzV.serialize(value, newNode.value.address + newNode.value.offset);
+
+        HEslice access;
+       Redo:
+        while (true) {
+        	try {
+            /** SEARCH **/
+            p = root;
+            pinfo = p.info;
+            l = p.left;
+            while (l.left != null) {
+                p = l;
+                access = HE.get_protected(l.key,idx);
+                l = (access == null || KCt.compareKeys(access.address+access.offset, key) > 0) ? l.left : l.right;
+            }
+            pinfo = p.info;                             // read pinfo once instead of every iteration
+            if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
+                                                        // (just as if we'd read p's info field before the reference to l)
+            /** END SEARCH **/
+
+            if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+                help(pinfo, idx);
+            } else {
+         	   access = HE.get_protected(l.key,idx);
+                if (access != null && KCt.compareKeys(access.address+access.offset, key)  == 0) {
+                	return false;
+                	
+                } else {
+                    // key is not in the tree, try to replace a leaf with a small subtree
+                    newSibling = new Node<HEslice, HEslice>(l.key, l.value);
+                    access = HE.get_protected(l.key,idx);
+                    if (access == null ||  KCt.compareKeys(access.address+access.offset, key) > 0) // newinternal = max(ret.l.key, key);
+                 	   {
+                    	HEslice tmp = null;
+                        if(access != null) {
+                            tmp = HE.allocate(SrzK.calculateSize(key));
+                        	SrzK.serialize(access.address+access.offset,   tmp.address   +tmp.offset);
+                        }
+                        newInternal = new Node<HEslice, HEslice>(tmp, newNode, newSibling);
+                 	   } else {
+                           HEslice tmp = HE.allocate(SrzK.calculateSize(key));
+                           SrzK.serialize(key,   tmp.address   +tmp.offset);
+                 		   newInternal = new Node<HEslice, HEslice>(tmp, newSibling, newNode);
+                 		   }
+                    newPInfo = new IInfo<HEslice, HEslice>(l, p, newInternal);
+                    result = null;
+                    }
+                
+                // try to IFlag parent
+                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
+                    helpInsert(newPInfo);
+                    return true;
+                } else {
+                    // if fails, help the current operation
+                    // need to get the latest p.info since CAS doesnt return current value
+                    HE.fastFree(newInternal.key);
+                	help(p.info, idx);
+                    }
+                }
+            }catch (Exception e) { continue Redo;}
+        }
+    }
+    
  //--------------------------------------------------------------------------------
  //PRIVATE METHODS
  //- helpInsert

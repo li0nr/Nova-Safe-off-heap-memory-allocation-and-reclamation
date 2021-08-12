@@ -174,9 +174,7 @@ public class BST_NoMM<K , V> {
    // Insert key to dictionary, return the previous value associated with the specified key,
    // or null if there was no mapping for the key
    /** PRECONDITION: k CANNOT BE NULL **/
-   public final V put(final K key, final V value, int idx) {
-	   put_count ++;
-
+   public final boolean put(final K key, final V value, int idx) {
        Node<NovaSlice, NovaSlice> newInternal;
        Node<NovaSlice, NovaSlice> newSibling, newNode;
        IInfo<NovaSlice, NovaSlice> newPInfo;
@@ -218,9 +216,7 @@ public class BST_NoMM<K , V> {
                    // key already in the tree, try to replace the old node with new node
                    result = l.value;
                    V ret = SrzV.deserialize(result.address+ result.offset);
-                   alloc.free(newNode.key);
-                   alloc.free(newNode.value);
-                   return ret;
+                   return true;
                } else {
                    // key is not in the tree, try to replace a leaf with a small subtree
                    newSibling = new Node<NovaSlice, NovaSlice>(l.key, l.value);
@@ -247,11 +243,10 @@ public class BST_NoMM<K , V> {
                // try to IFlag parent
                if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
                    helpInsert(newPInfo);
-                   return null;
+                   return true;
                } else {
                    // if fails, help the current operation
                    // need to get the latest p.info since CAS doesnt return current value
-                   alloc.free(newInternal.key);
                    help(p.info);
                    }
                }
@@ -318,6 +313,82 @@ public class BST_NoMM<K , V> {
        }
    }
 
+   
+   public final boolean Fill(final K key, final V value, int idx) {
+       Node<NovaSlice, NovaSlice> newInternal;
+       Node<NovaSlice, NovaSlice> newSibling, newNode;
+       IInfo<NovaSlice, NovaSlice> newPInfo;
+       NovaSlice result;
+
+       /** SEARCH VARIABLES **/
+       Node<NovaSlice, NovaSlice> p;
+       Info<NovaSlice, NovaSlice> pinfo;
+       Node<NovaSlice, NovaSlice> l;
+       /** END SEARCH VARIABLES **/
+       NovaSlice k = new NovaSlice(0, 0, 0);
+       NovaSlice v = new NovaSlice(0, 0, 0);
+       alloc.allocate(k, SrzK.calculateSize(key));
+       alloc.allocate(v, SrzV.calculateSize(value));
+
+       newNode = new Node<NovaSlice, NovaSlice>(k,v);
+       SrzK.serialize(key,   newNode.key.address   +newNode.key.offset);
+       SrzV.serialize(value, newNode.value.address + newNode.value.offset);
+       
+       while (true) {
+
+           /** SEARCH **/
+           p = root;
+           pinfo = p.info;
+           l = p.left;
+           while (l.left != null) {
+               p = l;
+               l = (l.key == null || KCt.compareKeys(l.key.address+l.key.offset, key) > 0) ? l.left : l.right;
+           }
+           pinfo = p.info;                             // read pinfo once instead of every iteration
+           if (l != p.left && l != p.right) continue;  // then confirm the child link to l is valid
+                                                       // (just as if we'd read p's info field before the reference to l)
+           /** END SEARCH **/
+
+           if (!(pinfo == null || pinfo.getClass() == Clean.class)) {
+               help(pinfo);
+           } else {
+               if (l.key != null && KCt.compareKeys(l.key.address+l.key.offset, key)  == 0) {
+            	   return false;
+               } else {
+                   // key is not in the tree, try to replace a leaf with a small subtree
+                   newSibling = new Node<NovaSlice, NovaSlice>(l.key, l.value);
+                   if (l.key == null ||  KCt.compareKeys(l.key.address+l.key.offset, key) > 0) // newinternal = max(ret.l.key, key);
+                	   {
+                       if(l.key != null) {
+                    	   NovaSlice tmp = new NovaSlice(0, 0, 0);
+                    	   alloc.allocate(tmp, SrzK.calculateSize(key));
+                    	   SrzK.serialize(l.key.address+l.key.offset, tmp.address+tmp.offset);
+                       }                           
+                   	   newInternal = new Node<NovaSlice, NovaSlice>(l.key, newNode, newSibling);
+                   	   
+                	   } else {
+                	       NovaSlice tmp = new NovaSlice(0, 0, 0);
+                	       alloc.allocate(tmp, SrzK.calculateSize(key));
+                	       SrzK.serialize(key,   tmp.address   +tmp.offset);
+                		   newInternal = new Node<NovaSlice, NovaSlice>(tmp, newSibling, newNode);
+                		   }
+
+                   newPInfo = new IInfo<NovaSlice, NovaSlice>(l, p, newInternal);
+                   result = null;
+                   }
+               
+               // try to IFlag parent
+               if (infoUpdater.compareAndSet(p, pinfo, newPInfo)) {
+                   helpInsert(newPInfo);
+                   return true;
+               } else {
+                   // if fails, help the current operation
+                   // need to get the latest p.info since CAS doesnt return current value
+                   help(p.info);
+                   }
+               }
+           }
+       }
 //--------------------------------------------------------------------------------
 //PRIVATE METHODS
 //- helpInsert
@@ -354,9 +425,6 @@ public class BST_NoMM<K , V> {
    private void helpMarked(final DInfo<NovaSlice, NovaSlice> info) {
        final Node<NovaSlice, NovaSlice> other = (info.p.right == info.l) ? info.p.left : info.p.right;
        (info.gp.left == info.p ? leftUpdater : rightUpdater).compareAndSet(info.gp, info.p, other);
-       alloc.free(info.l.key);
-       alloc.free(info.l.value);
-       if(info.p.key != null ) alloc.free(info.p.key);
        infoUpdater.compareAndSet(info.gp, info, new Clean());
    }
 

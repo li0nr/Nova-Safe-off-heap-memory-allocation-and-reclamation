@@ -28,7 +28,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.RNG;
-import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.BST.BST_Nova_Long;
 import com.yahoo.oak.BST_jmh.BSTParam;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.EBR.LL_EBR_noCAS;

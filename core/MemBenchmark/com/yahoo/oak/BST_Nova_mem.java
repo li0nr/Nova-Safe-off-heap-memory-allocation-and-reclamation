@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.BST.BST_Nova_Long;
 import com.yahoo.oak.Buff.Buff;
 
 public class BST_Nova_mem {
-    static private BST_Nova<Buff,Buff> BSTX ;
+    static private BST_Nova_Long<Buff,Buff> BSTX ;
     static final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 
     
@@ -20,7 +20,7 @@ public class BST_Nova_mem {
     	    
     	    ParamBench.PrintMem(allocator);
             
-    	    BSTX = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,
+    	    BSTX = new BST_Nova_Long<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER,
     	    								Buff.DEFAULT_C,Buff.DEFAULT_C,mng);
         	
     	    

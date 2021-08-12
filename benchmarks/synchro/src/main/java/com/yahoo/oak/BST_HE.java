@@ -1,18 +1,18 @@
 package com.yahoo.oak;
 
 import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.BST.BST_HE;
+import com.yahoo.oak.BST.BST_HE_;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
 
-public class BST_HE_Synch implements CompositionalBST<Buff, Buff>{
+public class BST_HE implements CompositionalBST<Buff, Buff>{
 	
 	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-	BST_HE<Buff,Buff>BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	BST_HE_<Buff,Buff>BST = new BST_HE_<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
 	
 	
-	public BST_HE_Synch(){
+	public BST_HE(){
 		
 	}
 	public boolean containsKey(final Buff key, int tidx) {
@@ -20,11 +20,15 @@ public class BST_HE_Synch implements CompositionalBST<Buff, Buff>{
 	}
 	
     public  Buff get(final Buff key, int tidx) {
-    	return BST.get(key, tidx);
+    	return BST.get(key, tidx,Buff.DEFAULT_R);
     }
     
-    public  Buff put(final Buff key, final Buff value, int idx) {
+    public boolean put(final Buff key, final Buff value, int idx) {
     	return BST.put(key, value, idx);
+    }
+    
+    public boolean Fill(final Buff key, final Buff value, int idx) {
+    	return BST.Fill(key, value, idx);
     }
     
     public  boolean remove(final Buff key, int idx) {
@@ -36,8 +40,9 @@ public class BST_HE_Synch implements CompositionalBST<Buff, Buff>{
     }
     
     public void clear() {
+    	allocator.close();
     	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	BST = new BST_HE<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    	BST = new BST_HE_<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
     			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
     }
     

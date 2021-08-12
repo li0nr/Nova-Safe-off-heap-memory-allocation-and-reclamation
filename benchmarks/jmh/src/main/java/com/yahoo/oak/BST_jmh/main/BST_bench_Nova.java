@@ -28,7 +28,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.RNG;
-import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.BST.BST_Nova_Long;
 import com.yahoo.oak.BST_jmh.BSTParam;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.ParamBench;
@@ -42,7 +42,7 @@ public class BST_bench_Nova {
     public static class BenchmarkState {
 
     	public static  int size = BSTParam.BST_SIZE;
-        private BST_Nova<Buff,Buff> BST ;
+        private BST_Nova_Long<Buff,Buff> BST ;
 	    public static NativeMemoryAllocator allocator ;
 	    public static NovaManager novaManager ; 
 
@@ -79,7 +79,7 @@ public class BST_bench_Nova {
 
     		allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     		NovaManager novaManager = new NovaManager(allocator);
-    	    BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    	    BST = new BST_Nova_Long<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
         	for (int i=0; i <0.75 *size ; i++) {
         		int keyval = rand.nextInt(size);
@@ -87,7 +87,7 @@ public class BST_bench_Nova {
         		Buff v = new Buff();
         		k.set(keyval);
         		v.set(size - keyval);
-        		if(BST.put(k,v, 0) != null)
+        		if(BST.put(k,v, 0) != false)
         			i--;
         		}
 			System.out.println("\n after fill BST size: "+ BST.size());

@@ -7,8 +7,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.yahoo.oak.BST.BST;
-import com.yahoo.oak.BST.BST_HE;
-import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.BST.BST_HE_;
+import com.yahoo.oak.BST.BST_Nova_Long;
 import com.yahoo.oak.Buff.Buff;
 
 @Ignore
@@ -21,7 +21,7 @@ public class BST_Test {
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
 
-	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    BST_Nova_Long<Buff,Buff> BST = new BST_Nova_Long<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
 	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
 	    	    
 	    Buff x =new Buff();
@@ -50,8 +50,8 @@ public class BST_Test {
 	public void BST_HE_CoverTest() {
 		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 		
-	    BST_HE<Buff,Buff> BST = 
-	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    BST_HE_<Buff,Buff> BST = 
+	    		new BST_HE_<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
 
 	    Buff x =new Buff();
@@ -118,11 +118,11 @@ public class BST_Test {
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
 
-	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    BST_Nova_Long<Buff,Buff> BST = new BST_Nova_Long<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
 	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
 	    
-	    BST_HE<Buff,Buff> BST_HE = 
-	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    BST_HE_<Buff,Buff> BST_HE = 
+	    		new BST_HE_<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
 	    int i = 0;
 	    Buff k = new Buff();
@@ -140,7 +140,7 @@ public class BST_Test {
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
 
-	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    BST_Nova_Long<Buff,Buff> BST = new BST_Nova_Long<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
 	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
 	    
 	    int i = 0;
@@ -154,7 +154,7 @@ public class BST_Test {
 	    while(i < 1) {
 	    	k.set(i);
 	    	i++;
-	    	assert BST.put(k, k, 0) == null;
+	    	assert BST.put(k, k, 0) == true;
 	    }
 	    i = 0;
 	    while(i < 1) {
@@ -172,8 +172,8 @@ public class BST_Test {
 	public void BST_Fill_delete_HE() {
 		final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    
-	    BST_HE<Buff,Buff> BST_HE = 
-	    		new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    BST_HE_<Buff,Buff> BST_HE = 
+	    		new BST_HE_<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 	    							,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
 	    int i = 0;
 	    Buff k = new Buff();
@@ -188,7 +188,7 @@ public class BST_Test {
 	    while(i < 1) {
 	    	k.set(i);
 	    	i++;
-		    assert BST_HE.put(k, k, 0) == null;
+		    assert BST_HE.put(k, k, 0) == true;
 	    }
 	    i = 0;
 	    while(i < 1) {
@@ -208,7 +208,7 @@ public class BST_Test {
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
 
-	    BST_Nova<Buff,Buff> BST = new BST_Nova<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
+	    BST_Nova_Long<Buff,Buff> BST = new BST_Nova_Long<Buff,Buff>( Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER, 
 	    												   Buff.DEFAULT_C, Buff.DEFAULT_C, novaManager);
 	    	    
 	    int i = 0;

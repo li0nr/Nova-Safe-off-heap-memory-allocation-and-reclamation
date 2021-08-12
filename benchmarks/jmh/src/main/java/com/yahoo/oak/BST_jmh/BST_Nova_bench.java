@@ -23,7 +23,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
-import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.BST.BST_Nova_Long;
 import com.yahoo.oak.Buff.Buff;
 
 
@@ -34,14 +34,14 @@ public class BST_Nova_bench {
     public static class BenchmarkState {
 
     	public static  int size = BSTParam.BST_SIZE;
-        private BST_Nova<Buff,Buff> BST ;
+        private BST_Nova_Long<Buff,Buff> BST ;
 
         @Setup
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager novaManager = new NovaManager(allocator);
     	    
-    	    BST = new BST_Nova<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    	    BST = new BST_Nova_Long<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					, Buff.DEFAULT_C, Buff.DEFAULT_C,novaManager);
         	for (int i=0; i <size ; i++) {
         		Buff k = new Buff();

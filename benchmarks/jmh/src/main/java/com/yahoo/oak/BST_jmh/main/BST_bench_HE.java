@@ -29,8 +29,8 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
-import com.yahoo.oak.BST.BST_HE;
-import com.yahoo.oak.BST.BST_Nova;
+import com.yahoo.oak.BST.BST_HE_;
+import com.yahoo.oak.BST.BST_Nova_Long;
 import com.yahoo.oak.BST_jmh.BSTParam;
 import com.yahoo.oak.BST_jmh.main.BST_bench_Nova.BenchmarkState;
 import com.yahoo.oak.BST_jmh.main.BST_bench_Nova.ThreadState;
@@ -47,7 +47,7 @@ public class BST_bench_HE {
 
     	public static  int size  = BSTParam.BST_SIZE;
     	public static  NativeMemoryAllocator allocator;
-        private BST_HE<Buff,Buff> BST ;
+        private BST_HE_<Buff,Buff> BST ;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -81,7 +81,7 @@ public class BST_bench_HE {
     			ParamBench.PrintMem(allocator);
     		
     		allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	    BST = new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+    	    BST = new BST_HE_<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 					,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
         	for (int i=0; i <0.75 *size ; i++) {
         		int keyval = rand.nextInt(size);
@@ -89,7 +89,7 @@ public class BST_bench_HE {
         		Buff v = new Buff();
         		k.set(keyval);
         		v.set(size - keyval);
-        		if(BST.put(k,v, 0) != null)
+        		if(BST.put(k,v, 0) != false)
         			i--;
         		}
 			System.out.println("\n after fill BST size: "+ BST.size());

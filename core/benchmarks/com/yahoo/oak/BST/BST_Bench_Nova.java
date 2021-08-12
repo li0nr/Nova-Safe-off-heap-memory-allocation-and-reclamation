@@ -14,7 +14,7 @@ public class BST_Bench_Nova {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    final NovaManager mng = new NovaManager(allocator);
 	    
-	    BST_Nova<Buff, Buff>BST = new BST_Nova<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    BST_Nova_Long<Buff, Buff>BST = new BST_Nova_Long<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 									,Buff.DEFAULT_C, Buff.DEFAULT_C, mng);
 	    
 	    
@@ -30,12 +30,12 @@ public class BST_Bench_Nova {
 		System.out.print("warmup \n");
 		int i = 0;
 		while(i <1000) {
-			BST.get(k, 0);
+			BST.get(k, 0, Buff.DEFAULT_R);
 			i++;
 		}
 		System.out.print("real \n");
 		long start = System.nanoTime();
-		BST.get(k, 0);
+		BST.get(k, 0, Buff.DEFAULT_R);
 		long End = System.nanoTime();
 		long x = End - start;
 		System.out.print("curr time is" + x);

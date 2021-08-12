@@ -9,7 +9,7 @@ public class BST_Bench_HE {
 		int BST_SIZE= 10000;
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
 	    
-	    BST_HE<Buff, Buff>BST = new BST_HE<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
+	    BST_HE_<Buff, Buff>BST = new BST_HE_<Buff, Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 									,Buff.DEFAULT_C, Buff.DEFAULT_C, allocator);
     	for (int i=0; i <BST_SIZE ; i++) {
     		Buff k = new Buff();
@@ -23,13 +23,13 @@ public class BST_Bench_HE {
 		System.out.print("warmup \n");
 		int i = 0;
 		while(i <1000) {
-			BST.get(k, 0);
+			BST.get(k, 0,Buff.DEFAULT_R);
 			i++;
 		}
 		System.out.print("real \n");
 
 		long start = System.nanoTime();
-		BST.get(k, 0);
+		BST.get(k, 0,Buff.DEFAULT_R);
 		long End = System.nanoTime();
 		long x = End - start;
 		System.out.print("curr time is" + x);
