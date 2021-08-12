@@ -4,7 +4,7 @@ output=${dir}/outputSA
 java=java
 jarfile="target/nova-synchrobench-0.0.1-SNAPSHOT.jar"
 
-thread="01 04 08 12 16 20 24 28 32"
+thread="01 04  16  24  32"
 size="20000"
 keysize="1024"
 #writes="0 50"
@@ -87,39 +87,29 @@ summary="${output}/summarySA.csv"
 echo "Starting nova test `date`"
 echo "Scenario, Bench, Heap size, Direct Mem, # Threads, Throughput, stdError" > ${summary}
 
-for scenario in ${!scenarios[@]}; do
- for bench in ${benchs}; do
-    echo ""
-    echo "Scenario: ${bench} ${scenario}"
-    heapSize="${heap_limit[${bench},${scenario}]}"
-	echo ${heapSize}
-	echo 
-    directMemSize="${direct_limit[${bench}]}"
-    benchSize="${becnh_size[${bench}]}"
 
-    for heapLimit in ${heapSize}; do
-      #for gcAlg in ${gcAlgorithms}; do
-        gcAlg=""
-        javaopt="-server -Xmx${heapLimit} -Xms${heapLimit} ${gcAlg}"
-        for write in ${writes}; do
-          for t in ${thread}; do
+for t in ${thread}; do
+	for scenario in ${!scenarios[@]}; do
+		for bench in ${benchs}; do
+			echo ""
+			echo "Scenario: ${bench} ${scenario}"
+			echo 
+			benchSize="${becnh_size[${bench}]}"
+			javaopt="-server "
             #for i in ${size}; do
-              r=`echo "${benchSize}" | bc`
-              out=${output}/oak-${scenario}-${bench}-xmx${heapLimit}-Xms${heapLimit}-t${t}-${gcAlg}.log
-              cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keysize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
-              echo ${cmd}
-              echo ${cmd} >> ${out}
-              ${cmd} >> ${out} 2>&1
-              # update summary
-              finalSize=`grep "Mean Total Size:" ${out} | cut -d : -f2 | tr -d '[:space:]'`
-              throughput=`grep "Mean:" ${out} | cut -d : -f2 | tr -d '[:space:]'`	    
-              std=`grep "Standard error:" ${out} | cut -d : -f2 | tr -d '[:space:]'`
-              echo "${scenario}, ${bench}, ${heapLimit}, ${directMemSize}, ${t},${throughput},${std}" >> ${summary}
-            done
-          done
-        done
-      #done
+			r=`echo "${benchSize}" | bc`
+			out=${output}/oak-${scenario}-${bench}-xmx${heapLimit}-Xms${heapLimit}-t${t}-${gcAlg}.log
+			cmd="${java} ${javaopt} -jar ${jarfile} -b ${benchClassPrefix}.${bench} ${scenarios[$scenario]} -k ${keysize} -i ${benchSize} -r ${r} -n ${iterations} -t ${t} -d ${duration} -W ${warmup}"
+			echo ${cmd}
+			echo ${cmd} >> ${out}
+			${cmd} >> ${out} 2>&1
+			# update summary
+			finalSize=`grep "Mean Total Size:" ${out} | cut -d : -f2 | tr -d '[:space:]'`
+			throughput=`grep "Mean:" ${out} | cut -d : -f2 | tr -d '[:space:]'`	    
+			std=`grep "Standard error:" ${out} | cut -d : -f2 | tr -d '[:space:]'`
+			echo "${scenario}, ${bench}, ${heapLimit}, ${directMemSize}, ${t},${throughput},${std}" >> ${summary}
+		done
       echo "" >> ${summary}
+	  done 
   done
-done
 echo "SA test complete `date`"
