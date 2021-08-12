@@ -192,6 +192,7 @@ public class BST<K extends Comparable<? super K> , V> {
                if (l.key!= null && key.compareTo(l.key) == 0) {
                    // key already in the tree, try to replace the old node with new node
             	   l.value = value;
+            	   return true;
                } else {
                    // key is not in the tree, try to replace a leaf with a small subtree
                    newSibling = new Node<K, V>(l.key, l.value);
