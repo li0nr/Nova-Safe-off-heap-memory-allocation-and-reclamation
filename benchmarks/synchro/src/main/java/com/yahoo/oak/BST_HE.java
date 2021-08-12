@@ -4,10 +4,11 @@ import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.BST.BST_HE_;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalBST;
+import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class BST_HE implements CompositionalBST<Buff, Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
 	BST_HE_<Buff,Buff>BST = new BST_HE_<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
 			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
 	
@@ -41,7 +42,7 @@ public class BST_HE implements CompositionalBST<Buff, Buff>{
     
     public void clear() {
     	allocator.close();
-    	allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    	allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
     	BST = new BST_HE_<Buff,Buff>(Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_SERIALIZER
     			, Buff.DEFAULT_C, Buff.DEFAULT_C,allocator);
     }
