@@ -11,7 +11,7 @@ keysize="1024"
 writes="0"
 warmup="30"
 iterations="3"
-duration="15000"
+duration="60000"
 #gcAlgorithms="-XX:+UseParallelOldGC -XX:+UseConcMarkSweepGC -XX:+UseG1GC"
 
 declare -A heap_limit=(
@@ -50,13 +50,13 @@ declare -A heap_limit=(
 
 
 declare -A becnh_size=(						
-						["SA_EBR"]="1000000"
-						["SA_HE"]="1000000"
-						["SA_Nova"]="1000000"
-						["SA_Nova_primitive"]="1000000"
-						["SA_NovaFenceFree"]="1000000"
-						["SA_NoMM"]="1000000"
-						["SA_GC"]="1000000"
+						["SA_EBR"]="30_000_000"
+						["SA_HE"]="30_000_000"
+						["SA_Nova"]="30_000_000"
+						["SA_Nova_primitive"]="30_000_000"
+						["SA_NovaFenceFree"]="30_000_000"
+						["SA_NoMM"]="30_000_000"
+						["SA_GC"]="30_000_000"
 					   )
 						                        
                         
@@ -80,7 +80,7 @@ declare -A scenarios=(
 
 benchClassPrefix="com.yahoo.oak"
 
-benchs="SA_EBR SA_HE SA_Nova SA_Nova_primitive SA_Nova_FenceFree SA_NoMM SA_GC"
+benchs="SA_EBR SA_HE SA_Nova SA_Nova_primitive SA_NoMM SA_GC"
 
 summary="${output}/summarySA.csv"
 
