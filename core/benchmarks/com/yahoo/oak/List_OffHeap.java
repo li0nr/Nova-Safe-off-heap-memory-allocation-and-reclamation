@@ -3,13 +3,7 @@ package com.yahoo.oak;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
-import jdk.internal.ref.Cleaner;
-
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 public class List_OffHeap implements ListInterface{
 	
@@ -99,22 +93,6 @@ public class List_OffHeap implements ListInterface{
 		 for (int i=0;i<size;i++){
 			 ByteBuffer buffer = ArrayOff[i];
 			 if(buffer == null) continue;
-			 Field cleanerField = null;
-			 try {
-	            cleanerField = buffer.getClass().getDeclaredField("cleaner");
-	            } catch (NoSuchFieldException e) {
-	            	e.printStackTrace();
-	            	}
-			 assert cleanerField != null;
-	         cleanerField.setAccessible(true);
-	         Cleaner cleaner = null;
-	         try {
-	        	 cleaner = (Cleaner) cleanerField.get(buffer);
-	        	 } catch (IllegalAccessException e) {
-	        		 e.printStackTrace();
-	        		 }
-	         assert cleaner != null;
-	         cleaner.clean();
 	         }
 		 }
 	 

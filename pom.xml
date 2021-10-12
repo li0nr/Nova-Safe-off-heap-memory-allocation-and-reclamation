@@ -103,4 +103,14 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+        <profiles>
+  		<profile>
+  		<activation>
+  		<jdk>[9,)</jdk>
+  		</activation>
+  		<properties>
+  			<maven.compiler.release>17</maven.compiler.release>
+  		</properties>
+  		</profile>
+  	</profiles>
 </project>
