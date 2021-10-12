@@ -78,6 +78,7 @@ public class ThreadLoopLL implements Runnable {
     boolean iterate = false;
     
     Buff key = new Buff(Parameters.confKeySize);
+    Buff val = new Buff(Parameters.confValSize);
 
     /**
      * The distribution of methods as an array of percentiles
@@ -111,7 +112,7 @@ public class ThreadLoopLL implements Runnable {
         // for the key distribution INCREASING we want to continue the increasing integers sequence,
         // started in the initial filling of the map
         // for the key distribution RANDOM the below value will be overwritten anyway
-        int newInt = 0; //start deleting from 0
+        int newInt = -1; //start deleting from 0
         //int newInt = Parameters.confSize;
 
         while (!stop) {
@@ -119,6 +120,7 @@ public class ThreadLoopLL implements Runnable {
         	newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
         	key.set(newInt);
+        	val.set(newInt);
 
             int coin = rand.nextInt(1000);
             if(coin < cdf[0]) { //-a deleting is good?
@@ -132,7 +134,7 @@ public class ThreadLoopLL implements Runnable {
             }
             else if (coin < cdf[1]) { // -u writing is better than deleting?
             	numAdd++;
-            	if(bench.put(key,key, myThreadNum)) {
+            	if(bench.put(key,val, myThreadNum)) {
             		numSuccAdd++;
             	}
             	else failures++;

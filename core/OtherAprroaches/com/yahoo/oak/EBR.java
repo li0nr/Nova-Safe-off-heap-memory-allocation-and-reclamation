@@ -3,9 +3,7 @@ package com.yahoo.oak;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
-
 import sun.misc.Unsafe;
-import sun.misc.Contended;
 
 
 public class EBR {

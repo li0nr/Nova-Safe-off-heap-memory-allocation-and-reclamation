@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import sun.misc.Cleaner;
+import jdk.internal.ref.Cleaner;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

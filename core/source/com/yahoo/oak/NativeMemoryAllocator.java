@@ -218,12 +218,12 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
     int numOfAllocatedBlocks() {
         return (int) numberOfBlocks();
     }
-
+    
     // This method MUST be called within a thread safe context !!!
     private void allocateNewCurrentBlock() {
         Block b = blocksProvider.getBlock();
+        this.blocksArray[idGenerator.get()] = b;
         int blockID = idGenerator.getAndIncrement();
-        this.blocksArray[blockID] = b;
         b.setID(blockID);
         this.currentBlock = b;
     }
