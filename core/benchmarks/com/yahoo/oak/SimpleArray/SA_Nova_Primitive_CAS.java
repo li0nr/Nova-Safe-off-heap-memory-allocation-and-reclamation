@@ -71,7 +71,7 @@ public class SA_Nova_Primitive_CAS {
 		return true;
 	}
 	
-	public boolean Parallelfill(int size) {
+	public boolean ParallelFill(int size) {
 		ArrayList<Thread> threads = new ArrayList<>();
 		int NUM_THREADS = size/1_000_000;;
 	    for (int i = 0; i < NUM_THREADS; i++) {

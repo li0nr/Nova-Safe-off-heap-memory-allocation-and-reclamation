@@ -37,6 +37,7 @@ import com.yahoo.oak.SA_jmh.SA_bench_EBR.ThreadState;
 import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_Nova_CAS;
+import com.yahoo.oak.SimpleArray.SA_Nova_Primitive_CAS;
 
 
 
@@ -78,31 +79,15 @@ public class SA_bench_Nova {
 	    
         @Setup(Level.Iteration)
         public void fill() {
-    		Random rand = new Random(208);
-    		if(SA != null) {
-    			ParamBench.PrintMem(SA.getAlloc());
-    			SA.getAlloc().FreeNative();
-    		}
-    		    	    
     	    SA = new SA_Nova_CAS(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
-    	    
-        	for (int i=0; i <size ; i++) {
-        		int keyval = rand.nextInt(size);
-        		Buff k = new Buff(1024);
-        		k.set(keyval);
-        		if(SA.fill(k, 0) != true) {
-        			i--;
-        		}
-        	}
+    	    SA.ParallelFill(SAParam.LL_Size);
         }
         @TearDown(Level.Iteration)
         public void printStats() {
-    		//ParamBench.PrintMem(allocator);
-
-//			System.out.println("\n gets Num iter : "+ BST.get_count);
-//			System.out.println("\n dels Num iter : "+ BST.del_count);
-//			System.out.println("\n puts Num iter : "+ BST.put_count);
-
+        	
+			ParamBench.PrintMem(SA.getAlloc());
+			SA.getAlloc().FreeNative();
+			SA = null;
         }
     }
 

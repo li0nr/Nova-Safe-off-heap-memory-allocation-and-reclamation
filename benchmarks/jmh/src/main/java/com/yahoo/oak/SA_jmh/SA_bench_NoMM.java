@@ -77,30 +77,15 @@ public class SA_bench_NoMM {
 	    
         @Setup(Level.Iteration)
         public void fill() {
-    		Random rand = new Random(208);
-    		if(SA != null) {
-    			ParamBench.PrintMem(SA.getAlloc());
-    			SA.getAlloc().FreeNative();
-    		}
     	    SA = new SA_NoMM2(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
-    	    
-        	for (int i=0; i <size ; i++) {
-        		int keyval = rand.nextInt(size);
-        		Buff k = new Buff(1024);
-        		k.set(keyval);
-        		if(SA.fill(k, 0) != true) {
-        			i--;
-        		}
-        	}
+    	    SA.ParallelFill(SAParam.LL_Size);
         }
         @TearDown(Level.Iteration)
         public void printStats() {
-    		//ParamBench.PrintMem(allocator);
-
-//			System.out.println("\n gets Num iter : "+ BST.get_count);
-//			System.out.println("\n dels Num iter : "+ BST.del_count);
-//			System.out.println("\n puts Num iter : "+ BST.put_count);
-
+        	
+			ParamBench.PrintMem(SA.getAlloc());
+			SA.getAlloc().FreeNative();
+			SA = null;
         }
     }
 
