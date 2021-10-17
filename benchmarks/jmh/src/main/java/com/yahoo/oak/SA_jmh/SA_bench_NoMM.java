@@ -32,6 +32,8 @@ import com.yahoo.oak.RNG;
 
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
+import com.yahoo.oak.SA_jmh.SA_bench_HE.BenchmarkState;
+import com.yahoo.oak.SA_jmh.SA_bench_HE.ThreadState;
 import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_NoMM;
@@ -93,7 +95,7 @@ public class SA_bench_NoMM {
 	public static class ThreadState {
 		static int threads = -1;
 		Random rand = new Random();
-		Buff buff = new Buff();
+		Buff buff = new Buff(1024);
 		int i=-1;
 		
 		@Setup
@@ -113,211 +115,87 @@ public class SA_bench_NoMM {
 	
 	
 	
-  @Warmup(iterations = SAParam.warmups)
-  @Measurement(iterations = SAParam.iterations)
-  @BenchmarkMode(Mode.AverageTime)
-  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 0)
-  @OperationsPerInvocation(SAParam.LL_Size)
-  @Benchmark
-  public void search90_delete5_insert5(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-  	int i = 0;
-  	while( i < BenchmarkState.size/ThreadState.threads) {
-  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-  		switch(BenchmarkState.BenchmarkState_90_5_5.Functions_3()) {
-  		case(1):
-  	      	blackhole.consume(state.SA.get(threadState.rand.nextInt(BenchmarkState.size), 
-  	      			Buff.DEFAULT_R,threadState.i));
-			break;
-  		case(2):
-  	      	blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
-  	      			,threadState.i));
-			break;
-  		case(3):
-  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
-  	      			, threadState.buff,threadState.i));
-  		}
-      	i++;
-      	}
-  	}
+	  @Warmup(iterations = SAParam.warmups)
+	  @Measurement(iterations = SAParam.iterations)
+	  @BenchmarkMode(Mode.AverageTime)
+	  @OutputTimeUnit(TimeUnit.MILLISECONDS)
+	  @Fork(value = 0)
+	  @OperationsPerInvocation(SAParam.LL_Size)
+	  @Benchmark
+	  public void search90_delete5_insert5(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+	  	int i = 0;
+	  	while( i < BenchmarkState.size/ThreadState.threads) {
+	  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+	  		switch(BenchmarkState.BenchmarkState_90_5_5.Functions_3()) {
+	  		case(1):
+	  	      	blackhole.consume(state.SA.get(threadState.rand.nextInt(BenchmarkState.size), 
+	  	      			Buff.DEFAULT_R,threadState.i));
+				break;
+	  		case(2):
+	  	      	blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+	  	      			,threadState.i));
+				break;
+	  		case(3):
+	  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+	  	      			, threadState.buff,threadState.i));
+	  		}
+	      	i++;
+	      	}
+	  	}
+	  
+	  @Warmup(iterations = SAParam.warmups)
+	  @Measurement(iterations = SAParam.iterations)
+	  @BenchmarkMode(Mode.AverageTime)
+	  @OutputTimeUnit(TimeUnit.MILLISECONDS)
+	  @Fork(value = 0)
+	  @OperationsPerInvocation(SAParam.LL_Size)
+	  @Benchmark
+	  public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+	  	int i = 0;
+	  	while( i < BenchmarkState.size/ThreadState.threads) {
+	  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+	  		switch(BenchmarkState.BenchmarkState_50_25_25.Functions_3()) {
+	  		case(1):
+	  	      	blackhole.consume(state.SA.get(threadState.rand.nextInt(BenchmarkState.size), 
+	  	      			Buff.DEFAULT_R,threadState.i));
+				break;
+	  		case(2):
+	  	      	blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+	  	      			,threadState.i));
+				break;
+	  		case(3):
+	  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+	  	      			, threadState.buff,threadState.i));
+	  		}
+	  		i++;
+	  		}
+	  	}
+	  
+	  @Warmup(iterations = SAParam.warmups)
+	  @Measurement(iterations = SAParam.iterations)
+	  @BenchmarkMode(Mode.AverageTime)
+	  @OutputTimeUnit(TimeUnit.MILLISECONDS)
+	  @Fork(value = 0)
+	  @OperationsPerInvocation(SAParam.LL_Size)
+	  @Benchmark
+	  public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
+	  	int i = 0;
+	  	while( i < BenchmarkState.size/ThreadState.threads) {
+	  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
+	  		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
+	  		case(1):
+	  			blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+	  	      			,threadState.i));
+	  		break;
+	  		case(2):
+	  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+	  	      			, threadState.buff,threadState.i));
+	  		}
+	  		i++;
+	  		}
+	  	}
   
-//  @Warmup(iterations = LLParam.warmups)
-//  @Measurement(iterations = LLParam.iterations)
-//  @BenchmarkMode(Mode.AverageTime)
-//  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//  @Fork(value = 0)
-//  @OperationsPerInvocation(LLParam.LL_Size)
-//  @Benchmark
-//  public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//  	int i = 0;
-//  	while( i < BenchmarkState.size/ThreadState.threads) {
-//  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//  		switch(BenchmarkState.BenchmarkState_50_25_25.Functions_3()) {
-//  		case(1):
-//  	      	blackhole.consume(state.LL.contains(threadState.buff,threadState.i));
-//			break;
-//  		case(2):
-//  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
-//			break;
-//  		case(3):
-//  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
-//  		}
-//  		i++;
-//  		}
-//  	}
-//  
-//  @Warmup(iterations = LLParam.warmups)
-//  @Measurement(iterations = LLParam.iterations)
-//  @BenchmarkMode(Mode.AverageTime)
-//  @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//  @Fork(value = 0)
-//  @OperationsPerInvocation(LLParam.LL_Size)
-//  @Benchmark
-//  public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//  	int i = 0;
-//  	while( i < BenchmarkState.size/ThreadState.threads) {
-//  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//  		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
-//  		case(1):
-//  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
-//  			break;
-//  		case(2):
-//  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.i));
-//  		}
-//  		i++;
-//      	}
-//  	}
-    
-	
-//	 @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void ReadBulk_Serial(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i < BenchmarkState.size/ThreadState.threads) {
-//	    		threadState.buff.set(i);
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-//	    
-//	    @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void ReadBulk_Rand(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i < BenchmarkState.size/ThreadState.threads) {
-// 	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	if(i% 10 == 0)blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-//	    
-//	    @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void ReadBulk_RandnD(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i < BenchmarkState.size/ThreadState.threads) {
-// 	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-//    
-//	    @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void ReadBulk_Randn3D(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i < BenchmarkState.size/ThreadState.threads) {
-// 	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-//	    
-//	    @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void ReadBulk_Randn4D(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i < BenchmarkState.size/ThreadState.threads) {
-// 	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-//
-//	    
-//	    @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void ReadBulk_Randn5D(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i < BenchmarkState.size/ThreadState.threads) {
-// 	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//	        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-//	    @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Group("ReadDelete")
-//	    @GroupThreads(1)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void readParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i <BenchmarkState.size/ThreadState.threads) {
-//	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//	        	blackhole.consume(state.BST.containsKey(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-//	    
-//	    @Warmup(iterations = BSTParam.warmups)
-//	    @Measurement(iterations = BSTParam.iterations)
-//	    @BenchmarkMode(Mode.AverageTime)
-//	    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//	    @Group("ReadDelete")
-//	    @GroupThreads(7)
-//	    @Fork(value = 0)
-//	    @Benchmark
-//	    public void deleteParallel(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
-//	    	int i = 0;
-//	    	while( i < BenchmarkState.size/ThreadState.threads) {
-//	    		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
-//	        	blackhole.consume(state.BST.remove(threadState.buff,threadState.i));
-//	        	i++;
-//	    	}
-//		}
-	    
+
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
 	    			.include(SA_bench_NoMM.class.getSimpleName())

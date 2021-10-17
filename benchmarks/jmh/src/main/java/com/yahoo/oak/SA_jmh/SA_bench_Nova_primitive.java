@@ -95,7 +95,7 @@ public class SA_bench_Nova_primitive {
 	public static class ThreadState {
 		static int threads = -1;
 		Random rand = new Random();
-		Buff buff = new Buff();
+		Buff buff = new Buff(1024);
 		int i=-1;
 		
 		@Setup
