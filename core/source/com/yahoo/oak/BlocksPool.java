@@ -152,7 +152,7 @@ final class BlocksPool implements BlocksProvider, Closeable {
     
     public void returnBlock(Block b, boolean notlazy) {
         b.reset();
-        this.blocks.poll().clean();
+        b.clean();
     }
 
     /**
