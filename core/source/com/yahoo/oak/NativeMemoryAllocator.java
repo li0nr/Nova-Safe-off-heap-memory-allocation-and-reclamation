@@ -229,8 +229,24 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
     }
     
     public void FreeNative() {
-    	((BlocksPool)blocksProvider).close();
+        if (!closed.compareAndSet(false, true)) {
+            return;
+        }
+
+        // Release the hold of the block array and return it the provider.
+        Block[] b = blocksArray;
+        blocksArray = null;
+
+        // Reset "closed" to apply a memory barrier before actually returning the block.
+        closed.set(true);
+
+        for (int i = 1; i <= numberOfBlocks(); i++) {
+            blocksProvider.returnBlock(b[i], true);
+        }
+        // no need to do anything with the free list,
+        // as all free list members were residing on one of the (already released) blocks
     }
+    
     
     public void deFrag() {
     	Iterator<NovaSlice> iter = NovafreeList.iterator();

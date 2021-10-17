@@ -12,4 +12,7 @@ interface BlocksProvider {
     Block getBlock();
 
     void returnBlock(Block block);
+    
+    void returnBlock(Block block,boolean notlazy);
+
 }

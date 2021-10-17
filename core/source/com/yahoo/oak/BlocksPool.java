@@ -149,6 +149,11 @@ final class BlocksPool implements BlocksProvider, Closeable {
             }
         }
     }
+    
+    public void returnBlock(Block b, boolean notlazy) {
+        b.reset();
+        this.blocks.poll().clean();
+    }
 
     /**
      * Should be called when the entire Pool is not used anymore. Releases the memory only of the
