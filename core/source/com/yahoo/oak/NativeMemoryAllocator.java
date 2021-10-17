@@ -241,6 +241,7 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
         closed.set(true);
 
         for (int i = 1; i <= numberOfBlocks(); i++) {
+        	if(b[i] != null)
             blocksProvider.returnBlock(b[i], true);
         }
         // no need to do anything with the free list,

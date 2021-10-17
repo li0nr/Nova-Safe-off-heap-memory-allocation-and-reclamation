@@ -14,7 +14,7 @@ public class SAParam {
 	static final int thread24=24;
 	static final int thread32=32;
  	
-	public static final int LL_Size = 1000_000;
+	public static final int LL_Size = 5_000_000;
 
 	public static final int forks = 0;
 }
