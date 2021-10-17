@@ -39,7 +39,7 @@ import com.yahoo.oak.ParamBench;
 
 
 
-public class LL_Bench_Nova {
+public class LL_old_Bench_Nova {
 final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
 	@State(Scope.Benchmark)
@@ -269,7 +269,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
     
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
-    			.include(LL_Bench_Nova.class.getSimpleName())
+    			.include(LL_old_Bench_Nova.class.getSimpleName())
                 .forks(BSTParam.forks)
                 .threads(1)
                 .build();

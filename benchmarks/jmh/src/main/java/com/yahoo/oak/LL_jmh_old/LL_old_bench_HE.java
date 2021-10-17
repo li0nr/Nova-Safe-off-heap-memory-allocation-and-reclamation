@@ -35,7 +35,7 @@ import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
 
 
 
-public class LL_bench_HE {
+public class LL_old_bench_HE {
 	
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
@@ -328,7 +328,7 @@ public class LL_bench_HE {
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(LL_bench_HE.class.getSimpleName())
+	    			.include(LL_old_bench_HE.class.getSimpleName())
 	                .forks(LLParam.forks)
 	                .threads(1)
 	                .build();

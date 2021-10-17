@@ -27,7 +27,7 @@ import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noCAS;
 
 
-public class LL_Nova_bench {
+public class LL_old_Nova_bench {
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
 	 
     @State(Scope.Benchmark)
@@ -118,7 +118,7 @@ public class LL_Nova_bench {
     
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
-    			.include(LL_Nova_bench.class.getSimpleName())
+    			.include(LL_old_Nova_bench.class.getSimpleName())
                 .forks(LLParam.forks)
                 .threads(1)
                 .build();

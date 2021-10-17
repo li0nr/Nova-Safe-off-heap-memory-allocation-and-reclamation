@@ -40,7 +40,7 @@ import com.yahoo.oak.ParamBench;
 
 
 
-public class LL_EBR_bench {
+public class LL_old_EBR_bench {
 final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
 	@State(Scope.Benchmark)
@@ -202,7 +202,7 @@ final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
     
     public static void main(String[] args) throws RunnerException {
     	Options opt = new OptionsBuilder()
-    			.include(LL_EBR_bench.class.getSimpleName())
+    			.include(LL_old_EBR_bench.class.getSimpleName())
                 .forks(BSTParam.forks)
                 .threads(1)
                 .build();
