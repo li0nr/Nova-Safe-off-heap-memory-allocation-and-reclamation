@@ -16,7 +16,7 @@ public class SA_GC implements CompositionalSA<Buff>{
     }
     
     public  boolean ParallelFill(int size) {
-    	return SA.Parallelfill(size);
+    	return SA.ParallelFill(size);
     }
     
     public  Integer get( int index, int idx) {

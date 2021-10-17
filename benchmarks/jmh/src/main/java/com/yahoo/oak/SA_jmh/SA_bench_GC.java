@@ -1,4 +1,4 @@
-package com.yahoo.oak.LL_jmh;
+package com.yahoo.oak.SA_jmh;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Group;
+import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -24,24 +26,30 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.HarrisLinkedList;
+import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
+import com.yahoo.oak.SA_jmh.SA_bench_Nova_FF.BenchmarkState;
+import com.yahoo.oak.SA_jmh.SA_bench_Nova_FF.ThreadState;
+import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
+import com.yahoo.oak.SimpleArray.SA_GC;
+import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
 
 
 
-public class LL_GC {
+public class SA_bench_GC {
 	
 	final static  AtomicInteger THREAD_INDEX = new AtomicInteger(0);
  	
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
 
-    	public static  int size  = LLParam.LL_Size;
+    	public static  int size  = SAParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private HarrisLinkedList<Buff, Buff> LL ;
+        private SA_GC SA;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -69,15 +77,15 @@ public class LL_GC {
     	}
 	    
         @Setup(Level.Iteration)
-        public void Fill_Bench() {
+        public void fill() {
     	    allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);    
-    	    LL = new HarrisLinkedList<Buff,Buff>(Buff.CC,Buff.CC);
+    	    SA = new SA_GC(size, Buff.CC);
+    	    SA.ParallelFill(SAParam.LL_Size);
         }
-        
         @TearDown(Level.Iteration)
         public void printStats() {
-        	ParamBench.PrintMem(allocator);
-        	LL = null;
+			ParamBench.PrintMem(allocator);
+			SA = null;
         }
     }
 
@@ -85,7 +93,7 @@ public class LL_GC {
 	public static class ThreadState {
 		static int threads = -1;
 		Random rand = new Random();
-		Buff buff = new Buff();
+		Buff buff = new Buff(1024);
 		int i=-1;
 		
 		@Setup
@@ -105,83 +113,93 @@ public class LL_GC {
 	
 	
 	
-  @Warmup(iterations = LLParam.warmups)
-  @Measurement(iterations = LLParam.iterations)
+  @Warmup(iterations = SAParam.warmups)
+  @Measurement(iterations = SAParam.iterations)
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(LLParam.LL_Size)
+  @OperationsPerInvocation(SAParam.LL_Size)
   @Benchmark
   public void search90_delete5_insert5(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
-  	while( i < LLParam.OpsInOperations) {
-  		threadState.buff.set(threadState.rand.nextInt(2*BenchmarkState.size));
+  	while( i < BenchmarkState.size/ThreadState.threads) {
+  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
   		switch(BenchmarkState.BenchmarkState_90_5_5.Functions_3()) {
   		case(1):
-  	      	blackhole.consume(state.LL.contains(threadState.buff,threadState.i));
+  	      	blackhole.consume(state.SA.get(threadState.rand.nextInt(BenchmarkState.size), 
+  	      		Buff.GCR,threadState.i));
 			break;
   		case(2):
-  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
+  	      	blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+  	      			,threadState.i));
 			break;
   		case(3):
-  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.buff,threadState.i));
+  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+  	      			, threadState.buff,threadState.i));
   		}
       	i++;
       	}
   	}
   
-  @Warmup(iterations = LLParam.warmups)
-  @Measurement(iterations = LLParam.iterations)
+  @Warmup(iterations = SAParam.warmups)
+  @Measurement(iterations = SAParam.iterations)
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(LLParam.LL_Size)
+  @OperationsPerInvocation(SAParam.LL_Size)
   @Benchmark
   public void search50_delete25_insert25(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
-  	while( i < LLParam.OpsInOperations) {
-  		threadState.buff.set(threadState.rand.nextInt(2*BenchmarkState.size));
+  	while( i < BenchmarkState.size/ThreadState.threads) {
+  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
   		switch(BenchmarkState.BenchmarkState_50_25_25.Functions_3()) {
   		case(1):
-  	      	blackhole.consume(state.LL.contains(threadState.buff,threadState.i));
+  	      	blackhole.consume(state.SA.get(threadState.rand.nextInt(BenchmarkState.size), 
+  	      		Buff.GCR,threadState.i));
 			break;
   		case(2):
-  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
+  	      	blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+  	      			,threadState.i));
 			break;
   		case(3):
-  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.buff,threadState.i));
+  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+  	      			, threadState.buff,threadState.i));
   		}
   		i++;
   		}
   	}
   
-  @Warmup(iterations = LLParam.warmups)
-  @Measurement(iterations = LLParam.iterations)
+  @Warmup(iterations = SAParam.warmups)
+  @Measurement(iterations = SAParam.iterations)
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
   @Fork(value = 0)
-  @OperationsPerInvocation(LLParam.LL_Size)
+  @OperationsPerInvocation(SAParam.LL_Size)
   @Benchmark
   public void delete50_insert50(Blackhole blackhole,BenchmarkState state,ThreadState threadState) {
   	int i = 0;
-  	while( i < LLParam.OpsInOperations) {
-  		threadState.buff.set(threadState.rand.nextInt(2*BenchmarkState.size));
+  	while( i < BenchmarkState.size/ThreadState.threads) {
+  		threadState.buff.set(threadState.rand.nextInt(BenchmarkState.size));
   		switch(BenchmarkState.BenchmarkState_50_50.Functions_2()) {
   		case(1):
-  	      	blackhole.consume(state.LL.remove(threadState.buff,threadState.i));
-  			break;
+  			blackhole.consume(state.SA.delete(threadState.rand.nextInt(BenchmarkState.size)
+  	      			,threadState.i));
+  		break;
   		case(2):
-  	      	blackhole.consume(state.LL.add(threadState.buff,threadState.buff,threadState.i));
+  	      	blackhole.consume(state.SA.set(threadState.rand.nextInt(BenchmarkState.size)
+  	      			, threadState.buff,threadState.i));
   		}
   		i++;
-      	}
+  		}
   	}
     
+	
+
 	    
 	    public static void main(String[] args) throws RunnerException {
 	    	Options opt = new OptionsBuilder()
-	    			.include(LL_GC.class.getSimpleName())
-	                .forks(LLParam.forks)
+	    			.include(SA_bench_GC.class.getSimpleName())
+	                .forks(SAParam.forks)
 	                .threads(1)
 	                .build();
 

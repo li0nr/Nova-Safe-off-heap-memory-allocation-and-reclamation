@@ -30,6 +30,8 @@ import com.yahoo.oak.RNG;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.EBR.LL_EBR_noCAS;
 import com.yahoo.oak.LL.HE.LL_HE_noCAS;
+import com.yahoo.oak.SA_jmh.SAParam;
+import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 
 
 
@@ -71,34 +73,20 @@ public class LL_EBR {
 	    
         @Setup(Level.Iteration)
         public void Fill_Bench() {
-    		Random rand = new Random(new Random().nextInt());
-    		if(allocator != null)
-    			ParamBench.PrintMem(allocator);
-    		
-    	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    	    
+    	    allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);    
     	    LL = new LL_EBR_noCAS<Buff, Buff>(allocator,
     	    		Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,
     	    		Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
-    	    
-        	for (int i=0; i < size ; i++) {
-        		int keyval = rand.nextInt(2*size);
-        		Buff k = new Buff();
-        		k.set(keyval);
-        		if(LL.Fill(k,k, 0) == false)
-        			i--;
-        		}
         }
+        
         @TearDown(Level.Iteration)
         public void printStats() {
-    		//ParamBench.PrintMem(allocator);
-
-//			System.out.println("\n gets Num iter : "+ BST.get_count);
-//			System.out.println("\n dels Num iter : "+ BST.del_count);
-//			System.out.println("\n puts Num iter : "+ BST.put_count);
-
+        	ParamBench.PrintMem(allocator);
+        	allocator.FreeNative();
+        	LL = null;
         }
     }
+	
 
 	@State(Scope.Thread)
 	public static class ThreadState {
