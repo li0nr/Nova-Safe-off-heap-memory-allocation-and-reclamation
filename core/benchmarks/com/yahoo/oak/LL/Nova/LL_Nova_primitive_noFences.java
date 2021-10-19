@@ -278,33 +278,8 @@ public class LL_Nova_primitive_noFences<K,V> {
 
         }
     }
-//    public Iterator<E> iterator(int idx) {
-//        return new LLIterator<E>(this, idx);
-//    }
-//    
-//
-//    
-//    class LLIterator<E> implements Iterator<E> {
-//        Node current;
-//        int idx;
-//
-//	   public LLIterator(HarrisLinkedListNova<E> list, int idx)
-//	   {
-//	        current = list.head.getNext();
-//	        this.idx = idx;
-//        }
-//        // Checks if the next element exists
-//        public boolean hasNext() {
-//            return current.key != 1; 	
-//        }
-//          
-//        // moves the cursor/iterator to next element
-//        public E next() {
-//            E data = (E)current.Read(Srz);
-//            current = current.getNext();
-//            return data;
-//        }
-//    }	
+
+    
     
 	public static void main(String[] args) {
 	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);

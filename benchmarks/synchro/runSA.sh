@@ -80,7 +80,7 @@ declare -A scenarios=(
 
 benchClassPrefix="com.yahoo.oak"
 
-benchs="SA_EBR SA_HE SA_Nova SA_Nova_primitive SA_NoMM SA_GC"
+benchs="SA_EBR SA_HE SA_Nova SA_Nova_primitive SA_NoMM SA_Nova_primitive_FenceFree SA_GC"
 
 summary="${output}/summarySA.csv"
 

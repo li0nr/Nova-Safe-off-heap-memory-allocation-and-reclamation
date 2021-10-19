@@ -66,7 +66,7 @@ public class SA_Nova_Primitive_CAS {
 		}
 //		Facade_Nova.AllocateSlice(e, refrences_offset + size*Long.BYTES, srZ.calculateSize(e) , threadIDX);
 		//Facade_Nova.AllocateSlice(e, 1, srZ.calculateSize(e) , threadIDX);
-		refrences[size]= Facade_Nova.WriteFast(srZ, e, Facade_Nova.AllocateSlice(e, 1, srZ.calculateSize(e) , threadIDX), threadIDX);
+		refrences[size]= Facade_Nova.WriteFast(srZ, e, Facade_Nova.AllocateSlice(srZ.calculateSize(e) , threadIDX), threadIDX);
 		size++;
 		return true;
 	}
@@ -156,7 +156,9 @@ public class SA_Nova_Primitive_CAS {
 			while( i < 1_000_000) {		
 				v = localRanom.nextInt();
 		        key.set(v);		
-				array[idx*1_000_000 + i] = Facade_Nova.WriteFast(srZ, key, Facade_Nova.AllocateSlice(key, 1, srZ.calculateSize(key) , idx), idx);
+				array[idx*1_000_000 + i] = Facade_Nova.WriteFast(
+						srZ, key, Facade_Nova.AllocateSlice(srZ.calculateSize(key), idx)
+						,idx);
 				i++;
 				}
 			

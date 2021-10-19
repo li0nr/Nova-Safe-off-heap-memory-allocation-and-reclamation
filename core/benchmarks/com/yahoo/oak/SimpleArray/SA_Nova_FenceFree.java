@@ -115,7 +115,10 @@ public class SA_Nova_FenceFree {
 	public int getSize(){
 		return size;
 	}
-
+	
+	public void close() {
+		allocator.close();
+	}
 	
 	private void EnsureCap() {
 		int newSize = refrences.length *2;
@@ -148,7 +151,9 @@ public class SA_Nova_FenceFree {
 			while( i < 1_000_000) {		
 				v = localRanom.nextInt();
 		        key.set(v);		
-				array[idx*1_000_000 + i] = Facade_Nova.WriteFast(srZ, key, Facade_Nova.AllocateSlice(key, 1, srZ.calculateSize(key) , idx), idx);
+				array[idx*1_000_000 + i] = Facade_Nova_FenceFree.WriteFast(srZ, key, 
+						Facade_Nova_FenceFree.AllocateSlice(key, srZ.calculateSize(key) , idx)
+						, idx);
 				i++;
 				}
 			

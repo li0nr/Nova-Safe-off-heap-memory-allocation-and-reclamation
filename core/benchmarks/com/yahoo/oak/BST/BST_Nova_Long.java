@@ -220,8 +220,8 @@ public class BST_Nova_Long<K , V> {
         Node l;
         /** END SEARCH VARIABLES **/
         newNode = new Node(        
-        		Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx),
-        		Facade_Nova.AllocateSlice(null, Facade_long_offset_value,SrzV.calculateSize(value), idx));
+        		Facade_Nova.AllocateSlice(SrzK.calculateSize(key), idx),
+        		Facade_Nova.AllocateSlice(SrzV.calculateSize(value), idx));
         
         Facade_Nova.WriteFast(SrzK, key, newNode.key ,idx);
         Facade_Nova.WriteFast(SrzV, value, newNode.value,idx);
@@ -260,12 +260,12 @@ public class BST_Nova_Long<K , V> {
                     if(l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) {
                     	long tmp =Illegal_facade;
                     	if(l.key != Illegal_facade) {
-                    		tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                    		tmp = Facade_Nova.AllocateSlice(SrzK.calculateSize(key), idx);
                             Facade_Nova.ReadFromOffheap(SrzK, l.key, tmp,idx);
                     	}
                         newInternal = new Node(tmp, newNode, newSibling);
                     }else {
-                    	long tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                    	long tmp = Facade_Nova.AllocateSlice(SrzK.calculateSize(key), idx);
                     	Facade_Nova.WriteFast(SrzK, key, tmp, idx);
                     	newInternal = new Node(tmp, newSibling, newNode);
                     }
@@ -360,8 +360,8 @@ public class BST_Nova_Long<K , V> {
         Node l;
         /** END SEARCH VARIABLES **/
         newNode = new Node(        
-        		Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx),
-        		Facade_Nova.AllocateSlice(null, Facade_long_offset_value,SrzV.calculateSize(value), idx));
+        		Facade_Nova.AllocateSlice(SrzK.calculateSize(key), idx),
+        		Facade_Nova.AllocateSlice(SrzV.calculateSize(value), idx));
         
         Facade_Nova.WriteFast(SrzK, key, newNode.key ,idx);
         Facade_Nova.WriteFast(SrzV, value, newNode.value,idx);
@@ -396,12 +396,12 @@ public class BST_Nova_Long<K , V> {
                     if(l.key == Illegal_facade || Facade_Nova.Compare(key, KCt, l.key) > 0) {
                     	long tmp =Illegal_facade;
                     	if(l.key != Illegal_facade) {
-                    		tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                    		tmp = Facade_Nova.AllocateSlice(SrzK.calculateSize(key), idx);
                             Facade_Nova.ReadFromOffheap(SrzK, l.key, tmp,idx);
                     	}
                         newInternal = new Node(tmp, newNode, newSibling);
                     }else {
-                    	long tmp = Facade_Nova.AllocateSlice(null, Facade_long_offset_key,SrzK.calculateSize(key), idx);
+                    	long tmp = Facade_Nova.AllocateSlice(SrzK.calculateSize(key), idx);
                     	Facade_Nova.WriteFast(SrzK, key, tmp, idx);
                     	newInternal = new Node(tmp, newSibling, newNode);
                     }

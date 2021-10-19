@@ -7,8 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Group;
-import org.openjdk.jmh.annotations.GroupThreads;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -26,18 +24,11 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.ParamBench;
 import com.yahoo.oak.RNG;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
-import com.yahoo.oak.SA_jmh.SA_bench_HE.BenchmarkState;
-import com.yahoo.oak.SA_jmh.SA_bench_HE.ThreadState;
-import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
-import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_NoMM;
-import com.yahoo.oak.SimpleArray.SA_NoMM2;
 
 
 
@@ -50,7 +41,7 @@ public class SA_bench_NoMM {
 
     	public static  int size  = SAParam.LL_Size;
     	public static  NativeMemoryAllocator allocator;
-        private SA_NoMM2 SA;
+        private SA_NoMM SA;
 
     	static RNG BenchmarkState_90_5_5 = 	 new RNG(3);
     	static RNG BenchmarkState_50_25_25 = new RNG(3);
@@ -79,7 +70,7 @@ public class SA_bench_NoMM {
 	    
         @Setup(Level.Iteration)
         public void fill() {
-    	    SA = new SA_NoMM2(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
+    	    SA = new SA_NoMM(SAParam.LL_Size, Buff.DEFAULT_SERIALIZER);
     	    SA.ParallelFill(SAParam.LL_Size);
         }
         @TearDown(Level.Iteration)

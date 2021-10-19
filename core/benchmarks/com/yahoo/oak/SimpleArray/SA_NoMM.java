@@ -1,56 +1,47 @@
 package com.yahoo.oak.SimpleArray;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.function.Function;
+
+import sun.misc.Unsafe;
+
+import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
 import com.yahoo.oak.UnsafeUtils;
-import com.yahoo.oak.EBR.EBRslice;
-
-import sun.misc.Unsafe;
+import com.yahoo.oak._Global_Defs;
+import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.SimpleArray.SA_Nova_CAS.FillerThread;
 
 public class SA_NoMM {
 	
 
 	private static final int DEFAULT_CAPACITY=10;
-    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-    
+    final NativeMemoryAllocator allocator = new NativeMemoryAllocator((long)10 * ((long) Integer.MAX_VALUE) * 8);
+	
     static final long slices_base_offset;
     static final long slices_scale;
     
     static {
 		try {
 			final Unsafe UNSAFE=UnsafeUtils.unsafe;
-			slices_base_offset = UNSAFE.arrayBaseOffset(NovaSliceD[].class);
-			slices_scale = UNSAFE.arrayIndexScale(NovaSliceD[].class);
+			slices_base_offset = UNSAFE.arrayBaseOffset(NovaSlice[].class);
+			slices_scale = UNSAFE.arrayIndexScale(NovaSlice[].class);
 			 } catch (Exception ex) { throw new Error(ex); }
     }
-
+    
+    
     private final NovaS srZ;
 	private int size=0;
 	private NovaSlice[] Slices;
 
 	
-	
-	static public class NovaSliceD extends NovaSlice{
-
-		private boolean deleted;
-		
-		public NovaSliceD() {
-			super(-1, -1, 0);
-			deleted = false;
-		}
-		
-		public boolean isDeleted() {
-				return deleted? true: false;
-		}
-		
-	}
-	
 	public SA_NoMM(NovaS srZ){
-		Slices = new NovaSliceD[DEFAULT_CAPACITY];
+		Slices = new NovaSlice[DEFAULT_CAPACITY];
 		this.srZ = srZ;
 	}
 	
@@ -64,17 +55,33 @@ public class SA_NoMM {
 		if(size == Slices.length) {
 			EnsureCap();//might be problematic 
 		}
-		Slices[size] = new  NovaSlice(0, 0, 0);
+		Slices[size] = new NovaSlice(0, 0, 0);
 		allocator.allocate(Slices[size], srZ.calculateSize(e));
-		srZ.serialize(e, Slices[size].address + Slices[size].offset);
+		srZ.serialize(e, Slices[size].address+Slices[size].offset);
 		size++;
 		return true;
 	}
 	
-	public <R> R get(int index, NovaR Reader , int threadIDX) {
+	public boolean ParallelFill(int size) {
+		ArrayList<Thread> threads = new ArrayList<>();
+		int NUM_THREADS = size/1_000_000;;
+	    for (int i = 0; i < NUM_THREADS; i++) {
+	    	threads.add(new Thread(new FillerThread(i, Slices)));
+	    	threads.get(i).start();
+	    	}	
+	    for (Thread thread : threads) {
+	        try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+	    }
+		return true;
+	}
+	
+	public <R> R get(int index, Function Reader, int threadIDX) {
 		NovaSlice toRead = Slices[index];
-		if(toRead == null)
-			return null;
+		if(toRead == null) return null;
 		R obj = (R) Reader.apply(toRead.address+toRead.offset);
 		return obj;
 	}
@@ -89,10 +96,11 @@ public class SA_NoMM {
 				return false;
 			}
 		}
-		NovaSlice toEnte = Slices[index] ;
-		if(toEnte == null)			
+		NovaSlice toEnter = Slices[index];
+		if(toEnter == null) {
 			return false;
-		srZ.serialize(obj, toEnte.address + toEnte.offset);
+		}
+		srZ.serialize(obj, toEnter.address+toEnter.offset);
 		return true;
 	}
 	
@@ -101,11 +109,9 @@ public class SA_NoMM {
 		NovaSlice toDel = Slices[index];
 		if(toDel == null)
 			return false;
-		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null)) {
-			allocator.free(toDel);
-			return true;
-		}
-		return false;
+		if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices, slices_base_offset+index*slices_scale,toDel, null))
+			return false;
+		return true;
 	}
 
 	
@@ -113,7 +119,9 @@ public class SA_NoMM {
 		return size;
 	}
 
-	
+	public void Clear() {
+		allocator.close();
+	}
 	private void EnsureCap() {
 		int newSize = Slices.length *2;
 		Slices = Arrays.copyOf(Slices, newSize);
@@ -121,6 +129,35 @@ public class SA_NoMM {
 	
 	public NativeMemoryAllocator getAlloc() {
 		return allocator;
+	}
+	
+	public class FillerThread extends Thread {
+
+		int idx;
+		NovaSlice[] array;
+		Random localRanom;
+		FillerThread(int index, NovaSlice[] local){
+			idx = index;
+			array = local;
+			localRanom = new Random(idx);
+		}
+		
+		@Override
+		public void run() {
+			int i = 0;
+			int v ;
+	        Buff key = new Buff(1024);
+
+			while( i < 1_000_000) {		
+				v = localRanom.nextInt();
+		        key.set(v);	
+				array[idx*1_000_000 + i] = new NovaSlice(0, 0, 0);
+				allocator.allocate(Slices[idx*1_000_000 + i], srZ.calculateSize(key));
+				srZ.serialize(key, Slices[idx*1_000_000 + i].address+Slices[idx*1_000_000 + i].offset);
+				i++;
+				}
+			
+	        }
 	}
 	
 }

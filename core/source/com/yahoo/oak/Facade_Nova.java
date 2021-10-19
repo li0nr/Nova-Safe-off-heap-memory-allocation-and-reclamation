@@ -32,7 +32,7 @@ public class Facade_Nova {
         return facadeNewData;
 	}
 	
-	static public <K> long AllocateSlice(K obj, long meta_offset, int size, int idx) {
+	static public <K> long AllocateSlice(int size, int idx) {
 		NovaSlice 	newslice = novaManager.getSlice(size,idx);
 		int offset=	newslice.getAllocatedOffset();
 		int block =	newslice.getAllocatedBlockID();

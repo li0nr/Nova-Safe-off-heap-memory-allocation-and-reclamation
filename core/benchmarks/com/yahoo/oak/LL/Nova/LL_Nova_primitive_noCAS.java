@@ -128,10 +128,8 @@ public class LL_Nova_primitive_noCAS<K,V> {
                     return true;
                 } else {
 
-                    long OffKRef = Facade_Nova.WriteFast(Ksr, key, Facade_Nova.AllocateSlice(null, key_offset,
-                    		Ksr.calculateSize(key), idx),idx);
-                    long OffVRef = Facade_Nova.WriteFast(Vsr, value, Facade_Nova.AllocateSlice(null, value_offset,
-                    		Vsr.calculateSize(value), idx),idx);
+                    long OffKRef = Facade_Nova.WriteFast(Ksr, key, Facade_Nova.AllocateSlice(Ksr.calculateSize(key), idx),idx);
+                    long OffVRef = Facade_Nova.WriteFast(Vsr, value, Facade_Nova.AllocateSlice(Vsr.calculateSize(value), idx),idx);
                     
                     Node newNode = new Node(OffKRef,OffVRef);
 
@@ -298,10 +296,8 @@ public class LL_Nova_primitive_noCAS<K,V> {
                     return false;
                 } else {
 
-                    long OffKRef = Facade_Nova.WriteFast(Ksr, key, Facade_Nova.AllocateSlice(null, key_offset,
-                    		Ksr.calculateSize(key), idx),idx);
-                    long OffVRef = Facade_Nova.WriteFast(Vsr, value, Facade_Nova.AllocateSlice(null, value_offset,
-                    		Vsr.calculateSize(value), idx),idx);
+                    long OffKRef = Facade_Nova.WriteFast(Ksr, key, Facade_Nova.AllocateSlice(Ksr.calculateSize(key), idx),idx);
+                    long OffVRef = Facade_Nova.WriteFast(Vsr, value, Facade_Nova.AllocateSlice(Vsr.calculateSize(value), idx),idx);
                     
                     Node newNode = new Node(OffKRef,OffVRef);
 

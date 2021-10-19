@@ -34,7 +34,7 @@ import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HE.HarrisLinkedListHE;
 import com.yahoo.oak.SimpleArray.SA_EBR_CAS_opt;
 import com.yahoo.oak.SimpleArray.SA_HE_CAS_opt;
-import com.yahoo.oak.SimpleArray.SA_NoMM2;
+import com.yahoo.oak.SimpleArray.SA_NoMM;
 import com.yahoo.oak.SimpleArray.SA_Nova_CAS;
 import com.yahoo.oak.SimpleArray.SA_Nova_FenceFree;
 import com.yahoo.oak.SimpleArray.SA_Nova_Primitive_CAS;

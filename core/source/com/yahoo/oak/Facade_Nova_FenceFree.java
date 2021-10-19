@@ -31,6 +31,15 @@ public class Facade_Nova_FenceFree {
         	novaManager.free(newslice);
         return facadeNewData;
         }
+	
+	static public <K> long AllocateSlice(K obj, int size, int idx) {
+		NovaSlice 	newslice = novaManager.getSlice(size,idx);
+		int offset=	newslice.getAllocatedOffset();
+		int block =	newslice.getAllocatedBlockID();
+		int version=  (int)newslice.getVersion();
+        long facadeNewData = combine(block,offset,version);
+        return facadeNewData;
+	}
 		
     /**
      * deletes the object referenced by the current facade 
