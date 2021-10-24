@@ -15,7 +15,7 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
 	@Override
 	public Integer containsKey(final Buff key, int tidx) {
 		Buff value = skipListMap.get(key);
-		return (Integer)Buff.GCR.apply(value);
+		return value == null ? null : (Integer)Buff.GCR.apply(value);
 	}
 
 
@@ -23,16 +23,14 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     public  boolean put(final Buff key,final Buff value, int idx) {
     	Buff keyb = Buff.CC.Copy(key);
     	Buff valueb = Buff.CC.Copy(value);
-    	skipListMap.put(keyb,valueb);
-    	return true;
+    	return skipListMap.put(keyb,valueb) == null ? true : false;
     }
     
     @Override
     public  boolean Fill(final Buff key,final Buff value, int idx) {    	
     	Buff keyb = Buff.CC.Copy(key);
     	Buff valueb = Buff.CC.Copy(value);
-    	skipListMap.put(keyb,valueb);
-    	return true;
+    	return skipListMap.put(keyb,valueb) == null ? true : false;
     	
     }
 

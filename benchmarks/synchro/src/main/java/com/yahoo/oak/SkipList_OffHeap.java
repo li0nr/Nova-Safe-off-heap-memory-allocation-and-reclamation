@@ -22,8 +22,8 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
 
 	@Override
 	public Integer containsKey(final Buff key, int tidx) {
-		long value = skipListMap.get(key);
-		return (Integer)Facade_Nova.Read(Buff.DEFAULT_R, value);
+		Long value = skipListMap.get(key);
+		return value == null ? null :(Integer)Facade_Nova.Read(Buff.DEFAULT_R, value);
 	}
 
 
@@ -45,8 +45,8 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
 
     @Override
     public  boolean remove(final Buff key, int idx) {
-    	long val = skipListMap.remove(key);
-    	return Facade_Nova.DeletePrivate(idx, val);
+    	Long val = skipListMap.remove(key);
+    	return val == null ? false : Facade_Nova.DeletePrivate(idx, val);
     }
 
 
