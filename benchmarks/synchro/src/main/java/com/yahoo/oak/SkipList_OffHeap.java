@@ -36,7 +36,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
 
     @Override
     public  boolean put(final Buff key,final Buff value, int idx) {
-    	long offValue = Facade_Nova.AllocateSlice(value.calculateSerializedSize(), idx);
+    	long offValue = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
     	Long valueOff = skipListMap.put(key, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null)
         	Facade_Nova.Delete(idx, valueOff, null, 0); 
@@ -44,8 +44,8 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     }
     
     @Override
-    public  boolean Fill(final Buff key,final Buff value, int idx) {    	
-    	long offValue = Facade_Nova.AllocateSlice(value.calculateSerializedSize(), idx);
+    public  boolean Fill(final Buff key,final Buff value, int idx) {    
+    	long offValue = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
     	skipListMap.put(key, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	return true;
     	
@@ -55,7 +55,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     @Override
     public  boolean remove(final Buff key, int idx) {
     	Long val = skipListMap.remove(key);
-    	return val == null ? false : Facade_Nova.DeletePrivate(idx, val);
+    	return val == null ? false : Facade_Nova.Delete(idx, val, null, 0);
     }
 
 
