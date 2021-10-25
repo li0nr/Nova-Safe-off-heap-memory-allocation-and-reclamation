@@ -23,14 +23,23 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
 	@Override
 	public Integer containsKey(final Buff key, int tidx) {
 		Long value = skipListMap.get(key);
-		return value == null ? null :(Integer)Facade_Nova.Read(Buff.DEFAULT_R, value);
+		if(value == null)
+			return null;
+		else {
+			Integer ret = (Integer)Facade_Nova.Read(Buff.DEFAULT_R, value);
+			if(ret == null)
+				return containsKey(key, tidx);
+			else return ret;
+		}
 	}
 
 
     @Override
     public  boolean put(final Buff key,final Buff value, int idx) {
     	long offValue = Facade_Nova.AllocateSlice(value.calculateSerializedSize(), idx);
-    	skipListMap.put(key, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
+    	Long valueOff = skipListMap.put(key, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
+    	if(valueOff != null)
+        	Facade_Nova.Delete(idx, valueOff, null, 0); 
     	return true;
     }
     
