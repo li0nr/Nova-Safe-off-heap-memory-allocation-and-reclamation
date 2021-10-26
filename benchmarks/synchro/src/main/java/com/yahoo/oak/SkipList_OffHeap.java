@@ -64,8 +64,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
 
         skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);});
         skipListMap = new ConcurrentSkipListMap<>();
-
-        (NativeMemoryAllocator)allocator.FreeNative();
+        allocator.FreeNative();
         allocator = new NativeMemoryAllocator((long) Integer.MAX_VALUE * 16);
         NovaManager mng = new NovaManager(allocator);
         new Facade_Nova(mng);
