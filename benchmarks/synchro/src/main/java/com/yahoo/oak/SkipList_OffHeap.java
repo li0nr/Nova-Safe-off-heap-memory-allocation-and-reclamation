@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     private ConcurrentSkipListMap<Buff, Long> skipListMap;
-    private BlockMemoryAllocator allocator;
+    private NativeMemoryAllocator allocator;
     private static final long KB = 1024L;
     private static final long GB = KB * KB * KB;
     private static final long OAK_MAX_OFF_MEMORY = 256 * GB;
@@ -65,7 +65,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
         skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);});
         skipListMap = new ConcurrentSkipListMap<>();
 
-        allocator.close();
+        (NativeMemoryAllocator)allocator.FreeNative();
         allocator = new NativeMemoryAllocator((long) Integer.MAX_VALUE * 16);
         NovaManager mng = new NovaManager(allocator);
         new Facade_Nova(mng);
