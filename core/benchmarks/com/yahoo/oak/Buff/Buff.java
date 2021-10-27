@@ -135,7 +135,7 @@ public class Buff  implements Comparable<Buff>{
 
 		@Override
 		public int compareKeys(Buff key1, Buff key2) {
-			return 0;
+			throw new IllegalAccessError();
 		}
 
 		@Override
@@ -157,6 +157,28 @@ public class Buff  implements Comparable<Buff>{
 			}
 			return Integer.compare(size, obj.capacity);
 		}
+		
+		public int compareKeys(long address, long address2) {
+			int offset = 0;
+
+			int size1 = UnsafeUtils.getInt(address);
+			int size2 = UnsafeUtils.getInt(address2);
+
+			final int minSize = Math.min(size1,size2);
+
+			address2 = address2 + Integer.BYTES;
+			address = address + Integer.BYTES;
+			for (int i = 0; i < minSize / Integer.BYTES; i++) {
+				int i1 = UnsafeUtils.unsafe.getInt(address + offset);
+				int i2 = UnsafeUtils.unsafe.getInt(address2 + offset);
+				int compare = Integer.compare(i1, i2);
+				if (compare != 0) {
+					return compare;
+				}
+				offset += Integer.BYTES;
+			}
+			return Integer.compare(size1,size2);
+		}
 
 		@Override
 		public void Print(long address) {
@@ -174,7 +196,7 @@ public class Buff  implements Comparable<Buff>{
 	    Integer apply(Long address) {
 	    	int capacity = UnsafeUtils.getInt(address);
 	    	address += Integer.BYTES;
-	    	int accumulator =0;
+	    	int accumulator = 0;
 	    	while(capacity > 0 ) {
 	    		accumulator += UnsafeUtils.getInt(address);
 		    	address += Integer.BYTES;
@@ -185,7 +207,21 @@ public class Buff  implements Comparable<Buff>{
 		
 	};
 	public interface GCReader<T> extends Function<Buff,T> {}
-
+	
+	public static final GCReader GCR= new GCReader<Integer>() {
+		 public Integer apply(Buff buff) {
+			 int capacity = buff.capacity;
+			 int accumulator = 0;
+			 int i = 0;
+			 while(capacity > 0) {
+				 accumulator += buff.buffer.getInt(i);
+				 capacity -= Integer.BYTES;
+				 i += Integer.BYTES;
+			 }
+			 return accumulator;
+		}
+	};
+	
 	public static final CopyConstructor<Buff> CC= new CopyConstructor<Buff>() {
 		 public Buff Copy(Buff o) {
 			Buff toRet = new Buff(o.capacity);
@@ -196,18 +232,5 @@ public class Buff  implements Comparable<Buff>{
 		}
 	};
 	
-	public static final GCReader GCR= new GCReader<Integer>() {
-		 public Integer apply(Buff buff) {
-			 int capacity = buff.capacity;
-			 int accumulator = 0;
-			 int i =0;
-			 while(capacity > 0) {
-				 accumulator = buff.buffer.getInt(i);
-				 capacity -= Integer.BYTES;
-				 i += Integer.BYTES;
-			 }
-			 return accumulator;
-		}
-	};
 
 }

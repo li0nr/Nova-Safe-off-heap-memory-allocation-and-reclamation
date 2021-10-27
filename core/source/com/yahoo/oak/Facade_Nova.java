@@ -185,8 +185,35 @@ public class Facade_Nova {
 		int res = srZ.compareKeys(address+offset+NovaManager.HEADER_SIZE, obj);
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
-		
 		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) 
+			throw new NovaIllegalAccess();
+		return res;	
+	}
+	 
+	 static public <T> int Compare(NovaC<T> srZ, long metadata1, long metadata2) {
+			
+		if(metadata1%2!=0 ||metadata2%2!=0 )
+			throw new NovaIllegalAccess();
+		
+		int version	= ExtractVer_Del(metadata1);
+		int block 	= Extractblock	(metadata1);
+		int offset 	= ExtractOffset	(metadata1);
+		
+		int version2	= ExtractVer_Del(metadata2);
+		int block2 		= Extractblock	(metadata2);
+		int offset2 	= ExtractOffset	(metadata2);
+
+		
+		long address = novaManager.getAdress(block);
+		long address2 = novaManager.getAdress(block2);
+
+
+		int res = srZ.compareKeys(address+offset+NovaManager.HEADER_SIZE, address2+offset2+NovaManager.HEADER_SIZE);
+		
+		if(bench_Flags.Fences)UNSAFE.loadFence();
+		
+		if( (version != (int)(UNSAFE.getLong(address+offset)&0xFFFFFF) ||
+				 (version2 != (int)(UNSAFE.getLong(address+offset)&0xFFFFFF) ))) 
 			throw new NovaIllegalAccess();
 		return res;	
 	}

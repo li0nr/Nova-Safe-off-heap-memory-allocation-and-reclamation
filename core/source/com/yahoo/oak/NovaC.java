@@ -10,6 +10,9 @@ public interface NovaC<K> extends Comparator<K> {
     int compareKeys(K key1, K key2);
 
     int compareKeys(long address, K obj);
+    
+    int compareKeys(long address, long address2);
+
     	
     void Print(long address);
 
