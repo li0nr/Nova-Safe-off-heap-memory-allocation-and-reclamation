@@ -211,9 +211,9 @@ public class Facade_Nova {
 		int res = srZ.compareKeys(address+offset+NovaManager.HEADER_SIZE, address2+offset2+NovaManager.HEADER_SIZE);
 		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
-		
+
 		if( (version != (int)(UNSAFE.getLong(address+offset)&0xFFFFFF) ||
-				 (version2 != (int)(UNSAFE.getLong(address+offset)&0xFFFFFF) ))) 
+				 (version2 != (int)(UNSAFE.getLong(address2+offset2)&0xFFFFFF) ))) 
 			throw new NovaIllegalAccess();
 		return res;	
 	}

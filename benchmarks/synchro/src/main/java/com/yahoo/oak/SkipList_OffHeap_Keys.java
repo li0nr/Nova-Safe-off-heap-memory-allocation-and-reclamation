@@ -45,30 +45,44 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
 
 	@Override
 	public Integer containsKey(final Buff key, int tidx) {
-		KeyValue key_val = skipListMap.get(key);
-		if(key_val == null)
-			return null;
-		else {
-			Integer ret = (Integer)Facade_Nova.Read(Buff.DEFAULT_R, key_val.value);
-			if(ret == null)
-				return containsKey(key, tidx);
-			else return ret;
+		for(int i=0 ; i < 1024; i ++) {
+			try {
+				KeyValue key_val = skipListMap.get(key);
+				if(key_val == null)
+					return null;
+				else {
+					Integer ret = (Integer)Facade_Nova.Read(Buff.DEFAULT_R, key_val.value);
+					if(ret == null)
+						return containsKey(key, tidx);
+					else return ret;
+				}
+			}catch(NovaIllegalAccess e ) {
+				continue;
+			}
 		}
+		throw new NovaIllegalAccess();
 	}
 
 
     @Override
     public  boolean put(final Buff key,final Buff value, int idx) {
-    	long offValue = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
-    	long offKey = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(key), idx);
-    	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, key, offKey, idx);
-    	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx);
-    	
-    	KeyValue key_val = skipListMap.put(offKey, new KeyValue(offKey, offValue) );
-    	
-    	if(key_val != null)
-        	Facade_Nova.Delete(idx, key_val.value, null, 0); 
-    	return true;
+		for(int i=0 ; i < 1024; i ++) {
+			try {
+		    	long offValue = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
+		    	long offKey = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(key), idx);
+		    	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, key, offKey, idx);
+		    	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx);
+		    	
+		    	KeyValue key_val = skipListMap.put(offKey, new KeyValue(offKey, offValue) );
+		    	
+		    	if(key_val != null)
+		        	Facade_Nova.Delete(idx, key_val.value, null, 0); 
+		    	return true;
+			}catch(NovaIllegalAccess e ) {
+				continue;
+			}
+		}
+		throw new NovaIllegalAccess();
     }
     
     @Override
@@ -86,22 +100,31 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
 
     @Override
     public  boolean remove(final Buff key, int idx) {
-    	KeyValue key_val = skipListMap.remove(key);
-    	if ( key_val == null ) 
-    		return false ;
-    		else {
-    			Facade_Nova.Delete(idx, key_val.key, null, 0);
-    			Facade_Nova.Delete(idx, key_val.value, null, 0);
-    		}
-    	return true;
+		for(int i=0 ; i < 1024; i ++) {
+			try {
+		    	KeyValue key_val = skipListMap.remove(key);
+		    	if ( key_val == null ) 
+		    		return false ;
+		    		else {
+		    			Facade_Nova.Delete(idx, key_val.key, null, 0);
+		    			Facade_Nova.Delete(idx, key_val.value, null, 0);
+		    		}
+		    	return true;
+			}catch(NovaIllegalAccess e ) {
+				continue;
+			}
+		}
+		throw new NovaIllegalAccess();
     }
 
 
     @Override
     public void clear() {
 
-        skipListMap.values().forEach(val -> {	Facade_Nova.DeletePrivate(0, val.key);
-        										Facade_Nova.DeletePrivate(0, val.value);});
+//        skipListMap.values().forEach(val -> {	Facade_Nova.DeletePrivate(0, val.key);
+//        										Facade_Nova.DeletePrivate(0, val.value);});
+        //not needed since we close the allocator
+
         skipListMap = new ConcurrentSkipListMap<>(comparator);
         allocator.FreeNative();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);

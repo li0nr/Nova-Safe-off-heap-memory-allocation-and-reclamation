@@ -62,7 +62,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     @Override
     public void clear() {
 
-        skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);});
+        //skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);}); not needed since we close the allocator
         skipListMap = new ConcurrentSkipListMap<>();
         allocator.FreeNative();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
