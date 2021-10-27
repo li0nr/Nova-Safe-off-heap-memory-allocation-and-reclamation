@@ -1,4 +1,4 @@
-package com.yahoo.oak;
+package com.yahoo.oak.NotUsed;
 
 import com.yahoo.oak.BST.BST;
 import com.yahoo.oak.Buff.Buff;

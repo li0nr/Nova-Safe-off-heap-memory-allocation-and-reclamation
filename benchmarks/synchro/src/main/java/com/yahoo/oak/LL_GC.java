@@ -4,11 +4,11 @@ import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.HarrisLinkedList;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
-public class LL_Synch implements CompositionalLL<Buff,Buff>{
+public class LL_GC implements CompositionalLL<Buff,Buff>{
 
 	HarrisLinkedList<Buff,Buff> LL = new HarrisLinkedList<Buff,Buff>(Buff.CC,Buff.CC);
 	
-	public LL_Synch(){
+	public LL_GC(){
 		
 	}
 	public Integer containsKey(final Buff key, int tidx) {
