@@ -92,9 +92,12 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
     	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, key, offKey, idx);
     	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx);
     	
-    	skipListMap.put(offKey, new KeyValue(offKey, offValue) );
-    	return true;
     	
+    	KeyValue key_val = skipListMap.put(offKey, new KeyValue(offKey, offValue) );
+    	
+    	if(key_val != null)
+        	Facade_Nova.Delete(idx, key_val.value, null, 0); 
+    	return true;    	
     }
 
 
