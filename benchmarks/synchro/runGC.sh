@@ -24,12 +24,12 @@ declare -A benchmarks=(
 )
 
 declare -A benchmark_Size=(
-  ["mem01_G"]="1000000"
-  ["mem10_G"]="10000000"
-  ["mem30_G"]="30000000"
-  ["mem50_G"]="50000000"
-  ["mem80_G"]="80000000"
-  ["mem90_G"]="90000000"
+  ["01_G"]="1000000"
+  ["10_G"]="10000000"
+  ["30_G"]="30000000"
+  ["50_G"]="50000000"
+  ["80_G"]="80000000"
+  ["90_G"]="90000000"
 )
 
 
@@ -40,6 +40,20 @@ declare -A gc_cmd_args=(
   ["CMS"]="-XX:+UseParNewGC"
   ["g1"]="-XX:+UseG1GC" #default
   ["zgc"]="-XX:+UseZGC"
+)
+
+declare -A java_modes=(
+  # JVM is launched in client mode by default in SUN/Oracle JDK.
+  ["default"]=""
+
+  # The Server VM has been specially tuned to maximize peak operating speed. It is intended for executing long-running
+  # server applications, which need the fastest possible operating speed more than a fast start-up time or smaller
+  # runtime memory footprint.
+  ["server"]="-server"
+
+  # The Java HotSpot Client VM has been specially tuned to reduce application start-up time and memory footprint, making
+  # it particularly well suited for client environments. In general, the client system is better for GUIs.
+  ["client"]="-client"
 )
 
 
@@ -53,7 +67,7 @@ java=java
 output=$(pwd)/output
 
 # Automatically picks the correct synchrobench JAR file
-jar_file_path=$(find "$(pwd)" -name "oak-benchmarks-synchrobench-*.jar" | grep -v "javadoc" | xargs ls -1t | head -1)
+jar_file_path=$(find "$(pwd)" -name "nova-synchrobench-*.jar" | grep -v "javadoc" | xargs ls -1t | head -1)
 # Pipes breakdown:
 #  1. find the synchrobench JAR file (show full path)
 #  2. exclude the JAR with the javadoc
@@ -65,7 +79,7 @@ test_scenarios=${!scenarios[*]}
 test_benchmarks=${!benchmarks[*]}
 test_size=${!benchmark_Size[*]}
 test_thread="08 16"
-test_gc="default"
+test_gc=${!gc_cmd_args[*]}
 test_java_modes="server"
 
 # Defines the key size
@@ -135,6 +149,13 @@ while getopts o:j:d:i:w:s:t:e:h:b:g:m:l:r:v opt; do
   esac
 done
 
+declare -A BSize="1000000
+  10000000
+  30000000
+  50000000
+  80000000 
+  90000000"
+
 ############################################################################
 # Changing working directory to the JAR file directory
 ############################################################################
@@ -174,23 +195,24 @@ for scenario in ${test_scenarios[*]}; do for bench in ${test_benchmarks[*]}; do
           echo "#### Quiting..."
           exit 1
         fi
-
+		benchSize=${benchmark_Size[${size}]}
+		echo ${benchSize}
         gc_args=${gc_cmd_args[${gc_alg}]}
         java_args="${java_modes[${java_mode}]} ${gc_args}"
 
         # Set the range to a factor of the size of the data
-        range=$((range_ratio * size))
+        range=$((range_ratio * benchSize))
 
         # Add a timestamp prefix to the log file.
         # This allows repeating the benchmark with the same parameters in the future without removing the old log.
         timestamp=$(date '+%d-%m-%Y--%H-%M-%S')
-        log_filename=${timestamp}-${scenario}-${bench}-xmx${heapSize}-direct${directSize}-t${thread}-m${java_mode}-gc${gc_alg}.log
+        log_filename=${timestamp}-${scenario}-${bench}-size_${size}-t${thread}-m${java_mode}-gc${gc_alg}.log
         out=${output}/${log_filename}
 
         # Construct the command line as a multi-lined list for aesthetics reasons
         cmd_args=(
           "${java} ${java_args} -jar ${jar_file_name} -b ${classPath} ${scenario_args}"
-          "-k ${keysize} -v ${valuesize} -i ${size} -r ${range} -t ${thread}"
+          "-k ${keysize} -v ${valuesize} -i ${benchSize} -r ${range} -t ${thread}"
           "-W ${warmup} -n ${iterations} -d ${duration}"
         )
         cmd=${cmd_args[*]}
