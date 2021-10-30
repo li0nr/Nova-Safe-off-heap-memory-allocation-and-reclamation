@@ -37,9 +37,11 @@ declare -A gc_cmd_args=(
   #["default"]=""
   ["Serial"]="-XX:+UseSerialGC"
   ["Parallel"]="-XX:+UseParallelGC"
-  ["CMS"]="-XX:+UseParNewGC"
+  #["CMS"]="-XX:+UseParNewGC" deprecated
   ["g1"]="-XX:+UseG1GC" #default
   ["zgc"]="-XX:+UseZGC"
+  ["Shenandoah"]="-XX:+UseShenandoahGC"
+  #["Epilon"]="-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC" does no reclamation https://openjdk.java.net/jeps/318
 )
 
 declare -A java_modes=(

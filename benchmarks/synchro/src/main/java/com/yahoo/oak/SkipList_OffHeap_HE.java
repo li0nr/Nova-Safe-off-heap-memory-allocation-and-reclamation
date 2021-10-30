@@ -1,59 +1,58 @@
 package com.yahoo.oak;
 
-import com.yahoo.oak.EBR.EBRslice;
+import com.yahoo.oak.HazardEras.HEslice;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 
-public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
-    private ConcurrentSkipListMap<Buff, EBRslice> skipListMap;
+public class SkipList_OffHeap_HE implements CompositionalLL<Buff,Buff> {
+    private ConcurrentSkipListMap<Buff, HEslice> skipListMap;
     private NativeMemoryAllocator allocator;
     private static final long KB = 1024L;
     private static final long GB = KB * KB * KB;
     private static final long OAK_MAX_OFF_MEMORY = 256 * GB;
-    private EBR mng ;
+    private HazardEras mng ;
 
-    public SkipList_OffHeap_EBR() {
+    public SkipList_OffHeap_HE() {
 
         skipListMap = new ConcurrentSkipListMap<>();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
-        mng = new EBR(allocator);
+        mng = new HazardEras(allocator);
     }
 
 	@Override
 	public Integer containsKey(final Buff key, int tidx) {
-		mng.start_op(tidx);
-		EBRslice value = skipListMap.get(key);
+		HEslice value = skipListMap.get(key);
 		if(value == null) {
-			mng.end_op(tidx);
 			return null;
 		}
 		else {
-			Integer obj = (Integer)Buff.DEFAULT_R.apply(value.address+value.offset);		        
-			mng.end_op(tidx);
-			return obj;
+			HEslice obj = mng.get_protected(value, tidx);
+			Integer ret = (Integer)Buff.DEFAULT_R.apply(obj.address+obj.offset);		        
+			mng.clear(tidx);
+			return ret;
 			}
 	}
 
 
     @Override
     public  boolean put(final Buff key,final Buff value, int idx) {
-    	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
+    	HEslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	EBRslice valueOff = skipListMap.put(key, offValue);
+    	HEslice valueOff = skipListMap.put(key, offValue);
     	if(valueOff != null)
-    		mng.retire(valueOff, idx);
+    		mng.retire(idx, valueOff);
     	return true;
     }
     
     @Override
     public  boolean Fill(final Buff key,final Buff value, int idx) {    
-    	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
+    	HEslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	EBRslice valueOff = skipListMap.put(key, offValue);
+    	HEslice valueOff = skipListMap.put(key, offValue);
     	if(valueOff != null)
-    		mng.retire(valueOff, idx);
+    		mng.retire(idx, valueOff);
     	return valueOff == null ? true : false;
     	
     }
@@ -61,9 +60,9 @@ public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
 
     @Override
     public  boolean remove(final Buff key, int idx) {
-    	EBRslice val = skipListMap.remove(key);
+    	HEslice val = skipListMap.remove(key);
     	if(val != null) {
-    		mng.retire(val, idx);
+    		mng.retire(idx, val);
     		return true;
     	}
     	return false;
@@ -75,9 +74,9 @@ public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
 
         //skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);}); not needed since we close the allocator
         skipListMap = new ConcurrentSkipListMap<>();
-        allocator.FreeNative();
+        allocator.close();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
-        mng = new EBR(allocator);
+        mng = new HazardEras(allocator);
         System.gc();
     }
 

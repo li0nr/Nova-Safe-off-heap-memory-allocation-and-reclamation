@@ -66,7 +66,7 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
 
     @Override
     public  boolean put(final Buff key,final Buff value, int idx) {
-		for(int i=0 ; i < 1024; i ++) {
+		for(int i = 0 ; i < 1024; i ++) {
 			try {
 		    	long offValue = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
 		    	long offKey = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(key), idx);
@@ -91,7 +91,6 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
     	long offKey = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(key), idx);
     	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, key, offKey, idx);
     	Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx);
-    	
     	
     	KeyValue key_val = skipListMap.put(offKey, new KeyValue(offKey, offValue) );
     	

@@ -67,11 +67,13 @@ public class EBR {
 		long e = eraClock.get();
 		reservations.set(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING,e);
 		UnsafeUtils.unsafe.fullFence();
+		// the Fence : we dont want the read or writes to start before setting the reservation
 	}
 		
 	public void end_op(int tid){
 		reservations.set(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING,NONE);
 		UnsafeUtils.unsafe.storeFence();
+		// the Fence : we dont want the read or writes to start after unsetting the reservation
 	}
 	public void reserve(int tid){
 		start_op(tid);

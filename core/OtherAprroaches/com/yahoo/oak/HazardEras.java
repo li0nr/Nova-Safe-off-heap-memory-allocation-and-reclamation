@@ -86,18 +86,22 @@ public class HazardEras{
      public HEslice get_protected(HEslice obj, int tid) {
     	 long prevEra = he.get(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING);
     	 while (true) {
-    		 //T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
+    		 				//T loadedOBJ= obj;//memory_order_seq_cst	in c++ is mapped to 
 		    				//A load operation with this memory order performs an acquire operation,
 		    				//a store performs a release operation,
 		    				//and read-modify-write performs both an acquire operation and a release operation,
 		    				//plus a single total order exists in which all threads observe all modifications in the same order
-    		 if(obj != null && obj.deadEra != -1)
-    			 return null;
+    		 if(obj != null && obj.deadEra != -1) //TODO I think deadEra should be volatile
+    			 return null;					  // if something was deleted but the dead still did not get updated 
 
-    		 UnsafeUtils.unsafe.loadFence();
-    		 long era = eraClock.get();
-    		 UnsafeUtils.unsafe.loadFence(); ////must be here this is aquvilent to the acquire 
-
+    		 //UnsafeUtils.unsafe.loadFence();
+    		 //this fence is the equivalence for atom.load() in cpp
+    		 long era = eraClock.get();			
+    		 									
+    		 UnsafeUtils.unsafe.loadFence(); 	
+    		 //this is needed scenario if obj is has been deleted for a while 
+    		 //we enter get protected without read barrier we can read era and exit with obj before checking if it is deleted
+    		 //this fence is the equivalence for eraClock.load(memory_order_acquire);
     		 if (era == prevEra) return obj ;
     		 UnsafeUtils.unsafe.fullFence();
     		 he.set(tid*_Global_Defs.CACHE_PADDING+_Global_Defs.CACHE_PADDING, era); //TODO he must be volatile
