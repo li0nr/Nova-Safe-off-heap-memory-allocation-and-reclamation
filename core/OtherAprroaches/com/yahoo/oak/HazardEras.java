@@ -91,9 +91,13 @@ public class HazardEras{
 		    				//a store performs a release operation,
 		    				//and read-modify-write performs both an acquire operation and a release operation,
 		    				//plus a single total order exists in which all threads observe all modifications in the same order
-    		 if(obj != null && obj.deadEra != -1) //TODO I think deadEra should be volatile
-    			 return null;					  // if something was deleted but the dead still did not get updated 
-
+    		 if(obj != null && obj.deadEra != -1) //TODO I think deadEra should be volatile :
+    			 								  //scenario: we enter the get_protected without prev 
+    			 								  //before setting the he obj gets deleted and reclaimed,
+    			 								  //in the second iteration deadEra is not visible and all the conditions
+    			 								  //checkout resulting in returning a reclaimed object
+    			 								  // * can leave like this since we have atomic getandadd ~~ not sure
+    			 return null;
     		 //UnsafeUtils.unsafe.loadFence();
     		 //this fence is the equivalence for atom.load() in cpp
     		 long era = eraClock.get();			

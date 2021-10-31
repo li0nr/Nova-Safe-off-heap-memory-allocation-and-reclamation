@@ -29,6 +29,8 @@ public class SkipList_OffHeap_HE implements CompositionalLL<Buff,Buff> {
 		}
 		else {
 			HEslice obj = mng.get_protected(value, tidx);
+			if (obj == null) //we found key but we could not read in time!
+				return containsKey(key, tidx);
 			Integer ret = (Integer)Buff.DEFAULT_R.apply(obj.address+obj.offset);		        
 			mng.clear(tidx);
 			return ret;
@@ -74,7 +76,7 @@ public class SkipList_OffHeap_HE implements CompositionalLL<Buff,Buff> {
 
         //skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);}); not needed since we close the allocator
         skipListMap = new ConcurrentSkipListMap<>();
-        allocator.close();
+        allocator.FreeNative();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
         mng = new HazardEras(allocator);
         System.gc();

@@ -27,7 +27,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
 			return null;
 		else {
 			Integer ret = (Integer)Facade_Nova.Read(Buff.DEFAULT_R, value);
-			if(ret == null)
+			if(ret == null) //meaning the key was found  but the value is now deleted due to concurrent delete
 				return containsKey(key, tidx);
 			else return ret;
 		}

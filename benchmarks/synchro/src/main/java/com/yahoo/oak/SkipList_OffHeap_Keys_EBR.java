@@ -126,6 +126,7 @@ public class SkipList_OffHeap_Keys_EBR implements CompositionalLL<Buff,Buff> {
         //not needed since we close the allocator
 
         skipListMap = new ConcurrentSkipListMap<>(comparator);
+        allocator.FreeNative();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
         mng = new EBR(allocator);
         System.gc();
