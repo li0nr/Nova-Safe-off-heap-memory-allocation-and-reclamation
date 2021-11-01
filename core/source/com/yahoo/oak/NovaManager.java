@@ -121,17 +121,18 @@ public class NovaManager implements MemoryManager {
     			HostageSlices.add(TAP.get(i+REFENTRY));
     		}
     	globalNovaNumber.incrementAndGet();
-
+    	int j  =0 ;
     	NovaSlice toDeleteObj;
         for (int iret = 0; iret < myReleaseList.size();) {
         	toDeleteObj = myReleaseList.get(iret);
             if (! HostageSlices.contains(toDeleteObj.getRef())) {
             	myReleaseList.remove(toDeleteObj);
-            	allocator.free(toDeleteObj);
+            	allocator.free(toDeleteObj); j++;
             	continue;
             }
             iret++;
         }
+        System.out.print("Total freeed is " + j+"\n" );
     }
     
     public boolean free(NovaSlice s) {
