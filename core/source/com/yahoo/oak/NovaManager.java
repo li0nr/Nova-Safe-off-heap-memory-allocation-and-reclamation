@@ -156,7 +156,7 @@ public class NovaManager implements MemoryManager {
 
     public NovaSlice getSlice(int size,int ThreadIdx) {
     	NovaSlice s = Slices[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING];
-    	allocate(s, ThreadIdx, size);
+    	allocate(s, size,ThreadIdx);
     	return s;
     
     }
