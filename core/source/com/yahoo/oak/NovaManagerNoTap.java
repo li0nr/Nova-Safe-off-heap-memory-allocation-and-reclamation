@@ -65,7 +65,7 @@ public class NovaManagerNoTap implements MemoryManager {
 
     
     @Override
-    public void allocate(NovaSlice s, int size) {
+    public void allocate(NovaSlice s, int size, int idx) {
         boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
         assert allocated;
         if(slicesAllocated++ == _Global_Defs.RELEASE_LIST_LIMIT)
@@ -106,7 +106,7 @@ public class NovaManagerNoTap implements MemoryManager {
 
     public NovaSlice getSlice(int size,int ThreadIdx) {
     	NovaSlice s = Slices[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING];
-    	allocate(s, size);
+    	allocate(s, size, ThreadIdx);
     	return s;
     
     }

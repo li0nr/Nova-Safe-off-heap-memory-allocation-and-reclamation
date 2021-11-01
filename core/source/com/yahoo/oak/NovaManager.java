@@ -69,9 +69,13 @@ public class NovaManager implements MemoryManager {
 
     
     @Override
-    public void allocate(NovaSlice s, int size) {
-        boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
-        assert allocated;
+    public void allocate(NovaSlice s, int size, int idx) {
+    	try {
+            boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
+            assert allocated;
+    	}catch(OakOutOfMemoryException e) {
+    		InstantTryRelease(idx);
+    	}
         s.setHeader(globalNovaNumber.get(),size);
     }
     
@@ -107,6 +111,27 @@ public class NovaManager implements MemoryManager {
         }
     }
     
+    public void InstantTryRelease(int idx) {
+        List<NovaSlice> myReleaseList = this.releaseLists[(idx+1)*_Global_Defs.CACHE_PADDING];
+        ArrayList<Long> HostageSlices=new ArrayList<>();
+        for (int i = _Global_Defs.CACHE_PADDING; i < 2*_Global_Defs.CACHE_PADDING*_Global_Defs.MAX_THREADS; i= i +_Global_Defs.CACHE_PADDING ) {
+    		if(TAP.get(i+IDENTRY) != -1)
+    			HostageSlices.add(TAP.get(i+REFENTRY));
+    		}
+    	globalNovaNumber.incrementAndGet();
+
+    	NovaSlice toDeleteObj;
+        for (int iret = 0; iret < myReleaseList.size();) {
+        	toDeleteObj = myReleaseList.get(iret);
+            if (! HostageSlices.contains(toDeleteObj.getRef())) {
+            	myReleaseList.remove(toDeleteObj);
+            	allocator.free(toDeleteObj);
+            	continue;
+            }
+            iret++;
+        }
+    }
+    
     public boolean free(NovaSlice s) {
     	allocator.free(new NovaSlice(s));
     	return true; //assumes always successful!
@@ -131,7 +156,7 @@ public class NovaManager implements MemoryManager {
 
     public NovaSlice getSlice(int size,int ThreadIdx) {
     	NovaSlice s = Slices[(ThreadIdx+1)*_Global_Defs.CACHE_PADDING];
-    	allocate(s, size);
+    	allocate(s, ThreadIdx, size);
     	return s;
     
     }

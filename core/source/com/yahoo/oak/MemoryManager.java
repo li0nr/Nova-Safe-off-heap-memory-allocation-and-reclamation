@@ -33,7 +33,7 @@ interface MemoryManager extends Closeable {
      * @param size     - the size of the Slice to allocate
      * @param allocate - whether this Slice is for a key or a value
      */
-    void allocate(NovaSlice s, int size);
+    void allocate(NovaSlice s, int size, int idx);
     /**
      * When returning an allocated Slice to the Memory Manager, depending on the implementation, there might be a
      * restriction on whether this allocation is reachable by other threads or not.

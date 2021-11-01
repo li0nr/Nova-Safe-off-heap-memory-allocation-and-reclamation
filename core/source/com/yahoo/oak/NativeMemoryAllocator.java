@@ -128,6 +128,7 @@ public class NativeMemoryAllocator implements BlockMemoryAllocator {
                 }
                 // does allocation of new block brings us out of capacity?
                 if ((numberOfBlocks() + 1) * blocksProvider.blockSize() > capacity) {
+                	//try release release list blocks
                 	throw new OakOutOfMemoryException();
                 } else {
                     // going to allocate additional block (big chunk of memory)
