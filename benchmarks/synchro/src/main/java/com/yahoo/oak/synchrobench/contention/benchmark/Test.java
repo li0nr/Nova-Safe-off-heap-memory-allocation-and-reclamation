@@ -186,9 +186,18 @@ public class Test {
         try {
         	Class benchClass; Constructor c;
         	if(!benchName.contains("SA")) {
-                benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
-                        .forName(benchName);
-                c = benchClass.getDeclaredConstructor();
+        		if(Parameters.offheap != -1) {
+                    benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
+                            .forName(benchName);
+                    Class[] cArg = new Class[1];
+                    cArg[0] = Long.TYPE;
+                    c = benchClass.getDeclaredConstructor(cArg);	
+        		}
+        		else {
+                    benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
+                            .forName(benchName);
+                    c = benchClass.getDeclaredConstructor();
+        		}
         	}
         	else {
                 benchClass = (Class<CompositionalSA<Buff>>) Class
@@ -201,7 +210,10 @@ public class Test {
                 BST = (CompositionalBST<Buff, Buff>) c.newInstance();
                 benchType = Type.BST;
             } else if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
-            	LL = (CompositionalLL<Buff,Buff>) c.newInstance();
+            	if(Parameters.offheap != -1)
+                	LL = (CompositionalLL<Buff,Buff>) c.newInstance(Parameters.offheap);
+            	else
+            		LL = (CompositionalLL<Buff,Buff>) c.newInstance();
     			benchType = Type.LL;
             } else if (CompositionalSA.class.isAssignableFrom((Class<?>) benchClass)) {
             	SA = (CompositionalSA<Buff>) c.newInstance(Parameters.confSize);
@@ -523,6 +535,9 @@ public class Test {
                         break;
                     case "-m":
                         Parameters.memory = true;
+                        break;
+                    case "-o":
+                        Parameters.offheap = (Integer.parseInt(args[argNumber++])) * (long) (1024*1024*1024);
                         break;
                 }
             } catch (IndexOutOfBoundsException e) {

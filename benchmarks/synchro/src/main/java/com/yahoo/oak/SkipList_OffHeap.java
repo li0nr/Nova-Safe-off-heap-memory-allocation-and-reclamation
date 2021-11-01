@@ -10,10 +10,11 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     private NativeMemoryAllocator allocator;
     private static final long KB = 1024L;
     private static final long GB = KB * KB * KB;
-    private static final long OAK_MAX_OFF_MEMORY = 256 * GB;
+    private static long OAK_MAX_OFF_MEMORY = 256 * GB;
 
-    public SkipList_OffHeap() {
-
+    public SkipList_OffHeap(long MemCap) {
+    	if(MemCap != -1)
+    		OAK_MAX_OFF_MEMORY = MemCap;
         skipListMap = new ConcurrentSkipListMap<>();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
         NovaManager mng = new NovaManager(allocator);
