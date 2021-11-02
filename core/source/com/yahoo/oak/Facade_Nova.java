@@ -236,7 +236,7 @@ public class Facade_Nova {
 	 
 	static private long buildRef(int block, int offset) {
 		long Ref=(block &0xFFFFF);
-		Ref=Ref<<20;
+		Ref=Ref<<30;
 		Ref=Ref|(offset&0xFFFFF);
 		return Ref;
 	}
@@ -245,16 +245,16 @@ public class Facade_Nova {
 		return del;
 	}
 	static private int ExtractOffset(long toExtract) {
-		int del=(int) (toExtract>>24)&0xFFFFF;
+		int del=(int) (toExtract>>24)&0x3FFFFFFF;
 		return del;
 	}
 	static private int Extractblock(long toExtract) {
-		int del=(int) (toExtract>>44)&0xFFFFF;
+		int del=(int) (toExtract>>54)&0xFFFFF;
 		return del;
 	}
 	static private long combine(int block, int offset, int version_del ) {
 		long toReturn=  (block & 0xFFFFFFFF);
-		toReturn = toReturn << 20 | (offset & 0xFFFFFFFF);
+		toReturn = toReturn << 30 | (offset & 0xFFFFFFFF);
 		toReturn = toReturn << 24 | (version_del & 0xFFFFFFFF)  ;
 		return toReturn;
 	}
