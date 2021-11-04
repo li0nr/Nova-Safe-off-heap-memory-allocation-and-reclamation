@@ -17,19 +17,40 @@ declare -A scenarios=(
 
 declare -A benchmarks=(
   ["skip-list"]="SkipList_OnHeap"
-  ["offheap-list-key"]="SkipList_OffHeap"
-  ["offheap-list-key-value"]="SkipList_OffHeap_Keys"
-
-
+  #["offheap-list-key"]="SkipList_OffHeap"
+  #["offheap-list-key-value"]="SkipList_OffHeap_Keys"
 )
 
 declare -A benchmark_Size=(
   ["01_G"]="1000000"
   ["10_G"]="10000000"
   ["30_G"]="30000000"
-  ["50_G"]="50000000"
+  ["60_G"]="50000000"
   ["80_G"]="80000000"
-  ["90_G"]="90000000"
+)
+
+declare -A On_GC=(
+  ["01_G"]="-Xmx30"
+  ["10_G"]="-Xmx36"
+  ["30_G"]="-Xmx43"
+  ["60_G"]="-Xmx81"
+  ["80_G"]="-Xmx108"
+)
+
+declare -A OnOff=(
+  ["01_G"]="-Xmx4"
+  ["10_G"]="-Xmx5"
+  ["30_G"]="-Xmx9"
+  ["60_G"]="-Xmx20"
+  ["80_G"]="-Xmx28"
+)
+
+declare -A Off_GC=(
+  ["01_G"]="-o 26"
+  ["10_G"]="-o 31"
+  ["30_G"]="-o 34"
+  ["60_G"]="-o 61"
+  ["80_G"]="-o 80"
 )
 
 
@@ -80,7 +101,7 @@ jar_file_path=$(find "$(pwd)" -name "nova-synchrobench-*.jar" | grep -v "javadoc
 test_scenarios=${!scenarios[*]}
 test_benchmarks=${!benchmarks[*]}
 test_size=${!benchmark_Size[*]}
-test_thread="08 16"
+test_thread="16"
 test_gc=${!gc_cmd_args[*]}
 test_java_modes="server"
 
@@ -97,7 +118,7 @@ warmup="30"
 iterations="3"
 
 # Defines the test runtime in milliseconds.
-duration="30000"
+duration="60000"
 
 # Defines the sampling range for queries and insertions.
 range_ratio="2"
@@ -191,16 +212,15 @@ for scenario in ${test_scenarios[*]}; do for bench in ${test_benchmarks[*]}; do
   classPath="${benchClassPrefix}.${benchmarks[${bench}]}"
 
     for java_mode in ${test_java_modes[*]}; do for gc_alg in ${test_gc[*]}; 
-	do  for thread in ${test_thread[*]}; do for size in ${test_size[*]}; do
+	do  for thread in ${test_thread[*]}; do for size in ${test_size[*]}; do 
         # Check if the user hit CTRL+C before we start a new iteration
         if [[ "$CONTINUE" -ne 1 ]]; then
           echo "#### Quiting..."
           exit 1
         fi
 		benchSize=${benchmark_Size[${size}]}
-		echo ${benchSize}
         gc_args=${gc_cmd_args[${gc_alg}]}
-        java_args="${java_modes[${java_mode}]} ${gc_args}"
+        java_args="${java_modes[${java_mode}]} ${gc_args} ${On_GC[${size}]}"
 
         # Set the range to a factor of the size of the data
         range=$((range_ratio * benchSize))

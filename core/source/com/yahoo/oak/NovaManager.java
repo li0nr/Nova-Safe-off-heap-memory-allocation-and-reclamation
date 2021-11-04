@@ -70,8 +70,14 @@ public class NovaManager implements MemoryManager {
     
     @Override
     public void allocate(NovaSlice s, int size, int idx) {
-    	boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
-    	assert allocated;
+    	try {
+        	boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
+        	assert allocated;
+    	}catch(OakOutOfMemoryException e) {
+    		InstantTryRelease(idx);
+        	boolean allocated = allocator.allocate(s, size+ HEADER_SIZE);
+        	assert allocated;
+    	}
         s.setHeader(globalNovaNumber.get(),size);
     }
     
