@@ -41,9 +41,9 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     	Long valueOff = skipListMap.put(key, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null) {
         	Facade_Nova.Delete(idx, valueOff, null, 0); 
-        	return true;
+        	return false;
     	}
-    	return false;
+    	return true;
     }
     
     @Override
