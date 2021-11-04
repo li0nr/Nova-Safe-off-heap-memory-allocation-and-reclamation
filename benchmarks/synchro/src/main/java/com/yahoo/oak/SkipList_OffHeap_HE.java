@@ -11,11 +11,12 @@ public class SkipList_OffHeap_HE implements CompositionalLL<Buff,Buff> {
     private NativeMemoryAllocator allocator;
     private static final long KB = 1024L;
     private static final long GB = KB * KB * KB;
-    private static final long OAK_MAX_OFF_MEMORY = 256 * GB;
+    private static long OAK_MAX_OFF_MEMORY = 256 * GB;
     private HazardEras mng ;
 
-    public SkipList_OffHeap_HE() {
-
+    public SkipList_OffHeap_HE(long MemCap) {
+    	if(MemCap != -1)
+    		OAK_MAX_OFF_MEMORY = MemCap;
         skipListMap = new ConcurrentSkipListMap<>();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
         mng = new HazardEras(allocator);

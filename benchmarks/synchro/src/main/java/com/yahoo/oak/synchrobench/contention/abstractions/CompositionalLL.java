@@ -6,12 +6,12 @@
 
 package com.yahoo.oak.synchrobench.contention.abstractions;
 
-public interface CompositionalLL<K,V> {
+abstract public interface CompositionalLL<K,V> {
 
 	public Integer containsKey(final K key, int tidx);
 	    
     public  boolean Fill(final K key,final V value, int idx);
-
+    
     public  boolean put(final K key,final V value, int idx);
     
     public  boolean remove(final K key, int idx);
@@ -23,5 +23,7 @@ public interface CompositionalLL<K,V> {
     public int Size();
     
     public void print();
-    
+  
+    public default  boolean FillParallel(final int size, final int keysize, final int valsize, final int range) 
+    {throw new IllegalAccessError();};
 }

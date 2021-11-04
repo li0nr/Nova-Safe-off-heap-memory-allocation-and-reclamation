@@ -139,6 +139,11 @@ public class Test {
         	SA.ParallelFill((int)size);
         	return size;
         }
+        
+        if(benchType == Type.LL && Parameters.parallelFill)  {
+        	LL.FillParallel((int)size, Parameters.confKeySize, Parameters.confValSize, range);
+        	return size;
+        }
 
         for ( ;i > 0; ) {
         	
@@ -538,6 +543,9 @@ public class Test {
                         break;
                     case "-o":
                         Parameters.offheap = (Integer.parseInt(args[argNumber++])) * (long) (1024*1024*1024);
+                        break;
+                    case "-par":
+                        Parameters.parallelFill = true;
                         break;
                 }
             } catch (IndexOutOfBoundsException e) {

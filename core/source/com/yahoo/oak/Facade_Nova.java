@@ -72,7 +72,7 @@ public class Facade_Nova {
 		 return flag; 
 	}
 
-	static public <K> boolean Delete(int idx, long metadata, K obj, long meta_offset) {
+	static public <K> boolean Delete(int idx, long metadata ) {
 		
 		int block 	= Extractblock(metadata);
 		int offset	= ExtractOffset(metadata);

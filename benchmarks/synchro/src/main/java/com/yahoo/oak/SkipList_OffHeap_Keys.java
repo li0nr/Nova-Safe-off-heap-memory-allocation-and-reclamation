@@ -76,7 +76,7 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
 		    	KeyValue key_val = skipListMap.put(offKey, new KeyValue(offKey, offValue) );
 		    	
 		    	if(key_val != null)
-		        	Facade_Nova.Delete(idx, key_val.value, null, 0); 
+		        	Facade_Nova.Delete(idx, key_val.value); 
 		    	return true;
 			}catch(NovaIllegalAccess e ) {
 				continue;
@@ -95,7 +95,7 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
     	KeyValue key_val = skipListMap.put(offKey, new KeyValue(offKey, offValue) );
     	
     	if(key_val != null)
-        	Facade_Nova.Delete(idx, key_val.value, null, 0); 
+        	Facade_Nova.Delete(idx, key_val.value); 
     	return true;    	
     }
 
@@ -108,8 +108,8 @@ public class SkipList_OffHeap_Keys implements CompositionalLL<Buff,Buff> {
 		    	if ( key_val == null ) 
 		    		return false ;
 		    		else {
-		    			Facade_Nova.Delete(idx, key_val.key, null, 0);
-		    			Facade_Nova.Delete(idx, key_val.value, null, 0);
+		    			Facade_Nova.Delete(idx, key_val.key);
+		    			Facade_Nova.Delete(idx, key_val.value);
 		    		}
 		    	return true;
 			}catch(NovaIllegalAccess e ) {

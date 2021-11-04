@@ -280,7 +280,7 @@ public class BST_Nova_Long<K , V> {
                 }else {
                 	// if fails, help the current operation
                 	// need to get the latest p.info since CAS doesnt return current value
-                	Facade_Nova.Delete(idx, newInternal.key, 	newInternal, 	Facade_long_offset_key );
+                	Facade_Nova.Delete(idx, newInternal.key );
                 	help(p.info, idx);
                 	}
                 }
@@ -416,7 +416,7 @@ public class BST_Nova_Long<K , V> {
                 }else {
                 	// if fails, help the current operation
                 	// need to get the latest p.info since CAS doesnt return current value
-                	Facade_Nova.Delete(idx, newInternal.key, 	newInternal, 	Facade_long_offset_key );
+                	Facade_Nova.Delete(idx, newInternal.key );
                 	help(p.info, idx);
                 	}
                 }
@@ -459,9 +459,9 @@ public class BST_Nova_Long<K , V> {
     private void helpMarked(final DInfo info, int idx) {
         final Node other = (info.p.right == info.l) ? info.p.left : info.p.right;
         if((info.gp.left == info.p ? leftUpdater : rightUpdater).compareAndSet(info.gp, info.p, other)){
-            Facade_Nova.Delete(idx, info.l.key	, info.l, Facade_long_offset_key );
-            Facade_Nova.Delete(idx, info.l.value, info.l, Facade_long_offset_value );
-            Facade_Nova.Delete(idx, info.p.key	, info.p, Facade_long_offset_key );	
+            Facade_Nova.Delete(idx, info.l.key	);
+            Facade_Nova.Delete(idx, info.l.value);
+            Facade_Nova.Delete(idx, info.p.key );	
         }
         infoUpdater.compareAndSet(info.gp, info, new Clean());
     }
