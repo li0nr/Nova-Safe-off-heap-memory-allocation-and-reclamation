@@ -98,10 +98,12 @@ public class SA_Nova_Primitive_CAS {
 	
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
-		if(refrences[index] %2 == 1)
+		if(refrences[index] %2 == 1) {
 			Facade_Nova.AllocateReusedSlice(refrences,ref_base_offset+index*ref_scale,
 					refrences[index],srZ.calculateSize(obj),threadIDX);
-		return Facade_Nova.WriteFull(srZ, obj, refrences[index], threadIDX) != -1 ? true : false; 
+			return Facade_Nova.WriteFull(srZ, obj, refrences[index], threadIDX) != -1 ? true : false; 
+		}
+		return false;
 	}
 	
 	public <T> T get(NovaR<T> Reader, int index, int threadIDX)  {

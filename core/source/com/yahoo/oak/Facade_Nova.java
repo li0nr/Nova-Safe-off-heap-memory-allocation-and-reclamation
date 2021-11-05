@@ -73,7 +73,8 @@ public class Facade_Nova {
 	}
 
 	static public <K> boolean Delete(int idx, long metadata ) {
-		
+		if(metadata %2 != 0) 
+			return false;
 		int block 	= Extractblock(metadata);
 		int offset	= ExtractOffset(metadata);
 		long address = novaManager.getAdress(block);
@@ -93,7 +94,8 @@ public class Facade_Nova {
 
 	
 	static public <K> boolean DeletePrivate(int idx, long metadata) {
-		
+		if(metadata %2 != 0) 
+			return false;
 		int block 	= Extractblock(metadata);
 		int offset	= ExtractOffset(metadata);
 		long address = novaManager.getAdress(block);
@@ -157,7 +159,7 @@ public class Facade_Nova {
 	}
 
 	
-	static public <T>long WriteFast(NovaS<T> lambda, T obj, long facade_meta, int idx ) {//for now write doesnt take lambda for writing 
+	static public <T>long WriteFast(NovaS<T> lambda, T obj, long facade_meta, int idx ) {
 
 		if(facade_meta%2!=0)
 			return -1;
@@ -165,8 +167,7 @@ public class Facade_Nova {
 		int offset 	= ExtractOffset	(facade_meta);
 		long address = novaManager.getAdress(block);
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
-
-		 return facade_meta;
+		return facade_meta;
 	}
 	
 	

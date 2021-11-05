@@ -24,36 +24,30 @@ public class BaseLine_bench {
     public static class BenchmarkState {
     	
     	Buff v;
-    	Facade nu;
+    	long nu;
     	NovaSlice Slice;
     	HEslice HESlice;
 
     	HazardEras HE;
-	    ArrayList<Facade> F;
-	    Facade[] F2;
+	    ArrayList<Long> F;
+	    long[] F2;
 	    
         @Setup
         public void setup() {
     	    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
     	    final NovaManager novaManager = new NovaManager(allocator);
     	    HE = new HazardEras(allocator);
-    	    nu = new Facade<>(novaManager);
+    	    new Facade_Nova(novaManager);
     	    Slice = new NovaSlice(-1,-1,-1);
 
     	    allocator.allocate(Slice, 8);
-    	    nu.AllocateSlice(8, 0);
+    	    nu = Facade_Nova.AllocateSlice(8, 0);
     	    v = new Buff();
     	    v.set(100);
-    	    nu.WriteFast(Buff.DEFAULT_SERIALIZER,v , 0);
+    	    Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, v ,nu,  0);
     	    Buff.DEFAULT_SERIALIZER.serialize(v, Slice.address + Slice.offset);
     	    F = new ArrayList<>();
-    	    Facade[] F2 = new Facade[32];
-    	    for (int i=0; i < 1; i++) {
-    	    	F2[16] = new Facade<>();
-    	    	F.add(new Facade<>());
     	    }
-
-        	}
         }
     
     @Benchmark
@@ -69,8 +63,8 @@ public class BaseLine_bench {
     public void ReadNova(Blackhole blackhole,BenchmarkState state) {
     	int i = 0;
     	while(i<iter) {
-    	blackhole.consume(state.nu.Compare(state.v, Buff.DEFAULT_C));
-    	i++;
+    	blackhole.consume(Facade_Nova.Compare(state.v, Buff.DEFAULT_C, state.nu));
+    			i++;
     	}
     }
     
@@ -78,7 +72,7 @@ public class BaseLine_bench {
     public void WriteNova(Blackhole blackhole,BenchmarkState state) {
     	int i = 0;
     	while(i<iter) {
-    	blackhole.consume(state.nu.WriteFull(Buff.DEFAULT_SERIALIZER, state.v, 0));
+    	blackhole.consume(Facade_Nova.WriteFull(Buff.DEFAULT_SERIALIZER, state.v, state.nu, 0));
     	i++;
     	}
     }

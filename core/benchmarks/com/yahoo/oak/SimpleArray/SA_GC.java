@@ -81,13 +81,11 @@ public class SA_GC {
 	public boolean set(int index, Buff obj, int threadIDX)  {
 		if(Slices[index] == null) {
 			Buff toAdd = CC.Copy(obj); 
-			if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices,
+			if(UnsafeUtils.unsafe.compareAndSwapObject(Slices,
 					slices_base_offset+index*slices_scale, null, toAdd))
-				return false;
-			return true;
+				return true;
 		}
-		Slices[index] = CC.Copy(obj);
-		return true;
+		return false;
 	}
 	
 
@@ -95,10 +93,10 @@ public class SA_GC {
 		Buff toDel = Slices[index];
 		if(toDel == null) 
 			return false;
-		if(!UnsafeUtils.unsafe.compareAndSwapObject(Slices,
+		if(UnsafeUtils.unsafe.compareAndSwapObject(Slices,
 				slices_base_offset+index*slices_scale, toDel, null))
-			return false;
-		else return true;
+			return true;
+		return false;
 	}
 
 	

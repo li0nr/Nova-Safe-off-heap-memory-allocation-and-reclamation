@@ -1,7 +1,6 @@
 package com.yahoo.oak;
 
 
-
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -16,7 +15,7 @@ public class FacadeTest {
 	
     private  NovaManager  novaManager;
 
-	private  Facade facade;
+	private  long facade;
     private  ArrayList<Thread> threads;
     private static CountDownLatch latch = new CountDownLatch(1);
 
@@ -25,17 +24,13 @@ public class FacadeTest {
 
 
     private  void initNova() {
-        final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
-         novaManager = new NovaManager(allocator);
-
+    	final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+    	novaManager = new NovaManager(allocator);
         threads = new ArrayList<>(NUM_THREADS);
     }
     
     private void initFacade() {
-    	facade= new Facade(novaManager);
-    	facade.AllocateSlice(8,0);
-    	facade.Write(0,0);
-
+    	new Facade_Nova(novaManager);
     }
     
     public class CreateAllocateSlice implements Runnable {
@@ -47,8 +42,7 @@ public class FacadeTest {
         }
         @Override
         public void run() {
-        	Facade f=new Facade(novaManager);
-        	f.AllocateSlice(10,idx);
+        	Facade_Nova.AllocateSlice(12,idx);
             }
         }
     
@@ -61,11 +55,7 @@ public class FacadeTest {
         }
         @Override
         public void run() {
-        	try {
-        		long result=facade.Read();	
-        	}catch (Exception e) {
-        		System.out.print(e.toString());
-        	}
+        	long result=Facade_Nova.Read(com.yahoo.oak.List_Nova.DEFAULT_R,facade);	
         }
     }
     
@@ -80,11 +70,7 @@ public class FacadeTest {
         }
         @Override
         public void run() {
-        	try {
-        		facade.Write(0,idx);	
-        	}catch (Exception e) {
-        		System.out.print(e.toString());
-        	}
+        	Facade_Nova.WriteFull(com.yahoo.oak.List_Nova.DEFAULT_SERIALIZER,(long)0,facade,idx);
         }
     }
     
@@ -97,11 +83,7 @@ public class FacadeTest {
         }
         @Override
         public void run() {
-        	try {
-        		facade.AllocateSlice(8,idx);	
-        	}catch (Exception e) {
-        		System.out.print(e.toString());
-        	}
+        	facade = Facade_Nova.AllocateSlice(8,idx);	
         }
     }
     
@@ -115,12 +97,18 @@ public class FacadeTest {
         }
         @Override
         public void run() {
-        	facade.Delete(idx);
-            }
+        	try {
+            	Facade_Nova.Delete(idx, facade);
+        	}catch(NullPointerException e) {
+        		e.printStackTrace();
+        	}
+        }
     }
+    
     @Test
 	public void testAllocate() throws InterruptedException {
 		initNova();
+		initFacade();
 	    for (int i = 0; i < NUM_THREADS; i++) {
 	        threads.add(new Thread(new CreateAllocateSlice(latch,i)));
 	        threads.get(i).start();
@@ -129,7 +117,7 @@ public class FacadeTest {
         for (int i = 0; i < NUM_THREADS; i++) {
             threads.get(i).join();
         }
-	    Assert.assertEquals(NUM_THREADS*(10+novaManager.HEADER_SIZE), novaManager.allocated());
+	    Assert.assertEquals(NUM_THREADS*(12+novaManager.HEADER_SIZE), novaManager.allocated());
 	}
 	
 	
@@ -137,6 +125,8 @@ public class FacadeTest {
 	public void concurrentREAD() throws InterruptedException {
 		initNova();
 		initFacade();
+		facade =         	Facade_Nova.AllocateSlice(12,0);
+
 	    for (int i = 0; i < NUM_THREADS; i++) {
 	        threads.add(new Thread(new ReaderThread(latch,i)));
 	        threads.get(i).start();
@@ -154,6 +144,7 @@ public class FacadeTest {
 	public void concurrentReadDelete() throws InterruptedException {
 		initNova();
 		initFacade();
+    	facade = Facade_Nova.AllocateSlice(12,0);
 		int i = 0;
 	    for ( ;i < NUM_THREADS-1; i++) {
 	        threads.add(new Thread(new ReaderThread(latch,i)));
@@ -174,27 +165,30 @@ public class FacadeTest {
 
     }
 	
-	@Test 
+	@Test
 	public void concurrentWriteDelete() throws InterruptedException {
 		initNova();
 		initFacade();
 		int i = 0;
+        threads.add(new Thread(new allocateThreads(latch,2)));
+        threads.get(i).start();
+        threads.get(i).join();
+
+
         threads.add(new Thread(new WriterThead(latch,0)));
         threads.add(new Thread(new delteThead(latch,1)));
-        threads.add(new Thread(new allocateThreads(latch,2)));
 
 
-	    for ( i=0;i < NUM_THREADS; i++) {
+	    for ( i=1;i < NUM_THREADS; i++) {
 	        threads.get(i).start();
 	    }
 
         
 
         latch.countDown();
-        for (i = 0; i < NUM_THREADS; i++) {
+        for (i = 1; i < NUM_THREADS; i++) {
             threads.get(i).join();
         }
-		
 	}
 	
 
@@ -202,8 +196,9 @@ public class FacadeTest {
 	public void AllocDeAlloc() throws InterruptedException {
 		initNova();
 		initFacade();
-		facade.Delete(0);
-		facade.AllocateSlice(8,0);
+		facade = Facade_Nova.AllocateSlice(8,0);
+		Facade_Nova.Delete(0,facade);
+		Facade_Nova.AllocateSlice(8,0);
 		
 	}
 	
@@ -211,11 +206,10 @@ public class FacadeTest {
 	@Test 
 	public void sequentialinitdelete() throws InterruptedException {
 		initNova();
-    	facade= new Facade(novaManager);
-    	facade.AllocateSlice(8,0);
-		facade.Delete(0);
-		facade.AllocateSlice(8,0);
-		
+		initFacade();
+		facade = Facade_Nova.AllocateSlice(8,0);
+		Facade_Nova.Delete(0,facade);
+		facade = Facade_Nova.AllocateSlice(8,0);		
 	}
 	
 	
@@ -224,7 +218,7 @@ public class FacadeTest {
 	@Test 
 	public void concurrenallocate() throws InterruptedException {
 		initNova();
-    	facade= new Facade(novaManager);
+		initFacade();
 		int i = 0;
 	    for ( ;i < NUM_THREADS; i++) {
 	        threads.add(new Thread(new allocateThreads(latch,i)));
@@ -242,7 +236,7 @@ public class FacadeTest {
 	@Test 
 	public void concurrentdelete() throws InterruptedException {
 		initNova();
-    	facade= new Facade(novaManager);
+		initFacade();
 		int i = 0;
         threads.add(new Thread(new allocateThreads(latch,i)));
         threads.get(i).start();
@@ -251,8 +245,7 @@ public class FacadeTest {
 		    threads.add(new Thread(new delteThead(latch,i)));
 	        threads.get(i).start();
 	    }
-
-        
+       
         latch.countDown();
         for (i = 0; i < NUM_THREADS; i++) {
             threads.get(i).join();
@@ -264,13 +257,14 @@ public class FacadeTest {
 	@Test 
 	public void releaseTest() throws InterruptedException {
 		initNova();
-		Facade[] f=new Facade[5];
+		initFacade();
+		
+		long [] f=new long[5];
 		for(int i=0; i< f.length; i++) {
-			f[i]=new Facade(novaManager);
-			f[i].AllocateSlice(Long.BYTES, 0);
+			f[i] = Facade_Nova.AllocateSlice(Long.BYTES, 0);
 		}
 		for(int i=0; i< f.length; i++)
-			f[i].Delete(0);
+			Facade_Nova.Delete(0,f[i]);
 		
 	}
 	
@@ -278,7 +272,7 @@ public class FacadeTest {
 	public void ConcurrentAllocateDelete() throws InterruptedException {
 		int TestThreads = 4;
 		initNova();
-    	facade= new Facade(novaManager);
+		initFacade();
 		int i = 0;
         threads.add(new Thread(new allocateThreads(latch,0)));
         threads.get(0).start();
@@ -301,36 +295,39 @@ public class FacadeTest {
 	@Test 
 	public void deleteCheck() throws InterruptedException {
 		initNova();
-    	facade= new Facade(novaManager);
-    	facade.AllocateSlice(8,0);
-		facade.Delete(0);
+		initFacade();
+		facade = Facade_Nova.AllocateSlice(8,0);
+		Facade_Nova.Delete(0,facade);
 	}
 	
 	@Test 
 	public void checkallMethods() throws InterruptedException {
 		initNova();
-		Facade[] alotofFacades = new Facade[1024*1024/16];
-    	facade= new Facade(novaManager);
-    	facade.AllocateSlice(8,0);
-    	facade.Read();
-    	facade.Write(5, 0);
-    	facade.Read();
-		facade.Delete(0);
-		facade.AllocateSlice(8, 0);
-    	facade.Read();
+		initFacade();
+		long[] alotofFacades = new long[1024*1024/16];
+		facade = Facade_Nova.AllocateSlice(8, 0);
+		Facade_Nova.Read(com.yahoo.oak.List_Nova.DEFAULT_R, facade);
+		Facade_Nova.WriteFull(com.yahoo.oak.List_Nova.DEFAULT_SERIALIZER,(long)5, facade, 0);
+		Facade_Nova.Read(com.yahoo.oak.List_Nova.DEFAULT_R, facade);
+		Facade_Nova.WriteFast(com.yahoo.oak.List_Nova.DEFAULT_SERIALIZER,(long)6, facade, 0);
+		Facade_Nova.Read(com.yahoo.oak.List_Nova.DEFAULT_R, facade);
+		Facade_Nova.Delete(0, facade);
+		facade = Facade_Nova.AllocateSlice(8, 0);
+		Facade_Nova.Read(com.yahoo.oak.List_Nova.DEFAULT_R, facade);
+
+		
     	for(int i=0; i<20;i++) {
-    		alotofFacades[i] = new Facade(novaManager);
-    		alotofFacades[i].AllocateSlice(8, 0);
-    		alotofFacades[i].Write(i, 0);
-    		assert alotofFacades[i].Read() == i;
+    		alotofFacades[i] = Facade_Nova.AllocateSlice(8, 0);
+    		Facade_Nova.WriteFast(com.yahoo.oak.List_Nova.DEFAULT_SERIALIZER,(long)i, alotofFacades[i], 0);
+
+    		assert 		Facade_Nova.Read(com.yahoo.oak.List_Nova.DEFAULT_R, alotofFacades[i]) == i;
     	}
     	for(int i=0; i<20;i++) {
-    		alotofFacades[i].Delete(0);
+    		Facade_Nova.Delete(0, alotofFacades[i]);
     	}
     	for(int i=0; i<20;i++) {
-    		alotofFacades[i].AllocateSlice(8, 0);
+    		alotofFacades[i] = Facade_Nova.AllocateSlice(8, 0);
     	}
     	novaManager.close();
-	}
-
+    }
 }

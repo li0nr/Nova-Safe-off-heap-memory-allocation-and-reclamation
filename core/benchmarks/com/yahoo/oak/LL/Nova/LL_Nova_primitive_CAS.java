@@ -1,9 +1,7 @@
 package com.yahoo.oak.LL.Nova;
 
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
-import com.yahoo.oak.Facade;
 import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;

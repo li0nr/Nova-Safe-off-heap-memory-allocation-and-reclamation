@@ -2,21 +2,13 @@ package com.yahoo.oak.LL.Nova;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
-import com.yahoo.oak.Facade;
-import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.Facade_Slice.Facade_slice;
-import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noCAS.Node;
-import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
-import com.yahoo.oak.NovaSlice;
-import com.yahoo.oak.UnsafeUtils;
-import com.yahoo.oak.Buff.Buff;
-import sun.misc.Unsafe;
 
 /**
  * <h1>HarrisAMRLinkedList</h1>

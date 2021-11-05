@@ -136,13 +136,10 @@ public class Facade_Slice {
 	}
 
 
+	//assumes that the slice can be access solely through one thread which called this function
 	static public <K> boolean DeletePrivate(int idx, Facade_slice S) {
-		
-		if(S.version%2 == DELETED)
-			return false;
-	
-		long OffHeapMetaData= UNSAFE.getLong(S.address+S.offset);//reads off heap meta
-		 
+		if(S.version%2 == DELETED)  //we can also not use this but its here for sanity!
+			return false;		 
 		novaManager.free(new NovaSlice(S.blockID, S.offset, S.length));
 		return true; 
 	}
@@ -190,16 +187,11 @@ public class Facade_Slice {
 		return obj;
 	}
 
-
-	
 	static public <T> int Compare(T obj, NovaC<T> srZ, Facade_slice S) {
 		 if(S.version%2 == DELETED)
 			throw new NovaIllegalAccess();
-
 		int res = srZ.compareKeys(S.address + S.offset +NovaManager.HEADER_SIZE, obj);
-		
 		if(bench_Flags.Fences)UNSAFE.loadFence();
-		
 		if(! (S.version == (int)(UNSAFE.getLong(S.address + S.offset)&0xFFFFFF))) 
 			throw new NovaIllegalAccess();
 		return res;
@@ -210,7 +202,7 @@ public class Facade_Slice {
 	 
 	static private long buildRef(int block, int offset) {
 		long Ref=(block &0xFFFFF);
-		Ref=Ref<<20;
+		Ref=Ref<<30;
 		Ref=Ref|(offset&0xFFFFF);
 		return Ref;
 	}

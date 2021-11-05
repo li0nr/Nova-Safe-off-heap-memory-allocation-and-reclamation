@@ -2,12 +2,6 @@ package com.yahoo.oak;
 
 
 import java.util.Arrays;
-//import org.junit.Test;
-
-import com.yahoo.oak.Facade;
-import com.yahoo.oak.NativeMemoryAllocator;
-import com.yahoo.oak.NovaManager;
-
 
 
 public class List_Nova implements ListInterface{
@@ -21,19 +15,19 @@ public class List_Nova implements ListInterface{
 
 
 
-	Facade[] ArrayOfFacades;
+	long[] ArrayOfFacades;
 	private int size=0;
 	
 
 	
 	public List_Nova(){
-		ArrayOfFacades=new Facade[DEFAULT_CAPACITY];
-
+		new Facade_Nova(novaManager);
+		ArrayOfFacades=new long[DEFAULT_CAPACITY];
 	}
 	
 	public List_Nova(int capacity){
-		ArrayOfFacades=new Facade[capacity];
-
+		new Facade_Nova(novaManager);
+		ArrayOfFacades=new long[capacity];
 	}
 
 	public boolean add(Long e,int idx) {
@@ -41,10 +35,9 @@ public class List_Nova implements ListInterface{
 			EnsureCap();
 		}
 
-		if(ArrayOfFacades[size]== null)
-			ArrayOfFacades[size]=new Facade(novaManager);
-		ArrayOfFacades[size].AllocateSlice(Long.BYTES,idx);
-	    ArrayOfFacades[size].Write(e,idx);
+		if(ArrayOfFacades[size] == 0)
+			ArrayOfFacades[size]= Facade_Nova.AllocateSlice(Long.BYTES,idx);
+		Facade_Nova.WriteFast(DEFAULT_SERIALIZER,e,ArrayOfFacades[size], idx);
 	    size++;
 	    return true;
 	}
@@ -53,14 +46,14 @@ public class List_Nova implements ListInterface{
 		if(i>= size || i<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		return ArrayOfFacades[i].Read();
+		return Facade_Nova.Read(DEFAULT_R , ArrayOfFacades[i]);
 	}
 	
 	public boolean set(int index, long e, int idx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		 if(ArrayOfFacades[index].Write(e,idx) != null)
+		 if(Facade_Nova.WriteFull(DEFAULT_SERIALIZER,e,ArrayOfFacades[index],idx) != -1)
 			 return true;
 		 else 
 			 return false;
@@ -70,14 +63,14 @@ public class List_Nova implements ListInterface{
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		ArrayOfFacades[index].AllocateSlice(8, threadidx);
+		ArrayOfFacades[index] = Facade_Nova.AllocateSlice(8, threadidx);
 	}
 	
 	public boolean delete(int index, int threadidx) {
 		if(index>= size || index<0) {
 			throw new IndexOutOfBoundsException();
 		}
-		return  ArrayOfFacades[index].Delete(threadidx);
+		return  Facade_Nova.Delete(threadidx, ArrayOfFacades[index]);
 	}
 	
 	
@@ -86,8 +79,7 @@ public class List_Nova implements ListInterface{
 	}
 	
    public void remove(int index, int idx) {
-        Facade removeItem = ArrayOfFacades[index];
-        removeItem.Delete(idx);
+        Facade_Nova.Delete(idx, ArrayOfFacades[index]);
         
     }
 	
@@ -105,11 +97,39 @@ public class List_Nova implements ListInterface{
 	}
 	
 	
+	public static final NovaS<Long> DEFAULT_SERIALIZER = new NovaS<Long>() {
+		@Override
+		public void serialize(Long object, long output) {
+			UnsafeUtils.putLong(output, (long)object);
+		}
+		
+		@Override
+		public void serialize(long source, long output) {
+			UnsafeUtils.putInt(output, UnsafeUtils.getInt(source));
+		}
+
+		@Override
+		public Long deserialize(long input) {
+			return UnsafeUtils.getLong(input);
+		}
+
+		@Override
+		public int calculateSize(Long object) {
+			return 8;
+		}
+	};
+	
+	public static final NovaR<Long> DEFAULT_R = new NovaR<Long>() {
+		public
+		Long apply(Long address) {
+			return UnsafeUtils.getLong(address);
+	    }
+	};
  
-@Override
-public void close()  {
-	novaManager.close();
-}
+	@Override
+	public void close()  {
+		novaManager.close();
+	}
 	
 
 public  static void main(String[] args)throws java.io.IOException {

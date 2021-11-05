@@ -95,13 +95,14 @@ public class SA_NoMM {
 				allocator.free(toEnter);
 				return false;
 			}
+			toEnter = Slices[index];
+			if(toEnter == null) {
+				return false;
+			}
+			srZ.serialize(obj, toEnter.address+toEnter.offset);
+			return true;
 		}
-		NovaSlice toEnter = Slices[index];
-		if(toEnter == null) {
-			return false;
-		}
-		srZ.serialize(obj, toEnter.address+toEnter.offset);
-		return true;
+		return false;
 	}
 	
 

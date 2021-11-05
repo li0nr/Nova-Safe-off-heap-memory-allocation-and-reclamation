@@ -98,16 +98,17 @@ public class SA_EBR_CAS_opt {
 				_EBR.fastFree(toEnter);
 				return false;
 			}
-		}
-		_EBR.start_op(threadIDX);
-		EBRslice toEnter = Slices[index];
-		if(toEnter == null) {
+			_EBR.start_op(threadIDX);
+			toEnter = Slices[index];
+			if(toEnter == null) {
+				_EBR.end_op(threadIDX);
+				return false;
+			}
+			srZ.serialize(obj, toEnter.address+toEnter.offset);
 			_EBR.end_op(threadIDX);
-			return false;
+			return true;
 		}
-		srZ.serialize(obj, toEnter.address+toEnter.offset);
-		_EBR.end_op(threadIDX);
-		return true;
+		return false;
 	}
 	
 

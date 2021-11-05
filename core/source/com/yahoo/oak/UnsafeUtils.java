@@ -47,7 +47,11 @@ public final class UnsafeUtils {
     	return unsafe.getInt(address);
     }
     
-    public static void putLong(long address, int value) {
+    public static void putLong(long address, long value) {
     	unsafe.putLong(address, value);
+    }
+    
+    public static long getLong(long address) {
+    	return unsafe.getLong(address);
     }
 }

@@ -122,7 +122,7 @@ public class NovaSlice implements  Comparable<NovaSlice> {
     
     long getRef() {
     	int ref=blockID;
-    	return ref<<20 | offset;
+    	return ref<<30 | offset;
 	}
 
 

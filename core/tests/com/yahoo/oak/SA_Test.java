@@ -31,9 +31,13 @@ public class SA_Test {
 			x.set(i);
 			assert mySA.delete(i, 0) == true;
 		}
-		for(int i =1; i < 1024; i+=2) {
+		for(int i =0; i < 1024; i++) {
 			x.set(i+4);
-			assert mySA.set(i, x, 0) == true;
+			if(i%2 == 0)
+				assert mySA.set(i, x, 0) == true;
+			else 
+				assert mySA.set(i, x, 0) == false;
+
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
@@ -60,9 +64,13 @@ public class SA_Test {
 			x.set(i);
 			assert mySA.delete(i, 0) == true;
 		}
-		for(int i =1; i < 1024; i+=2) {
+		for(int i =0; i < 1024; i++) {
 			x.set(i+4);
-			assert mySA.set(i, x, 0) == true;
+			if(i%2 == 0)
+				assert mySA.set(i, x, 0) == true;
+			else 
+				assert mySA.set(i, x, 0) == false;
+
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
@@ -90,9 +98,13 @@ public class SA_Test {
 			x.set(i);
 			assert mySA.delete(i, 0) == true;
 		}
-		for(int i =1; i < 1024; i+=2) {
+		for(int i =0; i < 1024; i++) {
 			x.set(i+4);
-			assert mySA.set(i, x, 0) == true;
+			if(i%2 == 0)
+				assert mySA.set(i, x, 0) == true;
+			else 
+				assert mySA.set(i, x, 0) == false;
+
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
@@ -121,9 +133,13 @@ public class SA_Test {
 			x.set(i);
 			assert mySA.delete(i, 0) == true;
 		}
-		for(int i =1; i < 1024; i+=2) {
+		for(int i =0; i < 1024; i++) {
 			x.set(i+4);
-			assert mySA.set(i, x, 0) == true;
+			if(i%2 == 0)
+				assert mySA.set(i, x, 0) == true;
+			else 
+				assert mySA.set(i, x, 0) == false;
+
 		}
 		for(int i =1; i < 1024; i+=2) {
 			x.set(i+4);
