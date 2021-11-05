@@ -17,7 +17,7 @@ declare -A scenarios=(
 
 declare -A benchmarks=(
   ["skip-list"]="SkipList_OnHeap"
-  #["offheap-list-key"]="SkipList_OffHeap"
+  ["offheap-list-key"]="SkipList_OffHeap"
   #["offheap-list-key-value"]="SkipList_OffHeap_Keys"
 )
 
@@ -25,30 +25,30 @@ declare -A benchmark_Size=(
   ["01_G"]="1000000"
   ["10_G"]="10000000"
   ["30_G"]="30000000"
-  ["60_G"]="50000000"
+  ["60_G"]="60000000"
   ["80_G"]="80000000"
 )
 
 declare -A On_GC=(
-  ["01_G"]="-Xmx30"
-  ["10_G"]="-Xmx36"
-  ["30_G"]="-Xmx43"
-  ["60_G"]="-Xmx81"
-  ["80_G"]="-Xmx108"
+  ["01_G"]="-Xmx1500M"
+  ["10_G"]="-Xmx14G"
+  ["30_G"]="-Xmx41G"
+  ["60_G"]="-Xmx81G"
+  ["80_G"]="-Xmx108G"
 )
 
 declare -A OnOff=(
-  ["01_G"]="-Xmx4"
-  ["10_G"]="-Xmx5"
-  ["30_G"]="-Xmx9"
-  ["60_G"]="-Xmx20"
-  ["80_G"]="-Xmx28"
+  ["01_G"]="-Xmx500M"
+  ["10_G"]="-Xmx4G"
+  ["30_G"]="-Xmx10G"
+  ["60_G"]="-Xmx20G"
+  ["80_G"]="-Xmx28G"
 )
 
 declare -A Off_GC=(
-  ["01_G"]="-o 26"
-  ["10_G"]="-o 31"
-  ["30_G"]="-o 34"
+  ["01_G"]="-o 1"
+  ["10_G"]="-o 10"
+  ["30_G"]="-o 31"
   ["60_G"]="-o 61"
   ["80_G"]="-o 80"
 )
@@ -118,7 +118,7 @@ warmup="30"
 iterations="3"
 
 # Defines the test runtime in milliseconds.
-duration="60000"
+duration="30000"
 
 # Defines the sampling range for queries and insertions.
 range_ratio="2"
@@ -203,7 +203,8 @@ echo "Timestamp, Log File, Scenario, Bench, Heap size, Direct Mem, # Threads, GC
 echo "Starting benchmark: $(date)"
 
 # Iterate over a cartesian product of the arguments
-for scenario in ${test_scenarios[*]}; do for bench in ${test_benchmarks[*]}; do
+for scenario in ${test_scenarios[*]}; do
+  bench="skip-list"
   echo ""
   echo "Scenario: ${bench} ${scenario}"
   echo "" >>"${summary}"
@@ -220,7 +221,19 @@ for scenario in ${test_scenarios[*]}; do for bench in ${test_benchmarks[*]}; do
         fi
 		benchSize=${benchmark_Size[${size}]}
         gc_args=${gc_cmd_args[${gc_alg}]}
-        java_args="${java_modes[${java_mode}]} ${gc_args} ${On_GC[${size}]}"
+		
+		javaHeap=""
+		javaOffHeap=""
+		
+		if [[ "$bench" == "skip-list" ]]; then 
+			javaHeap=${On_GC[${size}]}
+		else
+			javaHeap=${OnOff[${size}]}
+			javaOffHeap=${Off_GC[${size}]}
+
+		fi
+		
+		java_args="${java_modes[${java_mode}]} ${gc_args} ${javaHeap}"
 
         # Set the range to a factor of the size of the data
         range=$((range_ratio * benchSize))
@@ -235,7 +248,7 @@ for scenario in ${test_scenarios[*]}; do for bench in ${test_benchmarks[*]}; do
         cmd_args=(
           "${java} ${java_args} -jar ${jar_file_name} -b ${classPath} ${scenario_args}"
           "-k ${keysize} -v ${valuesize} -i ${benchSize} -r ${range} -t ${thread}"
-          "-W ${warmup} -n ${iterations} -d ${duration}"
+          "-W ${warmup} -n ${iterations} -d ${duration} ${javaOffHeap}"
         )
         cmd=${cmd_args[*]}
         echo "${cmd}"
@@ -295,7 +308,115 @@ for scenario in ${test_scenarios[*]}; do for bench in ${test_benchmarks[*]}; do
           echo "${summary_line[*]}"
         ) >>"${summary}"
       done; done
-    done; done; done
+    done; done;
+  done;
+  
+  for scenario in ${test_scenarios[*]}; do
+  bench="offheap-list-key"
+  echo ""
+  echo "Scenario: ${bench} ${scenario}"
+  echo "" >>"${summary}"
+
+  scenario_args=${scenarios[${scenario}]}
+  classPath="${benchClassPrefix}.${benchmarks[${bench}]}"
+
+    for java_mode in ${test_java_modes[*]}; do 
+		for thread in ${test_thread[*]}; do for size in ${test_size[*]}; do 
+        # Check if the user hit CTRL+C before we start a new iteration
+        if [[ "$CONTINUE" -ne 1 ]]; then
+          echo "#### Quiting..."
+          exit 1
+        fi
+		benchSize=${benchmark_Size[${size}]}
+        gc_args=""
+		
+		javaHeap=""
+		javaOffHeap=""
+		
+		if [[ "$bench" == "skip-list" ]]; then 
+			javaHeap=${On_GC[${size}]}
+		else
+			javaHeap=${OnOff[${size}]}
+			javaOffHeap=${Off_GC[${size}]}
+
+		fi
+		
+		java_args="${java_modes[${java_mode}]} ${gc_args} ${javaHeap}"
+
+        # Set the range to a factor of the size of the data
+        range=$((range_ratio * benchSize))
+
+        # Add a timestamp prefix to the log file.
+        # This allows repeating the benchmark with the same parameters in the future without removing the old log.
+        timestamp=$(date '+%d-%m-%Y--%H-%M-%S')
+        log_filename=${timestamp}-${scenario}-${bench}-size_${size}-t${thread}-m${java_mode}-gc${gc_alg}.log
+        out=${output}/${log_filename}
+
+        # Construct the command line as a multi-lined list for aesthetics reasons
+        cmd_args=(
+          "${java} ${java_args} -jar ${jar_file_name} -b ${classPath} ${scenario_args}"
+          "-k ${keysize} -v ${valuesize} -i ${benchSize} -r ${range} -t ${thread}"
+          "-W ${warmup} -n ${iterations} -d ${duration} ${javaOffHeap}"
+        )
+        cmd=${cmd_args[*]}
+        echo "${cmd}"
+
+        # Print all arguments to the log file
+        {
+          echo "[Arguments]"
+          # General arguments:
+          echo "timestamp: ${timestamp}"
+          echo "log_filename: ${log_filename}"
+          echo "synchrobench_path: ${synchrobench_path}"
+          # Iteration arguments:
+          echo "scenario: ${scenario}"
+          echo "bench: ${bench}"
+          echo "heap_limit: ${heapSize}"
+          echo "direct_limit: ${directSize}"
+          echo "gc_alg: ${gc_alg}"
+          echo "gc_args: ${gc_args}"
+          echo "java_mode: ${java_mode}"
+          echo "write: ${write}"
+          # CMD arguments:
+          echo "cmd: ${cmd}"
+          echo "java: ${java}"
+          echo "java_args: ${java_args}"
+          echo "jar_file_name: ${jar_file_name}"
+          echo "classPath: ${classPath}"
+          echo "scenario_args: ${scenario_args}"
+          echo "keysize: ${keysize}"
+          echo "valuesize: ${valuesize}"
+          echo "warmup: ${warmup}"
+          echo "iterations: ${iterations}"
+          echo "size: ${size}"
+          echo "range: ${range}"
+          echo "thread: ${thread}"
+          echo "duration: ${duration}"
+          echo ""
+          # The benchmark output will be appended here
+          echo "[Output]"
+        } >"${out}"
+
+        if [[ "$verify_script" -ne 1 ]]; then
+          ${cmd} >>"${out}" 2>&1
+
+          # Read statistics from the output log
+          finalSize=$(grep "Mean Total Size:" "${out}" | cut -d : -f2 | tr -d '[:space:]')
+          throughput=$(grep "Mean:" "${out}" | cut -d : -f2 | tr -d '[:space:]')
+          std=$(grep "Standard deviation pop:" "${out}" | cut -d : -f2 | tr -d '[:space:]')
+        fi
+
+        # Update summary
+        summary_line=("${timestamp}" "${log_filename}" "${scenario}" "${bench}" "${heapSize}" "${directSize}"
+          "${thread}" "${gc_alg}" "${finalSize}" "${throughput}" "${std}")
+        (
+          # Define the separator to be a comma instead of a space
+          # This only have effect in the context of these parenthesis
+          IFS=,
+          echo "${summary_line[*]}"
+        ) >>"${summary}"
+      done; done
+    done;
   done;
 
 echo "Oak test complete $(date)"
