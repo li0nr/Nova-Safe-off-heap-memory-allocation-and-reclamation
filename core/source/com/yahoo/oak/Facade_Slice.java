@@ -130,7 +130,7 @@ public class Facade_Slice {
 		if(!UNSAFE.compareAndSwapLong(null, SliceHeaderAddress, OffHeapMetaData,
 				OffHeapMetaData|1)) //swap with CAS
 			 return false;
-		
+		S.version = S.version |1;
 		novaManager.release(localBlock, localOffset, localLenght,idx); 
 		return true; 
 	}

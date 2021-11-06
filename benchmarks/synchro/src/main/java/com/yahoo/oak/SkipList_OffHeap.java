@@ -48,7 +48,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
         	Facade_Nova.Delete(idx, valueOff); 
         	return false;
     	}
-    	return valueOff == null ? true : false;
+    	return true;
     }
     
     @Override

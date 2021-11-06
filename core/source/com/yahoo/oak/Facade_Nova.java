@@ -87,7 +87,7 @@ public class Facade_Nova {
 				OffHeapMetaData|1)) //swap with CAS
 			 return false;
 
-		long len=OffHeapMetaData>>>24; //get the lenght 
+		long len=OffHeapMetaData>>>24; //get the length
 		 novaManager.release(block,offset,(int)len,idx); 
 		 return true; 
 	}
