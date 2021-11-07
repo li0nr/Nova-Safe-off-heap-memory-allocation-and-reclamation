@@ -223,7 +223,7 @@ public class Facade_Nova_MagicNumber {
 	 
 	static private long buildRef(int block, int offset) {
 		long Ref=(block &0xFFFFF);
-		Ref=Ref<<20;
+		Ref=Ref<<30;
 		Ref=Ref|(offset&0xFFFFF);
 		return Ref;
 	}
@@ -241,7 +241,7 @@ public class Facade_Nova_MagicNumber {
 	}
 	static private long combine(int block, int offset, int version_del ) {
 		long toReturn=  (block & 0xFFFFFFFF);
-		toReturn = toReturn << 20 | (offset & 0xFFFFFFFF);
+		toReturn = toReturn << 30 | (offset & 0xFFFFFFFF);
 		toReturn = toReturn << 24 | (version_del & 0xFFFFFFFF)  ;
 		return toReturn;
 	}
