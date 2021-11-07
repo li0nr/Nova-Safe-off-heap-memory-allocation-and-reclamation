@@ -26,7 +26,7 @@ public class Facade_Nova_FenceFree {
 		int offset=	newslice.getAllocatedOffset();
 		int block =	newslice.getAllocatedBlockID();
 		int version=  (int)newslice.getVersion();
-        long facadeNewData = combine(block,offset,version);
+        long facadeNewData = _Global_Defs.combine(block,offset,version);
         if(!UNSAFE.compareAndSwapLong(obj, meta_offset, data, facadeNewData))
         	novaManager.free(newslice);
         return facadeNewData;
@@ -37,7 +37,7 @@ public class Facade_Nova_FenceFree {
 		int offset=	newslice.getAllocatedOffset();
 		int block =	newslice.getAllocatedBlockID();
 		int version=  (int)newslice.getVersion();
-        long facadeNewData = combine(block,offset,version);
+        long facadeNewData = _Global_Defs.combine(block,offset,version);
         return facadeNewData;
 	}
 		
@@ -50,8 +50,8 @@ public class Facade_Nova_FenceFree {
 		boolean flag = true;
 		if(metadata %2 != 0) 
 			return false;
-		int block 	= Extractblock(metadata);
-		int offset	= ExtractOffset(metadata);
+		int block 	= _Global_Defs.Extractblock(metadata);
+		int offset	= _Global_Defs.ExtractOffset(metadata);
 		
 		long address = novaManager.getAdress(block);
 
@@ -60,7 +60,7 @@ public class Facade_Nova_FenceFree {
 		
 		
 		long len=OffHeapMetaData>>>24; //get the lenght 
-		long version = ExtractVer_Del(metadata); //get the version in the facade including delete
+		long version = _Global_Defs.ExtractVer_Del(metadata); //get the version in the facade including delete
 		OffHeapMetaData = len <<24 | version; // created off heap style meta 
 
 		long SliceHeaderAddress= address + offset;
@@ -80,8 +80,8 @@ public class Facade_Nova_FenceFree {
 	
 	static public <K> boolean DeletePrivate(int idx, long metadata) {
 		
-		int block 	= Extractblock(metadata);
-		int offset	= ExtractOffset(metadata);
+		int block 	= _Global_Defs.Extractblock(metadata);
+		int offset	= _Global_Defs.ExtractOffset(metadata);
 		long address = novaManager.getAdress(block);
 
 		long OffHeapMetaData= UNSAFE.getLong(address+offset);//reads off heap meta
@@ -96,12 +96,12 @@ public class Facade_Nova_FenceFree {
 		if(facade_meta%2==DELETED)
 			return -1;
 		
-		int block		= Extractblock	(facade_meta);
-		int offset 		= ExtractOffset	(facade_meta);
+		int block		= _Global_Defs.Extractblock	(facade_meta);
+		int offset 		= _Global_Defs.ExtractOffset	(facade_meta);
 		
 		long address = novaManager.getAdress(block);
 
-		int version = ExtractVer_Del(facade_meta);
+		int version = _Global_Defs.ExtractVer_Del(facade_meta);
 		if(!novaManager.checkEpochFences_inc(version>>1,idx))
 			UnsafeUtils.unsafe.fullFence();
 		
@@ -118,9 +118,9 @@ public class Facade_Nova_FenceFree {
 		if(metadata%2!=0)
 			return null;
 		
-		int version	= ExtractVer_Del(metadata);
-		int block 	= Extractblock	(metadata);
-		int offset 	= ExtractOffset	(metadata);
+		int version	= _Global_Defs.ExtractVer_Del(metadata);
+		int block 	= _Global_Defs.Extractblock	(metadata);
+		int offset 	= _Global_Defs.ExtractOffset	(metadata);
 
 		
 		long address = novaManager.getAdress(block);
@@ -140,8 +140,8 @@ public class Facade_Nova_FenceFree {
 		if(facade_meta%2!=0)
 			throw new NovaIllegalAccess();
 		
-		int block 	= Extractblock	(facade_meta);
-		int offset 	= ExtractOffset	(facade_meta);
+		int block 	= _Global_Defs.Extractblock	(facade_meta);
+		int offset 	= _Global_Defs.ExtractOffset	(facade_meta);
 		long address = novaManager.getAdress(block);
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
 
@@ -154,9 +154,9 @@ public class Facade_Nova_FenceFree {
 		if(metadata%2!=0)
 			throw new NovaIllegalAccess();
 		
-		int version	= ExtractVer_Del(metadata);
-		int block 	= Extractblock	(metadata);
-		int offset 	= ExtractOffset	(metadata);
+		int version	= _Global_Defs.ExtractVer_Del(metadata);
+		int block 	= _Global_Defs.Extractblock	(metadata);
+		int offset 	= _Global_Defs.ExtractOffset	(metadata);
 
 		
 		long address = novaManager.getAdress(block);
@@ -174,34 +174,12 @@ public class Facade_Nova_FenceFree {
 	 
 	 static public <T> void Print(NovaC<T> srZ, long facademeta) {
 			
-			int block 	= Extractblock	(facademeta);
-			int offset 	= ExtractOffset	(facademeta);
+			int block 	= _Global_Defs.Extractblock	(facademeta);
+			int offset 	= _Global_Defs.ExtractOffset	(facademeta);
 			
 			long address = novaManager.getAdress(block);
 
-			srZ.Print(address+offset+NovaManager.HEADER_SIZE);
-		 
+			srZ.Print(address+offset+NovaManager.HEADER_SIZE); 
 	 }
-	
-	 
-	 
-	static private int ExtractVer_Del(long toExtract) {
-		int del=(int) (toExtract)&0x7FFFFF;
-		return del;
-	}
-	static private int ExtractOffset(long toExtract) {
-		int del=(int) (toExtract>>24)&0xFFFFF;
-		return del;
-	}
-	static private int Extractblock(long toExtract) {
-		int del=(int) (toExtract>>44)&0xFFFFF;
-		return del;
-	}
-	static private long combine(int block, int offset, int version_del ) {
-		long toReturn=  (block & 0xFFFFFFFF);
-		toReturn = toReturn << 20 | (offset & 0xFFFFFFFF);
-		toReturn = toReturn << 24 | (version_del & 0xFFFFFFFF)  ;
-		return toReturn;
-	}
 
 }

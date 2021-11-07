@@ -67,7 +67,7 @@ public class NovaSlice implements  Comparable<NovaSlice> {
 
 
     void setHeader(int version, int size) {
-    	long header_slice	= (long)(size+NovaManager.HEADER_SIZE) <<24 & 0xFFFFF000;
+    	long header_slice	= (long)(size+NovaManager.HEADER_SIZE) <<24 & 0xFFFFF000; //TODO fix len could be bigger when we have bigger blocks
     	int  newVer			= (version<<1 | 0) & 0xFFF;
     	long header			= header_slice | newVer ;
     	
@@ -75,7 +75,7 @@ public class NovaSlice implements  Comparable<NovaSlice> {
 	}
     
     void setHeader_Magic(int version, int size) {
-    	long header_slice	= (long)(size+NovaManager.HEADER_SIZE+NovaManager.MAGIC_SIZE) <<24 & 0xFFFFF000;
+    	long header_slice	= (long)(size+NovaManager.HEADER_SIZE+NovaManager.MAGIC_SIZE) <<24 & 0xFFFFF000; //TODO fix len could be bigger when we have bigger blocks
     	int  newVer			= (version<<1 | 0) & 0xFFF;
     	long header			= header_slice | newVer ;
     	

@@ -149,7 +149,7 @@ public class Facade_Slice {
 		if(S.version%2 == DELETED)
 			return null;
 		
-		long facadeRef	= buildRef		(S.blockID,S.offset);
+		long facadeRef	= _Global_Defs.buildRef		(S.blockID,S.offset);
 		
 		if(bench_Flags.TAP) {
 			novaManager.setTap(facadeRef,idx);	
@@ -197,14 +197,5 @@ public class Facade_Slice {
 		return res;
 	}
 	 
-	 
-	
-	 
-	static private long buildRef(int block, int offset) {
-		long Ref=(block &0xFFFFF);
-		Ref=Ref<<30;
-		Ref=Ref|(offset&0xFFFFF);
-		return Ref;
-	}
 
 }
