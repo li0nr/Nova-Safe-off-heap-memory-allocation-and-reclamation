@@ -22,25 +22,46 @@ declare -A benchmarks=(
 )
 
 declare -A benchmark_Size=(
-  ["70_G"]="70000000"
-  ["75_G"]="75000000"
+  ["01_G"]="1000000"
+  ["10_G"]="10000000"
+  ["30_G"]="30000000"
+  ["60_G"]="60000000"
   ["80_G"]="80000000"
-  ["85_G"]="85000000"
-  ["90_G"]="90000000"
-  ["95_G"]="95000000"
 )
 
+declare -A On_GC=(
+  ["01_G"]="-Xmx1500M"
+  ["10_G"]="-Xmx14G"
+  ["30_G"]="-Xmx41G"
+  ["60_G"]="-Xmx81G"
+  ["80_G"]="-Xmx108G"
+)
 
+declare -A OnOff=(
+  ["01_G"]="-Xmx500M"
+  ["10_G"]="-Xmx4G"
+  ["30_G"]="-Xmx10G"
+  ["60_G"]="-Xmx20G"
+  ["80_G"]="-Xmx28G"
+)
+
+declare -A Off_GC=(
+  ["01_G"]="-o 1"
+  ["10_G"]="-o 10"
+  ["30_G"]="-o 31"
+  ["60_G"]="-o 61"
+  ["80_G"]="-o 80"
+)
 
 
 declare -A gc_cmd_args=(
   #["default"]=""
-  #["Serial"]="-XX:+UseSerialGC"
+  ["Serial"]="-XX:+UseSerialGC"
   ["Parallel"]="-XX:+UseParallelGC"
   #["CMS"]="-XX:+UseParNewGC" deprecated
   ["g1"]="-XX:+UseG1GC" #default
   ["zgc"]="-XX:+UseZGC"
-  #["Shenandoah"]="-XX:+UseShenandoahGC"
+  ["Shenandoah"]="-XX:+UseShenandoahGC"
   #["Epilon"]="-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC" does no reclamation https://openjdk.java.net/jeps/318
 )
 
@@ -205,10 +226,10 @@ for scenario in ${test_scenarios[*]}; do
 		javaOffHeap=""
 		
 		if [[ "$bench" == "skip-list" ]]; then 
-			javaHeap="-Xmx128G"
+			javaHeap=${On_GC[${size}]}
 		else
-			javaHeap="-Xmx38G"
-			javaOffHeap="-o 90"
+			javaHeap=${OnOff[${size}]}
+			javaOffHeap=${Off_GC[${size}]}
 
 		fi
 		
@@ -309,8 +330,16 @@ for scenario in ${test_scenarios[*]}; do
 		benchSize=${benchmark_Size[${size}]}
         gc_args=""
 		
-		javaHeap="-Xmx34G"
-		javaOffHeap="-o 94"
+		javaHeap=""
+		javaOffHeap=""
+		
+		if [[ "$bench" == "skip-list" ]]; then 
+			javaHeap=${On_GC[${size}]}
+		else
+			javaHeap=${OnOff[${size}]}
+			javaOffHeap=${Off_GC[${size}]}
+
+		fi
 		
 		java_args="${java_modes[${java_mode}]} ${gc_args} ${javaHeap}"
 
