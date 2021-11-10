@@ -13,6 +13,10 @@ function ctrl_c() {
 ############################################################################
 declare -A scenarios=(
   ["25Put25Delete50Get"]="-a 25 -u 50 -s 50"
+  ["50Put50Delete50Get"]="-a 50 -u 100 -s 0"
+  ["05Put05Delete90Get"]="-a 5 -u 10 -s 90"
+
+  
 )
 
 declare -A benchmarks=(
@@ -26,30 +30,6 @@ declare -A benchmarks=(
   #["offheap-list-key-value"]="SkipList_OffHeap_Keys"
 )
 
-
-declare -A On_GC=(
-  ["01_G"]="-Xmx1500M"
-  ["10_G"]="-Xmx14G"
-  ["30_G"]="-Xmx41G"
-  ["60_G"]="-Xmx81G"
-  ["80_G"]="-Xmx108G"
-)
-
-declare -A OnOff=(
-  ["01_G"]="-Xmx500M"
-  ["10_G"]="-Xmx4G"
-  ["30_G"]="-Xmx10G"
-  ["60_G"]="-Xmx20G"
-  ["80_G"]="-Xmx28G"
-)
-
-declare -A Off_GC=(
-  ["01_G"]="-o 1"
-  ["10_G"]="-o 10"
-  ["30_G"]="-o 31"
-  ["60_G"]="-o 61"
-  ["80_G"]="-o 80"
-)
 
 
 declare -A gc_cmd_args=(
@@ -170,12 +150,6 @@ while getopts o:j:d:i:w:s:t:e:h:b:g:m:l:r:v opt; do
   esac
 done
 
-declare -A BSize="1000000
-  10000000
-  30000000
-  50000000
-  80000000 
-  90000000"
 
 ############################################################################
 # Changing working directory to the JAR file directory
