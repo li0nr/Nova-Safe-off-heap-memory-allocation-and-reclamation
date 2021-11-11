@@ -22,12 +22,12 @@ declare -A benchmarks=(
 )
 
 declare -A benchmark_Size=(
+  ["60_G"]="60000000"
+  ["65_G"]="65000000"
   ["70_G"]="70000000"
   ["75_G"]="75000000"
   ["80_G"]="80000000"
-  ["85_G"]="85000000"
-  ["90_G"]="90000000"
-  ["95_G"]="95000000"
+  ["82_G"]="82000000"
 )
 
 
@@ -201,17 +201,8 @@ for scenario in ${test_scenarios[*]}; do
 		benchSize=${benchmark_Size[${size}]}
         gc_args=${gc_cmd_args[${gc_alg}]}
 		
-		javaHeap=""
-		javaOffHeap=""
-		
-		if [[ "$bench" == "skip-list" ]]; then 
-			javaHeap="-Xmx128G"
-		else
-			javaHeap="-Xmx38G"
-			javaOffHeap="-o 90"
-
-		fi
-		
+		javaHeap="-Xmx110G"
+				
 		java_args="${java_modes[${java_mode}]} ${gc_args} ${javaHeap}"
 
         # Set the range to a factor of the size of the data
@@ -309,8 +300,8 @@ for scenario in ${test_scenarios[*]}; do
 		benchSize=${benchmark_Size[${size}]}
         gc_args=""
 		
-		javaHeap="-Xmx34G"
-		javaOffHeap="-o 94"
+		javaHeap="-Xmx30G"
+		javaOffHeap="-o 80"
 		
 		java_args="${java_modes[${java_mode}]} ${gc_args} ${javaHeap}"
 
