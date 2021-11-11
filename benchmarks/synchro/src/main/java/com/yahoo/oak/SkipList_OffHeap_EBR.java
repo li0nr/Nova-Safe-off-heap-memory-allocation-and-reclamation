@@ -1,6 +1,7 @@
 package com.yahoo.oak;
 
 import com.yahoo.oak.EBR.EBRslice;
+import com.yahoo.oak.Facade_Slice.Facade_slice;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -42,19 +43,41 @@ public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
     public  boolean put(final Buff key,final Buff value, int idx) {
     	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	EBRslice valueOff = skipListMap.put(key, offValue);
+    	Buff keyb = Buff.CC.Copy(key);
+    	EBRslice valueOff = skipListMap.put(keyb, offValue);
     	if(valueOff != null)
     		mng.retire(valueOff, idx);
     	return true;
     }
     
     @Override
+    public  boolean OverWrite(final Buff key,final Buff value, int idx) {
+    	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
+    	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
+    	Buff keyb = Buff.CC.Copy(key);
+    	EBRslice valueOff =skipListMap.merge(keyb, offValue, (old,v)->
+    	{	
+    		mng.start_op(idx);
+    		UnsafeUtils.putInt(4 +old.offset+old.getAddress(),
+    				~UnsafeUtils.getInt( 4 + old.offset+old.getAddress()));//4 for capacity
+    		mng.end_op(idx);
+    			return old;	
+    		});
+    	if(valueOff != offValue) {
+    		mng.fastFree(offValue); 
+    		return true;
+    	}
+    	return false;
+    }
+    
+    @Override
     public  boolean Fill(final Buff key,final Buff value, int idx) {    
     	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	EBRslice valueOff = skipListMap.put(key, offValue);
+    	Buff keyb = Buff.CC.Copy(key);
+    	EBRslice valueOff = skipListMap.put(keyb, offValue);
     	if(valueOff != null)
-    		mng.retire(valueOff, idx);
+    		mng.fastFree(valueOff);
     	return valueOff == null ? true : false;
     	
     }

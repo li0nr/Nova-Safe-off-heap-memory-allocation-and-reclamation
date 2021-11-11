@@ -1,6 +1,8 @@
 package com.yahoo.oak;
 
 
+import java.util.function.BiFunction;
+
 import sun.misc.Unsafe;
 
 public class Facade_Slice {
@@ -140,7 +142,7 @@ public class Facade_Slice {
 	static public <K> boolean DeletePrivate(int idx, Facade_slice S) {
 		if(S.version%2 == DELETED)  //we can also not use this but its here for sanity!
 			return false;		 
-		novaManager.free(new NovaSlice(S.blockID, S.offset, S.length));
+		novaManager.free(S);
 		return true; 
 	}
 	
@@ -160,6 +162,29 @@ public class Facade_Slice {
 			return null;
 			}
 		lambda.serialize(obj,S.address+ S.offset +NovaManager.HEADER_SIZE);
+		 if(bench_Flags.TAP) {
+             if(bench_Flags.Fences)UNSAFE.storeFence();
+            novaManager.UnsetTap(idx);
+            }
+		 return S;
+	}
+	
+	static public <T> Facade_slice OverWrite (BiFunction<Facade_slice,Facade_slice,Facade_slice> lambda, Facade_slice S ,int idx) {//for now write doesnt take lambda for writing 
+
+		if(S.version%2 == DELETED)
+			return null;
+		
+		long facadeRef	= _Global_Defs.buildRef		(S.blockID,S.offset);
+		
+		if(bench_Flags.TAP) {
+			novaManager.setTap(facadeRef,idx);	
+			if(bench_Flags.Fences)UNSAFE.fullFence();
+			}
+		if(! (S.version == (int)(UNSAFE.getLong(S.address+S.offset)&0xFFFFFF))) {
+			novaManager.UnsetTap(idx);
+			return null;
+			}
+		S = lambda.apply(S,S);
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
             novaManager.UnsetTap(idx);

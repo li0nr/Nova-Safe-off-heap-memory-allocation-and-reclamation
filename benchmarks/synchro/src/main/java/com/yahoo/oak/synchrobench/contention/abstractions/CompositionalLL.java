@@ -6,6 +6,8 @@
 
 package com.yahoo.oak.synchrobench.contention.abstractions;
 
+import com.yahoo.oak.Buff.Buff;
+
 abstract public interface CompositionalLL<K,V> {
 
 	public Integer containsKey(final K key, int tidx);
@@ -13,6 +15,9 @@ abstract public interface CompositionalLL<K,V> {
     public  boolean Fill(final K key,final V value, int idx);
     
     public  boolean put(final K key,final V value, int idx);
+    
+    default public  boolean OverWrite(final Buff key,final Buff value, int idx) 
+    {throw new IllegalAccessError();}
     
     public  boolean remove(final K key, int idx);
         

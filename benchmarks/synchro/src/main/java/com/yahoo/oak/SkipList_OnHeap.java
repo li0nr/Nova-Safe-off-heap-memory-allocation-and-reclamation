@@ -36,6 +36,21 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     	return skipListMap.put(keyb,valueb) == null ? true : false;
     }
     
+    @Override
+    public  boolean OverWrite(final Buff key,final Buff value, int idx) {
+    	Buff keyb = Buff.CC.Copy(key);
+    	Buff valueb = Buff.CC.Copy(value);
+    	
+    	Buff valueOff =skipListMap.merge(keyb, valueb, (old,v)->
+    	{	
+    		old.buffer.putInt(0,~old.buffer.getInt(0));
+    		return old;	
+    		});
+    	if(valueb != valueOff)
+    		return true;
+    	return false;
+    }
+    
     public  boolean FillParallel(int sizeInMillions, int keysize, int valsize, int range) {    	
     	ArrayList<Thread> threads = new ArrayList<>();
     	int NUM_THREADS = sizeInMillions/1_000_000;;
@@ -116,5 +131,17 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
 				}
 			}
 		}
+	
+    static public void main(String[]arg) {
+    	SkipList_OnHeap myskip = new SkipList_OnHeap();
+    	Buff x = new Buff(4);
+    			x.set(0);
+    	myskip.put(x, x, 0);
+    	myskip.OverWrite(x, x, 0);
+    	Buff y = new Buff(4);
+    	y.set(1);
+    	myskip.OverWrite(y, y, 0);
+    	int t = myskip.containsKey(x, 0);
+    }
 
 }

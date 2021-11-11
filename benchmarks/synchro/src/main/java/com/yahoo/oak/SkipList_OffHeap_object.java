@@ -1,10 +1,10 @@
 package com.yahoo.oak;
 
-import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.Facade_Slice.Facade_slice;
-import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
-
 import java.util.concurrent.ConcurrentSkipListMap;
+
+import com.yahoo.oak.Facade_Slice.Facade_slice;
+import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
 
 public class SkipList_OffHeap_object implements CompositionalLL<Buff,Buff> {
@@ -44,10 +44,32 @@ public class SkipList_OffHeap_object implements CompositionalLL<Buff,Buff> {
     	Buff keyb = Buff.CC.Copy(key);
     	Facade_slice valueOff = skipListMap.put(keyb, Facade_Slice.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null) {
-        	Facade_Slice.Delete(idx, valueOff); 
-        	return false;
+    		Facade_Slice.Delete(idx, valueOff); 
+    		return false;
     	}
     	return true;
+    }
+    
+    @Override
+    public  boolean OverWrite(final Buff key,final Buff value, int idx) {
+    	Facade_slice offValue = new Facade_slice();
+    	Facade_Slice.AllocateSlice(offValue, Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
+    	Buff keyb = Buff.CC.Copy(key);
+    	//Facade_slice valueOff = skipListMap.put(keyb, Facade_Slice.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
+    	Facade_slice valueOff =skipListMap.merge(keyb, offValue, (old,v)->
+    	{	
+    		Facade_Slice.OverWrite( (value1,value2)-> {
+    			UnsafeUtils.putInt(NovaManager.HEADER_SIZE + 4 +value1.offset+value1.getAddress(),
+    					~UnsafeUtils.getInt(NovaManager.HEADER_SIZE + 4 + value1.offset+value1.getAddress()));//4 for capacity
+    			return value1;	
+    			},old,idx);
+        		return old;
+    		});
+    	if(valueOff != offValue) {
+    		Facade_Slice.DeletePrivate(idx, offValue); 
+    		return true;
+    	}
+    	return false;
     }
     
     @Override
@@ -57,7 +79,7 @@ public class SkipList_OffHeap_object implements CompositionalLL<Buff,Buff> {
     	Buff keyb = Buff.CC.Copy(key);
     	Facade_slice valueOff = skipListMap.put(keyb, Facade_Slice.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null)
-        	Facade_Slice.Delete(idx, valueOff); 
+        	Facade_Slice.DeletePrivate(idx, valueOff); 
     	return valueOff== null ? true : false;
     	
     }
@@ -95,4 +117,15 @@ public class SkipList_OffHeap_object implements CompositionalLL<Buff,Buff> {
     public void print() {}
 
 
+    static public void main(String[]arg) {
+    	SkipList_OffHeap_object myskip = new SkipList_OffHeap_object(1);
+    	Buff x = new Buff(4);
+    			x.set(0);
+    	myskip.put(x, x, 0);
+    	myskip.OverWrite(x, x, 0);
+    	Buff y = new Buff(4);
+    	y.set(1);
+    	myskip.OverWrite(y, y, 0);
+    	int t = myskip.containsKey(x, 0);
+    }
 }

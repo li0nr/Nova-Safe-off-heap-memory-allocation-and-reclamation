@@ -30,6 +30,7 @@ public class Parameters {
     public static int confKeySize = 4;
     public static int confValSize = 4;
     public static long offheap = -1;
+    public static boolean overWrite = false;
     public static boolean parallelFill = false;
 
     public static int Type = 0; //0 is BST , 1 is LL, 2 is SA

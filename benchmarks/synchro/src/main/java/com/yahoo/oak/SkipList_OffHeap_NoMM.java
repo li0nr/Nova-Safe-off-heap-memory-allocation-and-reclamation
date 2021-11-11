@@ -1,6 +1,7 @@
 package com.yahoo.oak;
 
 import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.EBR.EBRslice;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -51,6 +52,24 @@ public class SkipList_OffHeap_NoMM implements CompositionalLL<Buff,Buff> {
         	allocator.free(offValue);
     	return valueOff == null ? true : false;
     	
+    }
+    
+    @Override
+    public  boolean OverWrite(final Buff key,final Buff value, int idx) {
+    	NovaSlice offValue = new NovaSlice(0, 0, 0);
+		allocator.allocate(offValue, Buff.DEFAULT_SERIALIZER.calculateSize(value));
+    	Buff keyb = Buff.CC.Copy(key);
+    	NovaSlice valueOff =skipListMap.merge(keyb, offValue, (old,v)->
+    	{	
+    		UnsafeUtils.putInt(4 +old.offset+old.getAddress(),
+    				~UnsafeUtils.getInt( 4 + old.offset+old.getAddress()));//4 for capacity
+    			return old;	
+    		});
+    	if(valueOff != offValue) {
+        	allocator.free(offValue);
+    		return true;
+    	}
+    	return false;
     }
 
 

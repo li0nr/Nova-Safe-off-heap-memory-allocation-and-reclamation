@@ -1,11 +1,9 @@
 package com.yahoo.oak;
 
+
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.SkipList_OnHeap.FillerThread;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
-import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 
@@ -61,23 +59,6 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     	
     }
     
-    public  boolean FillParallel(int sizeInMillions, int keysize, int valsize, int range) {    	
-    	ArrayList<Thread> threads = new ArrayList<>();
-    	int NUM_THREADS = sizeInMillions/1_000_000;;
-	    for (int i = 0; i < NUM_THREADS; i++) {
-	    	threads.add(new Thread(new FillerThread(i, skipListMap, keysize, valsize, range)));
-	    	threads.get(i).start();
-	    	}	
-	    for (Thread thread : threads) {
-	        try {
-				thread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-	    }
-		return true;
-    }
-
 
     @Override
     public  boolean remove(final Buff key, int idx) {
@@ -111,41 +92,4 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     @Override
     public void print() {}
 
-	public class FillerThread extends Thread {
-
-		int idx;
-		Random localRanom;
-		Buff keybuf;
-		Buff valbuf;
-		int range;
-		ConcurrentSkipListMap map;
-		
-		FillerThread(int index, ConcurrentSkipListMap local, int keysize, int valsize, int range){
-			idx = index;
-			map = local;
-			this.range = range;
-			keybuf = new Buff(keysize);
-			valbuf = new Buff(valsize);
-			localRanom = new Random(idx);
-		}
-		
-		@Override
-		public void run() {
-			int i = 0;
-			int v ;
-			while( i < 1_000_000) {		
-				v = localRanom.nextInt(this.range);
-				keybuf.set(v);
-				valbuf.set(v);
-		    	Buff keyb = Buff.CC.Copy(keybuf);
-		    	long offValue = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(valbuf), idx);
-		    	Long valueOff = skipListMap.put(keyb, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, valbuf, offValue, idx));
-		    	if(valueOff != null) {
-		        	Facade_Nova.Delete(idx, valueOff); 
-					i--;
-					}
-		    	i++;
-		    	}
-			}
-		}
 }

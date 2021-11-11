@@ -547,6 +547,9 @@ public class Test {
                     case "-par":
                         Parameters.parallelFill = true;
                         break;
+                    case "-oW":
+                        Parameters.overWrite = true;
+                        break;
                 }
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("Missing value after option: " + currentArg + ". Ignoring...");

@@ -132,12 +132,19 @@ public class ThreadLoopLL implements Runnable {
             		failures++;
             	}
             }
-            else if (coin < cdf[1]) { // -u writing is better than deleting?
+            else if (coin < cdf[1]) {// -u writing is better than deleting?
             	numAdd++;
-            	if(bench.put(key,val, myThreadNum)) {
-            		numSuccAdd++;
+            	if(Parameters.overWrite) {
+            		if(bench.OverWrite(key, val, myThreadNum))
+                		numSuccAdd++;
+                	else failures++;
             	}
-            	else failures++;
+            	else {
+                	if(bench.put(key,val, myThreadNum)) {
+                		numSuccAdd++;
+                	}
+                	else failures++;
+            	}
             		
             }
             else if (coin < cdf[2]) { // -s reading is the best ever

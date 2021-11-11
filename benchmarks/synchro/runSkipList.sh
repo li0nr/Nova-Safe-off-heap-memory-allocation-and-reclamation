@@ -13,7 +13,7 @@ function ctrl_c() {
 ############################################################################
 declare -A scenarios=(
   ["25Put25Delete50Get"]="-a 25 -u 50 -s 50"
-  ["50Put50Delete50Get"]="-a 50 -u 100 -s 0"
+  ["50Put50Delete00Get"]="-a 50 -u 100 -s 0 -oW"
   ["05Put05Delete90Get"]="-a 5 -u 10 -s 90"
 
   
@@ -21,12 +21,12 @@ declare -A scenarios=(
 
 declare -A benchmarks=(
   ["skip-list"]="SkipList_OnHeap"
-  ["offheap-list-key"]="SkipList_OffHeap"
+  #["offheap-list-key"]="SkipList_OffHeap"
   ["offheap-list-key-EBR"]="SkipList_OffHeap_EBR"
   ["offheap-list-key-HE"]="SkipList_OffHeap_HE"
   ["offheap-list-key-NoMM"]="SkipList_OffHeap_NoMM"
   ["offheap-list-key-Nova-object"]="SkipList_OffHeap_object"
-  ["offheap-list-key-Nova-reuse"]="SkipList_OffHeap_reuse"
+  #["offheap-list-key-Nova-reuse"]="SkipList_OffHeap_reuse"
   #["offheap-list-key-value"]="SkipList_OffHeap_Keys"
 )
 
@@ -198,9 +198,9 @@ for scenario in ${test_scenarios[*]}; do
 		javaOffHeap=""
 		
 		if [[ "$bench" == "skip-list" ]]; then 
-			javaHeap="-Xmx14"
+			javaHeap="-Xmx14G"
 		else
-			javaHeap="-Xmx4"
+			javaHeap="-Xmx4G"
 			javaOffHeap="-o 10"
 
 		fi
