@@ -52,22 +52,21 @@ public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
     
     @Override
     public  boolean OverWrite(final Buff key,final Buff value, int idx) {
-    	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
-    	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	Buff keyb = Buff.CC.Copy(key);
-    	EBRslice valueOff =skipListMap.merge(keyb, offValue, (old,v)->
+//    	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
+//    	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
+//    	Buff keyb = Buff.CC.Copy(key);
+		mng.start_op(idx);
+    	EBRslice valueOff =skipListMap.compute(key,(k,v)->
     	{	
-    		mng.start_op(idx);
-    		UnsafeUtils.putInt(4 +old.offset+old.getAddress(),
-    				~UnsafeUtils.getInt( 4 + old.offset+old.getAddress()));//4 for capacity
+    		UnsafeUtils.putInt(4 +v.offset+v.getAddress(),
+    				~UnsafeUtils.getInt( 4 + v.offset+v.getAddress()));//4 for capacity
     		mng.end_op(idx);
-    			return old;	
+    			return v;	
     		});
-    	if(valueOff != offValue) {
-    		mng.fastFree(offValue); 
+    	if(valueOff == null)
+    		return false;
+    	else 	
     		return true;
-    	}
-    	return false;
     }
     
     @Override

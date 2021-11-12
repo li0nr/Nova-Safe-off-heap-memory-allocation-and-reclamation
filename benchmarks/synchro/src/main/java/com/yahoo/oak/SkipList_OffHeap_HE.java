@@ -63,12 +63,10 @@ public class SkipList_OffHeap_HE implements CompositionalLL<Buff,Buff> {
     
     @Override
     public  boolean OverWrite(final Buff key,final Buff value, int idx) {
-    	HEslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
-    	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	Buff keyb = Buff.CC.Copy(key);
-    	HEslice valueOff =skipListMap.merge(keyb, offValue, (old,v)->
+
+    	HEslice valueOff =skipListMap.compute(key, (old,v)->
     	{	
-    		HEslice obj = mng.get_protected(old, idx);
+    		HEslice obj = mng.get_protected(v, idx);
     		if(obj == null)
     			return null;
     		UnsafeUtils.putInt(4 +obj.offset+obj.getAddress(),
@@ -76,11 +74,10 @@ public class SkipList_OffHeap_HE implements CompositionalLL<Buff,Buff> {
 			mng.clear(idx);
     			return obj;	
     		});
-    	if(valueOff != offValue) {
-    		mng.fastFree(offValue); 
+    	if(valueOff == null)
+    		return false;
+    	else 	
     		return true;
-    	}
-    	return false;
     }
 
 

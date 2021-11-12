@@ -13,8 +13,10 @@ function ctrl_c() {
 ############################################################################
 declare -A scenarios=(
   ["25Put25Delete50Get"]="-a 25 -u 50 -s 50"
-  ["50Put50Delete00Get"]="-a 50 -u 100 -s 0 -oW"
+  ["50Put50Delete00Get"]="-a 50 -u 100 -s 0"
   ["05Put05Delete90Get"]="-a 5 -u 10 -s 90"
+  ["40Put50Get"]="-u 50 -s 100 -oW"
+
 
   
 )

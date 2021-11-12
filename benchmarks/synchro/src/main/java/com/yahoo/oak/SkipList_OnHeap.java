@@ -38,17 +38,16 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     
     @Override
     public  boolean OverWrite(final Buff key,final Buff value, int idx) {
-    	Buff keyb = Buff.CC.Copy(key);
-    	Buff valueb = Buff.CC.Copy(value);
     	
-    	Buff valueOff =skipListMap.merge(keyb, valueb, (old,v)->
+    	Buff valueOff =skipListMap.compute(key, (old,v)->
     	{	
     		old.buffer.putInt(0,~old.buffer.getInt(0));
     		return old;	
     		});
-    	if(valueb != valueOff)
+    	if(valueOff == null)
+    		return false;
+    	else 	
     		return true;
-    	return false;
     }
     
     public  boolean FillParallel(int sizeInMillions, int keysize, int valsize, int range) {    	

@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.yahoo.oak.Facade_Slice.Facade_slice;
 import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.EBR.EBRslice;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
 
@@ -52,24 +53,22 @@ public class SkipList_OffHeap_object implements CompositionalLL<Buff,Buff> {
     
     @Override
     public  boolean OverWrite(final Buff key,final Buff value, int idx) {
-    	Facade_slice offValue = new Facade_slice();
-    	Facade_Slice.AllocateSlice(offValue, Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
-    	Buff keyb = Buff.CC.Copy(key);
     	//Facade_slice valueOff = skipListMap.put(keyb, Facade_Slice.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
-    	Facade_slice valueOff =skipListMap.merge(keyb, offValue, (old,v)->
+    	//Facade_slice valueOff =skipListMap.merge(keyb, offValue, (old,v)->
+    	Facade_slice valueOff =skipListMap.compute(key,(k,v)->
     	{	
+    		if(v == null) return v;
     		Facade_Slice.OverWrite( (value1,value2)-> {
     			UnsafeUtils.putInt(NovaManager.HEADER_SIZE + 4 +value1.offset+value1.getAddress(),
     					~UnsafeUtils.getInt(NovaManager.HEADER_SIZE + 4 + value1.offset+value1.getAddress()));//4 for capacity
     			return value1;	
-    			},old,idx);
-        		return old;
+    			},v,idx);
+        		return v;
     		});
-    	if(valueOff != offValue) {
-    		Facade_Slice.DeletePrivate(idx, offValue); 
+    	if(valueOff == null)
+    		return false;
+    	else 	
     		return true;
-    	}
-    	return false;
     }
     
     @Override
