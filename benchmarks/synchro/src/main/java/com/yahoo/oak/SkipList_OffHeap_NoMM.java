@@ -58,6 +58,7 @@ public class SkipList_OffHeap_NoMM implements CompositionalLL<Buff,Buff> {
     public  boolean OverWrite(final Buff key,final Buff value, int idx) {
     	NovaSlice valueOff =skipListMap.compute(key, (old,v)->
     	{	
+    		if(v== null) return v;
     		UnsafeUtils.putInt(4 +v.offset+v.getAddress(),
     				~UnsafeUtils.getInt( 4 + v.offset+v.getAddress()));//4 for capacity
     			return v;	

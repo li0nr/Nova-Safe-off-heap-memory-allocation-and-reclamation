@@ -58,6 +58,7 @@ public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
 		mng.start_op(idx);
     	EBRslice valueOff =skipListMap.compute(key,(k,v)->
     	{	
+    		if(v == null) return v;
     		UnsafeUtils.putInt(4 +v.offset+v.getAddress(),
     				~UnsafeUtils.getInt( 4 + v.offset+v.getAddress()));//4 for capacity
     		mng.end_op(idx);
