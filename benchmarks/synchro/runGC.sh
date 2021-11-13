@@ -22,6 +22,8 @@ declare -A benchmarks=(
 )
 
 declare -A benchmark_Size=(
+  ["50_G"]="50000000"
+  ["55_G"]="55000000"
   ["60_G"]="60000000"
   ["65_G"]="65000000"
   ["70_G"]="70000000"
@@ -151,12 +153,6 @@ while getopts o:j:d:i:w:s:t:e:h:b:g:m:l:r:v opt; do
   esac
 done
 
-declare -A BSize="1000000
-  10000000
-  30000000
-  50000000
-  80000000 
-  90000000"
 
 ############################################################################
 # Changing working directory to the JAR file directory

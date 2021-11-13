@@ -42,8 +42,8 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     	Buff valueOff =skipListMap.compute(key, (old,v)->
     	{	
     		if(v == null) return v;
-    		old.buffer.putInt(0,~old.buffer.getInt(0));
-    		return old;	
+    		v.buffer.putInt(0,~v.buffer.getInt(0));
+    		return v;	
     		});
     	if(valueOff == null)
     		return false;

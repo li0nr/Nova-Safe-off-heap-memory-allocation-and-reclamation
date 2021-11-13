@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.yahoo.oak.Facade_Slice.Facade_slice;
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.EBR.EBRslice;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
 
