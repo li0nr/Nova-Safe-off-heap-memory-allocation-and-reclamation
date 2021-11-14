@@ -2,6 +2,7 @@ package com.yahoo.oak.LL.Nova;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+import com.yahoo.oak.Facade_Nova;
 import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.Facade_Slice.Facade_slice;
 import com.yahoo.oak.NovaC;
@@ -9,6 +10,7 @@ import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
+import com.yahoo.oak.UnsafeUtils;
 
 /**
  * <h1>HarrisAMRLinkedList</h1>
@@ -109,8 +111,12 @@ public class LL_Nova_noCAS<K,V> {
                 final Node pred = window.pred;
                 final Node curr = window.curr;
                 if (curr.key!= null && Facade_Slice.Compare(key, Kcm, curr.key) == 0) { 
-                    Facade_Slice.WriteFull(Vsr, value, curr.value, idx);
-                    return true;
+                    //Facade_Slice.WriteFull(Vsr, value, curr.value, idx);
+                	Facade_Slice.OverWrite( (val_addr)-> {
+            				UnsafeUtils.putInt(val_addr+4,~UnsafeUtils.getInt(val_addr+4));//4 for capacity
+            					return val_addr;	
+            			},curr.value,idx);
+                	return true;
                 } else {
                     
                 	Node newNode = new Node(new Facade_slice(), new Facade_slice());

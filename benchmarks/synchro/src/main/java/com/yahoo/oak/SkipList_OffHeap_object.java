@@ -57,9 +57,9 @@ public class SkipList_OffHeap_object implements CompositionalLL<Buff,Buff> {
     	Facade_slice valueOff =skipListMap.compute(key,(k,v)->
     	{	
     		if(v == null) return v;
-    		Facade_Slice.OverWrite( (value1,value2)-> {
-    			UnsafeUtils.putInt(NovaManager.HEADER_SIZE + 4 +value1.offset+value1.getAddress(),
-    					~UnsafeUtils.getInt(NovaManager.HEADER_SIZE + 4 + value1.offset+value1.getAddress()));//4 for capacity
+    		Facade_Slice.OverWrite( (value1)-> {
+    			UnsafeUtils.putInt(value1+4,
+    					~UnsafeUtils.getInt(value1+4));//4 for capacity
     			return value1;	
     			},v,idx);
         		return v;

@@ -230,6 +230,10 @@ public class Buff  implements Comparable<Buff>{
 			}
 			return toRet;
 		}
+		 
+		 public void overWrite(Buff o) {
+			o.buffer.putInt(0, ~o.buffer.getInt(0));
+		}
 	};
 	
 

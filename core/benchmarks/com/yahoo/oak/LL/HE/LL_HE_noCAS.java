@@ -4,11 +4,13 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.Facade_EBR;
 import com.yahoo.oak.Facade_HE;
+import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
+import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.HazardEras.HEslice;
 import com.yahoo.oak.LL.HE.LL_HE_noCAS_opt.Node;
 
@@ -112,7 +114,11 @@ public class LL_HE_noCAS<K,V> {
             final Node pred = window.pred;
             final Node curr = window.curr;
             if (curr.key!= null && Facade_HE.Compare(key, Kcm, curr.key, tidx) == 0) { 
-                Facade_HE.Write(Vsr, value, curr.value, tidx);
+                //Facade_HE.Write(Vsr, value, curr.value, tidx);
+                Facade_HE.OverWrite( (val_addr)-> {
+        				UnsafeUtils.putInt(val_addr+4,~UnsafeUtils.getInt(val_addr+4));//4 for capacity
+        					return val_addr;	
+        			},curr.value,tidx);
                 return true;
             } else {
             	HEslice oKey  = Facade_HE.allocate( Ksr.calculateSize(key));

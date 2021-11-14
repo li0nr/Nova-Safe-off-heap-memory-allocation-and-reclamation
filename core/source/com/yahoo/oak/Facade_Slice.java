@@ -2,6 +2,7 @@ package com.yahoo.oak;
 
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import sun.misc.Unsafe;
 
@@ -169,7 +170,7 @@ public class Facade_Slice {
 		 return S;
 	}
 	
-	static public <T> Facade_slice OverWrite (BiFunction<Facade_slice,Facade_slice,Facade_slice> lambda, Facade_slice S ,int idx) {//for now write doesnt take lambda for writing 
+	static public <T> Facade_slice OverWrite (Function<Long,Long> lambda, Facade_slice S ,int idx) {//for now write doesnt take lambda for writing 
 
 		if(S.version%2 == DELETED)
 			return null;
@@ -184,7 +185,7 @@ public class Facade_Slice {
 			novaManager.UnsetTap(idx);
 			return null;
 			}
-		S = lambda.apply(S,S);
+		 lambda.apply(S.address + S.offset + NovaManager.HEADER_SIZE);
 		 if(bench_Flags.TAP) {
              if(bench_Flags.Fences)UNSAFE.storeFence();
             novaManager.UnsetTap(idx);

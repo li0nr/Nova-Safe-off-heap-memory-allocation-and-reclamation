@@ -1,6 +1,11 @@
 package com.yahoo.oak;
 
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+import com.yahoo.oak.Facade_Slice.Facade_slice;
+
 import sun.misc.Unsafe;
 
 public class Facade_Nova {
@@ -130,6 +135,36 @@ public class Facade_Nova {
 			return -1;
 			}
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
+		 if(bench_Flags.TAP) {
+			 if(bench_Flags.Fences)UNSAFE.storeFence();
+			 novaManager.UnsetTap(idx);
+			 }
+		 return facade_meta;
+	}
+	
+	static public <T> long OverWrite (Function<Long,Long> lambda, long facade_meta,int idx) {//for now write doesnt take lambda for writing 
+
+		if(facade_meta%2==DELETED) 
+			return -1;
+		
+		int block		= _Global_Defs.Extractblock	(facade_meta);
+		int offset 		= _Global_Defs.ExtractOffset	(facade_meta);
+		long facadeRef	= _Global_Defs.buildRef		(block,offset);
+		
+		if(bench_Flags.TAP) {
+			novaManager.setTap(facadeRef,idx);	
+			if(bench_Flags.Fences)UNSAFE.fullFence();
+		}
+		
+		long address = novaManager.getAdress(block);
+
+		int version = _Global_Defs.ExtractVer_Del(facade_meta);
+		if(! (version == (int)(UNSAFE.getLong(address+offset)&0xFFFFFF))) {
+			novaManager.UnsetTap(idx);
+			return -1;
+			}
+		lambda.apply(address+offset+NovaManager.HEADER_SIZE);
+		//lambda.serialize(obj,address+NovaManager.HEADER_SIZE+offset);
 		 if(bench_Flags.TAP) {
 			 if(bench_Flags.Fences)UNSAFE.storeFence();
 			 novaManager.UnsetTap(idx);

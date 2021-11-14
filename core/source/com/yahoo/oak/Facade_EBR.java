@@ -1,5 +1,7 @@
 package com.yahoo.oak;
 
+import java.util.function.Function;
+
 import com.yahoo.oak.EBR.EBRslice;
 import sun.misc.Unsafe;
 
@@ -46,6 +48,19 @@ public class Facade_EBR {
 			 throw new NovaIllegalAccess();
 		
 		lambda.serialize(obj,slice.address+slice.offset);
+		_EBR.clear(tidx);
+
+		 return slice;
+	}
+	
+	static public <T> EBRslice OverWrite(Function< Long, Long> lambda, EBRslice slice, int tidx ) {
+		
+		_EBR.start_op(tidx);
+		
+		if(slice.getEpoch() != -1)
+			 throw new NovaIllegalAccess();
+		
+		lambda.apply(slice.address+slice.offset);
 		_EBR.clear(tidx);
 
 		 return slice;

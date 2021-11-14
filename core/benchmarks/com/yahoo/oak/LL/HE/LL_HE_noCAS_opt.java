@@ -115,7 +115,9 @@ public class LL_HE_noCAS_opt<K,V> {
             final Node pred = window.pred;
             final Node curr = window.curr;
             if (curr.key!= null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) { 
-                Vsr.serialize(value, curr.value.address+curr.value.offset);
+                //Vsr.serialize(value, curr.value.address+curr.value.offset);
+            	UnsafeUtils.putInt(curr.value.address + curr.value.offset+4,
+            			~UnsafeUtils.getInt(curr.value.address + curr.value.offset+4));//4 for capacity
             	HE.clear(tidx);
                 return true;
             } else {

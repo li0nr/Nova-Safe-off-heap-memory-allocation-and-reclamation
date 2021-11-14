@@ -124,7 +124,11 @@ public class LL_Nova_primitive_noCAS<K,V> {
                 final Node pred = window.pred;
                 final Node curr = window.curr;
                 if (curr.key!= Illegal_nu && Facade_Nova.Compare(key, Kcm, curr.key) == 0) {
-                	Facade_Nova.WriteFull(Vsr, value, curr.value, idx);
+                	//Facade_Nova.WriteFull(Vsr, value, curr.value, idx);
+                	Facade_Nova.OverWrite( (val_addr)-> {
+            				UnsafeUtils.putInt(val_addr+4,~UnsafeUtils.getInt(val_addr+4));//4 for capacity
+            					return val_addr;	
+            			},curr.value,idx);
                     return true;
                 } else {
 
@@ -340,10 +344,12 @@ public class LL_Nova_primitive_noCAS<K,V> {
 	    final NovaManager novaManager = new NovaManager(allocator);
 	    
 	    Buff x =new Buff(4);
-	    x.set(88);
-	    LL_Nova_primitive_CAS<Buff, Buff>List = new LL_Nova_primitive_CAS<>(novaManager, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
+	    x.set(0);
+	    LL_Nova_primitive_noCAS<Buff, Buff>List = new LL_Nova_primitive_noCAS<>(novaManager, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
 	    		 ,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 		List.add(x,x,0);
+		List.add(x, x, 0);
+		List.get(x, Buff.DEFAULT_R, 0);
 		List.remove(x, 0);
 		List.add(x,x,0);
 		x.set(120);

@@ -1,6 +1,8 @@
 package com.yahoo.oak;
 
 
+import java.util.function.Function;
+
 import com.yahoo.oak.HazardEras.HEslice;
 
 import sun.misc.Unsafe;
@@ -49,6 +51,17 @@ public class Facade_HE {
 		 return slice;
 	}
 	
+	static public <T> HEslice OverWrite(Function<Long, Long> lambda, HEslice slice, int tidx ) {
+		
+		HEslice toRead = _HazardEras.get_protected(slice, tidx);
+		if(toRead.getdelEra() != -1)
+			return null;		
+		
+		lambda.apply(slice.address+slice.offset);
+		_HazardEras.clear(tidx);
+
+		 return slice;
+	}
 	
 	static public <T> HEslice WriteFast(NovaS<T> lambda, T obj, HEslice slice, int tidx ) {
 		if(slice.getdelEra() != -1)

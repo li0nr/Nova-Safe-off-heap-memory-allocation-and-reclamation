@@ -7,6 +7,7 @@ import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaIllegalAccess;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
+import com.yahoo.oak.UnsafeUtils;
 import com.yahoo.oak.EBR;
 import com.yahoo.oak.Facade_EBR;
 import com.yahoo.oak.EBR.EBRslice;
@@ -77,8 +78,10 @@ public class LL_EBR_noCAS_opt <K,V>{
 	            final Node pred = window.pred;
 	            final Node curr = window.curr;
 	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
-	                Vsr.serialize(value, curr.value.address+curr.value.offset);
-                    mng.clear(tidx);
+	                //Vsr.serialize(value, curr.value.address+curr.value.offset);
+	            	UnsafeUtils.putInt(curr.value.address + curr.value.offset+4,
+	            			~UnsafeUtils.getInt(curr.value.address + curr.value.offset+4));//4 for capacity
+	            	mng.clear(tidx);
 	                return true;
 	            } else {
 	            	EBRslice oKey  = mng.allocate( Ksr.calculateSize(key));

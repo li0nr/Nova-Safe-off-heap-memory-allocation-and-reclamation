@@ -3,7 +3,12 @@ package com.yahoo.oak.LL;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.CopyConstructor;
+import com.yahoo.oak.NativeMemoryAllocator;
+import com.yahoo.oak.NovaManager;
+import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.Buff.Buff.GCReader;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noCAS;
 
 public class HarrisLinkedList <E extends Comparable<? super E>,V extends Comparable<? super V>>{
 
@@ -63,7 +68,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	            final Node<E,V> pred = window.pred;
 	            final Node<E,V> curr = window.curr;
 	            if (curr.key != null && curr.key.compareTo(key) == 0) { 
-	                curr.value = VCC.Copy(value);
+	                VCC.overWrite(curr.value);
 	                return true;
 	            } else {
 	    	    	E myKey = KCC.Copy(key);
@@ -231,4 +236,17 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	        }
 	        return i;
 	    }
+	    
+		public static void main(String[] args) {
+
+		    Buff x =new Buff(4);
+		    x.set(0);
+			HarrisLinkedList<Buff,Buff> LL = new HarrisLinkedList<Buff,Buff>(Buff.CC,Buff.CC);
+
+			LL.add(x,x,0);
+			LL.add(x, x, 0);
+			LL.get(x, Buff.GCR, 0);
+
+
+		}
 }

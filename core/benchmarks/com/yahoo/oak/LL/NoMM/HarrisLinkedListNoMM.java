@@ -3,11 +3,16 @@ package com.yahoo.oak.LL.NoMM;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import com.yahoo.oak.Facade_Nova;
+import com.yahoo.oak.Facade_Slice;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.NovaC;
+import com.yahoo.oak.NovaManager;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.NovaSlice;
+import com.yahoo.oak.UnsafeUtils;
+import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.LL.Nova.LL_Nova_primitive_noCAS;
 
 public class HarrisLinkedListNoMM <K,V>{
 
@@ -71,8 +76,10 @@ public class HarrisLinkedListNoMM <K,V>{
 	            final Node pred = window.pred;
 	            final Node curr = window.curr;
 	            if (curr.key != null && Kcm.compareKeys(curr.key.address + curr.key.offset, key) == 0) {
-	                Vsr.serialize(value,curr.value.address + curr.value.offset);
-	                return true;
+	                //Vsr.serialize(value,curr.value.address + curr.value.offset);
+	            	UnsafeUtils.putInt(curr.value.address + curr.value.offset+4,
+	            			~UnsafeUtils.getInt(curr.value.address + curr.value.offset+4));//4 for capacity
+	            	return true;
 	            } else {
 	    	    	NovaSlice myK = new NovaSlice(0,0,0);
 	    	    	NovaSlice myV = new NovaSlice(0,0,0);
@@ -249,4 +256,18 @@ public class HarrisLinkedListNoMM <K,V>{
 	        	curr = curr.next.getReference();
 	        }
 	    }
+	    
+		public static void main(String[] args) {
+		    final NativeMemoryAllocator allocator = new NativeMemoryAllocator(Integer.MAX_VALUE);
+		    
+		    Buff x =new Buff(4);
+		    x.set(0);
+		    HarrisLinkedListNoMM<Buff, Buff>List = new HarrisLinkedListNoMM<>(allocator,
+					Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+			List.add(x,x,0);
+			List.add(x, x, 0);
+			List.get(x, Buff.DEFAULT_R, 0);
+
+
+		}
 }
