@@ -78,7 +78,7 @@ public class SA_Nova_Primitive_CAS_Magic {
 
 	public <T> boolean set(int index, T obj, int threadIDX)  {
 		if(refrences[index] %2 == 1)
-			Facade_Nova_MagicNumber.AllocateReusedSlice(refrences,ref_base_offset+index*ref_scale,
+			Facade_Nova_MagicNumber.AllocateReusedSlice(refrences,ref_base_offset+index*ref_scale,//reused not correct!
 					refrences[index],srZ.calculateSize(obj),threadIDX);
 		return Facade_Nova_MagicNumber.WriteFull(srZ, obj, refrences[index], threadIDX) != -1 ? true : false; 
 	}

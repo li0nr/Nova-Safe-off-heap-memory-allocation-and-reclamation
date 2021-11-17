@@ -30,7 +30,7 @@ public class Facade_Nova_MagicNumber {
         if(!UNSAFE.compareAndSwapLong(obj, meta_offset, data, facadeNewData))
         	novaManager.free(newslice);
         return facadeNewData;
-	}
+	} //MUST be deleted! not correct 
 	
 	static public <K> long AllocateSlice(K obj, long meta_offset, int size, int idx) {
 		NovaSlice 	newslice = novaManager.getSlice_Magic(size,idx);
@@ -177,10 +177,8 @@ public class Facade_Nova_MagicNumber {
 		int offset 	= _Global_Defs.ExtractOffset	(facade_meta);
 		long address = novaManager.getAdress(block);
 		lambda.serialize(obj,address+NovaManager.HEADER_SIZE+ NovaManager.MAGIC_SIZE+offset);
-    	long x = UnsafeUtils.unsafe.getLong(address+offset); //Magic number changes
-    	long y =UnsafeUtils.unsafe.getLong(address+offset+NovaManager.MAGIC_SIZE); //Magic number changes
 
-		 return facade_meta;
+		return facade_meta;
 	}
 	
 	

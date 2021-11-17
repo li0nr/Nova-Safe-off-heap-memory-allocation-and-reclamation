@@ -28,6 +28,7 @@ declare -A benchmarks=(
   ["offheap-list-key-HE"]="SkipList_OffHeap_HE"
   ["offheap-list-key-NoMM"]="SkipList_OffHeap_NoMM"
   ["offheap-list-key-Nova-object"]="SkipList_OffHeap_object"
+  ["offheap-list-key-Nova-magic"]="SkipList_OffHeap_Magic"
   #["offheap-list-key-Nova-reuse"]="SkipList_OffHeap_reuse"
   #["offheap-list-key-value"]="SkipList_OffHeap_Keys"
 )

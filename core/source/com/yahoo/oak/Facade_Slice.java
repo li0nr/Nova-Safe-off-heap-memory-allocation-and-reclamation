@@ -29,7 +29,7 @@ public class Facade_Slice {
 	
 	static public class Facade_slice extends NovaSlice{
 
-		private int version;
+		public int version;
 		static long version_offset;
 		
 		public Facade_slice() {
