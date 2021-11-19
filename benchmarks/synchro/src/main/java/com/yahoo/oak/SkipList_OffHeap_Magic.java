@@ -44,7 +44,7 @@ public class SkipList_OffHeap_Magic implements CompositionalLL<Buff,Buff> {
     	Buff keyb = Buff.CC.Copy(key);
     	Facade_slice valueOff = skipListMap.put(keyb, Facade_Slice_MagicNumber.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null) {
-    		Facade_Slice.Delete(idx, valueOff); 
+    		Facade_Slice_MagicNumber.Delete(idx, valueOff); 
     		return false;
     	}
     	return true;
