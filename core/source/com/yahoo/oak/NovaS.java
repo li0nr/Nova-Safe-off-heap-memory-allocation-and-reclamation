@@ -6,6 +6,7 @@
 
 package com.yahoo.oak;
 
+import jdk.incubator.foreign.MemorySegment;
 /**
  * An interface to be supported by keys and values provided for Oak's mapping
  */
@@ -15,6 +16,8 @@ public interface NovaS<T> {
     void serialize(T object, long target);
 
     void serialize(long source , long target); //off heap seri
+    
+    void serialize(T object, MemorySegment target); //segment seri
 
     // deserializes the given Oak buffer    
     T deserialize(long source);

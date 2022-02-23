@@ -8,6 +8,9 @@ import com.yahoo.oak.NovaC;
 import com.yahoo.oak.NovaR;
 import com.yahoo.oak.NovaS;
 import com.yahoo.oak.UnsafeUtils;
+import jdk.incubator.foreign.MemorySegment;
+import jdk.incubator.foreign.MemoryAccess;
+
 
 public class Buff  implements Comparable<Buff>{
 	public final int capacity;
@@ -108,6 +111,19 @@ public class Buff  implements Comparable<Buff>{
 		}
 
 		@Override
+		public void serialize(Buff object, MemorySegment output) {
+			int offset = 00 ;
+			MemoryAccess.setIntAtOffset(output, offset , object.capacity);
+			offset += Integer.BYTES;
+			for (int i = 0; i < object.capacity / Integer.BYTES; i++) {
+				int data = object.buffer.getInt(offset);
+				MemoryAccess.setIntAtOffset(output, offset, data);
+				offset += Integer.BYTES;
+			}
+		}
+
+
+		@Override
 		public Buff deserialize(long input) {
 			long inputPos = input;
 			int capacity = UnsafeUtils.getInt(inputPos);
@@ -206,6 +222,24 @@ public class Buff  implements Comparable<Buff>{
 	    }
 		
 	};
+	
+	public interface MemSegmentReader<T> extends Function<MemorySegment,T> {}
+	
+	public static final MemSegmentReader<Integer> MSR = new MemSegmentReader<Integer>() {
+		public Integer apply(MemorySegment seg) {
+			int offset  = 0;
+			int capacity = MemoryAccess.getIntAtOffset(seg, offset);
+			offset += Integer.BYTES;
+	    	int accumulator = 0;
+	    	while( capacity > 0) {
+				accumulator +=  MemoryAccess.getIntAtOffset(seg, offset);
+				offset += Integer.BYTES;
+		    	capacity -= Integer.BYTES;
+	    	}
+			return accumulator;
+		}
+	};
+	
 	public interface GCReader<T> extends Function<Buff,T> {}
 	
 	public static final GCReader GCR= new GCReader<Integer>() {

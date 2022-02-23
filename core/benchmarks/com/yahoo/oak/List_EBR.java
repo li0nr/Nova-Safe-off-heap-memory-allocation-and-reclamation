@@ -2,8 +2,6 @@ package com.yahoo.oak;
 
 import java.util.Arrays;
 
-import org.openjdk.jmh.runner.RunnerException;
-
 import com.yahoo.oak.EBR;
 import com.yahoo.oak.EBR_interface;
 import com.yahoo.oak.NativeMemoryAllocator;

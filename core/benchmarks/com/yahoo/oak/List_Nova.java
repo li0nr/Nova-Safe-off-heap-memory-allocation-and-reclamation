@@ -3,6 +3,8 @@ package com.yahoo.oak;
 
 import java.util.Arrays;
 
+import jdk.incubator.foreign.MemorySegment;
+
 
 public class List_Nova implements ListInterface{
 
@@ -116,6 +118,12 @@ public class List_Nova implements ListInterface{
 		@Override
 		public int calculateSize(Long object) {
 			return 8;
+		}
+
+		@Override
+		public void serialize(Long object, MemorySegment target) {
+			// TODO Auto-generated method stub
+			
 		}
 	};
 	

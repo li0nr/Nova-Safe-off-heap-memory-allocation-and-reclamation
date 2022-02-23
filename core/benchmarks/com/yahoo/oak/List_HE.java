@@ -2,8 +2,6 @@ package com.yahoo.oak;
 
 import java.util.Arrays;
 
-import org.openjdk.jmh.runner.RunnerException;
-
 import com.yahoo.oak.HazardEras;
 import com.yahoo.oak.NativeMemoryAllocator;
 import com.yahoo.oak.UnsafeUtils;
