@@ -1,7 +1,6 @@
 package com.yahoo.oak;
 
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import sun.misc.Unsafe;
@@ -60,8 +59,7 @@ public class Facade_Slice {
 			return false;
 	
 		NovaSlice 	newslice = novaManager.getSlice(size,idx);
-		S.offset  =	newslice.offset;
-		S.blockID =	newslice.blockID;
+		S.copyFrom(newslice);
 		S.address = newslice.address;
 		S.length  = newslice.length;
 		int NewVer= (int) newslice.getVersion() &0xFFFFFF;

@@ -2,7 +2,11 @@ package com.yahoo.oak;
 
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
+
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicLongArray;
+
 import jdk.incubator.foreign.MemorySegment;
 
 
@@ -15,9 +19,6 @@ public class SkipList_OffHeap_MemSeg implements CompositionalLL<Buff,Buff> {
     private static long OAK_MAX_OFF_MEMORY = 256 * GB;
 
     public SkipList_OffHeap_MemSeg(long MemCap) {
-    	Module module = com.yahoo.oak.SkipList_OffHeap_MemSeg.class.getModule();
-
-    	String moduleName = module.getName();
 
     	if(MemCap != -1)
     		OAK_MAX_OFF_MEMORY = MemCap;
@@ -43,8 +44,7 @@ public class SkipList_OffHeap_MemSeg implements CompositionalLL<Buff,Buff> {
 
     @Override
     public  boolean put(final Buff key,final Buff value, int idx) {
-    	MemorySegment s = null;
-    	assert allocator.allocate(s, Buff.DEFAULT_SERIALIZER.calculateSize(value));
+    	MemorySegment s = allocator.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value,s);
     	skipListMap.put(key,s);
     	MemorySegment valueOff = skipListMap.put(key, s);
@@ -56,14 +56,14 @@ public class SkipList_OffHeap_MemSeg implements CompositionalLL<Buff,Buff> {
     
     @Override
     public  boolean Fill(final Buff key,final Buff value, int idx) {    
-    	MemorySegment s = null;
-    	allocator.allocate(s, Buff.DEFAULT_SERIALIZER.calculateSize(value));
+    	MemorySegment s = allocator.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
+
     	Buff.DEFAULT_SERIALIZER.serialize(value,s);
     	skipListMap.put(key,s);
     	MemorySegment valueOff = skipListMap.put(key, s);
     	if(valueOff != null)
     		allocator.free(s);
-    	return valueOff== null ? true : false;
+    	return valueOff == null ? true : false;
     	
     }
 

@@ -1,4 +1,4 @@
-package com.yahoo.oak;
+package com.yahoo.oak.NotUsed;
 
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.SimpleArray.SA_Nova_CAS;

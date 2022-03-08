@@ -37,7 +37,7 @@ class BlockSegment {
     }
 
     // Block manages its linear allocation. Thread safe.
-    boolean allocate(MemorySegment s, int size) {
+    MemorySegment allocate(int size) {
         int now = allocated.getAndAdd(size );
         if (now + size  > this.capacity) {
             allocated.getAndAdd(-size );
@@ -45,8 +45,7 @@ class BlockSegment {
         }
         ResourceScope scope = ResourceScope.newSharedScope();
         MemoryAddress MemAddress = this.seg.address().addOffset(now);
-        s = MemAddress.asSegment(size,scope);
-        return true;
+        return MemAddress.asSegment(size,scope);
     }
 
 
@@ -73,6 +72,10 @@ class BlockSegment {
         return capacity;
     }
 
+    public MemorySegment getSegment() {
+    	return this.seg;
+    }
+    
     public long getAddress() {
         throw new RuntimeException();
     }
