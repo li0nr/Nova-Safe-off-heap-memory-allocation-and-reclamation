@@ -32,8 +32,8 @@ public class FillWorker extends BenchWorker {
 
     public FillWorker(
         CompositionalLL bench,
-        long size,
-        long range
+        long range,
+        long size
     ) {
         super(bench);
         this.range = range;
@@ -55,7 +55,6 @@ public class FillWorker extends BenchWorker {
     }
 
     public void fill() {
-        long operations = 0;
         final Random localRand =  new Random();
     	int v = 0;
 

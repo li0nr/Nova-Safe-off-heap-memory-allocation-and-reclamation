@@ -29,6 +29,4 @@ abstract public interface CompositionalLL<K,V> {
     
     public void print();
   
-    public default  boolean FillParallel(final int size, final int keysize, final int valsize, final int range) 
-    {throw new IllegalAccessError();};
 }
