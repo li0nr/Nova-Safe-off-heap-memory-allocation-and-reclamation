@@ -203,7 +203,7 @@ for scenario in ${test_scenarios[*]}; do
           echo "#### Quiting..."
           exit 1
         fi
-		benchSize="655536"
+		benchSize="65536"
 		
 		javaHeap=""
 		javaOffHeap=""
