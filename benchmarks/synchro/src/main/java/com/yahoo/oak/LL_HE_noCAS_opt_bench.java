@@ -2,6 +2,7 @@ package com.yahoo.oak;
 
 
 import com.yahoo.oak.Buff.Buff;
+import com.yahoo.oak.LL.EBR.LL_EBR_noCAS_opt;
 import com.yahoo.oak.LL.HE.LL_HE_noCAS_opt;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
@@ -38,7 +39,14 @@ public class LL_HE_noCAS_opt_bench implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
+    	LL = null;
+    	allocator.close();
+    	allocator = null;
     	
+    	allocator = new NativeMemoryAllocator(Parameters.offheap);
+    	LL = new LL_HE_noCAS_opt<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
+    			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+    	System.gc();
     }
     
     public void print() {

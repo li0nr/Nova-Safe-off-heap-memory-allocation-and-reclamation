@@ -36,7 +36,9 @@ public class LL_GC implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
-
+    	LL = null;
+    	System.gc();
+    	LL = new HarrisLinkedList<Buff,Buff>(Buff.CC,Buff.CC);
     }
     
     public void print() {
