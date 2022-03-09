@@ -47,6 +47,7 @@ public class LL_Nova_Magic_noCAS_bench implements CompositionalLL<Buff,Buff>{
     	allocator = null;
     	
     	allocator = new NativeMemoryAllocator(Parameters.offheap);
+    	NovaManager mng = new NovaManager(allocator);
     	LL = new LL_Nova_primitive_noCAS_Magic<Buff,Buff>(mng, 
     			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	System.gc();

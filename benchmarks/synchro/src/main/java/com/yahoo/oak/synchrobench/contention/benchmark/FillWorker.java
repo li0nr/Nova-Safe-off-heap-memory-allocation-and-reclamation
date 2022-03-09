@@ -29,15 +29,19 @@ public class FillWorker extends BenchWorker {
      * The number of operation performed by this worker.
      */
     long operations = 0;
+    
+    int index = -1;
 
     public FillWorker(
         CompositionalLL bench,
         long range,
-        long size
+        long size,
+        int index
     ) {
         super(bench);
         this.range = range;
         this.size = size;
+        this.index = index;
     }
 
     public long getOperations() {
@@ -66,7 +70,7 @@ public class FillWorker extends BenchWorker {
             Buff val = new Buff(Parameters.confValSize);
             val.set(v+1);
 
-            if (bench.putIfAbsent(key, val,0)) {
+            if (bench.putIfAbsent(key, val, index)) {
                 i++;
             }
             // counts all the putIfAbsent operations, not only the successful ones

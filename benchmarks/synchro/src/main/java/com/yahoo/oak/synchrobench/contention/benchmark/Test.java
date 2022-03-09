@@ -127,7 +127,7 @@ public class Test {
         final long reminder = size % numWorkers;
         for (int i = 0; i < numWorkers; i++) {
             final long sz = i < reminder ? sizePerThread + 1 : sizePerThread;
-            fillWorkers[i] = new FillWorker(LL,range, sz);
+            fillWorkers[i] = new FillWorker(LL,range, sz, i);
             fillThreads[i] = new Thread(fillWorkers[i]);
         }
         final long reportGranMS = 200;
