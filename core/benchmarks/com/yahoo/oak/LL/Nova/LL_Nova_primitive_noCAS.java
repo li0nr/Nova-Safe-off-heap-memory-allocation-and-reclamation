@@ -288,7 +288,7 @@ public class LL_Nova_primitive_noCAS<K,V> {
     }
     
     
-    public boolean Fill(K key, V value,  int idx) {
+    public boolean putIfAbsent(K key, V value,  int idx) {
         CmpFail: while(true)
         try{
         	while (true) {

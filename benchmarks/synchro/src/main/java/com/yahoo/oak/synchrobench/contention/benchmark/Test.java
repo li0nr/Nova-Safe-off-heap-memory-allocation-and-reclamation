@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.junit.runners.parameterized.ParametersRunnerFactory;
 
@@ -30,7 +31,6 @@ import org.junit.runners.parameterized.ParametersRunnerFactory;
 public class Test {
 
     public enum Type {
-        BST,
         LL,
         SA
     }
@@ -42,7 +42,6 @@ public class Test {
     /**
      * The array of runnable thread codes
      */
-    private ThreadLoop[] threadLoops_BST;
     private ThreadLoopLL[] threadLoops_LL;
     private ThreadLoopSA[] threadLoops_SA;
 
@@ -97,7 +96,6 @@ public class Test {
      * The instance of the benchmark
      */
     private Type benchType = null;
-    private CompositionalBST<Buff, Buff> BST = null;
     private CompositionalLL<Buff,Buff> LL = null;
     private CompositionalSA<Buff> SA = null;
 
@@ -120,66 +118,61 @@ public class Test {
         }
     };
 
-    public long fill(final int range, final long size) {
-        if (benchType != Type.LL && benchType != Type.BST && benchType != Type.SA) {
-            System.err.println("Wrong benchmark type");
-            System.exit(0);
+    public void fill(final long range, final long size) throws InterruptedException {
+        // Non-random key distribution can only be initialized from one thread.
+        final int numWorkers = Parameters.isRandomKeyDistribution() ? Parameters.confNumFillThreads : 1;
+        FillWorker[] fillWorkers = new FillWorker[numWorkers];
+        Thread[] fillThreads = new Thread[numWorkers];
+        final long sizePerThread = size / numWorkers;
+        final long reminder = size % numWorkers;
+        for (int i = 0; i < numWorkers; i++) {
+            final long sz = i < reminder ? sizePerThread + 1 : sizePerThread;
+            fillWorkers[i] = new FillWorker(LL,range, sz);
+            fillThreads[i] = new Thread(fillWorkers[i]);
+        }
+        final long reportGranMS = 200;
+        final boolean isConsole = System.console() != null;
+
+        System.out.print("Start filling data...");
+        if (!isConsole) {
+            System.out.println();
         }
 
-        long operations = 0;
-        final Random localRand = S_RANDOM.get();
-        int v = 0;
-
-        long i = size;
-        if(benchType == Type.LL) {
-        	i -=LL.Size();
-        }
-        
-        if(benchType == Type.SA) {
-        	SA.ParallelFill((int)size);
-        	return size;
-        }
-        
-        if(benchType == Type.LL && Parameters.parallelFill)  {
-        	LL.FillParallel((int)size, Parameters.confKeySize, Parameters.confValSize, range);
-        	return size;
+        final long startTime = System.currentTimeMillis();
+        for (Thread thread : fillThreads) {
+            thread.start();
         }
 
-        for ( ;i > 0; ) {
-        	
-            v = (Parameters.confKeyDistribution == Parameters.KeyDist.INCREASING)
-                    ? v + 1 : localRand.nextInt(range);
-            Buff key = new Buff(Parameters.confKeySize);
-            key.set(v);
-            Buff val = new Buff(Parameters.confValSize);
-            val.set(v);
-            
-			switch(benchType) {
-			case BST:
-
-	            if (BST.Fill(key, val,0) == true) {
-	                i--;
-	            }   
-	            break;
-			case LL:
-				if (LL.Fill(key,val,0) == true) {
-	                i--;
-	            } 
-	            break;
-			case SA:
-	            if (SA.fill(key, 0) == true) {
-	                i--;
-	            } 
-	            break;
-			default:
-				System.err.println("Wrong benchmark type");
-				System.exit(0);
-				
-			}           
-            // counts all the putIfAbsent operations, not only the successful ones
-            operations++;
+        try {
+            if (isConsole) {
+                while ((LL.size() < size) && Stream.of(fillThreads).anyMatch(Thread::isAlive)) {
+                    long operations = Stream.of(fillWorkers).mapToLong(FillWorker::getOperations).sum();
+                    final long curTime = System.currentTimeMillis();
+                    double runTime = ((double) (curTime - startTime)) / 1000.0;
+                    System.out.printf(
+                        "\rFilling data: %5.0f%% -- %,6.2f (seconds) - %,d operations",
+                        (float) LL.size() * 100 / (float) size,
+                        runTime,
+                        operations
+                    );
+                    Thread.sleep(reportGranMS);
+                }
+            }
+        } catch (InterruptedException e) {
+            System.out.println("\nFilling was interrupted. Waiting to finish.");
+        } finally {
+            for (Thread t : fillThreads) {
+                t.join();
+            }
         }
-        return operations;
+        final long endTime = System.currentTimeMillis();
+        double initTime = ((double) (endTime - startTime)) / 1000.0;
+        long operations = Stream.of(fillWorkers).mapToLong(FillWorker::getOperations).sum();
+
+        if (isConsole) {
+            System.out.print("\r");
+        }
+        System.out.printf("Initialization complete in %,.4f (seconds) - %,d operations%n", initTime, operations);
     }
 
 
@@ -211,10 +204,7 @@ public class Test {
                 cArg[0] = Integer.TYPE;
                 c = benchClass.getDeclaredConstructor(cArg);
         	}
-            if (CompositionalBST.class.isAssignableFrom(benchClass)) {
-                BST = (CompositionalBST<Buff, Buff>) c.newInstance();
-                benchType = Type.BST;
-            } else if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
+        	if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
             	if(Parameters.offheap != -1)
                 	LL = (CompositionalLL<Buff,Buff>) c.newInstance(Parameters.offheap);
             	else
@@ -226,7 +216,7 @@ public class Test {
             }
 
         } catch (Exception e) {
-            System.err.println("Cannot find benchmark class: " + benchName);
+            e.printStackTrace();
             System.exit(-1);
         }
     }
@@ -239,14 +229,6 @@ public class Test {
      */
     private void initThreads() throws InterruptedException {
         switch (benchType) {
-            case BST:
-            	threadLoops_BST = new ThreadLoop[Parameters.confNumThreads];
-                threads = new Thread[Parameters.confNumThreads];
-                for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
-                	threadLoops_BST[threadNum] = new ThreadLoop(threadNum, BST, methods);
-                    threads[threadNum] = new Thread(threadLoops_BST[threadNum]);
-                }
-                break;
             case LL:
             	threadLoops_LL = new ThreadLoopLL[Parameters.confNumThreads];
                 threads = new Thread[Parameters.confNumThreads];
@@ -294,9 +276,6 @@ public class Test {
         float allocated = Float.NaN;
         try {
         	switch (benchType) {
-			case BST:
-	        	allocated = ( BST).allocated();
-				break;
 			case LL:
 	        	allocated = ( LL).allocated();
 				break;
@@ -325,9 +304,8 @@ public class Test {
             throws InterruptedException {
         printHeapStats("Before initial fill");
         long startTime = System.currentTimeMillis();
-        long count = fill(Parameters.confRange, Parameters.confSize);
+        fill(Parameters.confRange, Parameters.confSize);
         double initTime = ((double) (System.currentTimeMillis() - startTime)) / 1000.0;
-        System.out.println("Initialization complete in (s) " + initTime + " operations " + count);
         printHeapStats("After initial fill, before benchmark");
 
 //        Thread.sleep(5000);
@@ -351,11 +329,6 @@ public class Test {
                 Thread.sleep(milliseconds);
         } finally {
         	switch (benchType) {
-			case BST:
-        		for (ThreadLoop threadLoop : threadLoops_BST) {
-        			threadLoop.stopThread();
-        			}
-				break;
 			case LL:
         		for (ThreadLoopLL threadLoop : threadLoops_LL) {
         			threadLoop.stopThread();
@@ -383,9 +356,6 @@ public class Test {
 
     public void clear() {
         switch (benchType) {
-            case BST:
-            	BST.clear();
-                break;
             case LL:
             	LL.clear();
             	break;
@@ -433,12 +403,6 @@ public class Test {
                 e.printStackTrace();
             }
             test.execute(Parameters.confNumMilliseconds, false);
-
-            if (test.BST instanceof MaintenanceAlg) {
-                ((MaintenanceAlg) test.BST).stopMaintenance();
-                test.structMods += ((MaintenanceAlg) test.BST)
-                        .getStructMods();
-            }
 
             test.printBasicStats();
             if (Parameters.confDetailedStats) {
@@ -514,6 +478,9 @@ public class Test {
                     case "--range":
                     case "-r":
                         Parameters.confRange = Integer.parseInt(args[argNumber++]);
+                        break;
+                    case "--fill-threads":
+                        Parameters.confNumFillThreads = Integer.parseInt(args[argNumber++]);
                         break;
                     case "--Warmup":
                     case "-W":
@@ -655,23 +622,6 @@ public class Test {
     private void printBasicStats() {
         for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
         	switch (benchType) {
-			case BST:
-	        	numAdd += threadLoops_BST[threadNum].numAdd;
-	            numRemove += threadLoops_BST[threadNum].numRemove;
-	            numContains += threadLoops_BST[threadNum].numContains;
-
-	            
-	            numSucAdd += threadLoops_BST[threadNum].numSuccAdd;
-	            numSucRemove += threadLoops_BST[threadNum].numSucRemove;
-	            numSucContains += threadLoops_BST[threadNum].numSucContains;
-
-//	                    numAddAll += threadLoops_BST[threadNum].numAddAll;
-//	                    numRemoveAll += threadLoops_BST[threadNum].numRemoveAll;
-//	                    numSize += threadLoops_BST[threadNum].numSize;
-	            failures += threadLoops_BST[threadNum].failures;
-	            total += threadLoops_BST[threadNum].total;
-//	                    aborts += threadLoops_BST[threadNum].aborts;
-				break;
 			case LL:
 	        	numAdd += threadLoops_LL[threadNum].numAdd;
 	            numRemove += threadLoops_LL[threadNum].numRemove;
@@ -793,20 +743,6 @@ public class Test {
 
         for (short threadNum = 0; threadNum < Parameters.confNumThreads; threadNum++) {
         	switch (benchType) {
-			case BST:
-	        	threadLoops_BST[threadNum].numAdd = 0;
-	            threadLoops_BST[threadNum].numRemove = 0;
-	            threadLoops_BST[threadNum].numAddAll = 0;
-	            threadLoops_BST[threadNum].numRemoveAll = 0;
-	            threadLoops_BST[threadNum].numSize = 0;
-	            threadLoops_BST[threadNum].numContains = 0;
-	            threadLoops_BST[threadNum].failures = 0;
-	            threadLoops_BST[threadNum].total = 0;
-	            threadLoops_BST[threadNum].aborts = 0;
-	            threadLoops_BST[threadNum].numSuccAdd = 0;
-	            threadLoops_BST[threadNum].numSucContains = 0;
-	            threadLoops_BST[threadNum].numSucRemove = 0;
-				break;
 			case LL:
 	        	threadLoops_LL[threadNum].numAdd = 0;
 	        	threadLoops_LL[threadNum].numRemove = 0;

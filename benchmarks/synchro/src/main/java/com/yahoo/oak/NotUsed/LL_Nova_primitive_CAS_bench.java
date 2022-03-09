@@ -25,7 +25,7 @@ public class LL_Nova_primitive_CAS_bench implements CompositionalLL<Buff,Buff>{
     	return LL.add(key,value, idx);
     }
     
-    public  boolean Fill(final Buff key,final Buff value,  int idx) {
+    public  boolean putIfAbsent(final Buff key,final Buff value,  int idx) {
     	return LL.add(key,value, idx);
     }
     
@@ -44,7 +44,7 @@ public class LL_Nova_primitive_CAS_bench implements CompositionalLL<Buff,Buff>{
     			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     }
     
-    public int Size() {
+    public int size() {
     	return 0;
     }
     

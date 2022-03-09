@@ -44,7 +44,7 @@ public class SkipList_OffHeap_NoMM implements CompositionalLL<Buff,Buff> {
     }
     
     @Override
-    public  boolean Fill(final Buff key,final Buff value, int idx) {    
+    public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    
     	NovaSlice offValue = new NovaSlice(0, 0, 0);
 		allocator.allocate(offValue, Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
@@ -92,7 +92,7 @@ public class SkipList_OffHeap_NoMM implements CompositionalLL<Buff,Buff> {
     }
 
     @Override
-    public int Size() {
+    public int size() {
         return skipListMap.size();
     }
 

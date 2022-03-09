@@ -71,11 +71,10 @@ public class SkipList_OffHeap_Magic implements CompositionalLL<Buff,Buff> {
     }
     
     @Override
-    public  boolean Fill(final Buff key,final Buff value, int idx) {    
+    public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    
     	Facade_slice offValue = new Facade_slice();
     	Facade_Slice_MagicNumber.AllocateSlice(offValue, Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
-    	Buff keyb = Buff.CC.Copy(key);
-    	Facade_slice valueOff = skipListMap.put(keyb, Facade_Slice_MagicNumber.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
+    	Facade_slice valueOff = skipListMap.put(key, Facade_Slice_MagicNumber.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null)
     		Facade_Slice_MagicNumber.DeletePrivate(idx, valueOff); 
     	return valueOff== null ? true : false;
@@ -102,7 +101,7 @@ public class SkipList_OffHeap_Magic implements CompositionalLL<Buff,Buff> {
     }
 
     @Override
-    public int Size() {
+    public int size() {
         return skipListMap.size();
     }
 

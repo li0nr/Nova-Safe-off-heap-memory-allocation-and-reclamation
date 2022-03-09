@@ -27,8 +27,8 @@ public class LL_EBR_noCAS_opt_bench implements CompositionalLL<Buff,Buff>{
     	return LL.remove(key, idx);
     }
     
-    public  boolean Fill(final Buff key,final Buff value,  int idx) {
-    	return LL.Fill(key,value, idx);
+    public  boolean putIfAbsent(final Buff key,final Buff value,  int idx) {
+    	return LL.putIfAbsentOak(key,value, idx);
     }
     
     public long allocated() {
@@ -39,7 +39,7 @@ public class LL_EBR_noCAS_opt_bench implements CompositionalLL<Buff,Buff>{
 
     }
     
-    public int Size() {
+    public int size() {
     	return LL.Size();
     }
     

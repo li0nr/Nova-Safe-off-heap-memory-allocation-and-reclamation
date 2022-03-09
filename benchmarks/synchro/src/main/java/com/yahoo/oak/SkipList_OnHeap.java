@@ -30,10 +30,8 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     }
     
     @Override
-    public  boolean Fill(final Buff key,final Buff value, int idx) {    	
-    	Buff keyb = Buff.CC.Copy(key);
-    	Buff valueb = Buff.CC.Copy(value);
-    	return skipListMap.put(keyb,valueb) == null ? true : false;
+    public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    	
+    	return skipListMap.put(key,value) == null ? true : false;
     }
     
     @Override
@@ -51,24 +49,6 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     		return true;
     }
     
-    public  boolean FillParallel(int sizeInMillions, int keysize, int valsize, int range) {    	
-    	ArrayList<Thread> threads = new ArrayList<>();
-    	int NUM_THREADS = sizeInMillions/1_000_000;;
-	    for (int i = 0; i < NUM_THREADS; i++) {
-	    	threads.add(new Thread(new FillerThread(i, skipListMap, keysize, valsize, range)));
-	    	threads.get(i).start();
-	    	}	
-	    for (Thread thread : threads) {
-	        try {
-				thread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-	    }
-		return true;
-    }
-
-
     @Override
     public  boolean remove(final Buff key, int idx) {
     	Buff val = skipListMap.remove(key);
@@ -85,7 +65,7 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     }
 
     @Override
-    public int Size() {
+    public int size() {
         return skipListMap.size();
     }
 

@@ -18,6 +18,7 @@ public class Parameters {
         INCREASING
     }
 
+    public static int confNumFillThreads = 32;
     public static int confNumThreads = 1;
     public static int confNumMilliseconds = 5000;
     public static int confNumWrites = 0;
@@ -45,6 +46,10 @@ public class Parameters {
 
     public static KeyDist confKeyDistribution = KeyDist.RANDOM;
 
+    public static boolean isRandomKeyDistribution() {
+        return confKeyDistribution == KeyDist.RANDOM;
+    }
+    
     public static String confBenchClassName = "com.yahoo.oak.BST_Nova_Synch";
 
     public static String asString() {

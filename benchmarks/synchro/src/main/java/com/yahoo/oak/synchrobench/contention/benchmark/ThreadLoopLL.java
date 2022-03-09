@@ -120,7 +120,7 @@ public class ThreadLoopLL implements Runnable {
         	newInt = (Parameters.confKeyDistribution == Parameters.KeyDist.RANDOM) ?
                     rand.nextInt(Parameters.confRange) : newInt + 1;
         	key.set(newInt);
-        	val.set(newInt);
+        	val.set(newInt+1);
 
             int coin = rand.nextInt(1000);
             if(coin < cdf[0]) { //-a deleting is good?

@@ -19,8 +19,8 @@ public class LL_GC implements CompositionalLL<Buff,Buff>{
     	return LL.add(key,value, idx);
     }
     
-    public  boolean Fill(final Buff key,final Buff value,  int idx) {
-    	return LL.Fill(key,value, idx);
+    public  boolean putIfAbsent(final Buff key,final Buff value,  int idx) {
+    	return LL.putIfAbsentOak(key,value, idx);
     }
     
     public  boolean remove(final Buff key, int idx) {
@@ -31,7 +31,7 @@ public class LL_GC implements CompositionalLL<Buff,Buff>{
     	return 0;
     }
     
-    public int Size() {
+    public int size() {
     	return LL.Size();
     }
     

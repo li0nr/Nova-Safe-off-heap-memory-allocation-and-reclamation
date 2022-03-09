@@ -55,7 +55,7 @@ public class SkipList_OffHeap_MemSeg implements CompositionalLL<Buff,Buff> {
     }
     
     @Override
-    public  boolean Fill(final Buff key,final Buff value, int idx) {    
+    public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    
     	MemorySegment s = allocator.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
 
     	Buff.DEFAULT_SERIALIZER.serialize(value,s);
@@ -91,7 +91,7 @@ public class SkipList_OffHeap_MemSeg implements CompositionalLL<Buff,Buff> {
     }
 
     @Override
-    public int Size() {
+    public int size() {
         return skipListMap.size();
     }
 

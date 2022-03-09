@@ -189,7 +189,7 @@ public class HarrisLinkedList <E extends Comparable<? super E>,V extends Compara
 	        return flag;
 	    }
 	    
-	    public boolean Fill(E key,V value, int tidx) {	
+	    public boolean putIfAbsentOak(E key,V value, int tidx) {	
 	        while (true) {
 	            final Window<E,V> window = find(key, tidx);
 	            // On Harris paper, pred is named left_node and curr is right_node

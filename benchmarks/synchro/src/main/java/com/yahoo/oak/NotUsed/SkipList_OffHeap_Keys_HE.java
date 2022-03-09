@@ -98,7 +98,7 @@ public class SkipList_OffHeap_Keys_HE implements CompositionalLL<Buff,Buff> {
     }
     
     @Override
-    public  boolean Fill(final Buff key,final Buff value, int idx) {
+    public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {
 
     	HEslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	HEslice offKey = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(key));
@@ -144,7 +144,7 @@ public class SkipList_OffHeap_Keys_HE implements CompositionalLL<Buff,Buff> {
     }
 
     @Override
-    public int Size() {
+    public int size() {
         return skipListMap.size();
     }
 
