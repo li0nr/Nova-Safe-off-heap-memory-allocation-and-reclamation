@@ -7,11 +7,11 @@ import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class LL_NoMM_Synch implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.offheap);
 	HarrisLinkedListNoMM<Buff,Buff> LL = new HarrisLinkedListNoMM<Buff,Buff>(allocator,
 			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
-	public LL_NoMM_Synch(){
+	public LL_NoMM_Synch(long MemCap){
 		
 	}
 	public Integer containsKey(final Buff key, int tidx) {

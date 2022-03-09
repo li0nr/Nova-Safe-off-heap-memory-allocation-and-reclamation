@@ -7,12 +7,12 @@ import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class LL_Nova_primitive_noCAS_bench implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.offheap);
 	NovaManager mng = new NovaManager(allocator);
 	LL_Nova_primitive_noCAS<Buff,Buff> LL = new LL_Nova_primitive_noCAS<Buff,Buff>(mng, 
 			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
-	public LL_Nova_primitive_noCAS_bench(){
+	public LL_Nova_primitive_noCAS_bench(long MemCap){
 		
 	}
 	public Integer containsKey(final Buff key, int tidx) {

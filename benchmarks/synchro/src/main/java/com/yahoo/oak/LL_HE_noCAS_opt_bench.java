@@ -8,11 +8,11 @@ import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class LL_HE_noCAS_opt_bench implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.offheap);
 	LL_HE_noCAS_opt<Buff,Buff> LL = new LL_HE_noCAS_opt<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
 			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
-	public LL_HE_noCAS_opt_bench(){
+	public LL_HE_noCAS_opt_bench(long MemCap){
 		
 	}
 	public Integer containsKey(final Buff key, int tidx) {

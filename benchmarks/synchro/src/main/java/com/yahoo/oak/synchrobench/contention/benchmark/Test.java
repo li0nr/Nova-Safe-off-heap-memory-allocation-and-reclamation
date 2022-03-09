@@ -207,8 +207,6 @@ public class Test {
         	if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
             	if(Parameters.offheap != -1)
                 	LL = (CompositionalLL<Buff,Buff>) c.newInstance(Parameters.offheap);
-            	else
-            		LL = (CompositionalLL<Buff,Buff>) c.newInstance();
     			benchType = Type.LL;
             } else if (CompositionalSA.class.isAssignableFrom((Class<?>) benchClass)) {
             	SA = (CompositionalSA<Buff>) c.newInstance(Parameters.confSize);

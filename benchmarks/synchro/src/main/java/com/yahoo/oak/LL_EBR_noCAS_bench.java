@@ -8,13 +8,12 @@ import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
 public class LL_EBR_noCAS_bench implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.MAXSIZE);
+	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.offheap);
 	LL_EBR_noCAS<Buff,Buff> LL = new LL_EBR_noCAS<Buff,Buff>(allocator, Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER
 			,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
-	public LL_EBR_noCAS_bench(){
-		
-	}
+	public LL_EBR_noCAS_bench(long MemCap){		}
+	
 	public Integer containsKey(final Buff key, int tidx) {
 		return LL.get(key, Buff.DEFAULT_R, tidx);
 	}

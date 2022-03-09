@@ -8,7 +8,7 @@ public class LL_GC implements CompositionalLL<Buff,Buff>{
 
 	HarrisLinkedList<Buff,Buff> LL = new HarrisLinkedList<Buff,Buff>(Buff.CC,Buff.CC);
 	
-	public LL_GC(){
+	public LL_GC(long MemCap){
 		
 	}
 	public Integer containsKey(final Buff key, int tidx) {
