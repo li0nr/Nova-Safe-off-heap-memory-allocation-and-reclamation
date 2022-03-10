@@ -41,7 +41,7 @@ public class NovaManager implements MemoryManager {
         for (int i = _Global_Defs.CACHE_PADDING; i < _Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING* 2; i+=_Global_Defs.CACHE_PADDING) {
             this.releaseLists[i]	= new ArrayList<>(_Global_Defs.RELEASE_LIST_LIMIT);
             this.Slices		 [i]	= new NovaSlice(INVALID_SLICE,INVALID_SLICE,INVALID_SLICE);
-            this.TAP.set(i+IDENTRY, -1); 
+            this.TAP.set(i+REFENTRY, 0); 
             }     
         globalNovaNumber = new AtomicInteger(1);
     }
@@ -94,9 +94,11 @@ public class NovaManager implements MemoryManager {
         if (myReleaseList.size() >= _Global_Defs.RELEASE_LIST_LIMIT) {
         	
             ArrayList<Long> HostageSlices=new ArrayList<>();
-            for (int i = _Global_Defs.CACHE_PADDING; i < 2*_Global_Defs.CACHE_PADDING*_Global_Defs.MAX_THREADS; i= i +_Global_Defs.CACHE_PADDING ) {
-        		if(TAP.get(i+IDENTRY) != -1)
-        			HostageSlices.add(TAP.get(i+REFENTRY));
+            for (int i = _Global_Defs.CACHE_PADDING; 
+            		 i < _Global_Defs.CACHE_PADDING*_Global_Defs.MAX_THREADS*2; i= i +_Global_Defs.CACHE_PADDING ) {
+        			long refEntry = TAP.get(i+REFENTRY);
+        			if (refEntry != 0)
+        				HostageSlices.add(refEntry);
         		}
         	globalNovaNumber.incrementAndGet();
 
@@ -143,13 +145,13 @@ public class NovaManager implements MemoryManager {
 
   public  void setTap(long ref,int idx) {
 	int i= idx%_Global_Defs.MAX_THREADS;
-	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+IDENTRY, idx);
+	//TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+IDENTRY, idx);
 	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+REFENTRY, ref);
   }
     
   public  void UnsetTap(int idx) {
 	int i= idx%_Global_Defs.MAX_THREADS;
-	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+IDENTRY, -1);
+	TAP.set(_Global_Defs.CACHE_PADDING*(i+1)+REFENTRY, 0);
   }
 
     public long getAdress(int blockID) {

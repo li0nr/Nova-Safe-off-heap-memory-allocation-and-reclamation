@@ -11,6 +11,7 @@ public class _Global_Defs {
 		long Ref=(block &0xFFFFF);
 		Ref=Ref<<30; //TODO bigger block bigger offset 
 		Ref=Ref|(offset& 0x3FFFFFFF);
+		assert Ref != 0;
 		return Ref;
 	}
 	static int ExtractVer_Del(long toExtract) {

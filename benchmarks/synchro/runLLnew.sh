@@ -31,7 +31,7 @@ declare -A benchmarks=(
   ["LL_NoMM"]="LL_NoMM_Synch"
   ["LL_GC"]="LL_GC"
   ["LL_ZGC"]="LL_GC"
-  ["LL_Nova_ZGC"]="LL_Nova_noCAS_bench"
+  ["LL_Nova_ZGC"]="LL_Nova_primitive_noCAS_bench"
 
 
 )

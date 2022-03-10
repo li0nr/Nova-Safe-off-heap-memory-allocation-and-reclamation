@@ -14,7 +14,7 @@ function ctrl_c() {
 declare -A scenarios=(
   ["25Put25Delete50Get"]="-a 25 -u 50 -s 50"
   ["50Put50Delete00Get"]="-a 50 -u 100 -s 0"
-  ["05Put05Delete90Get"]="-a 5 -u 10 -s 90"
+  ["05Put05Delete50Get"]="-a 5 -u 10 -s 50"
   ["40Put50Get"]="-u 50 -s 100 -oW"
 
 
@@ -22,12 +22,14 @@ declare -A scenarios=(
 )
 
 declare -A benchmarks=(
-  ["skip-list"]="SkipList_OnHeap"
+  ["skip-list_GC"]="SkipList_OnHeap"
+  ["skip-list_ZGC"]="SkipList_OnHeap"
+
   #["offheap-list-key"]="SkipList_OffHeap"
   ["offheap-list-key-EBR"]="SkipList_OffHeap_EBR"
   ["offheap-list-key-HE"]="SkipList_OffHeap_HE"
   ["offheap-list-key-NoMM"]="SkipList_OffHeap_NoMM"
-  ["offheap-list-Segment"]="SkipList_OffHeap_MemSeg"
+  #["offheap-list-Segment"]="SkipList_OffHeap_MemSeg"
   ["offheap-list-key-Nova-object"]="SkipList_OffHeap_object"
   ["offheap-list-key-Nova-magic"]="SkipList_OffHeap_Magic"
   #["offheap-list-key-Nova-reuse"]="SkipList_OffHeap_reuse"
@@ -187,7 +189,13 @@ for scenario in ${test_scenarios[*]}; do
 
   scenario_args=${scenarios[${scenario}]}
   classPath="${benchClassPrefix}.${benchmarks[${bench}]}"
+  
+  gc_args=""
+  if [[ "$bench" == "skip-list_ZGC" ]]; then
+	gc_args="-XX:+UseZGC"
+	fi
 
+	
     for java_mode in ${test_java_modes[*]};
 	do  for thread in ${test_thread[*]}; do
         # Check if the user hit CTRL+C before we start a new iteration
@@ -196,12 +204,11 @@ for scenario in ${test_scenarios[*]}; do
           exit 1
         fi
 		benchSize="10000000"
-        gc_args=""
 		
 		javaHeap=""
 		javaOffHeap=""
 		
-		if [[ "$bench" == "skip-list" ]]; then 
+		if [ "$bench" == "skip-list_GC" ] || [ "$bench" == "skip-list_ZGC" ]; then 
 			javaHeap="-Xmx14G"
 		else
 			javaHeap="-Xmx4G"

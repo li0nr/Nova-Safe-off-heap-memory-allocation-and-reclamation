@@ -18,7 +18,7 @@ public class Parameters {
         INCREASING
     }
 
-    public static int confNumFillThreads = 2;
+    public static int confNumFillThreads = 24;
     public static int confNumThreads = 1;
     public static int confNumMilliseconds = 5000;
     public static int confNumWrites = 0;
