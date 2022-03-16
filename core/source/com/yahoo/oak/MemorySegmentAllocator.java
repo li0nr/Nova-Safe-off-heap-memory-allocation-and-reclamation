@@ -12,7 +12,10 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemorySegment;
+import jdk.incubator.foreign.ResourceScope;
 
 
 public class MemorySegmentAllocator  {
@@ -142,7 +145,7 @@ public class MemorySegmentAllocator  {
            
         MemorySegment isAllocated = null;
         // freeList is empty or there is no suitable slice
-        while (isAllocated != null) {
+        while (isAllocated == null) {
             try {
                 // The ByteBuffer inside this slice is the thread's ByteBuffer
                 isAllocated = currentBlock.allocate(size);
@@ -180,11 +183,13 @@ public class MemorySegmentAllocator  {
     
     public void free(MemorySegment s) {
     	long size = s.byteSize();
-        if(NovafreeList.add(s))
+        MemoryAddress MemAddress = s.address();
+        ResourceScope scope = ResourceScope.newSharedScope();
+    	MemorySegment s2 = MemAddress.asSegment(size,scope);
+        if(NovafreeList.add(s2))
         	allocated.addAndGet(-size);
         if(allocated.get() < 0)
         	throw new NovaIllegalAccess();
-        s.scope().close();
         if (stats != null) {
             stats.release((int)size);
         }

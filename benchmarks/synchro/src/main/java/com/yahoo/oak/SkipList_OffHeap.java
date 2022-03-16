@@ -52,9 +52,9 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     @Override
     public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    
     	long offValue = Facade_Nova.AllocateSlice(Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
-    	Long valueOff = skipListMap.put(key, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
+    	Long valueOff = skipListMap.putIfAbsent(key, Facade_Nova.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null)
-        	Facade_Nova.Delete(idx, valueOff); 
+        	Facade_Nova.Delete(idx, offValue); 
     	return valueOff== null ? true : false;
     	
     }
@@ -70,8 +70,7 @@ public class SkipList_OffHeap implements CompositionalLL<Buff,Buff> {
     @Override
     public void clear() {
 
-        //skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);}); not needed since we close the allocator
-        skipListMap = new ConcurrentSkipListMap<>();
+    	skipListMap = new ConcurrentSkipListMap<>();
         allocator.FreeNative();
         allocator = new NativeMemoryAllocator(OAK_MAX_OFF_MEMORY);
         NovaManager mng = new NovaManager(allocator);

@@ -184,18 +184,11 @@ public class Test {
         try {
         	Class benchClass; Constructor c;
         	if(!benchName.contains("SA")) {
-        		if(Parameters.offheap != -1) {
                     benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
                             .forName(benchName);
                     Class[] cArg = new Class[1];
                     cArg[0] = Long.TYPE;
                     c = benchClass.getDeclaredConstructor(cArg);	
-        		}
-        		else {
-                    benchClass = (Class<CompositionalBST<Buff, Buff>>) Class
-                            .forName(benchName);
-                    c = benchClass.getDeclaredConstructor();
-        		}
         	}
         	else {
                 benchClass = (Class<CompositionalSA<Buff>>) Class
@@ -207,6 +200,8 @@ public class Test {
         	if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
             	if(Parameters.offheap != -1)
                 	LL = (CompositionalLL<Buff,Buff>) c.newInstance(Parameters.offheap);
+            	else 
+                	LL = (CompositionalLL<Buff,Buff>) c.newInstance(0);
     			benchType = Type.LL;
             } else if (CompositionalSA.class.isAssignableFrom((Class<?>) benchClass)) {
             	SA = (CompositionalSA<Buff>) c.newInstance(Parameters.confSize);

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     private ConcurrentSkipListMap<Buff, Buff> skipListMap;
 
-    public SkipList_OnHeap() {
+    public SkipList_OnHeap(long empty) {
         skipListMap = new ConcurrentSkipListMap<>();
     }
 
@@ -31,7 +31,7 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
     
     @Override
     public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    	
-    	return skipListMap.put(key,value) == null ? true : false;
+    	return skipListMap.putIfAbsent(key,value) == null ? true : false;
     }
     
     @Override
@@ -113,7 +113,7 @@ public class SkipList_OnHeap implements CompositionalLL<Buff,Buff> {
 		}
 	
     static public void main(String[]arg) {
-    	SkipList_OnHeap myskip = new SkipList_OnHeap();
+    	SkipList_OnHeap myskip = new SkipList_OnHeap(0);
     	Buff x = new Buff(4);
     			x.set(0);
     	myskip.put(x, x, 0);

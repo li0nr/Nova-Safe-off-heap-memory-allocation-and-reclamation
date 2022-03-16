@@ -13,8 +13,8 @@ function ctrl_c() {
 ############################################################################
 declare -A scenarios=(
   ["25Put25Delete50Get"]="-a 25 -u 50 -s 50"
-  #["50Put50Delete00Get"]="-a 50 -u 100 -s 0"
-  #["05Put05Delete50Get"]="-a 5 -u 10 -s 50"
+  ["50Put50Delete00Get"]="-a 50 -u 100 -s 0"
+  ["05Put05Delete50Get"]="-a 5 -u 10 -s 50"
 
 
   
@@ -83,7 +83,7 @@ jar_file_path=$(find "$(pwd)" -name "nova-synchrobench-*.jar" | grep -v "javadoc
 test_scenarios=${!scenarios[*]}
 test_benchmarks=${!benchmarks[*]}
 test_size=${!benchmark_Size[*]}
-test_thread="1 4 8 16 24 32"
+test_thread="1 4 8 12 16 20 24 28 32"
 test_gc=${!gc_cmd_args[*]}
 test_java_modes="server"
 
@@ -97,7 +97,7 @@ valuesize="1024"
 warmup="30"
 
 # Defines the number of measured iterations.
-iterations="3"
+iterations="5"
 
 # Defines the test runtime in milliseconds.
 duration="30000"

@@ -112,11 +112,11 @@ public class Buff  implements Comparable<Buff>{
 
 		@Override
 		public void serialize(Buff object, MemorySegment output) {
-			int offset = 00 ;
+			int offset = 0 ;
 			MemoryAccess.setIntAtOffset(output, offset , object.capacity);
 			offset += Integer.BYTES;
 			for (int i = 0; i < object.capacity / Integer.BYTES; i++) {
-				int data = object.buffer.getInt(offset);
+				int data = object.buffer.getInt(offset - Integer.BYTES);
 				MemoryAccess.setIntAtOffset(output, offset, data);
 				offset += Integer.BYTES;
 			}

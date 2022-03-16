@@ -29,7 +29,7 @@ declare -A benchmarks=(
   ["offheap-list-key-EBR"]="SkipList_OffHeap_EBR"
   ["offheap-list-key-HE"]="SkipList_OffHeap_HE"
   ["offheap-list-key-NoMM"]="SkipList_OffHeap_NoMM"
-  #["offheap-list-Segment"]="SkipList_OffHeap_MemSeg"
+  ["offheap-list-Segment"]="SkipList_OffHeap_MemSeg_allocator"
   ["offheap-list-key-Nova-object"]="SkipList_OffHeap_object"
   ["offheap-list-key-Nova-magic"]="SkipList_OffHeap_Magic"
   #["offheap-list-key-Nova-reuse"]="SkipList_OffHeap_reuse"
@@ -85,7 +85,7 @@ jar_file_path=$(find "$(pwd)" -name "nova-synchrobench-*.jar" | grep -v "javadoc
 test_scenarios=${!scenarios[*]}
 test_benchmarks=${!benchmarks[*]}
 test_size=${!benchmark_Size[*]}
-test_thread="1 4 8 16 24 32"
+test_thread="1 4 8 12 16 20 24 28 32"
 test_gc=${!gc_cmd_args[*]}
 test_java_modes="server"
 

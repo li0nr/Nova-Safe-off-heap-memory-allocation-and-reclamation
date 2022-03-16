@@ -54,9 +54,9 @@ public class SkipList_OffHeap_HE implements CompositionalLL<Buff,Buff> {
     public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    
     	HEslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	HEslice valueOff = skipListMap.put(key, offValue);
+    	HEslice valueOff = skipListMap.putIfAbsent(key, offValue);
     	if(valueOff != null)
-    		mng.fastFree(valueOff);
+    		mng.fastFree(offValue);
     	return valueOff == null ? true : false;
     }
     

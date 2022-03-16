@@ -74,9 +74,9 @@ public class SkipList_OffHeap_object implements CompositionalLL<Buff,Buff> {
     public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    
     	Facade_slice offValue = new Facade_slice();
     	Facade_Slice.AllocateSlice(offValue, Buff.DEFAULT_SERIALIZER.calculateSize(value), idx);
-    	Facade_slice valueOff = skipListMap.put(key, Facade_Slice.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
+    	Facade_slice valueOff = skipListMap.putIfAbsent(key, Facade_Slice.WriteFast(Buff.DEFAULT_SERIALIZER, value, offValue, idx));
     	if(valueOff != null)
-        	Facade_Slice.DeletePrivate(idx, valueOff); 
+        	Facade_Slice.DeletePrivate(idx, offValue); 
     	return valueOff== null ? true : false;
     	
     }

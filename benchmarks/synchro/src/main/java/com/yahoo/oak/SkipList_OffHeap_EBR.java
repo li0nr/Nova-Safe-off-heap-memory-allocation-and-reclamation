@@ -52,9 +52,7 @@ public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
     
     @Override
     public  boolean OverWrite(final Buff key,final Buff value, int idx) {
-//    	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
-//    	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-//    	Buff keyb = Buff.CC.Copy(key);
+
 		mng.start_op(idx);
     	EBRslice valueOff =skipListMap.compute(key,(k,v)->
     	{	
@@ -74,9 +72,9 @@ public class SkipList_OffHeap_EBR implements CompositionalLL<Buff,Buff> {
     public  boolean putIfAbsent(final Buff key,final Buff value, int idx) {    
     	EBRslice offValue = mng.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value, offValue.address+offValue.offset);
-    	EBRslice valueOff = skipListMap.put(key, offValue);
+    	EBRslice valueOff = skipListMap.putIfAbsent(key, offValue);
     	if(valueOff != null)
-    		mng.fastFree(valueOff);
+    		mng.fastFree(offValue);
     	return valueOff == null ? true : false;
     	
     }
