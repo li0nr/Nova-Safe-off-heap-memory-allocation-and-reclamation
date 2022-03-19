@@ -190,8 +190,10 @@ for scenario in ${test_scenarios[*]}; do
 
   scenario_args=${scenarios[${scenario}]}
   classPath="${benchClassPrefix}.${benchmarks[${bench}]}"
-  gc_args=""
-  
+  gc_args="--add-modules jdk.incubator.foreign
+		   --add-opens jdk.incubator.foreign/jdk.internal.foreign=ALL-UNNAMED              
+		   --add-opens java.base/java.nio=ALL-UNNAMED
+		   --enable-native-access=ALL-UNNAMED"  
   if [[ "$bench" == "LL_ZGC" ]]; then
 	gc_args="-XX:+UseZGC"
 	fi
