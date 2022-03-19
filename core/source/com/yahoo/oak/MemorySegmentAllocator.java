@@ -179,20 +179,10 @@ public class MemorySegmentAllocator  {
         MemoryAddress MemAddress = s.address();
         ResourceScope scope = ResourceScope.newSharedScope();
     	MemorySegment s2 = MemAddress.asSegment(size,scope);
-    	if(NovafreeList.contains(s2)) {
-    		System.out.print("wjy?");
-    	}
-    	boolean added = false;
-    	int i = 0;
-    	while(!added && i < 5) {
-    		added = NovafreeList.add(s2);
-    		i++;
-            if (added) {
-            	allocated.addAndGet(-size);
-            	NovafreeList.contains(s2);
-            }
-    	}
-
+    	s.scope().close();
+        if ( NovafreeList.add(s2)) {
+        	allocated.addAndGet(-size);
+        }
         if(allocated.get() < 0)
         	throw new NovaIllegalAccess();
         if (stats != null) {

@@ -32,6 +32,9 @@ declare -A benchmarks=(
   ["LL_GC"]="LL_GC"
   ["LL_ZGC"]="LL_GC"
   ["LL_Nova_ZGC"]="LL_Nova_primitive_noCAS_bench"
+  ["LL_MemSeg"]="LL_MemSeg_bench"
+  ["LL_MemSeg_alloc"]="LL_MemSeg_allocator_bench"
+
 
 
 )
