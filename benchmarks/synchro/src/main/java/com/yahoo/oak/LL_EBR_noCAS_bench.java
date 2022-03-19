@@ -1,8 +1,6 @@
 package com.yahoo.oak;
 
 
-import java.util.concurrent.ConcurrentSkipListMap;
-
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.LL.EBR.LL_EBR_noCAS;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;

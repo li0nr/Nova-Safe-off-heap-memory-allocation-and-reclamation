@@ -3,7 +3,6 @@ package com.yahoo.oak;
 import com.yahoo.oak.Buff.Buff;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
 
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentSkipListMap;
 

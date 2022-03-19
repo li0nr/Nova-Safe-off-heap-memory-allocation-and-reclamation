@@ -14,8 +14,8 @@ function ctrl_c() {
 declare -A scenarios=(
   ["25Put25Delete50Get"]="-a 25 -u 50 -s 50"
   ["50Put50Delete00Get"]="-a 50 -u 100 -s 0"
-  ["05Put05Delete50Get"]="-a 5 -u 10 -s 50"
-  ["40Put50Get"]="-u 50 -s 100 -oW"
+  ["05Put05Delete90Get"]="-a 5 -u 10 -s 90"
+  #["40Put50Get"]="-u 50 -s 100 -oW"
 
 
   
@@ -32,8 +32,6 @@ declare -A benchmarks=(
   ["offheap-list-Segment"]="SkipList_OffHeap_MemSeg_allocator"
   ["offheap-list-key-Nova-object"]="SkipList_OffHeap_object"
   ["offheap-list-key-Nova-magic"]="SkipList_OffHeap_Magic"
-  #["offheap-list-key-Nova-reuse"]="SkipList_OffHeap_reuse"
-  #["offheap-list-key-value"]="SkipList_OffHeap_Keys"
 )
 
 
@@ -190,7 +188,10 @@ for scenario in ${test_scenarios[*]}; do
   scenario_args=${scenarios[${scenario}]}
   classPath="${benchClassPrefix}.${benchmarks[${bench}]}"
   
-  gc_args=""
+  gc_args="--add-modules jdk.incubator.foreign
+		   --add-opens jdk.incubator.foreign/jdk.internal.foreign=ALL-UNNAMED              
+		   --add-opens java.base/java.nio=ALL-UNNAMED
+		   --enable-native-access=ALL-UNNAMED"
   if [[ "$bench" == "skip-list_ZGC" ]]; then
 	gc_args="-XX:+UseZGC"
 	fi
@@ -212,7 +213,7 @@ for scenario in ${test_scenarios[*]}; do
 			javaHeap="-Xmx14G"
 		else
 			javaHeap="-Xmx4G"
-			javaOffHeap="-o 10"
+			javaOffHeap="-o 10 -XX:MaxDirectMemorySize10G"
 
 		fi
 		

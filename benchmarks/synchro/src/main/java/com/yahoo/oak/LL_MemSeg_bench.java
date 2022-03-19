@@ -1,22 +1,19 @@
 package com.yahoo.oak;
 
 import com.yahoo.oak.Buff.Buff;
-import com.yahoo.oak.LL.Nova.LL_Nova_noCAS;
+import com.yahoo.oak.LL.NoMM.LL_MemSeg;
 import com.yahoo.oak.synchrobench.contention.abstractions.CompositionalLL;
-import com.yahoo.oak.synchrobench.contention.benchmark.Parameters;
 
-public class LL_Nova_noCAS_bench implements CompositionalLL<Buff,Buff>{
+public class LL_MemSeg_bench implements CompositionalLL<Buff,Buff>{
 	
-	NativeMemoryAllocator allocator = new NativeMemoryAllocator(Parameters.offheap);
-	NovaManager mng = new NovaManager(allocator);
-	LL_Nova_noCAS<Buff,Buff> LL = new LL_Nova_noCAS<Buff,Buff>(mng, 
+	LL_MemSeg<Buff,Buff> LL = new LL_MemSeg<Buff,Buff>(
 			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
 	
-	public LL_Nova_noCAS_bench(long MemCap){
+	public LL_MemSeg_bench(long MemCap){
 		
 	}
 	public Integer containsKey(final Buff key, int tidx) {
-		return LL.get(key,Buff.DEFAULT_R, tidx);
+		return LL.get(key,Buff.MSR, tidx);
 	}
 	
     public  boolean put(final Buff key,final Buff value,  int idx) {
@@ -32,7 +29,7 @@ public class LL_Nova_noCAS_bench implements CompositionalLL<Buff,Buff>{
     }
         
     public long allocated() {
-    	return allocator.allocated();
+    	return -1;
     }
     
     public int size() {
@@ -41,12 +38,7 @@ public class LL_Nova_noCAS_bench implements CompositionalLL<Buff,Buff>{
     
     public void clear() {
     	LL = null;
-    	allocator.close();
-    	allocator = null;
-    	
-    	allocator = new NativeMemoryAllocator(Parameters.offheap);
-    	NovaManager mng = new NovaManager(allocator);
-    	LL= new LL_Nova_noCAS<Buff,Buff>(mng, 
+    	LL = new LL_MemSeg<Buff,Buff>(
     			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	System.gc();
     }

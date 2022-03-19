@@ -174,6 +174,26 @@ public class Buff  implements Comparable<Buff>{
 			return Integer.compare(size, obj.capacity);
 		}
 		
+		@Override
+		public int compareKeys(MemorySegment seg, Buff obj) {
+
+			int size = MemoryAccess.getIntAtOffset(seg, 4);
+
+			final int minSize = Math.min(size, obj.capacity);
+
+			int offset = Integer.BYTES;
+			for (int i = 0; i < minSize / Integer.BYTES; i++) {
+				int i1 = MemoryAccess.getIntAtOffset(seg,offset);
+				int i2 = obj.buffer.getInt(offset);
+				int compare = Integer.compare(i1, i2);
+				if (compare != 0) {
+					return compare;
+				}
+				offset += Integer.BYTES;
+			}
+			return Integer.compare(size, obj.capacity);
+		}
+		
 		public int compareKeys(long address, long address2) {
 			int offset = 0;
 
