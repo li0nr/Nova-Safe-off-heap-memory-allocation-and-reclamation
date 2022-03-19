@@ -45,7 +45,6 @@ public class SkipList_OffHeap_MemSeg_allocator implements CompositionalLL<Buff,B
     public  boolean put(final Buff key,final Buff value, int idx) {
     	MemorySegment s = allocator.allocate(Buff.DEFAULT_SERIALIZER.calculateSize(value));
     	Buff.DEFAULT_SERIALIZER.serialize(value,s);
-    	skipListMap.put(key,s);
     	MemorySegment valueOff = skipListMap.put(key, s);
     	if(valueOff != null) {
     		allocator.free(valueOff);
