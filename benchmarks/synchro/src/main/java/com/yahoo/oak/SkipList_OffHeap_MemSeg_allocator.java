@@ -48,7 +48,7 @@ public class SkipList_OffHeap_MemSeg_allocator implements CompositionalLL<Buff,B
     	skipListMap.put(key,s);
     	MemorySegment valueOff = skipListMap.put(key, s);
     	if(valueOff != null) {
-    		allocator.free(s);
+    		allocator.free(valueOff);
     	}
     	return true;
     }

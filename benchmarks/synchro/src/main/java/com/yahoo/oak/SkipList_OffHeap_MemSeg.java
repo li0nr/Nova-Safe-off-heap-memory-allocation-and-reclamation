@@ -44,10 +44,9 @@ public class SkipList_OffHeap_MemSeg implements CompositionalLL<Buff,Buff> {
     	MemorySegment s = MemorySegment.allocateNative(
     			Buff.DEFAULT_SERIALIZER.calculateSize(value), ResourceScope.newSharedScope());
     	Buff.DEFAULT_SERIALIZER.serialize(value,s);
-    	skipListMap.put(key,s);
     	MemorySegment valueOff = skipListMap.put(key, s);
     	if(valueOff != null) {
-        	s.scope().close();
+        	valueOff.scope().close();
     	}
     	return true;
     }

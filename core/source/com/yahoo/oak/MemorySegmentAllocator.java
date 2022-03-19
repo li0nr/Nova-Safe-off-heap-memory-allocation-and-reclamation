@@ -186,8 +186,13 @@ public class MemorySegmentAllocator  {
         MemoryAddress MemAddress = s.address();
         ResourceScope scope = ResourceScope.newSharedScope();
     	MemorySegment s2 = MemAddress.asSegment(size,scope);
-        if(NovafreeList.add(s2))
-        	allocated.addAndGet(-size);
+    	boolean added = false;
+    	while(!added) {
+    		added = NovafreeList.add(s2);
+            if (added)
+            	allocated.addAndGet(-size);
+    	}
+
         if(allocated.get() < 0)
         	throw new NovaIllegalAccess();
         if (stats != null) {
