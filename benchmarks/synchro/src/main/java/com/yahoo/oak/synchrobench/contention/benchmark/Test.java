@@ -119,6 +119,7 @@ public class Test {
     };
 
     public void fill(final long range, final long size) throws InterruptedException {
+    	if(size < 0) return ;
         // Non-random key distribution can only be initialized from one thread.
         final int numWorkers = Parameters.isRandomKeyDistribution() ? Parameters.confNumFillThreads : 1;
         FillWorker[] fillWorkers = new FillWorker[numWorkers];
@@ -297,7 +298,7 @@ public class Test {
             throws InterruptedException {
         printHeapStats("Before initial fill");
         long startTime = System.currentTimeMillis();
-        fill(Parameters.confRange, Parameters.confSize);
+        fill(Parameters.confRange, Parameters.confSize - LL.size());
         double initTime = ((double) (System.currentTimeMillis() - startTime)) / 1000.0;
         printHeapStats("After initial fill, before benchmark");
 

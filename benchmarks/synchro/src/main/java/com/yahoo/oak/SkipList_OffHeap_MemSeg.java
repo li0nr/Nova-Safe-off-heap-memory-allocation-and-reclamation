@@ -101,7 +101,7 @@ public class SkipList_OffHeap_MemSeg implements CompositionalLL<Buff,Buff> {
     public void clear() {
 
         //skipListMap.values().forEach(val -> {Facade_Nova.DeletePrivate(0, val);}); not needed since we close the allocator
-        skipListMap = new ConcurrentSkipListMap<>();
+        //skipListMap = new ConcurrentSkipListMap<>();
         System.gc();
     }
 

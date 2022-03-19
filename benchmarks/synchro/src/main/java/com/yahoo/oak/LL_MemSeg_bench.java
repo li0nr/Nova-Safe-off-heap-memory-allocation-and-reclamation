@@ -37,9 +37,6 @@ public class LL_MemSeg_bench implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
-    	LL = null;
-    	LL = new LL_MemSeg<Buff,Buff>(
-    			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	System.gc();
     }
     
