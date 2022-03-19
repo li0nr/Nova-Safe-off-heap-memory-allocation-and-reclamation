@@ -187,8 +187,10 @@ public class MemorySegmentAllocator  {
         ResourceScope scope = ResourceScope.newSharedScope();
     	MemorySegment s2 = MemAddress.asSegment(size,scope);
     	boolean added = false;
-    	while(!added) {
+    	int i = 0;
+    	while(!added && i < 5) {
     		added = NovafreeList.add(s2);
+    		i++;
             if (added)
             	allocated.addAndGet(-size);
     	}
