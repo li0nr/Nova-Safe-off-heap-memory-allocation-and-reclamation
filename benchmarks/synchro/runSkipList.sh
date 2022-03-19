@@ -22,16 +22,16 @@ declare -A scenarios=(
 )
 
 declare -A benchmarks=(
-  ["skip-list_GC"]="SkipList_OnHeap"
-  ["skip-list_ZGC"]="SkipList_OnHeap"
+  #["skip-list_GC"]="SkipList_OnHeap"
+  #["skip-list_ZGC"]="SkipList_OnHeap"
 
   #["offheap-list-key"]="SkipList_OffHeap"
-  ["offheap-list-key-EBR"]="SkipList_OffHeap_EBR"
-  ["offheap-list-key-HE"]="SkipList_OffHeap_HE"
-  ["offheap-list-key-NoMM"]="SkipList_OffHeap_NoMM"
-  ["offheap-list-Segment"]="SkipList_OffHeap_MemSeg_allocator"
+  #["offheap-list-key-EBR"]="SkipList_OffHeap_EBR"
+  #["offheap-list-key-HE"]="SkipList_OffHeap_HE"
+  #["offheap-list-key-NoMM"]="SkipList_OffHeap_NoMM"
+  #["offheap-list-Segment"]="SkipList_OffHeap_MemSeg_allocator"
   ["offheap-list-key-Nova-object"]="SkipList_OffHeap_object"
-  ["offheap-list-key-Nova-magic"]="SkipList_OffHeap_Magic"
+  #["offheap-list-key-Nova-magic"]="SkipList_OffHeap_Magic"
 )
 
 
@@ -188,10 +188,7 @@ for scenario in ${test_scenarios[*]}; do
   scenario_args=${scenarios[${scenario}]}
   classPath="${benchClassPrefix}.${benchmarks[${bench}]}"
   
-  gc_args="--add-modules jdk.incubator.foreign
-		   --add-opens jdk.incubator.foreign/jdk.internal.foreign=ALL-UNNAMED              
-		   --add-opens java.base/java.nio=ALL-UNNAMED
-		   --enable-native-access=ALL-UNNAMED"
+  gc_args="--add-modules jdk.incubator.foreign --add-opens jdk.incubator.foreign/jdk.internal.foreign=ALL-UNNAMED           --add-opens java.base/java.nio=ALL-UNNAMED --enable-native-access=ALL-UNNAMED"
   if [[ "$bench" == "skip-list_ZGC" ]]; then
 	gc_args="-XX:+UseZGC"
 	fi
