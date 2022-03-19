@@ -32,8 +32,6 @@ public class MemorySegmentAllocator  {
     private BlockSegment[] blocksArray;
     private static int  blockcount=0;
 
-    private final MemorySegment[] Segs;
-
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     /**
@@ -41,7 +39,7 @@ public class MemorySegmentAllocator  {
      * They are sorted by the slice length, then by the block id, then by their offset.
      * See {@code Slice.compareTo(Slice)} for more information.
      */
-    private final ConcurrentSkipListSet<MemorySegment> NovafreeList;// = new ConcurrentSkipListSet<>();
+    private final ConcurrentSkipListSet<MemorySegment> NovafreeList;// = new ConcurrentSkipListSet<MemorySegment>();
 
     
     private final BlocksSegmentPool blocksProvider;
@@ -76,21 +74,16 @@ public class MemorySegmentAllocator  {
         this.blocksArray = new BlockSegment[blockArraySize + 1];
         // initially allocate one single block from pool
         // this may lazy initialize the pool and take time if this is the first call for the pool
-        allocateNewCurrentBlock();
-        this.capacity = capacity;
-        
-        
         Comparator<Object> MemSegComparator = (o1, o2) -> {
-        	return Long.compare(((MemorySegment) o1).byteSize(), ((MemorySegment) o2).byteSize());
+        	int lenCMP = Long.compare(((MemorySegment) o1).byteSize(), ((MemorySegment) o2).byteSize());
+        	if (lenCMP == 0)
+        		return Long.compare(o1.hashCode(), o2.hashCode());
+        	return lenCMP;
         };
         this.NovafreeList = new ConcurrentSkipListSet<MemorySegment>(MemSegComparator);
-        this.Segs = new MemorySegment[_Global_Defs.MAX_THREADS*2*_Global_Defs.CACHE_PADDING];
-
-        for (int i = _Global_Defs.CACHE_PADDING; 
-        		 i < _Global_Defs.MAX_THREADS * _Global_Defs.CACHE_PADDING* 2;
-        		 i +=_Global_Defs.CACHE_PADDING) {
-            this.Segs		 [i]	= currentBlock.getSegment().asSlice(0);
-            }   
+        
+        allocateNewCurrentBlock();
+        this.capacity = capacity;
         
         
     }
@@ -186,13 +179,18 @@ public class MemorySegmentAllocator  {
         MemoryAddress MemAddress = s.address();
         ResourceScope scope = ResourceScope.newSharedScope();
     	MemorySegment s2 = MemAddress.asSegment(size,scope);
+    	if(NovafreeList.contains(s2)) {
+    		System.out.print("wjy?");
+    	}
     	boolean added = false;
     	int i = 0;
     	while(!added && i < 5) {
     		added = NovafreeList.add(s2);
     		i++;
-            if (added)
+            if (added) {
             	allocated.addAndGet(-size);
+            	NovafreeList.contains(s2);
+            }
     	}
 
         if(allocated.get() < 0)
