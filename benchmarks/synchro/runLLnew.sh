@@ -100,7 +100,7 @@ valuesize="1024"
 warmup="30"
 
 # Defines the number of measured iterations.
-iterations="5"
+iterations="3"
 
 # Defines the test runtime in milliseconds.
 duration="30000"

@@ -293,8 +293,8 @@ public class LL_MemSeg_Alloc<K,V> {
                         return true;
                     }
                     else {
-                    	allocator.free(curr.key);
-                    	allocator.free(curr.value);
+                    	allocator.free(newNode.key);
+                    	allocator.free(newNode.value);
                     }
                 }
             }  

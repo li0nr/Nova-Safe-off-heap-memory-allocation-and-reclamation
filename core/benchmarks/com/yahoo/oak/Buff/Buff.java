@@ -184,7 +184,7 @@ public class Buff  implements Comparable<Buff>{
 			int offset = Integer.BYTES;
 			for (int i = 0; i < minSize / Integer.BYTES; i++) {
 				int i1 = MemoryAccess.getIntAtOffset(seg,offset);
-				int i2 = obj.buffer.getInt(offset);
+				int i2 = obj.buffer.getInt(offset - Integer.BYTES);
 				int compare = Integer.compare(i1, i2);
 				if (compare != 0) {
 					return compare;

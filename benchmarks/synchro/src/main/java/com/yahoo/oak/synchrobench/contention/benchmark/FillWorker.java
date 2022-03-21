@@ -54,6 +54,7 @@ public class FillWorker extends BenchWorker {
             fill();
         } catch (Exception e) {
             System.err.printf("Failed during initial fill: %s%n", e.getMessage());
+            e.printStackTrace();
             reportError(e);
         }
     }
