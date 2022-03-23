@@ -210,9 +210,12 @@ for scenario in ${test_scenarios[*]}; do
 		if [ "$bench" == "skip-list_GC" ] || [ "$bench" == "skip-list_ZGC" ]; then 
 			javaHeap="-Xmx14G"
 		else
-			javaHeap="-Xmx4G"
-			javaOffHeap="-o 10 -XX:MaxDirectMemorySize10G"
-
+			if [ "$bench" == "offheap-list-Segment_Alloc" ]; then 
+			javaHeap="-Xmx14G" 			javaOffHeap="-o 10"
+			else 
+				javaHeap="-Xmx4G"
+				javaOffHeap="-o 10"
+			fi	
 		fi
 		
 		java_args="${java_modes[${java_mode}]} ${gc_args} ${javaHeap}"
