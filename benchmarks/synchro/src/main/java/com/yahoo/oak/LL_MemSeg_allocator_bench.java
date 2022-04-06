@@ -39,13 +39,12 @@ public class LL_MemSeg_allocator_bench implements CompositionalLL<Buff,Buff>{
     }
     
     public void clear() {
-    	LL = null;
-    	allocator.close();
-    	allocator = null;
-    	
-    	allocator = new MemorySegmentAllocator(Parameters.offheap);
-    	LL = new LL_MemSeg_Alloc<Buff,Buff>(allocator,
-    			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
+//    	LL = null;
+//    	allocator.close();
+//    	allocator = null;
+//    	allocator = new MemorySegmentAllocator(Parameters.offheap);
+//    	LL = new LL_MemSeg_Alloc<Buff,Buff>(allocator,
+//    			Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER,Buff.DEFAULT_C, Buff.DEFAULT_SERIALIZER);
     	System.gc();
     }
     

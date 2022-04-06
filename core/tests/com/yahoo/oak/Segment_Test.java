@@ -35,4 +35,16 @@ public class Segment_Test {
     	}
 
     }
+    
+    @Test
+    public void SegmentMemoryWithNova() {
+        BlockSegment block = new BlockSegment(1024*8);
+        MemorySegment s = block.allocate(8);
+        MemoryAddress addr = s.address();
+        long x = addr.toRawLongValue();
+        UnsafeUtils.putInt(x, 87);
+        UnsafeUtils.putInt(x+4, 94);
+        UnsafeUtils.getInt(x+4);
+
+    }
 }

@@ -8,12 +8,15 @@ package com.yahoo.oak;
 
 
 import java.util.concurrent.atomic.AtomicInteger;
+import jdk.incubator.foreign.MemorySegment;
+import jdk.incubator.foreign.ResourceScope;
 
 class Block {
 
 	private int id;
     private final long address;
     private final int capacity;
+    //private final ResourceScope scope;
     private final AtomicInteger allocated = new AtomicInteger(0);
     
     
@@ -25,6 +28,9 @@ class Block {
         // Pay attention in allocateDirect the data is *zero'd out*
         // which has an overhead in clearing and you end up touching every page
         this.address = UnsafeUtils.unsafe.allocateMemory(this.capacity);
+//        scope = ResourceScope.newSharedScope();
+//        this.address  = MemorySegment.allocateNative(this.capacity, scope).address().toRawLongValue();
+        
     }
     
     void setID(int id) {
@@ -57,7 +63,9 @@ class Block {
 
     // releasing the memory back to the OS, freeing the block, an opposite of allocation, not thread safe
     void clean() {
+    	//scope.close();
     	UnsafeUtils.unsafe.freeMemory(address);
+    	
     }
 
 
