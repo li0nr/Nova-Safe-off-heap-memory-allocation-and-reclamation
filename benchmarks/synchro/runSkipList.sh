@@ -114,7 +114,7 @@ range_ratio="2"
 # reason after a few iterations only to be discovered in the morning.
 verify_script=0
 
-benchClassPrefix="com.yahoo.oak"
+benchClassPrefix="com.nova"
 
 ############################################################################
 # Override default arguments

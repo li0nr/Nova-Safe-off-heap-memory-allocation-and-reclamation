@@ -21,6 +21,7 @@ declare -A scenarios=(
 )
 
 declare -A benchmarks=(
+
   ["LL_EBR"]="LL_EBR_noCAS_bench"
   ["LL_EBR_opt"]="LL_EBR_noCAS_opt_bench"
   ["LL_HE"]="LL_HE_noCAS_bench"
@@ -28,12 +29,20 @@ declare -A benchmarks=(
   ["LL_Nova"]="LL_Nova_noCAS_bench"
   ["LL_Nova_primitive"]="LL_Nova_primitive_noCAS_bench"
   ["LL_Nova_Maqic"]="LL_Nova_Magic_noCAS_bench"
-  ["LL_NoMM"]="LL_NoMM_Synch"
-  ["LL_GC"]="LL_GC"
-  ["LL_ZGC"]="LL_GC"
-  ["LL_Nova_ZGC"]="LL_Nova_primitive_noCAS_bench"
+
   ["LL_MemSeg"]="LL_MemSeg_bench"
   ["LL_MemSeg_alloc"]="LL_MemSeg_allocator_bench"
+  
+  
+  ["LL_GC"]="LL_GC"
+  ["LL_ZGC"]="LL_GC"
+  ["LL_SGC"]="LL_GC"
+  
+  ["LL_NoMM"]="LL_NoMM_Synch"
+
+
+  #["LL_Nova_ZGC"]="LL_Nova_primitive_noCAS_bench"
+
 
 
 
@@ -85,10 +94,10 @@ jar_file_path=$(find "$(pwd)" -name "nova-synchrobench-*.jar" | grep -v "javadoc
 # Iterate on the cartesian product of these arguments (space separated)
 test_scenarios=${!scenarios[*]}
 test_benchmarks=${!benchmarks[*]}
-test_size=${!benchmark_Size[*]}
 test_thread="1 4 8 12 16 20 24 28 32"
 test_gc=${!gc_cmd_args[*]}
 test_java_modes="server"
+benchSize="65536" #to allow ~100MB of raw data
 
 # Defines the key size
 keysize="512"
@@ -116,7 +125,7 @@ range_ratio="2"
 # reason after a few iterations only to be discovered in the morning.
 verify_script=0
 
-benchClassPrefix="com.yahoo.oak"
+benchClassPrefix="com.nova"
 
 ############################################################################
 # Override default arguments
@@ -197,6 +206,16 @@ for scenario in ${test_scenarios[*]}; do
   if [[ "$bench" == "LL_ZGC" ]]; then
 	gc_args="-XX:+UseZGC"
 	fi
+	
+	  if [[ "$bench" == "LL_GC" ]]; then
+	  	gc_args="-XX:+UseG1GC"
+	fi
+	
+  if [[ "$bench" == "LL_SGC" ]]; then
+	gc_args="-XX:+UseShenandoahGC"
+	fi
+	
+	
 
 	if [[ "$bench" == "LL_Nova_ZGC" ]];  then
 	gc_args="-XX:+UseZGC"
@@ -208,7 +227,6 @@ for scenario in ${test_scenarios[*]}; do
           echo "#### Quiting..."
           exit 1
         fi
-		benchSize="65536"
 		
 		javaHeap=""
 		javaOffHeap=""

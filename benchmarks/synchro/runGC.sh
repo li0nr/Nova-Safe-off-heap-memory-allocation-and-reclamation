@@ -42,7 +42,7 @@ declare -A gc_cmd_args=(
   #["CMS"]="-XX:+UseParNewGC" deprecated
   ["g1"]="-XX:+UseG1GC" #default
   ["zgc"]="-XX:+UseZGC"
-  #["Shenandoah"]="-XX:+UseShenandoahGC"
+  ["Shenandoah"]="-XX:+UseShenandoahGC"
   #["Epilon"]="-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC" does no reclamation https://openjdk.java.net/jeps/318
 )
 
@@ -112,7 +112,7 @@ range_ratio="2"
 # reason after a few iterations only to be discovered in the morning.
 verify_script=0
 
-benchClassPrefix="com.yahoo.oak"
+benchClassPrefix="com.nova"
 
 ############################################################################
 # Override default arguments

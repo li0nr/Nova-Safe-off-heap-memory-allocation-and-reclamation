@@ -31,7 +31,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.yahoo.oak.synchrobench.contention.benchmark.Test</mainClass>
+                            <mainClass>com.nova.synchrobench.contention.benchmark.Test</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -50,7 +50,7 @@ public class Parameters {
         return confKeyDistribution == KeyDist.RANDOM;
     }
     
-    public static String confBenchClassName = "com.yahoo.oak.BST_Nova_Synch";
+    public static String confBenchClassName = "com.nova.EMPTY";
 
     public static String asString() {
         return "Parameters:\n"
