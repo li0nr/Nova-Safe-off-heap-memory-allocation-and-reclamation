@@ -1,5 +1,5 @@
-module com.yahoo.oak {
-	exports com.yahoo.oak;
+module com.nova {
+	exports com.nova;
 
 	requires java.desktop;
 	requires java.management;

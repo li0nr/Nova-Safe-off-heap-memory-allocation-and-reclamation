@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>root</artifactId>
-        <groupId>com.yahoo.oak</groupId>
+        <groupId>com.nova</groupId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
@@ -48,7 +48,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
     <dependencies>
          <dependency>
-            <groupId>com.yahoo.oak</groupId>
+            <groupId>com.nova</groupId>
             <artifactId>nova</artifactId>
             <scope>compile</scope>
         </dependency>
