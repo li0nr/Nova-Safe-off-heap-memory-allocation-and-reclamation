@@ -50,7 +50,7 @@ public class Parameters {
         return confKeyDistribution == KeyDist.RANDOM;
     }
     
-    public static String confBenchClassName = "com.nova.EMPTY";
+    public static String confBenchClassName = "com.nova.LL_GC";
 
     public static String asString() {
         return "Parameters:\n"

@@ -182,18 +182,12 @@ public class Test {
     @SuppressWarnings("unchecked")
     public void instanciateAbstraction(String benchName) {
         try {
-        	Class benchClass = null ;
-        	Constructor c 	=  null ;
-        	if(!benchName.contains("SA")) {
-	
-        	}
-        	else {
-                benchClass = (Class<CompositionalSA<Buff>>) Class
+
+        		Class   benchClass = (Class<CompositionalSA<Buff>>) Class
                         .forName(benchName);
                 Class[] cArg = new Class[1];
-                cArg[0] = Integer.TYPE;
-                c = benchClass.getDeclaredConstructor(cArg);
-        	}
+                cArg[0] = Long.TYPE;
+                Constructor c = benchClass.getDeclaredConstructor(cArg);
         	if (CompositionalLL.class.isAssignableFrom((Class<?>) benchClass)) {
             	if(Parameters.offheap != -1)
                 	LL = (CompositionalLL<Buff,Buff>) c.newInstance(Parameters.offheap);
